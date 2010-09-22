@@ -25,15 +25,20 @@ public:
     map<string, bool> infoFlags;
     vector<string> format;
     map<string, map<string, string> > samples;
+    vector<string> sampleNames;
 
 public:
 
-    void parse(string& line, vector<string>& sampleNames) {
+    Variant(vector<string>& sns)
+        : sampleNames(sns)
+    { }
+
+
+    void parse(string& line) {
 
         // clean up potentially variable data structures
         info.clear();
         format.clear();
-        samples.clear();
 
         vector<string> fields = split(line, '\t');
         sequenceName = fields.at(0);
@@ -54,20 +59,29 @@ public:
             }
         }
         format = split(fields.at(8), ':');
+        if (fields.at(8) != lastFormat) {
+            samples.clear();
+            lastFormat = fields.at(8);
+        }
         vector<string>::iterator sampleName = sampleNames.begin();
-        for (vector<string>::iterator sample = fields.begin() + 9; sample != fields.end(); ++sample) {
-            if (*sample == ".") continue;
+        for (vector<string>::iterator sample = fields.begin() + 9; sample != fields.end(); ++sample, ++sampleName) {
+            if (*sample == ".") {
+                samples[*sampleName].clear();
+                continue;
+            }
             vector<string> infofields = split(*sample, ':');
             vector<string>::iterator i = infofields.begin();
             for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
                 samples[*sampleName][*f] = *i; ++i;
             }
-            ++sampleName;
         }
         //return true; // we should be catching exceptions...
     }
 
     friend ostream& operator<<(ostream& out, Variant& var);
+
+private:
+    string lastFormat; // last format string, so we don't have to rebuild the sample map on every step
 
 };
 
@@ -82,19 +96,27 @@ ostream& operator<<(ostream& out, Variant& var) {
     for (map<string, string>::iterator i = var.info.begin(); i != var.info.end(); ++i) {
         out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << i->second;
     }
-    out << ";";
     for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
-        out << ((i == var.infoFlags.begin()) ? "" : ";") << i->first;
+        out << ((i == var.infoFlags.end()) ? "" : ";") << i->first;
     }
     out << "\t";
     for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
         out << ((f == var.format.begin()) ? "" : ":") << *f;
     }
-    for (map<string, map<string, string> >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
+    for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
         out << "\t";
-        map<string, string>& sample = s->second;
-        for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-            out << ((f == var.format.begin()) ? "" : ":") << sample[*f];
+        map<string, map<string, string> >::iterator sampleItr = var.samples.find(*s);
+        if (sampleItr == var.samples.end()) {
+            out << ".";
+        } else {
+            map<string, string>& sample = sampleItr->second;
+            if (sample.size() == 0) {
+                out << ".";
+            } else {
+                for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
+                    out << ((f == var.format.begin()) ? "" : ":") << sample[*f];
+                }
+            }
         }
     }
     return out;
@@ -136,6 +158,7 @@ public:
                 copy(fields.begin() + 9, fields.end(), sampleNames.begin());
             } else {
                 // done with header
+                firstRecord = true;
                 header.resize(header.size() - 1);
                 return true;
             }
@@ -144,12 +167,20 @@ public:
     }
 
     bool getNextVariant(Variant& var) {
+        if (firstRecord) {
+            var.parse(line);
+            firstRecord = false;
+            return true;
+        }
         if (std::getline(*this, line)) {
-            var.parse(line, sampleNames);
+            var.parse(line);
             return true;
         } else {
             return false;
         }
     }
+
+private:
+    bool firstRecord;
 
 };

@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
     cout << variantFile.header << endl;
 
-    Variant var;
+    Variant var(variantFile.sampleNames);
     while (variantFile.getNextVariant(var)) {
         cout << var << endl;
     }
