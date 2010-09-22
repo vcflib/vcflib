@@ -1,0 +1,16 @@
+vcflib
+ a simple C++ library for parsing and manipulating VCF files.
+
+author: Erik Garrison <erik.garrison@bc.edu>
+
+The Variant Call Format (VCF) is a flat-file, tab-delimited textual format
+intended to concisely describe reference-indexed variations between
+individuals.  The current specification can be found on the 1000 Genomes wiki
+(http://www.1000genomes.org/wiki/doku.php?id=1000_genomes:analysis:vcf4.0).
+
+This library provides a simple API to map each VCF record into a C++ class.
+See vcfstats.cpp for example usage.
+
+Presently vcflib does not attempt to use tag information in the header to
+determine the datatype of each field in the site info and sample records, but
+this is planned for a subsequent revision.
