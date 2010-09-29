@@ -1,7 +1,7 @@
-vcfstats: Variant.h Split.cpp Split.h vcfstats.cpp
-	g++ -O3 vcfstats.cpp Split.cpp -o vcfstats
+vcfecho: Variant.h Split.cpp Split.h vcfecho.cpp
+	g++ -g -O3 vcfecho.cpp Split.cpp -o vcfecho
 
 clean:
-	rm -f vcfstats *.o
+	rm -f vcfecho *.o
 
 .PHONY: clean
