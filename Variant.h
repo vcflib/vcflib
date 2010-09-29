@@ -40,6 +40,7 @@ public:
         info.clear();
         format.clear();
 
+        // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
         vector<string> fields = split(line, '\t');
         sequenceName = fields.at(0);
         char* end; // dummy variable for strtoll
@@ -47,8 +48,8 @@ public:
         id = fields.at(2);
         ref = fields.at(3);
         alt = fields.at(4); // TODO handle multi-allelic situations
-        filter = fields.at(5);
-        quality = atoi(fields.at(6).c_str());
+        quality = atoi(fields.at(5).c_str());
+        filter = fields.at(6);
         vector<string> infofields = split(fields.at(7), ';');
         for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
             vector<string> kv = split(*f, '=');
