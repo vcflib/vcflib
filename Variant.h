@@ -92,8 +92,8 @@ ostream& operator<<(ostream& out, Variant& var) {
         << var.id << "\t"
         << var.ref << "\t"
         << var.alt << "\t"
-        << var.filter << "\t"
-        << var.quality << "\t";
+        << var.quality << "\t"
+        << var.filter << "\t";
     for (map<string, string>::iterator i = var.info.begin(); i != var.info.end(); ++i) {
         out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << i->second;
     }
