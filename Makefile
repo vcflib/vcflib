@@ -5,7 +5,8 @@ OBJECTS= $(SOURCES:.cpp=.o)
 
 BIN_SOURCES = vcfecho.cpp \
 			  vcfaltcount.cpp \
-			  vcfhetcount.cpp
+			  vcfhetcount.cpp \
+			  vcffilter.cpp
 BINS = $(BIN_SOURCES:.cpp=)
 
 all: $(OBJECTS) $(BINS)
@@ -18,8 +19,6 @@ $(OBJECTS): $(SOURCES)
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS)
 	$(CXX) $(OBJECTS) $@.cpp -o $@ $(LDFLAGS) $(CXXFLAGS) $(INCLUDES)
-
-.PHONY: all
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

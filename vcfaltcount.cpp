@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     unsigned int alternateAlleleCount = 0;
 
-    Variant var(variantFile.sampleNames, variantFile);
+    Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         //cout << var << endl;
         for (map<string, map<string, string> >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {

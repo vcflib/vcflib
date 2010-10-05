@@ -46,6 +46,13 @@ void Variant::parse(string& line) {
     //return true; // we should be catching exceptions...
 }
 
+void Variant::addFilter(string& tag) {
+    if (filter == "")
+        filter = tag;
+    else
+        filter += "," + tag;
+}
+
 ostream& operator<<(ostream& out, Variant& var) {
     out << var.sequenceName << "\t"
         << var.position << "\t"
@@ -87,42 +94,62 @@ ostream& operator<<(ostream& out, Variant& var) {
 VariantFilter::VariantFilter(string filterspec, bool infof) {
     isInfoField = infof; // marks if this filters on info-items or all genotypes
     size_t foundKey = filterspec.find(' ');
+    string opstr = "";
     if (foundKey == string::npos) {
-        cerr << "could not parse filter spec " << filterspec << endl;
+        //cerr << "could not parse filter spec " << filterspec << endl;
         exit(1);
     } else {
         field = filterspec.substr(0, foundKey);
-        cerr << "found field " << field << endl;
+        //cerr << "found field " << field << endl;
         size_t filterOp;
         if ((filterOp = filterspec.find("<=")) != string::npos) {
-            cerr << "found <=" << endl;
+            //cerr << "found <=" << endl;
             op = FILTER_LESS_THAN_OR_EQUAL;
+            opstr = "<=";
         } else if ((filterOp = filterspec.find(">=")) != string::npos) {
-            cerr << "found >=" << endl;
+            //cerr << "found >=" << endl;
             op = FILTER_GREATER_THAN_OR_EQUAL;
+            opstr = ">=";
         } else if ((filterOp = filterspec.find("==")) != string::npos) {
-            cerr << "found ==" << endl;
+            //cerr << "found ==" << endl;
             op = FILTER_EQUAL;
+            opstr = "==";
         } else if ((filterOp = filterspec.find("!=")) != string::npos) {
-            cerr << "found !=" << endl;
+            //cerr << "found !=" << endl;
             op = FILTER_NOT_EQUAL;
+            opstr = "!=";
         } else if ((filterOp = filterspec.find("<")) != string::npos) {
-            cerr << "found <" << endl;
+            //cerr << "found <" << endl;
             op = FILTER_LESS_THAN;
+            opstr = "<";
         } else if ((filterOp = filterspec.find(">")) != string::npos) {
-            cerr << "found >" << endl;
+            //cerr << "found >" << endl;
             op = FILTER_GREATER_THAN;
+            opstr = ">";
         } else {
-            cerr << "regarding as boolean flag filter" << endl;
+            //cerr << "regarding as boolean flag filter" << endl;
             op = FILTER_FLAG;
+            opstr = "";
         }
-        value = filterspec.substr(filterOp);
-        cerr << "got value " << value << endl;
+        string rest = filterspec.substr(filterOp);
+        size_t val = rest.find(" ");
+        if (val != string::npos) {
+            value = filterspec.substr(val + 1 + opstr.size() + 1);
+            //cerr << "got value '" << value << "'" << endl;
+        } else {
+            cerr << "could not parse " << filterspec << endl;
+            exit(1);
+        }
     }
 }
 
 bool VariantFilter::passes(Variant& var) {
     if (isInfoField) {
+        map<string, string>::iterator t = var.vcf.infoTypes.find(field);
+        if (t == var.vcf.infoTypes.end()) {
+            cerr << "info field " << field << " not in VCF file" << endl;
+            exit(1);
+        }
         string type = var.vcf.infoTypes[field];
         if (type == "Flag") {
             map<string, bool>::iterator f = var.infoFlags.find(field);
@@ -142,6 +169,11 @@ bool VariantFilter::passes(Variant& var) {
             exit(1);
         }
     } else { // go through all samples
+        map<string, string>::iterator t = var.vcf.formatTypes.find(field);
+        if (t == var.vcf.formatTypes.end()) {
+            cerr << "genotype field " << field << " not in VCF file" << endl;
+            exit(1);
+        }
         string type = var.vcf.formatTypes[field];
         for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
             map<string, string>& sample = var.samples[*s];

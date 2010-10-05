@@ -60,12 +60,13 @@ public:
 
 public:
 
-    Variant(vector<string>& sns, VariantCallFile& v)
-        : sampleNames(sns)
+    Variant(VariantCallFile& v)
+        : sampleNames(v.sampleNames)
         , vcf(v)
     { }
 
     void parse(string& line);
+    void addFilter(string& tag);
 
 private:
     string lastFormat;
