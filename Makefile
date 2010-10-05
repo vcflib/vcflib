@@ -1,12 +1,12 @@
 #OBJ_DIR = ./
 SOURCES = Variant.cpp \
 		  Split.cpp
-
 OBJECTS= $(SOURCES:.cpp=.o)
-#BUILT_OBJECTS= $(patsubst %,$(OBJ_DIR)/%,$(OBJECTS))
 
-BINS = vcfecho vcfaltcount vcfhetcount
-BIN_SOURCES = vcfecho.cpp vcfaltcount.cpp vcfhetcount.cpp
+BIN_SOURCES = vcfecho.cpp \
+			  vcfaltcount.cpp \
+			  vcfhetcount.cpp
+BINS = $(BIN_SOURCES:.cpp=)
 
 all: $(OBJECTS) $(BINS)
 
