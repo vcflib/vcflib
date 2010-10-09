@@ -136,11 +136,7 @@ int main(int argc, char** argv) {
             int gq;
             if (convert(sample["GQ"], gq)) {
                 gqsum[name] += gq;
-            } else {
-                cerr << "pyo" <<endl;
-                cerr << sample["GT"] << endl;
             }
-
 
             int dp;
             if (convert(sample["DP"], dp))
