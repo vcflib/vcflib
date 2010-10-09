@@ -17,8 +17,8 @@ int main(int argc, char** argv) {
 
     string filename = argv[1];
 
-    VariantCallFile variantFile;
-    if (!variantFile.openVCF(filename)) {
+    VariantCallFile variantFile(filename);
+    if (!variantFile.is_open()) {
         return 1;
     }
 

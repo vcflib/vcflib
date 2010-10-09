@@ -334,16 +334,6 @@ RuleToken::RuleToken(string tokenstr) {
     value = tokenstr;
 }
 
-/*
-RuleToken RuleToken::apply(RuleToken& token) {
-    if (isOperator(*this) && isOperator(token)) {
-        cerr << "cannot apply operator to operator" << endl;
-        exit(1);
-    } else {
-
-    }
-}
-*/
 
 void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
     string lastToken = "";
@@ -523,14 +513,31 @@ bool VariantFilter::passes(Variant& var, string& sample) {
     }
 }
 
+/*
 bool VariantCallFile::openVCF(string& filename) {
-    open(filename.c_str(), ifstream::in);
-    if (!is_open()) {
+    file.open(filename.c_str(), ifstream::in);
+    if (!file.is_open()) {
         cerr << "could not open " << filename << endl;
         return false;
+    } else {
+        return parseHeader();
     }
+}
+
+bool VariantCallFile::openVCF(ifstream& stream) {
+    file = stream;
+    if (!file.is_open()) {
+        cerr << "provided file is not open" << endl;
+        return false;
+    } else {
+        return parseHeader();
+    }
+}
+*/
+
+bool VariantCallFile::parseHeader(void) {
     header = "";
-    while (std::getline(*this, line)) {
+    while (std::getline(*file, line)) {
         if (line.substr(0,2) == "##") {
             // meta-information lines
             // TODO parse into map from info/format key to type
@@ -585,7 +592,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         firstRecord = false;
         return true;
     }
-    if (std::getline(*this, line)) {
+    if (std::getline(*file, line)) {
         var.parse(line);
         return true;
     } else {

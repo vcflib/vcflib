@@ -9,10 +9,22 @@ using namespace vcf;
 
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
-         << endl
          << "options:" << endl 
-         << "    -s, --samples    outputs a table of stats / individual in the vcf file (default)" << endl
-         << "    -r, --records    outputs a line of statistics over all records in the vcf file" << endl
+         << endl
+         << "    -h, --help    this dialog" << endl
+         << endl
+         << "By default, output a table of this form:" << endl
+         << "sample" << " "
+         << "sitecount" << " "
+         << "refcount" << " "
+         << "altcount" << " "
+         << "homcount" << " "
+         << "hetcount" << " "
+         << "avg_gq" << " "
+         << "avg_dp" << endl
+         << endl
+         << "for each sample in the VCF file." << endl
+         << "Reads from stdin if no file is specified on the command line." << endl
          << endl;
     exit(0);
 }
@@ -21,11 +33,7 @@ void printSummary(char** argv) {
 int main(int argc, char** argv) {
 
     int c;
-    bool statsForSamples = true;
-    bool statsForRecords = false;
-
-    if (argc == 1)
-        printSummary(argv);
+    //bool outputTotalStats = false;
 
     while (true) {
         static struct option long_options[] =
@@ -33,15 +41,14 @@ int main(int argc, char** argv) {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
             {"help", no_argument, 0, 'h'},
-            {"samples",  required_argument, 0, 's'},
-            {"records",  required_argument, 0, 'r'},
+            //{"totals",   no_argument, 0, 't'}, 
             //{"length",  no_argument, &printLength, true},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hsr",
+        c = getopt_long (argc, argv, "h",
                          long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -60,15 +67,9 @@ int main(int argc, char** argv) {
             printf ("\n");
             break;
 
-          case 's':
-            statsForSamples = true;
-            statsForRecords = false;
-            break;
- 
-          case 'r':
-            statsForRecords = true;
-            statsForSamples = false;
-            break;
+          //case 't':
+           // outputTotalStats = true;
+            //break;
  
           case 'h':
             printSummary(argv);
@@ -86,21 +87,15 @@ int main(int argc, char** argv) {
           }
       }
 
-    if (statsForRecords && statsForSamples) {
-        cerr << "only one output format may be specified, either -s or -r" << endl;
-        exit(1);
-    }
-
-    string inputFilename;
-    if (optind == argc - 1) {
-        inputFilename = argv[optind];
-    } else {
-        cerr << "No input file provided." << endl;
-        exit(1);
-    }
-
     VariantCallFile variantFile;
-    if (!variantFile.openVCF(inputFilename)) {
+    if (optind == argc - 1) {
+        string inputFilename = argv[optind];
+        variantFile.open(inputFilename);
+    } else {
+        variantFile.open(std::cin);
+    }
+
+    if (!variantFile.is_open()) {
         return 1;
     }
 

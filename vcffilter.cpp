@@ -137,8 +137,8 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    VariantCallFile variantFile;
-    if (!variantFile.openVCF(inputFilename)) {
+    VariantCallFile variantFile(inputFilename);
+    if (!variantFile.is_open()) {
         return 1;
     }
 

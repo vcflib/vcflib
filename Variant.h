@@ -17,9 +17,11 @@ namespace vcf {
 
 class Variant;
 
-class VariantCallFile : public ifstream {
+class VariantCallFile {
 
 public:
+
+    istream* file;
 
     string header;
     string line; // the current line
@@ -34,12 +36,50 @@ public:
     map<string, int> formatCounts;
     vector<string> sampleNames;
 
-    bool openVCF(string& filename);
+    bool open(string& filename) {
+        file = &_file;
+        _file.open(filename.c_str(), ifstream::in);
+        parsedHeader = parseHeader();
+    }
+
+    bool open(istream& stream) {
+        file = &stream;
+        parsedHeader = parseHeader();
+    }
+
+    bool open(ifstream& stream) {
+        file = &stream;
+        parsedHeader = parseHeader();
+    }
+
+    VariantCallFile(void) { }
+
+    // open a file
+    VariantCallFile(string& filename) : file(&_file) { 
+        _file.open(filename.c_str(), ifstream::in);
+        parsedHeader = parseHeader();
+    }
+
+    // use an existing stream as our file
+    VariantCallFile(ifstream& stream) : file(&stream) { 
+        parsedHeader = parseHeader();
+    }
+
+    VariantCallFile(istream& stream) : file(&stream) { 
+        parsedHeader = parseHeader();
+    }
+
+    bool is_open(void) { return parsedHeader; }
+
+    bool parseHeader(void);
 
     bool getNextVariant(Variant& var);
 
 private:
     bool firstRecord;
+    bool usingFile;
+    ifstream _file;
+    bool parsedHeader;
 
 };
 
