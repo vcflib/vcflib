@@ -1,11 +1,15 @@
 #OBJ_DIR = ./
+HEADERS = Variant.h \
+		  split.h \
+		  join.h
 SOURCES = Variant.cpp \
-		  Split.cpp
+		  split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
 BIN_SOURCES = vcfecho.cpp \
 			  vcfaltcount.cpp \
 			  vcfhetcount.cpp \
+			  vcfstats.cpp \
 			  vcffilter.cpp
 BINS = $(BIN_SOURCES:.cpp=)
 
@@ -14,7 +18,7 @@ all: $(OBJECTS) $(BINS)
 CXX = g++
 CXXFLAGS = -O3
 
-$(OBJECTS): $(SOURCES)
+$(OBJECTS): $(SOURCES) $(HEADERS)
 	$(CXX) -c -o $@ $(*F).cpp $(LDFLAGS) $(CXXFLAGS) $(INCLUDES)
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS)

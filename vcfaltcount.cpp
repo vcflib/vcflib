@@ -1,9 +1,10 @@
 #include "Variant.h"
-#include "Split.h"
+#include "split.h"
 #include <string>
 #include <iostream>
 
 using namespace std;
+using namespace vcf;
 
 
 int main(int argc, char** argv) {

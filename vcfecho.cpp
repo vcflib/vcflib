@@ -1,5 +1,7 @@
 #include "Variant.h"
 
+using namespace std;
+using namespace vcf;
 
 int main(int argc, char** argv) {
 

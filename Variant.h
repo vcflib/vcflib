@@ -6,9 +6,14 @@
 #include <utility>
 #include <stdlib.h>
 #include <assert.h>
-#include "Split.h"
+#include <stack>
+#include <queue>
+#include "split.h"
+#include "join.h"
 
 using namespace std;
+
+namespace vcf {
 
 class Variant;
 
@@ -67,62 +72,169 @@ public:
 
     void parse(string& line);
     void addFilter(string& tag);
+    bool getValueBool(string& key, string& sample);
+    float getValueFloat(string& key, string& sample);
+    string getValueString(string& key, string& sample);
+    bool getSampleValueBool(string& key, string& sample);
+    float getSampleValueFloat(string& key, string& sample);
+    string getSampleValueString(string& key, string& sample);
+    bool getInfoValueBool(string& key);
+    float getInfoValueFloat(string& key);
+    string getInfoValueString(string& key);
 
 private:
     string lastFormat;
 
 };
 
-// op type
-enum VariantFilterOpType {
-    FILTER_GREATER_THAN_OR_EQUAL,
-    FILTER_LESS_THAN_OR_EQUAL,
-    FILTER_EQUAL,
-    FILTER_NOT_EQUAL,
-    FILTER_GREATER_THAN,
-    FILTER_LESS_THAN,
-    FILTER_FLAG
+// from BamTools
+// RuleToken implementation
+
+struct RuleToken {
+
+    // enums
+    enum RuleTokenType { OPERAND = 0
+                       , NUMBER
+                       , BOOLEAN_VARIABLE
+                       , NUMERIC_VARIABLE
+                       , STRING_VARIABLE
+                       , AND_OPERATOR
+                       , OR_OPERATOR
+                       , NOT_OPERATOR
+                       , EQUAL_OPERATOR
+                       , GREATER_THAN_OPERATOR
+                       , LESS_THAN_OPERATOR
+                       , LEFT_PARENTHESIS
+                       , RIGHT_PARENTHESIS
+                       };
+
+    // constructor
+    RuleToken(string token);
+    RuleToken(void) 
+        : type(BOOLEAN_VARIABLE)
+        , state(false)
+    { }
+
+    // data members
+    RuleTokenType type;
+    string value;
+
+    float number;
+    string str;
+    bool state;
+
+    bool isVariable; // if this is a variable
+    //bool isEvaluated; // when we evaluate variables
+
+    RuleToken apply(RuleToken& other);
+
 };
 
-template <class T>
-bool applyFilter(VariantFilterOpType op, T data, T value) {
-    switch (op) {
-        case FILTER_GREATER_THAN_OR_EQUAL:
-            return data >= value;
-            break;
-        case FILTER_LESS_THAN_OR_EQUAL:
-            return data <= value;
-            break;
-        case FILTER_GREATER_THAN:
-            return data > value;
-            break;
-        case FILTER_LESS_THAN:
-            return data < value;
-            break;
-        case FILTER_EQUAL:
-            return data == value;
-            break;
-        case FILTER_NOT_EQUAL:
-            return data != value;
-            break;
-        default:
-            break;
+inline int priority(const RuleToken& token) {
+    switch ( token.type ) {
+        case ( RuleToken::NOT_OPERATOR )          : return 4;
+        case ( RuleToken::EQUAL_OPERATOR )        : return 3;
+        case ( RuleToken::GREATER_THAN_OPERATOR ) : return 3;
+        case ( RuleToken::LESS_THAN_OPERATOR )    : return 3;
+        case ( RuleToken::AND_OPERATOR )          : return 2;
+        case ( RuleToken::OR_OPERATOR )           : return 1;
+        case ( RuleToken::LEFT_PARENTHESIS )      : return 0;
+        case ( RuleToken::RIGHT_PARENTHESIS )     : return 0;
+        default: cerr << "invalid token type" << endl; exit(1);
     }
-    return false;
 }
+
+inline bool isRightAssociative(const RuleToken& token) {
+    return (token.type == RuleToken::NOT_OPERATOR ||
+            token.type == RuleToken::LEFT_PARENTHESIS);
+}
+
+inline bool isLeftAssociative(const RuleToken& token) {
+    return !isRightAssociative(token);
+}
+
+inline bool isLeftParenthesis(const RuleToken& token) {
+    return ( token.type == RuleToken::LEFT_PARENTHESIS );
+}
+
+inline bool isRightParenthesis(const RuleToken& token) {
+    return ( token.type == RuleToken::RIGHT_PARENTHESIS );
+}
+
+inline bool isOperand(const RuleToken& token) {
+    return ( token.type == RuleToken::OPERAND || 
+             token.type == RuleToken::NUMBER ||
+             token.type == RuleToken::NUMERIC_VARIABLE ||
+             token.type == RuleToken::STRING_VARIABLE ||
+             token.type == RuleToken::BOOLEAN_VARIABLE
+           );
+}
+
+inline bool isOperator(const RuleToken& token) {
+    return ( token.type == RuleToken::AND_OPERATOR ||
+             token.type == RuleToken::OR_OPERATOR  ||
+             token.type == RuleToken::NOT_OPERATOR ||
+             token.type == RuleToken::EQUAL_OPERATOR ||
+             token.type == RuleToken::GREATER_THAN_OPERATOR ||
+             token.type == RuleToken::LESS_THAN_OPERATOR
+             );
+}
+
+inline bool isOperatorChar(const char& c) {
+    return (c == '!' ||
+            c == '&' ||
+            c == '|' ||
+            c == '=' ||
+            c == '>' ||
+            c == '<');
+}
+
+inline bool isParanChar(const char& c) {
+    return (c == '(' || c == ')');
+}
+
+inline bool isNumeric(const RuleToken& token) {
+    return token.type == RuleToken::NUMERIC_VARIABLE;
+}
+
+inline bool isString(const RuleToken& token) {
+    return token.type == RuleToken::STRING_VARIABLE;
+}
+
+inline bool isBoolean(const RuleToken& token) {
+    return token.type == RuleToken::BOOLEAN_VARIABLE;
+}
+
+inline bool isVariable(const RuleToken& token) {
+    return isNumeric(token) || isString(token) || isBoolean(token);
+}
+
+// converts the string into the specified type, setting r to the converted
+// value and returning true/false on success or failure
+template<typename T>
+bool convert(const string& s, T& r) {
+    istringstream iss(s);
+    iss >> r;
+    return (iss.fail() || iss.tellg() != s.size()) ? false : true;
+}
+
+void tokenizeFilterSpec(string& filterspec, stack<RuleToken>& tokens);
+
 
 class VariantFilter {
 
 public:
 
-    string spec;
-    string field;   // field ID in the variant record
-    bool isInfoField;  // true if an info field, 
-    VariantFilterOpType op;
-    string value;  // value against which to check the key
+    enum VariantFilterType { SAMPLE = 0,
+                             RECORD };
 
-    VariantFilter(string filterspec, bool infof = true);
-    bool passes(Variant& var);
+    string spec;
+    queue<RuleToken> tokens; // tokens, infix notation
+    queue<RuleToken> rules;  // tokens, prefix notation
+    VariantFilterType type;
+    VariantFilter(string filterspec, VariantFilterType filtertype);
+    bool passes(Variant& var, string& sample);
 
 };
 
+} // end namespace VCF

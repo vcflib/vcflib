@@ -1,5 +1,6 @@
 #include "Variant.h"
 
+namespace vcf {
 
 void Variant::parse(string& line) {
 
@@ -33,17 +34,185 @@ void Variant::parse(string& line) {
     }
     vector<string>::iterator sampleName = sampleNames.begin();
     for (vector<string>::iterator sample = fields.begin() + 9; sample != fields.end(); ++sample, ++sampleName) {
+        string& name = *sampleName;
         if (*sample == ".") {
-            samples[*sampleName].clear();
+            samples.erase(name);
             continue;
         }
-        vector<string> infofields = split(*sample, ':');
-        vector<string>::iterator i = infofields.begin();
+        vector<string> samplefields = split(*sample, ':');
+        vector<string>::iterator i = samplefields.begin();
         for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-            samples[*sampleName][*f] = *i; ++i;
+            samples[name][*f] = *i; ++i;
         }
     }
     //return true; // we should be catching exceptions...
+}
+
+bool Variant::getInfoValueBool(string& key) {
+    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        string& type = s->second;
+        if (type == "Flag") {
+            map<string, bool>::iterator b = infoFlags.find(key);
+            if (b == infoFlags.end())
+                return false;
+            else
+                return true;
+        } else {
+            cerr << "not flag type " << key << endl;
+        }
+    }
+}
+
+string Variant::getInfoValueString(string& key) {
+    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        string& type = s->second;
+        if (type == "String") {
+            map<string, string>::iterator b = info.find(key);
+            if (b == info.end())
+                return false;
+            return b->second;
+        } else {
+            cerr << "not string type " << key << endl;
+        }
+    }
+}
+
+float Variant::getInfoValueFloat(string& key) {
+    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        string& type = s->second;
+        if (type == "Integer") {
+            map<string, string>::iterator b = info.find(key);
+            if (b == info.end())
+                return false;
+            int r;
+            if (!convert(b->second, r)) {
+                cerr << "could not convert field " << b->second << " to " << type << endl;
+                exit(1);
+            }
+            return r;
+        } else if (type == "Float") {
+            map<string, string>::iterator b = info.find(key);
+            if (b == info.end())
+                return false;
+            float r;
+            if (!convert(b->second, r)) {
+                cerr << "could not convert field " << b->second << " to " << type << endl;
+                exit(1);
+            }
+            return r;
+        } else {
+            cerr << "unsupported type for variant record " << type << endl;
+        }
+    }
+}
+
+bool Variant::getSampleValueBool(string& key, string& sample) {
+    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        string& type = s->second;
+        map<string, string>& sampleData = samples[sample];
+        if (type == "Flag") {
+            map<string, string>::iterator b = sampleData.find(key);
+            if (b == sampleData.end())
+                return false;
+            else
+                return true;
+        } else {
+            cerr << "not string type " << key << endl;
+        }
+    }
+}
+
+string Variant::getSampleValueString(string& key, string& sample) {
+    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        string& type = s->second;
+        map<string, string>& sampleData = samples[sample];
+        if (type == "String") {
+            map<string, string>::iterator b = sampleData.find(key);
+            if (b == sampleData.end())
+                return false;
+            return b->second;
+        } else {
+            cerr << "not string type " << key << endl;
+        }
+    }
+}
+
+float Variant::getSampleValueFloat(string& key, string& sample) {
+    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        string& type = s->second;
+        map<string, string>& sampleData = samples[sample];
+        if (type == "Integer") {
+            map<string, string>::iterator b = sampleData.find(key);
+            if (b == sampleData.end())
+                return false;
+            int r;
+            if (!convert(b->second, r)) {
+                cerr << "could not convert field " << b->second << " to " << type << endl;
+                exit(1);
+            }
+            return r;
+        } else if (type == "Float") {
+            map<string, string>::iterator b = sampleData.find(key);
+            if (b == sampleData.end())
+                return false;
+            float r;
+            if (!convert(b->second, r)) {
+                cerr << "could not convert field " << b->second << " to " << type << endl;
+                exit(1);
+            }
+            return r;
+        } else {
+            cerr << "unsupported type for sample " << type << endl;
+        }
+    }
+}
+
+bool Variant::getValueBool(string& key, string& sample) {
+    if (sample.length() == 0) { // an empty sample name means
+        return getInfoValueBool(key);
+    } else {
+        return getSampleValueBool(key, sample);
+    }
+}
+
+float Variant::getValueFloat(string& key, string& sample) {
+    if (sample.length() == 0) { // an empty sample name means
+        return getInfoValueFloat(key);
+    } else {
+        return getSampleValueFloat(key, sample);
+    }
+}
+
+string Variant::getValueString(string& key, string& sample) {
+    if (sample.length() == 0) { // an empty sample name means
+        return getInfoValueString(key);
+    } else {
+        return getSampleValueString(key, sample);
+    }
 }
 
 void Variant::addFilter(string& tag) {
@@ -91,112 +260,266 @@ ostream& operator<<(ostream& out, Variant& var) {
 }
 
 
-VariantFilter::VariantFilter(string filterspec, bool infof) {
-    isInfoField = infof; // marks if this filters on info-items or all genotypes
-    size_t foundKey = filterspec.find(' ');
-    string opstr = "";
-    if (foundKey == string::npos) {
-        //cerr << "could not parse filter spec " << filterspec << endl;
-        exit(1);
-    } else {
-        field = filterspec.substr(0, foundKey);
-        //cerr << "found field " << field << endl;
-        size_t filterOp;
-        if ((filterOp = filterspec.find("<=")) != string::npos) {
-            //cerr << "found <=" << endl;
-            op = FILTER_LESS_THAN_OR_EQUAL;
-            opstr = "<=";
-        } else if ((filterOp = filterspec.find(">=")) != string::npos) {
-            //cerr << "found >=" << endl;
-            op = FILTER_GREATER_THAN_OR_EQUAL;
-            opstr = ">=";
-        } else if ((filterOp = filterspec.find("==")) != string::npos) {
-            //cerr << "found ==" << endl;
-            op = FILTER_EQUAL;
-            opstr = "==";
-        } else if ((filterOp = filterspec.find("!=")) != string::npos) {
-            //cerr << "found !=" << endl;
-            op = FILTER_NOT_EQUAL;
-            opstr = "!=";
-        } else if ((filterOp = filterspec.find("<")) != string::npos) {
-            //cerr << "found <" << endl;
-            op = FILTER_LESS_THAN;
-            opstr = "<";
-        } else if ((filterOp = filterspec.find(">")) != string::npos) {
-            //cerr << "found >" << endl;
-            op = FILTER_GREATER_THAN;
-            opstr = ">";
+
+// shunting yard algorithm
+void infixToPrefix(queue<RuleToken> tokens, queue<RuleToken>& prefixtokens) {
+    stack<RuleToken> ops;
+    while (!tokens.empty()) {
+        RuleToken& token = tokens.front();
+        if (isOperator(token)) {
+            //cerr << "found operator " << token.value << endl;
+            while (ops.size() > 0 && isOperator(ops.top())
+                    && (   (isLeftAssociative(token)  && priority(token) <= priority(ops.top()))
+                        || (isRightAssociative(token) && priority(token) <  priority(ops.top())))) {
+                prefixtokens.push(ops.top());
+                ops.pop();
+            }
+            ops.push(token);
+        } else if (isLeftParenthesis(token)) {
+            //cerr << "found paran " << token.value << endl;
+            ops.push(token);
+        } else if (isRightParenthesis(token)) {
+            //cerr << "found paran " << token.value << endl;
+            while (ops.size() > 0 && !isLeftParenthesis(ops.top())) {
+                prefixtokens.push(ops.top());
+                ops.pop();
+            }
+            if (ops.size() == 0) {
+                cerr << "error: mismatched parentheses" << endl;
+                exit(1);
+            }
+            if (isLeftParenthesis(ops.top())) {
+                ops.pop();
+            }
         } else {
-            //cerr << "regarding as boolean flag filter" << endl;
-            op = FILTER_FLAG;
-            opstr = "";
+            //cerr << "found operand " << token.value << endl;
+            prefixtokens.push(token);
         }
-        string rest = filterspec.substr(filterOp);
-        size_t val = rest.find(" ");
-        if (val != string::npos) {
-            value = filterspec.substr(val + 1 + opstr.size() + 1);
-            //cerr << "got value '" << value << "'" << endl;
-        } else {
-            cerr << "could not parse " << filterspec << endl;
+        tokens.pop();
+    }
+    while (ops.size() > 0) {
+        if (isRightParenthesis(ops.top()) || isLeftParenthesis(ops.top())) {
+            cerr << "error: mismatched parentheses" << endl;
             exit(1);
         }
+        prefixtokens.push(ops.top());
+        ops.pop();
     }
 }
 
-bool VariantFilter::passes(Variant& var) {
-    if (isInfoField) {
-        map<string, string>::iterator t = var.vcf.infoTypes.find(field);
-        if (t == var.vcf.infoTypes.end()) {
-            cerr << "info field " << field << " not in VCF file" << endl;
-            exit(1);
+RuleToken::RuleToken(string tokenstr) {
+    isVariable = false;
+    if (tokenstr == "!") {
+        type = RuleToken::NOT_OPERATOR;
+    } else if (tokenstr == "&") {
+        type = RuleToken::AND_OPERATOR;
+    } else if (tokenstr == "|") {
+        type = RuleToken::OR_OPERATOR;
+    } else if (tokenstr == "=") {
+        type = RuleToken::EQUAL_OPERATOR;
+    } else if (tokenstr == ">") {
+        type = RuleToken::GREATER_THAN_OPERATOR;
+    } else if (tokenstr == "<") {
+        type = RuleToken::LESS_THAN_OPERATOR;
+    } else if (tokenstr == "(") {
+        type = RuleToken::LEFT_PARENTHESIS;
+    } else if (tokenstr == ")") {
+        type = RuleToken::RIGHT_PARENTHESIS;
+    } else { // operand
+        type = RuleToken::OPERAND;
+        if (convert(tokenstr, number)) {
+            type = RuleToken::NUMBER;
         }
-        string type = var.vcf.infoTypes[field];
-        if (type == "Flag") {
-            map<string, bool>::iterator f = var.infoFlags.find(field);
-            if (f != var.infoFlags.end()) {
-                return true;
-            } else {
-                return false;
+    }
+    value = tokenstr;
+}
+
+/*
+RuleToken RuleToken::apply(RuleToken& token) {
+    if (isOperator(*this) && isOperator(token)) {
+        cerr << "cannot apply operator to operator" << endl;
+        exit(1);
+    } else {
+
+    }
+}
+*/
+
+void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
+    string lastToken = "";
+    bool inToken = false;
+    for (int i = 0; i < filterspec.size(); ++i) {
+        char c = filterspec.at(i);
+        if (c == ' ') {
+            inToken = false;
+            if (!inToken && lastToken.size() > 0) {
+                tokens.push(RuleToken(lastToken));
+                lastToken = "";
             }
-        } else if (type == "Integer") {
-            return applyFilter(op, atoi(var.info[field].c_str()), atoi(value.c_str()));
-        } else if (type == "Float") {
-            return applyFilter(op, atof(var.info[field].c_str()), atof(value.c_str()));
-        } else if (type == "String") {
-            return applyFilter(op, var.info[field], value);
+        } else if (isOperatorChar(c) || isParanChar(c)) {
+            inToken = false;
+            if (lastToken.size() > 0) {
+                tokens.push(RuleToken(lastToken));
+                lastToken = "";
+            }
+            tokens.push(RuleToken(filterspec.substr(i,1)));
         } else {
-            cerr << "unsupported field type: " << type << endl;
-            exit(1);
+            inToken = true;
+            lastToken += c;
         }
-    } else { // go through all samples
-        map<string, string>::iterator t = var.vcf.formatTypes.find(field);
-        if (t == var.vcf.formatTypes.end()) {
-            cerr << "genotype field " << field << " not in VCF file" << endl;
-            exit(1);
-        }
-        string type = var.vcf.formatTypes[field];
-        for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
-            map<string, string>& sample = var.samples[*s];
-            // unclear what a format-field flag would be
-            /*if (type == "Flag") {
-                map<string, string>::iterator f = var.infoFlags.find(key);
-                if (f != var.samples.end()) {
-                    return true;
+    }
+    // get the last token
+    if (inToken) {
+        tokens.push(RuleToken(lastToken));
+    }
+}
+
+// class which evaluates filter expressions
+// allow filters to be defined using boolean infix expressions e.g.:
+//
+// "GQ > 10 & (DP < 3 | DP > 5) & SAMPLE = NA12878"
+// or
+// "GT = 1/1 | GT = 0/0"
+//
+// on initialization, tokenizes the input sequence, and converts it from infix to postfix
+// on call to 
+//
+
+
+VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype) {
+    type = filtertype;
+    spec = filterspec;
+    tokenizeFilterSpec(filterspec, tokens);
+    infixToPrefix(tokens, rules);
+    while (!rules.empty()) {
+        cerr << " " << rules.front().value << ((isNumeric(rules.front())) ? "f" : "");
+        rules.pop();
+    }
+    cerr << endl;
+    //cerr << join(" ", tokens) << endl;
+}
+
+bool VariantFilter::passes(Variant& var, string& sample) {
+    // to evaluate a rpn boolean queue with embedded numbers and variables
+    // make a result stack, use float to allow comparison of floating point
+    // numbers, booleans, and integers
+    stack<RuleToken> results;
+    queue<RuleToken> rulesCopy = rules; // copy
+
+    while (!rulesCopy.empty()) {
+        RuleToken& token = rulesCopy.front();
+        rulesCopy.pop();
+        // pop operands from the front of the queue and push them onto the stack
+        if (isOperand(token)) {
+            // if the token is variable, i.e. not evaluated in this context, we
+            // must evaluate it before pushing it onto the stack
+            if (isVariable(token)) {
+                // look up the variable using the Variant, depending on our filter type
+                string type;
+                if (sample.length() == 0) { // means we are record-specific
+                    type = var.vcf.infoTypes[token.value];
                 } else {
-                    return false;
+                    type = var.vcf.formatTypes[token.value];
                 }
-            } else */
-            if (type == "Integer") {
-                return applyFilter(op, atoi(sample[field].c_str()), atoi(value.c_str()));
-            } else if (type == "Float") {
-                return applyFilter(op, atof(sample[field].c_str()), atof(value.c_str()));
-            } else if (type == "String") {
-                return applyFilter(op, sample[field], value);
-            } else {
-                cerr << "unsupported field type: " << type << endl;
-                exit(1);
+
+                if (type == "Integer" || type == "Float") {
+                    token.type = RuleToken::NUMERIC_VARIABLE;
+                    token.number = var.getValueFloat(token.value, sample);
+                } else if (isString(token)) {
+                    token.type = RuleToken::STRING_VARIABLE;
+                    token.str = var.getValueString(token.value, sample);
+                } else if (type == "Flag") {
+                    token.type = RuleToken::BOOLEAN_VARIABLE;
+                    token.state = var.getValueBool(token.value, sample);
+                }
+            }
+            results.push(token);
+        } 
+        // apply operators to the first n elements on the stack and push the result back onto the stack
+        else if (isOperator(token)) {
+            RuleToken a, b, r;
+            // is it a not-operator?
+            switch (token.type) {
+                case ( RuleToken::NOT_OPERATOR ):
+                    a = results.top();
+                    results.pop();
+                    if (!isBoolean(a)) {
+                        cerr << "cannot negate a non-boolean" << endl;
+                    } else {
+                        a.state = !a.state;
+                        results.push(a);
+                    }
+                    break;
+                case ( RuleToken::EQUAL_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type) {
+                        switch (a.type) {
+                            case (RuleToken::STRING_VARIABLE):
+                                r.state = (a.str == b.str);
+                                break;
+                            case (RuleToken::NUMERIC_VARIABLE):
+                                r.state = (a.number == b.number);
+                                break;
+                            case (RuleToken::BOOLEAN_VARIABLE):
+                                r.state = (a.state == b.state);
+                                break;
+                            default:
+                                cerr << "should not get here" << endl; exit(1);
+                                break;
+                        }
+                    }
+                    results.push(r);
+                    break;
+                case ( RuleToken::GREATER_THAN_OPERATOR ):
+                case ( RuleToken::LESS_THAN_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
+                        if (token.type == RuleToken::GREATER_THAN_OPERATOR) {
+                            r.state = (a.number > b.number);
+                        } else {
+                            r.state = (a.number < b.number);
+                        }
+                    } else {
+                        cerr << "cannot compare (> or <) objects of dissimilar types" << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+                case ( RuleToken::AND_OPERATOR ):
+                case ( RuleToken::OR_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::BOOLEAN_VARIABLE) {
+                        if (token.type == RuleToken::AND_OPERATOR) {
+                            r.state = (a.state && b.state);
+                        } else {
+                            r.state = (a.state || b.state);
+                        }
+                    } else {
+                        cerr << "cannot compare (& or |) objects of dissimilar types" << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+                default:
+                    cerr << "should not get here!" << endl; exit(1);
+                    break;
             }
         }
+    }
+    // at the end you should have only one value on the stack, return it as a boolean
+    if (results.size() == 1) {
+        if (isBoolean(results.top())) {
+           return results.top().state;
+        } else {
+            cerr << "error, non-boolean value left on stack" << endl;
+            exit(1);
+        }
+    } else {
+        cerr << "more than one value left on results stack!" << endl;
+        exit(1);
     }
 }
 
@@ -270,3 +593,4 @@ bool VariantCallFile::getNextVariant(Variant& var) {
     }
 }
 
+} // end namespace vcf
