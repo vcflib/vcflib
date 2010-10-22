@@ -28,12 +28,14 @@ void Variant::parse(string& line) {
         }
     }
     format = split(fields.at(8), ':');
+    // if the format changed, we have to rebuild the samples
     if (fields.at(8) != lastFormat) {
         samples.clear();
         lastFormat = fields.at(8);
     }
     vector<string>::iterator sampleName = sampleNames.begin();
-    for (vector<string>::iterator sample = fields.begin() + 9; sample != fields.end(); ++sample, ++sampleName) {
+    vector<string>::iterator sample = fields.begin() + 9;
+    for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
         string& name = *sampleName;
         if (*sample == ".") {
             samples.erase(name);
@@ -44,6 +46,18 @@ void Variant::parse(string& line) {
         for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
             samples[name][*f] = *i; ++i;
         }
+    }
+    if (sampleName != sampleNames.end()) {
+        cerr << "error: more sample names in header than sample fields" << endl;
+        cerr << "samples: " << join(sampleNames, " ") << endl;
+        cerr << "line: " << line << endl;
+        exit(1);
+    }
+    if (sample != fields.end()) {
+        cerr << "error: more sample fields than samples listed in header" << endl;
+        cerr << "samples: " << join(sampleNames, " ") << endl;
+        cerr << "line: " << line << endl;
+        exit(1);
     }
     //return true; // we should be catching exceptions...
 }
