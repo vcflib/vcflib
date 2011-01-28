@@ -91,10 +91,11 @@ string Variant::getInfoValueString(string& key) {
         if (type == "String") {
             map<string, string>::iterator b = info.find(key);
             if (b == info.end())
-                return false;
+                return "";
             return b->second;
         } else {
             cerr << "not string type " << key << endl;
+            return "";
         }
     }
 }
@@ -343,6 +344,9 @@ RuleToken::RuleToken(string tokenstr) {
         type = RuleToken::OPERAND;
         if (convert(tokenstr, number)) {
             type = RuleToken::NUMBER;
+        } else {
+            // TODO
+            isVariable = true;
         }
     }
     value = tokenstr;
@@ -395,11 +399,12 @@ VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype) {
     spec = filterspec;
     tokenizeFilterSpec(filterspec, tokens);
     infixToPrefix(tokens, rules);
-    while (!rules.empty()) {
+    /*while (!rules.empty()) {
         cerr << " " << rules.front().value << ((isNumeric(rules.front())) ? "f" : "");
         rules.pop();
     }
-    cerr << endl;
+    */
+    //cerr << endl;
     //cerr << join(" ", tokens) << endl;
 }
 
@@ -415,16 +420,20 @@ bool VariantFilter::passes(Variant& var, string& sample) {
         rulesCopy.pop();
         // pop operands from the front of the queue and push them onto the stack
         if (isOperand(token)) {
+            cerr << "is operand: " << token.value << endl;
             // if the token is variable, i.e. not evaluated in this context, we
             // must evaluate it before pushing it onto the stack
-            if (isVariable(token)) {
+            if (token.isVariable) {
+                cerr << "is variable" << endl;
                 // look up the variable using the Variant, depending on our filter type
                 string type;
-                if (sample.length() == 0) { // means we are record-specific
+                if (sample.empty()) { // means we are record-specific
                     type = var.vcf.infoTypes[token.value];
                 } else {
                     type = var.vcf.formatTypes[token.value];
                 }
+                cerr << "token.value " << token.value << endl;
+                cerr << "type: " << type << endl;
 
                 if (type == "Integer" || type == "Float") {
                     token.type = RuleToken::NUMERIC_VARIABLE;
@@ -441,6 +450,7 @@ bool VariantFilter::passes(Variant& var, string& sample) {
         } 
         // apply operators to the first n elements on the stack and push the result back onto the stack
         else if (isOperator(token)) {
+            cerr << "is operator: " << token.value << endl;
             RuleToken a, b, r;
             // is it a not-operator?
             switch (token.type) {
@@ -519,10 +529,18 @@ bool VariantFilter::passes(Variant& var, string& sample) {
            return results.top().state;
         } else {
             cerr << "error, non-boolean value left on stack" << endl;
+            //cerr << results.top().value << endl;
             exit(1);
         }
-    } else {
+    } else if (results.size() > 1) {
         cerr << "more than one value left on results stack!" << endl;
+        while (!results.empty()) {
+            cerr << results.top().value << endl;
+            results.pop();
+        }
+        exit(1);
+    } else {
+        cerr << "results stack empty" << endl;
         exit(1);
     }
 }
@@ -579,6 +597,7 @@ bool VariantCallFile::parseHeader(void) {
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
                         infoTypes[id] = type;
+                        //cerr << id << " == " << type << endl;
                     } else if (entryType == "FORMAT") {
                         formatCounts[id] = number;
                         formatTypes[id] = type;
