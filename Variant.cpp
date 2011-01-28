@@ -15,7 +15,14 @@ void Variant::parse(string& line) {
     position = strtoll(fields.at(1).c_str(), &end, 10);
     id = fields.at(2);
     ref = fields.at(3);
-    alt = fields.at(4); // TODO handle multi-allelic situations
+    alt = split(fields.at(4), ","); // a comma-separated list of alternate alleles
+
+    // make a list of all (ref + alts) alleles, allele[0] = ref, alleles[1:] = alts
+    // add the ref allele ([0]), resize for the alt alleles, and then add the alt alleles
+    alleles.push_back(ref);
+    alleles.resize(alt.size()+1);
+    std::copy(alt.begin(), alt.end(), alleles.begin()+1);
+
     quality = atoi(fields.at(5).c_str());
     filter = fields.at(6);
     vector<string> infofields = split(fields.at(7), ';');
@@ -240,8 +247,13 @@ ostream& operator<<(ostream& out, Variant& var) {
     out << var.sequenceName << "\t"
         << var.position << "\t"
         << var.id << "\t"
-        << var.ref << "\t"
-        << var.alt << "\t"
+        << var.ref << "\t";
+    for (vector<string>::iterator i = var.alt.begin(); i != var.alt.end(); ++i) {
+        out << *i;
+        // add a comma for all but the last alternate allele
+        if (i != (var.alt.end() - 1)) out << ",";
+    }
+    out << "\t"
         << var.quality << "\t"
         << var.filter << "\t";
     for (map<string, string>::iterator i = var.info.begin(); i != var.info.end(); ++i) {
