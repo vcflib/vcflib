@@ -7,6 +7,8 @@ void Variant::parse(string& line) {
     // clean up potentially variable data structures
     info.clear();
     format.clear();
+    alt.clear();
+    alleles.clear();
 
     // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
     vector<string> fields = split(line, '\t');
