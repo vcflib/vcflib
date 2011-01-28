@@ -243,16 +243,29 @@ void Variant::addFilter(string& tag) {
         filter += "," + tag;
 }
 
+void Variant::printAlt(ostream& out) {
+    for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
+        out << *i;
+        // add a comma for all but the last alternate allele
+        if (i != (alt.end() - 1)) out << ",";
+    }
+}
+
+void Variant::printAlleles(ostream& out) {
+    for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
+        out << *i;
+        // add a comma for all but the last alternate allele
+        if (i != (alleles.end() - 1)) out << ",";
+    }
+}
+
 ostream& operator<<(ostream& out, Variant& var) {
     out << var.sequenceName << "\t"
         << var.position << "\t"
         << var.id << "\t"
         << var.ref << "\t";
-    for (vector<string>::iterator i = var.alt.begin(); i != var.alt.end(); ++i) {
-        out << *i;
-        // add a comma for all but the last alternate allele
-        if (i != (var.alt.end() - 1)) out << ",";
-    }
+    // report the list of alterbate alleles.
+    var.printAlt(out);
     out << "\t"
         << var.quality << "\t"
         << var.filter << "\t";

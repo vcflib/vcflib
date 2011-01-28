@@ -125,6 +125,9 @@ public:
     bool getInfoValueBool(string& key);
     float getInfoValueFloat(string& key);
     string getInfoValueString(string& key);
+    void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
+    void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
+     
 
 private:
     string lastFormat;
