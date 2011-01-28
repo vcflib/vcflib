@@ -94,7 +94,11 @@ public:
     unsigned long position;
     string id;
     string ref;
-    string alt;
+    vector<string> alt;      // a list of all the alternate alleles present at this locus
+    vector<string> alleles;  // a list all alleles (ref + alt) at this locus
+                             // the indicies are organized such that the genotype codes (0,1,2,.etc.)
+                             // correspond to the correct offest into the allelese vector.
+                             // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     string filter;
     int quality;
     map<string, string> info;
@@ -121,6 +125,9 @@ public:
     bool getInfoValueBool(string& key);
     float getInfoValueFloat(string& key);
     string getInfoValueString(string& key);
+    void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
+    void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
+     
 
 private:
     string lastFormat;

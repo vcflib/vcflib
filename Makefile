@@ -10,7 +10,8 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfaltcount.cpp \
 			  vcfhetcount.cpp \
 			  vcfstats.cpp \
-			  vcffilter.cpp
+			  vcffilter.cpp \
+			  vcfgenotypes.cpp
 BINS = $(BIN_SOURCES:.cpp=)
 
 all: $(OBJECTS) $(BINS)
