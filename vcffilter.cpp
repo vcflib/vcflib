@@ -18,13 +18,17 @@ void printSummary(char** argv) {
          << "Filter the specified vcf file using the set of filters." << endl
          << "Filters are specified in the form \"<ID> <operator> <value>:" << endl
          << " -f \"DP > 10\"  # for info fields" << endl
-         << " -g \"GT == 1|1\" # for genotype fields" << endl
-         << " -f \"pSnp\"  # for 'flag' fields" << endl
+         << " -g \"GT = 1|1\" # for genotype fields" << endl
+         << " -f \"CpG\"  # for 'flag' fields" << endl
          << endl
-         << "Operators can be any of: ==, !=, >=, <=, <, >" << endl
+         << "Operators can be any of: =, !, >=, <=, <, >" << endl
          << endl
          << "Any number of filters may be specified.  They are combined via logical AND" << endl
-         << "unless --or is specified on the command line." << endl
+         << "unless --or is specified on the command line.  Obtain logical negation through" << endl
+         << "the use of parentheses, e.g. !( DP = 10)" << endl
+         << endl
+         << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
+         << "though it does not appear in the INFO fields." << endl
          << endl;
     exit(0);
 }

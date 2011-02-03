@@ -101,8 +101,10 @@ public:
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     string filter;
     int quality;
+    string infoType(string& key);
     map<string, string> info;
     map<string, bool> infoFlags;
+    string formatType(string& key);
     vector<string> format;
     map<string, map<string, string> > samples;
     vector<string> sampleNames;

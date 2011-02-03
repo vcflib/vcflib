@@ -74,6 +74,29 @@ void Variant::parse(string& line) {
     //return true; // we should be catching exceptions...
 }
 
+string Variant::infoType(string& key) {
+    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    if (s == vcf.infoTypes.end()) {
+        if (key == "QUAL") { // hack to use QUAL as an "info" field
+            return "Integer";
+        }
+        cerr << "no info field " << key << endl;
+        exit(1);
+    } else {
+        return s->second;
+    }
+}
+
+string Variant::formatType(string& key) {
+    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    if (s == vcf.formatTypes.end()) {
+        cerr << "no format field " << key << endl;
+        exit(1);
+    } else {
+        return s->second;
+    }
+}
+
 bool Variant::getInfoValueBool(string& key) {
     map<string, string>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
@@ -115,6 +138,9 @@ string Variant::getInfoValueString(string& key) {
 float Variant::getInfoValueFloat(string& key) {
     map<string, string>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
+        if (key == "QUAL") {
+            return quality;
+        }
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
@@ -458,9 +484,9 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                 // look up the variable using the Variant, depending on our filter type
                 string type;
                 if (sample.empty()) { // means we are record-specific
-                    type = var.vcf.infoTypes[token.value];
+                    type = var.infoType(token.value);
                 } else {
-                    type = var.vcf.formatTypes[token.value];
+                    type = var.formatType(token.value);
                 }
                 //cerr << "token.value " << token.value << endl;
                 //cerr << "type: " << type << endl;
