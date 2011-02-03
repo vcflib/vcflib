@@ -129,15 +129,14 @@ int main(int argc, char** argv) {
           }
       }
 
-    string inputFilename;
+    VariantCallFile variantFile;
     if (optind == argc - 1) {
-        inputFilename = argv[optind];
+        string inputFilename = argv[optind];
+        variantFile.open(inputFilename);
     } else {
-        cerr << "No input file provided." << endl;
-        exit(1);
+        variantFile.open(std::cin);
     }
 
-    VariantCallFile variantFile(inputFilename);
     if (!variantFile.is_open()) {
         return 1;
     }

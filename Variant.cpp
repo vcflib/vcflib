@@ -36,37 +36,40 @@ void Variant::parse(string& line) {
             infoFlags[kv.at(0)] = true;
         }
     }
-    format = split(fields.at(8), ':');
-    // if the format changed, we have to rebuild the samples
-    if (fields.at(8) != lastFormat) {
-        samples.clear();
-        lastFormat = fields.at(8);
-    }
-    vector<string>::iterator sampleName = sampleNames.begin();
-    vector<string>::iterator sample = fields.begin() + 9;
-    for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
-        string& name = *sampleName;
-        if (*sample == ".") {
-            samples.erase(name);
-            continue;
+    // check if we have samples specified
+    if (fields.size() > 8) {
+        format = split(fields.at(8), ':');
+        // if the format changed, we have to rebuild the samples
+        if (fields.at(8) != lastFormat) {
+            samples.clear();
+            lastFormat = fields.at(8);
         }
-        vector<string> samplefields = split(*sample, ':');
-        vector<string>::iterator i = samplefields.begin();
-        for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-            samples[name][*f] = *i; ++i;
+        vector<string>::iterator sampleName = sampleNames.begin();
+        vector<string>::iterator sample = fields.begin() + 9;
+        for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
+            string& name = *sampleName;
+            if (*sample == ".") {
+                samples.erase(name);
+                continue;
+            }
+            vector<string> samplefields = split(*sample, ':');
+            vector<string>::iterator i = samplefields.begin();
+            for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
+                samples[name][*f] = *i; ++i;
+            }
         }
-    }
-    if (sampleName != sampleNames.end()) {
-        cerr << "error: more sample names in header than sample fields" << endl;
-        cerr << "samples: " << join(sampleNames, " ") << endl;
-        cerr << "line: " << line << endl;
-        exit(1);
-    }
-    if (sample != fields.end()) {
-        cerr << "error: more sample fields than samples listed in header" << endl;
-        cerr << "samples: " << join(sampleNames, " ") << endl;
-        cerr << "line: " << line << endl;
-        exit(1);
+        if (sampleName != sampleNames.end()) {
+            cerr << "error: more sample names in header than sample fields" << endl;
+            cerr << "samples: " << join(sampleNames, " ") << endl;
+            cerr << "line: " << line << endl;
+            exit(1);
+        }
+        if (sample != fields.end()) {
+            cerr << "error: more sample fields than samples listed in header" << endl;
+            cerr << "samples: " << join(sampleNames, " ") << endl;
+            cerr << "line: " << line << endl;
+            exit(1);
+        }
     }
     //return true; // we should be catching exceptions...
 }
@@ -447,11 +450,11 @@ bool VariantFilter::passes(Variant& var, string& sample) {
         rulesCopy.pop();
         // pop operands from the front of the queue and push them onto the stack
         if (isOperand(token)) {
-            cerr << "is operand: " << token.value << endl;
+            //cerr << "is operand: " << token.value << endl;
             // if the token is variable, i.e. not evaluated in this context, we
             // must evaluate it before pushing it onto the stack
             if (token.isVariable) {
-                cerr << "is variable" << endl;
+                //cerr << "is variable" << endl;
                 // look up the variable using the Variant, depending on our filter type
                 string type;
                 if (sample.empty()) { // means we are record-specific
@@ -459,25 +462,44 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                 } else {
                     type = var.vcf.formatTypes[token.value];
                 }
-                cerr << "token.value " << token.value << endl;
-                cerr << "type: " << type << endl;
+                //cerr << "token.value " << token.value << endl;
+                //cerr << "type: " << type << endl;
 
                 if (type == "Integer" || type == "Float") {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = var.getValueFloat(token.value, sample);
+                    //cerr << "number: " << token.number << endl;
                 } else if (isString(token)) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = var.getValueString(token.value, sample);
+                    //cerr << "string: " << token.str << endl;
                 } else if (type == "Flag") {
                     token.type = RuleToken::BOOLEAN_VARIABLE;
                     token.state = var.getValueBool(token.value, sample);
+                    //cerr << "state: " << token.state << endl;
+                }
+            } else {
+                float f;
+                string s;
+                //cerr << "parsing operand" << endl;
+                if (convert(token.value, f)) {
+                    token.type = RuleToken::NUMERIC_VARIABLE;
+                    token.number = f;
+                    //cerr << "number: " << token.number << endl;
+                } else if (convert(token.value, s)) {
+                    token.type = RuleToken::STRING_VARIABLE;
+                    token.str = s;
+                    //cerr << "string: " << token.str << endl;
+                } else {
+                    cerr << "could not parse non-variable operand " << token.value << endl;
+                    exit(1);
                 }
             }
             results.push(token);
         } 
         // apply operators to the first n elements on the stack and push the result back onto the stack
         else if (isOperator(token)) {
-            cerr << "is operator: " << token.value << endl;
+            //cerr << "is operator: " << token.value << endl;
             RuleToken a, b, r;
             // is it a not-operator?
             switch (token.type) {
@@ -518,9 +540,9 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                     b = results.top(); results.pop();
                     if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
                         if (token.type == RuleToken::GREATER_THAN_OPERATOR) {
-                            r.state = (a.number > b.number);
+                            r.state = (b.number > a.number);
                         } else {
-                            r.state = (a.number < b.number);
+                            r.state = (b.number < a.number);
                         }
                     } else {
                         cerr << "cannot compare (> or <) objects of dissimilar types" << endl;
@@ -553,7 +575,7 @@ bool VariantFilter::passes(Variant& var, string& sample) {
     // at the end you should have only one value on the stack, return it as a boolean
     if (results.size() == 1) {
         if (isBoolean(results.top())) {
-           return results.top().state;
+            return results.top().state;
         } else {
             cerr << "error, non-boolean value left on stack" << endl;
             //cerr << results.top().value << endl;
@@ -634,10 +656,16 @@ bool VariantCallFile::parseHeader(void) {
         } else if (line.substr(0,1) == "#") {
             // field name line
             vector<string> fields = split(line, '\t');
-            sampleNames.resize(fields.size() - 9);
-            copy(fields.begin() + 9, fields.end(), sampleNames.begin());
+            if (fields.size() > 8) {
+                sampleNames.resize(fields.size() - 9);
+                copy(fields.begin() + 9, fields.end(), sampleNames.begin());
+            }
         } else {
             // done with header
+            if (header.empty()) {
+                cerr << "error: no VCF header" << endl;
+                exit(1);
+            }
             firstRecord = true;
             header.resize(header.size() - 1);
             return true;
