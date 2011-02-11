@@ -100,7 +100,7 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     string filter;
-    int quality;
+    double quality;
     string infoType(string& key);
     map<string, string> info;
     map<string, bool> infoFlags;

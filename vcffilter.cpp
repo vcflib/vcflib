@@ -21,11 +21,11 @@ void printSummary(char** argv) {
          << " -g \"GT = 1|1\" # for genotype fields" << endl
          << " -f \"CpG\"  # for 'flag' fields" << endl
          << endl
-         << "Operators can be any of: =, !, >=, <=, <, >" << endl
+         << "Operators can be any of: =, !, <, >, |, &" << endl
          << endl
          << "Any number of filters may be specified.  They are combined via logical AND" << endl
          << "unless --or is specified on the command line.  Obtain logical negation through" << endl
-         << "the use of parentheses, e.g. !( DP = 10)" << endl
+         << "the use of parentheses, e.g. !( DP = 10)." << endl
          << endl
          << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
          << "though it does not appear in the INFO fields." << endl
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
             passes = !passes;
         }
         if (passes) {
-            var.addFilter(tag);
+            //var.addFilter(tag);
             cout << var << endl;
         }
     }

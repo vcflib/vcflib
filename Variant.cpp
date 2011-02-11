@@ -6,6 +6,7 @@ void Variant::parse(string& line) {
 
     // clean up potentially variable data structures
     info.clear();
+    infoFlags.clear();
     format.clear();
     alt.clear();
     alleles.clear();
@@ -25,7 +26,7 @@ void Variant::parse(string& line) {
     alleles.resize(alt.size()+1);
     std::copy(alt.begin(), alt.end(), alleles.begin()+1);
 
-    quality = atoi(fields.at(5).c_str());
+    quality = atof(fields.at(5).c_str());
     filter = fields.at(6);
     vector<string> infofields = split(fields.at(7), ';');
     for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
