@@ -11,6 +11,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfhetcount.cpp \
 			  vcfstats.cpp \
 			  vcffilter.cpp \
+			  vcf2tsv.cpp \
 			  vcfgenotypes.cpp
 BINS = $(BIN_SOURCES:.cpp=)
 
