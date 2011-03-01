@@ -415,7 +415,7 @@ void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
     bool inToken = false;
     for (int i = 0; i < filterspec.size(); ++i) {
         char c = filterspec.at(i);
-        if (c == ' ') {
+        if (c == ' ' || c == '\n') {
             inToken = false;
             if (!inToken && lastToken.size() > 0) {
                 tokens.push(RuleToken(lastToken));
