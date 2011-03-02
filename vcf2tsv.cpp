@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         var.printAlt(cout);
         cout << "\t"
              << var.quality << "\t"
-             << var.filter << "\t";
+             << var.filter;
 
         for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
             string value;
