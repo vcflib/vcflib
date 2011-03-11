@@ -73,6 +73,10 @@ while (<STDIN>) {
     } elsif ($diff eq 0 and length($ref) eq 1) {
         $snp += 1;
         $is_snp = 1;
+    } elsif ($diff eq 0 and length($ref) gt 1) {
+        $mnp += 1;
+        $mnplen += length($ref);
+        $mnp{length($ref)} += 1;
     }
     if ($is_snp) {
         if ((($ref eq "A" and $alt eq "G") or ($ref eq "G" and $alt eq "A"))
@@ -85,34 +89,18 @@ while (<STDIN>) {
         if ($_ =~ /CpG/) { $cpg += 1; }
     }
 
-    if ($_ =~ /INS=(\d+)\t/) {
-        $ins += 1;
-        $inslen += $1;
-        #print "found insertion of $1 bp\n";
-        $ins{$1} += 1;
-    } elsif ($diff lt 0) {
+    if ($diff lt 0) {
         $len = abs($diff);
         $ins += 1;
         $inslen += $len;
         $ins{$len} += 1;
     }
 
-    if ($_ =~ /DEL=(\d+)\t/) {
-        $del += 1;
-        $dellen += $1;
-        #print "found deletion of $1 bp\n";
-        $del{$1} += 1;
-    } elsif ($diff gt 0) {
+    if ($diff gt 0) {
         $len = abs($diff);
         $del += 1;
         $dellen += $len;
         $del{$len} += 1;
-    }
-
-    if ($_ =~ /MNP=(\d+)\t/) {
-        $mnp += 1;
-        $mnplen += $1;
-        $mnp{$1} += 1;
     }
     #elsif (length($ref) > 1 and $diff eq 0) {
     #    print $_ . "\n";
