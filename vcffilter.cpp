@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
     vector<VariantFilter> infofilters;
     vector<VariantFilter> genofilters;
     string tag = "";
+    string filterSpec;
 
     if (argc == 1)
         printSummary(argv);
@@ -98,10 +99,12 @@ int main(int argc, char** argv) {
             break;
 
           case 'f':
+            filterSpec += " " + string(optarg);
             infofilters.push_back(VariantFilter(string(optarg), VariantFilter::RECORD));
             break;
  
           case 'g':
+            filterSpec += " genotypes filtered with: " + string(optarg);
             genofilters.push_back(VariantFilter(string(optarg), VariantFilter::SAMPLE));
             break;
  
@@ -133,6 +136,8 @@ int main(int argc, char** argv) {
           }
       }
 
+    filterSpec = filterSpec.substr(1); // strip leading " "
+
     VariantCallFile variantFile;
     if (optind == argc - 1) {
         string inputFilename = argv[optind];
@@ -145,6 +150,15 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    vector<string> headerlines = split(variantFile.header, "\n");
+    variantFile.header.clear();
+    for (vector<string>::iterator l = headerlines.begin(); l != headerlines.end(); ++l) {
+        if (!filterSpec.empty() && (l->find("INFO") != string::npos || l + 1 == headerlines.end())) {
+            variantFile.header += "##filter=\"" + filterSpec + "\"\n";
+            filterSpec.clear();
+        }
+        variantFile.header += *l + ((l + 1 == headerlines.end()) ? "" : "\n");
+    }
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
@@ -156,8 +170,14 @@ int main(int argc, char** argv) {
             passes = !passes;
         }
         if (passes) {
-            //var.addFilter(tag);
-            cout << var << endl;
+            if (!tag.empty()) {
+                var.addFilter(tag);
+                cout << var << endl;
+            } else {
+                cout << variantFile.line << endl;
+            }
+        } else if (!tag.empty()) {
+            cout << variantFile.line << endl;
         }
     }
 

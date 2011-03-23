@@ -270,7 +270,7 @@ string Variant::getValueString(string& key, string& sample) {
 }
 
 void Variant::addFilter(string& tag) {
-    if (filter == "")
+    if (filter == "" || filter == ".")
         filter = tag;
     else
         filter += "," + tag;
