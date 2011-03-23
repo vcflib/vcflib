@@ -152,17 +152,47 @@ if (($ins + $del) > 0) {
         print "ins/del length ratio:\t$indel_length_ratio\n";
         print "\n";
         print "indel size frequency distribution\n";
-        print "size\tins\tdel\tins/del ratio\n";
+        print "size\tins\tdel\tins/del\tprev/curr\n";
+
+        $last_delcount = 0;
+        $last_inscount = 0;
+        $last_ratio_del = 0;
+        $last_ratio_ins = 0;
         for (1 .. $max) {
             $inscount = $ins{$_};
             $delcount = $del{$_};
+            if ($last_delcount != 0) {
+                $last_ratio_del = $delcount / $last_delcount;
+            }
+            if ($last_inscount != 0) {
+                $last_ratio_ins = $inscount / $last_inscount;
+            }
+            $last_delcount = $delcount;
+            $last_inscount = $inscount;
             if ($inscount > 0 and $delcount > 0) {
                 $ratio = $inscount / $delcount;
             } else {
                 $ratio = "";
             }
-            print "$_\t$inscount\t$delcount\t$ratio\n";
+            print "$_\t$inscount\t$delcount\t"
+            . sprintf("%.3f", $ratio);
+            if ($last_ratio_ins != 0 or $last_ratio_del != 0) {
+                print "\t";
+                if ($last_ratio_ins != 0) {
+                    print sprintf("%.3f", $last_ratio_ins);
+                }
+                print "\t";
+                if ($last_ratio_del != 0) {
+                    print sprintf("%.3f", $last_ratio_del);
+                }
+                print "\n";
+            } else {
+                print "\n";
+            }
         }
+        # FIXME
+        #print "\t\t\t\t" . sprintf("%.3f", $even_odd_ratio_sum_ins / $ins)
+        # . "\t" . sprintf("%.3f", $even_odd_ratio_sum_del / $del);
     }
 }
 
