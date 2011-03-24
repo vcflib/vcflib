@@ -152,7 +152,7 @@ if (($ins + $del) > 0) {
         print "ins/del length ratio:\t$indel_length_ratio\n";
         print "\n";
         print "indel size frequency distribution\n";
-        print "size\tins\tdel\tins/del\tprev/curr\n";
+        print "size\tins\tdel\tins/del\tcurr/prev\n";
 
         $last_delcount = 0;
         $last_inscount = 0;
