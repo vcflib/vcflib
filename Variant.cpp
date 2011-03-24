@@ -75,11 +75,46 @@ void Variant::parse(string& line) {
     //return true; // we should be catching exceptions...
 }
 
-string Variant::infoType(string& key) {
-    map<string, string>::iterator s = vcf.infoTypes.find(key);
+ostream& operator<<(ostream& out, VariantFieldType type) {
+    switch (type) {
+        case FIELD_INTEGER:
+            out << "integer";
+            break;
+        case FIELD_FLOAT:
+            out << "float";
+            break;
+        case FIELD_BOOL:
+            out << "bool";
+            break;
+        case FIELD_STRING:
+            out << "string";
+            break;
+        default:
+            out << "unknown";
+            break;
+    }
+    return out;
+}
+
+VariantFieldType typeStrToVariantFieldType(string& typeStr) {
+    if (typeStr == "Integer") {
+        return FIELD_INTEGER;
+    } else if (typeStr == "Float") {
+        return FIELD_FLOAT;
+    } else if (typeStr == "Flag") {
+        return FIELD_BOOL;
+    } else if (typeStr == "String") {
+        return FIELD_STRING;
+    } else {
+        return FIELD_UNKNOWN;
+    }
+}
+
+VariantFieldType Variant::infoType(string& key) {
+    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         if (key == "QUAL") { // hack to use QUAL as an "info" field
-            return "Integer";
+            return FIELD_INTEGER;
         }
         cerr << "no info field " << key << endl;
         exit(1);
@@ -88,8 +123,8 @@ string Variant::infoType(string& key) {
     }
 }
 
-string Variant::formatType(string& key) {
-    map<string, string>::iterator s = vcf.formatTypes.find(key);
+VariantFieldType Variant::formatType(string& key) {
+    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.formatTypes.end()) {
         cerr << "no format field " << key << endl;
         exit(1);
@@ -99,13 +134,13 @@ string Variant::formatType(string& key) {
 }
 
 bool Variant::getInfoValueBool(string& key) {
-    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        string& type = s->second;
-        if (type == "Flag") {
+        VariantFieldType type = s->second;
+        if (type == FIELD_BOOL) {
             map<string, bool>::iterator b = infoFlags.find(key);
             if (b == infoFlags.end())
                 return false;
@@ -118,13 +153,13 @@ bool Variant::getInfoValueBool(string& key) {
 }
 
 string Variant::getInfoValueString(string& key) {
-    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        string& type = s->second;
-        if (type == "String") {
+        VariantFieldType type = s->second;
+        if (type == FIELD_STRING) {
             map<string, string>::iterator b = info.find(key);
             if (b == info.end())
                 return "";
@@ -137,7 +172,7 @@ string Variant::getInfoValueString(string& key) {
 }
 
 float Variant::getInfoValueFloat(string& key) {
-    map<string, string>::iterator s = vcf.infoTypes.find(key);
+    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         if (key == "QUAL") {
             return quality;
@@ -145,18 +180,8 @@ float Variant::getInfoValueFloat(string& key) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        string& type = s->second;
-        if (type == "Integer") {
-            map<string, string>::iterator b = info.find(key);
-            if (b == info.end())
-                return false;
-            int r;
-            if (!convert(b->second, r)) {
-                cerr << "could not convert field " << b->second << " to " << type << endl;
-                exit(1);
-            }
-            return r;
-        } else if (type == "Float") {
+        VariantFieldType type = s->second;
+        if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
             map<string, string>::iterator b = info.find(key);
             if (b == info.end())
                 return false;
@@ -173,14 +198,14 @@ float Variant::getInfoValueFloat(string& key) {
 }
 
 bool Variant::getSampleValueBool(string& key, string& sample) {
-    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        string& type = s->second;
+        VariantFieldType type = s->second;
         map<string, string>& sampleData = samples[sample];
-        if (type == "Flag") {
+        if (type == FIELD_BOOL) {
             map<string, string>::iterator b = sampleData.find(key);
             if (b == sampleData.end())
                 return false;
@@ -193,14 +218,14 @@ bool Variant::getSampleValueBool(string& key, string& sample) {
 }
 
 string Variant::getSampleValueString(string& key, string& sample) {
-    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        string& type = s->second;
+        VariantFieldType type = s->second;
         map<string, string>& sampleData = samples[sample];
-        if (type == "String") {
+        if (type == FIELD_STRING) {
             map<string, string>::iterator b = sampleData.find(key);
             if (b == sampleData.end())
                 return false;
@@ -212,24 +237,14 @@ string Variant::getSampleValueString(string& key, string& sample) {
 }
 
 float Variant::getSampleValueFloat(string& key, string& sample) {
-    map<string, string>::iterator s = vcf.formatTypes.find(key);
+    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        string& type = s->second;
+        VariantFieldType type = s->second;
         map<string, string>& sampleData = samples[sample];
-        if (type == "Integer") {
-            map<string, string>::iterator b = sampleData.find(key);
-            if (b == sampleData.end())
-                return false;
-            int r;
-            if (!convert(b->second, r)) {
-                cerr << "could not convert field " << b->second << " to " << type << endl;
-                exit(1);
-            }
-            return r;
-        } else if (type == "Float") {
+        if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
             map<string, string>::iterator b = sampleData.find(key);
             if (b == sampleData.end())
                 return false;
@@ -483,7 +498,7 @@ bool VariantFilter::passes(Variant& var, string& sample) {
             if (token.isVariable) {
                 //cerr << "is variable" << endl;
                 // look up the variable using the Variant, depending on our filter type
-                string type;
+                VariantFieldType type;
                 if (sample.empty()) { // means we are record-specific
                     type = var.infoType(token.value);
                 } else {
@@ -492,18 +507,18 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                 //cerr << "token.value " << token.value << endl;
                 //cerr << "type: " << type << endl;
 
-                if (type == "Integer" || type == "Float") {
+                if (type == FIELD_INTEGER || type == FIELD_FLOAT) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = var.getValueFloat(token.value, sample);
                     //cerr << "number: " << token.number << endl;
+                } else if (type == FIELD_BOOL) {
+                    token.type = RuleToken::BOOLEAN_VARIABLE;
+                    token.state = var.getValueBool(token.value, sample);
+                    //cerr << "state: " << token.state << endl;
                 } else if (isString(token)) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = var.getValueString(token.value, sample);
                     //cerr << "string: " << token.str << endl;
-                } else if (type == "Flag") {
-                    token.type = RuleToken::BOOLEAN_VARIABLE;
-                    token.state = var.getValueBool(token.value, sample);
-                    //cerr << "state: " << token.state << endl;
                 }
             } else {
                 float f;
@@ -573,6 +588,7 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                         }
                     } else {
                         cerr << "cannot compare (> or <) objects of dissimilar types" << endl;
+                        cerr << a.type << " " << b.type << endl;
                         exit(1);
                     }
                     results.push(r);
@@ -669,7 +685,7 @@ bool VariantCallFile::parseHeader(void) {
                     assert(fields[2] == "Number");
                     int number = atoi(fields[3].c_str());
                     assert(fields[4] == "Type");
-                    string type = fields[5];
+                    VariantFieldType type = typeStrToVariantFieldType(fields[5]);
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
                         infoTypes[id] = type;

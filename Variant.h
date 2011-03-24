@@ -17,6 +17,17 @@ namespace vcf {
 
 class Variant;
 
+enum VariantFieldType { FIELD_FLOAT = 0
+                      , FIELD_INTEGER
+                      , FIELD_BOOL
+                      , FIELD_STRING
+                      , FIELD_UNKNOWN
+                      };
+
+VariantFieldType typeStrToFieldType(string& typeStr);
+ostream& operator<<(ostream& out, VariantFieldType type);
+
+
 class VariantCallFile {
 
 public:
@@ -30,9 +41,9 @@ public:
     string source;
     string reference;
     string phasing;
-    map<string, string> infoTypes;
+    map<string, VariantFieldType> infoTypes;
     map<string, int> infoCounts;
-    map<string, string> formatTypes;
+    map<string, VariantFieldType> formatTypes;
     map<string, int> formatCounts;
     vector<string> sampleNames;
 
@@ -101,13 +112,14 @@ public:
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     string filter;
     double quality;
-    string infoType(string& key);
+    VariantFieldType infoType(string& key);
     map<string, string> info;
     map<string, bool> infoFlags;
-    string formatType(string& key);
+    VariantFieldType formatType(string& key);
     vector<string> format;
     map<string, map<string, string> > samples;
     vector<string> sampleNames;
+
 
 public:
 

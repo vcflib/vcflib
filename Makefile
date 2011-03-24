@@ -20,6 +20,9 @@ all: $(OBJECTS) $(BINS)
 CXX = g++
 CXXFLAGS = -O3
 
+gprof:
+	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
+
 $(OBJECTS): $(SOURCES) $(HEADERS)
 	$(CXX) -c -o $@ $(*F).cpp $(LDFLAGS) $(CXXFLAGS) $(INCLUDES)
 

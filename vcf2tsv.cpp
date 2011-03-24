@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
     vector<string> infofields;
     vector<string> infoflags;
 
-    for (map<string, string>::iterator i = variantFile.infoTypes.begin(); i != variantFile.infoTypes.end(); ++i) {
-        if (i->second == "Flag") {
+    for (map<string, VariantFieldType>::iterator i = variantFile.infoTypes.begin(); i != variantFile.infoTypes.end(); ++i) {
+        if (i->second == FIELD_BOOL) {
             infoflags.push_back(i->first);
         } else {
             infofields.push_back(i->first);
