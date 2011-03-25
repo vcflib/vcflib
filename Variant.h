@@ -131,13 +131,13 @@ public:
     void parse(string& line);
     void addFilter(string& tag);
     bool getValueBool(string& key, string& sample);
-    float getValueFloat(string& key, string& sample);
+    double getValueFloat(string& key, string& sample);
     string getValueString(string& key, string& sample);
     bool getSampleValueBool(string& key, string& sample);
-    float getSampleValueFloat(string& key, string& sample);
+    double getSampleValueFloat(string& key, string& sample);
     string getSampleValueString(string& key, string& sample);
     bool getInfoValueBool(string& key);
-    float getInfoValueFloat(string& key);
+    double getInfoValueFloat(string& key);
     string getInfoValueString(string& key);
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
@@ -180,7 +180,7 @@ struct RuleToken {
     RuleTokenType type;
     string value;
 
-    float number;
+    double number;
     string str;
     bool state;
 

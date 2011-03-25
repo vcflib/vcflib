@@ -26,7 +26,7 @@ void Variant::parse(string& line) {
     alleles.resize(alt.size()+1);
     std::copy(alt.begin(), alt.end(), alleles.begin()+1);
 
-    quality = atof(fields.at(5).c_str());
+    convert(fields.at(5), quality);
     filter = fields.at(6);
     vector<string> infofields = split(fields.at(7), ';');
     for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
@@ -171,7 +171,7 @@ string Variant::getInfoValueString(string& key) {
     }
 }
 
-float Variant::getInfoValueFloat(string& key) {
+double Variant::getInfoValueFloat(string& key) {
     map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         if (key == "QUAL") {
@@ -185,7 +185,7 @@ float Variant::getInfoValueFloat(string& key) {
             map<string, string>::iterator b = info.find(key);
             if (b == info.end())
                 return false;
-            float r;
+            double r;
             if (!convert(b->second, r)) {
                 cerr << "could not convert field " << b->second << " to " << type << endl;
                 exit(1);
@@ -236,7 +236,7 @@ string Variant::getSampleValueString(string& key, string& sample) {
     }
 }
 
-float Variant::getSampleValueFloat(string& key, string& sample) {
+double Variant::getSampleValueFloat(string& key, string& sample) {
     map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
@@ -248,7 +248,7 @@ float Variant::getSampleValueFloat(string& key, string& sample) {
             map<string, string>::iterator b = sampleData.find(key);
             if (b == sampleData.end())
                 return false;
-            float r;
+            double r;
             if (!convert(b->second, r)) {
                 cerr << "could not convert field " << b->second << " to " << type << endl;
                 exit(1);
@@ -268,7 +268,7 @@ bool Variant::getValueBool(string& key, string& sample) {
     }
 }
 
-float Variant::getValueFloat(string& key, string& sample) {
+double Variant::getValueFloat(string& key, string& sample) {
     if (sample.length() == 0) { // an empty sample name means
         return getInfoValueFloat(key);
     } else {
@@ -521,7 +521,7 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                     //cerr << "string: " << token.str << endl;
                 }
             } else {
-                float f;
+                double f;
                 string s;
                 //cerr << "parsing operand" << endl;
                 if (convert(token.value, f)) {
@@ -683,7 +683,8 @@ bool VariantCallFile::parseHeader(void) {
                     assert(fields[0] == "ID");
                     string id = fields[1];
                     assert(fields[2] == "Number");
-                    int number = atoi(fields[3].c_str());
+                    int number;
+                    convert(fields[3].c_str(), number);
                     assert(fields[4] == "Type");
                     VariantFieldType type = typeStrToVariantFieldType(fields[5]);
                     if (entryType == "INFO") {
