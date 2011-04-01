@@ -295,6 +295,7 @@ public:
     VariantFilterType type;
     VariantFilter(string filterspec, VariantFilterType filtertype);
     bool passes(Variant& var, string& sample);
+    void removeFilteredGenotypes(Variant& var);
 
 };
 

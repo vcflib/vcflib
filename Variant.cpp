@@ -261,7 +261,7 @@ double Variant::getSampleValueFloat(string& key, string& sample) {
 }
 
 bool Variant::getValueBool(string& key, string& sample) {
-    if (sample.length() == 0) { // an empty sample name means
+    if (sample.empty()) { // an empty sample name means
         return getInfoValueBool(key);
     } else {
         return getSampleValueBool(key, sample);
@@ -269,7 +269,7 @@ bool Variant::getValueBool(string& key, string& sample) {
 }
 
 double Variant::getValueFloat(string& key, string& sample) {
-    if (sample.length() == 0) { // an empty sample name means
+    if (sample.empty()) { // an empty sample name means
         return getInfoValueFloat(key);
     } else {
         return getSampleValueFloat(key, sample);
@@ -277,7 +277,7 @@ double Variant::getValueFloat(string& key, string& sample) {
 }
 
 string Variant::getValueString(string& key, string& sample) {
-    if (sample.length() == 0) { // an empty sample name means
+    if (sample.empty()) { // an empty sample name means
         return getInfoValueString(key);
     } else {
         return getSampleValueString(key, sample);
@@ -634,6 +634,16 @@ bool VariantFilter::passes(Variant& var, string& sample) {
     } else {
         cerr << "results stack empty" << endl;
         exit(1);
+    }
+}
+
+void VariantFilter::removeFilteredGenotypes(Variant& var) {
+
+    for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
+        string& name = *s;
+        if (!passes(var, name)) {
+            var.samples.erase(name);
+        }
     }
 }
 

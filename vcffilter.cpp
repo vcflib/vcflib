@@ -163,21 +163,32 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-        bool passesInfo = passesFilters(var, infofilters, logicalOr);
-        bool passesGeno = passesFilters(var, genofilters, logicalOr);
-        bool passes = (logicalOr ? (passesInfo || passesGeno) : (passesInfo && passesGeno));
-        if (invert) {
-            passes = !passes;
+        if (!genofilters.empty()) {
+            for (vector<VariantFilter>::iterator f = genofilters.begin(); f != genofilters.end(); ++f) {
+                f->removeFilteredGenotypes(var);
+            }
         }
-        if (passes) {
-            if (!tag.empty()) {
-                var.addFilter(tag);
-                cout << var << endl;
-            } else {
+        if (!infofilters.empty()) {
+            bool passes = passesFilters(var, infofilters, logicalOr);
+            if (invert) {
+                passes = !passes;
+            }
+            if (passes) {
+                if (!tag.empty()) {
+                    var.addFilter(tag);
+                    cout << var << endl;
+                } else {
+                    cout << variantFile.line << endl;
+                }
+            } else if (!tag.empty()) {
                 cout << variantFile.line << endl;
             }
-        } else if (!tag.empty()) {
-            cout << variantFile.line << endl;
+        } else {
+            if (genofilters.empty()) {
+                cout << variantFile.line << endl;
+            } else {
+                cout << var << endl;
+            }
         }
     }
 
