@@ -54,7 +54,9 @@ int main(int argc, char** argv) {
     int c;
     bool invert = false;
     bool logicalOr = false;
+    vector<string> infofilterStrs;
     vector<VariantFilter> infofilters;
+    vector<string> genofilterStrs;
     vector<VariantFilter> genofilters;
     string tag = "";
     string filterSpec;
@@ -100,12 +102,12 @@ int main(int argc, char** argv) {
 
           case 'f':
             filterSpec += " " + string(optarg);
-            infofilters.push_back(VariantFilter(string(optarg), VariantFilter::RECORD));
+            infofilterStrs.push_back(string(optarg));
             break;
  
           case 'g':
             filterSpec += " genotypes filtered with: " + string(optarg);
-            genofilters.push_back(VariantFilter(string(optarg), VariantFilter::SAMPLE));
+            genofilterStrs.push_back(string(optarg));
             break;
  
           case 't':
@@ -148,6 +150,14 @@ int main(int argc, char** argv) {
 
     if (!variantFile.is_open()) {
         return 1;
+    }
+
+    for (vector<string>::iterator f = infofilterStrs.begin(); f != infofilterStrs.end(); ++f) {
+        infofilters.push_back(VariantFilter(*f, VariantFilter::RECORD, variantFile.infoTypes));
+    }
+
+    for (vector<string>::iterator f = genofilterStrs.begin(); f != genofilterStrs.end(); ++f) {
+        genofilters.push_back(VariantFilter(*f, VariantFilter::SAMPLE, variantFile.formatTypes));
     }
 
     vector<string> headerlines = split(variantFile.header, "\n");

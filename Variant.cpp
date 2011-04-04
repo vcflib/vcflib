@@ -228,7 +228,7 @@ string Variant::getSampleValueString(string& key, string& sample) {
         if (type == FIELD_STRING) {
             map<string, string>::iterator b = sampleData.find(key);
             if (b == sampleData.end())
-                return false;
+                return "";
             return b->second;
         } else {
             cerr << "not string type " << key << endl;
@@ -394,7 +394,7 @@ void infixToPrefix(queue<RuleToken> tokens, queue<RuleToken>& prefixtokens) {
     }
 }
 
-RuleToken::RuleToken(string tokenstr) {
+RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) {
     isVariable = false;
     if (tokenstr == "!") {
         type = RuleToken::NOT_OPERATOR;
@@ -414,10 +414,13 @@ RuleToken::RuleToken(string tokenstr) {
         type = RuleToken::RIGHT_PARENTHESIS;
     } else { // operand
         type = RuleToken::OPERAND;
-        if (convert(tokenstr, number)) {
-            type = RuleToken::NUMBER;
+        if (variables.find(tokenstr) == variables.end()) {
+            if (convert(tokenstr, number)) {
+                type = RuleToken::NUMBER;
+            } else {
+                type = RuleToken::STRING_VARIABLE;
+            }
         } else {
-            // TODO
             isVariable = true;
         }
     }
@@ -425,7 +428,7 @@ RuleToken::RuleToken(string tokenstr) {
 }
 
 
-void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
+void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens, map<string, VariantFieldType>& variables) {
     string lastToken = "";
     bool inToken = false;
     for (int i = 0; i < filterspec.size(); ++i) {
@@ -433,16 +436,16 @@ void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
         if (c == ' ' || c == '\n') {
             inToken = false;
             if (!inToken && lastToken.size() > 0) {
-                tokens.push(RuleToken(lastToken));
+                tokens.push(RuleToken(lastToken, variables));
                 lastToken = "";
             }
         } else if (isOperatorChar(c) || isParanChar(c)) {
             inToken = false;
             if (lastToken.size() > 0) {
-                tokens.push(RuleToken(lastToken));
+                tokens.push(RuleToken(lastToken, variables));
                 lastToken = "";
             }
-            tokens.push(RuleToken(filterspec.substr(i,1)));
+            tokens.push(RuleToken(filterspec.substr(i,1), variables));
         } else {
             inToken = true;
             lastToken += c;
@@ -450,7 +453,7 @@ void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
     }
     // get the last token
     if (inToken) {
-        tokens.push(RuleToken(lastToken));
+        tokens.push(RuleToken(lastToken, variables));
     }
 }
 
@@ -466,10 +469,10 @@ void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens) {
 //
 
 
-VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype) {
+VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables) {
     type = filtertype;
     spec = filterspec;
-    tokenizeFilterSpec(filterspec, tokens);
+    tokenizeFilterSpec(filterspec, tokens, variables);
     infixToPrefix(tokens, rules);
     /*while (!rules.empty()) {
         cerr << " " << rules.front().value << ((isNumeric(rules.front())) ? "f" : "");
@@ -492,20 +495,22 @@ bool VariantFilter::passes(Variant& var, string& sample) {
         rulesCopy.pop();
         // pop operands from the front of the queue and push them onto the stack
         if (isOperand(token)) {
-            //cerr << "is operand: " << token.value << endl;
+            //cout << "is operand: " << token.value << endl;
             // if the token is variable, i.e. not evaluated in this context, we
             // must evaluate it before pushing it onto the stack
             if (token.isVariable) {
-                //cerr << "is variable" << endl;
+                //cout << "is variable" << endl;
+                //cout << "is variable" << endl;
                 // look up the variable using the Variant, depending on our filter type
+                //cout << "token.value " << token.value << endl;
                 VariantFieldType type;
                 if (sample.empty()) { // means we are record-specific
                     type = var.infoType(token.value);
                 } else {
                     type = var.formatType(token.value);
+                    //cout << "type = " << type << endl;
                 }
-                //cerr << "token.value " << token.value << endl;
-                //cerr << "type: " << type << endl;
+                //cout << "type: " << type << endl;
 
                 if (type == FIELD_INTEGER || type == FIELD_FLOAT) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
@@ -515,6 +520,10 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                     token.type = RuleToken::BOOLEAN_VARIABLE;
                     token.state = var.getValueBool(token.value, sample);
                     //cerr << "state: " << token.state << endl;
+                } else if (type == FIELD_STRING) {
+                    //cout << "token.value = " << token.value << endl;
+                    token.type = RuleToken::STRING_VARIABLE;
+                    token.str = var.getValueString(token.value, sample);
                 } else if (isString(token)) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = var.getValueString(token.value, sample);
@@ -702,6 +711,7 @@ bool VariantCallFile::parseHeader(void) {
                         infoTypes[id] = type;
                         //cerr << id << " == " << type << endl;
                     } else if (entryType == "FORMAT") {
+                        //cout << "found format field " << id << " with type " << type << endl;
                         formatCounts[id] = number;
                         formatTypes[id] = type;
                     }

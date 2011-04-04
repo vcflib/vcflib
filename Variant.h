@@ -170,7 +170,7 @@ struct RuleToken {
                        };
 
     // constructor
-    RuleToken(string token);
+    RuleToken(string token, map<string, VariantFieldType>& variables);
     RuleToken(void) 
         : type(BOOLEAN_VARIABLE)
         , state(false)
@@ -279,7 +279,7 @@ bool convert(const string& s, T& r) {
     return (iss.fail() || iss.tellg() != s.size()) ? false : true;
 }
 
-void tokenizeFilterSpec(string& filterspec, stack<RuleToken>& tokens);
+void tokenizeFilterSpec(string& filterspec, stack<RuleToken>& tokens, map<string, VariantFieldType>& variables);
 
 
 class VariantFilter {
@@ -293,7 +293,7 @@ public:
     queue<RuleToken> tokens; // tokens, infix notation
     queue<RuleToken> rules;  // tokens, prefix notation
     VariantFilterType type;
-    VariantFilter(string filterspec, VariantFilterType filtertype);
+    VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables);
     bool passes(Variant& var, string& sample);
     void removeFilteredGenotypes(Variant& var);
 
