@@ -417,6 +417,8 @@ RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) 
         if (variables.find(tokenstr) == variables.end()) {
             if (convert(tokenstr, number)) {
                 type = RuleToken::NUMBER;
+            } else if (tokenstr == "QUAL") {
+                isVariable = true;
             } else {
                 type = RuleToken::STRING_VARIABLE;
             }
