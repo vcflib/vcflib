@@ -161,6 +161,10 @@ struct RuleToken {
                        , STRING_VARIABLE
                        , AND_OPERATOR
                        , OR_OPERATOR
+                       , ADD_OPERATOR
+                       , SUBTRACT_OPERATOR
+                       , MULTIPLY_OPERATOR
+                       , DIVIDE_OPERATOR
                        , NOT_OPERATOR
                        , EQUAL_OPERATOR
                        , GREATER_THAN_OPERATOR
@@ -193,12 +197,16 @@ struct RuleToken {
 
 inline int priority(const RuleToken& token) {
     switch ( token.type ) {
-        case ( RuleToken::NOT_OPERATOR )          : return 4;
-        case ( RuleToken::EQUAL_OPERATOR )        : return 3;
-        case ( RuleToken::GREATER_THAN_OPERATOR ) : return 3;
-        case ( RuleToken::LESS_THAN_OPERATOR )    : return 3;
-        case ( RuleToken::AND_OPERATOR )          : return 2;
-        case ( RuleToken::OR_OPERATOR )           : return 1;
+        case ( RuleToken::MULTIPLY_OPERATOR )     : return 8;
+        case ( RuleToken::DIVIDE_OPERATOR )       : return 8;
+        case ( RuleToken::ADD_OPERATOR )          : return 7;
+        case ( RuleToken::SUBTRACT_OPERATOR )     : return 7;
+        case ( RuleToken::NOT_OPERATOR )          : return 6;
+        case ( RuleToken::EQUAL_OPERATOR )        : return 5;
+        case ( RuleToken::GREATER_THAN_OPERATOR ) : return 5;
+        case ( RuleToken::LESS_THAN_OPERATOR )    : return 5;
+        case ( RuleToken::AND_OPERATOR )          : return 4;
+        case ( RuleToken::OR_OPERATOR )           : return 3;
         case ( RuleToken::LEFT_PARENTHESIS )      : return 0;
         case ( RuleToken::RIGHT_PARENTHESIS )     : return 0;
         default: cerr << "invalid token type" << endl; exit(1);
@@ -237,7 +245,11 @@ inline bool isOperator(const RuleToken& token) {
              token.type == RuleToken::NOT_OPERATOR ||
              token.type == RuleToken::EQUAL_OPERATOR ||
              token.type == RuleToken::GREATER_THAN_OPERATOR ||
-             token.type == RuleToken::LESS_THAN_OPERATOR
+             token.type == RuleToken::LESS_THAN_OPERATOR ||
+             token.type == RuleToken::MULTIPLY_OPERATOR ||
+             token.type == RuleToken::DIVIDE_OPERATOR ||
+             token.type == RuleToken::ADD_OPERATOR ||
+             token.type == RuleToken::SUBTRACT_OPERATOR
              );
 }
 
@@ -247,7 +259,11 @@ inline bool isOperatorChar(const char& c) {
             c == '|' ||
             c == '=' ||
             c == '>' ||
-            c == '<');
+            c == '<' ||
+            c == '*' ||
+            c == '/' ||
+            c == '+' ||
+            c == '-');
 }
 
 inline bool isParanChar(const char& c) {

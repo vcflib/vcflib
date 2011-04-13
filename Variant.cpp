@@ -402,6 +402,14 @@ RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) 
         type = RuleToken::AND_OPERATOR;
     } else if (tokenstr == "|") {
         type = RuleToken::OR_OPERATOR;
+    } else if (tokenstr == "+") {
+        type = RuleToken::ADD_OPERATOR;
+    } else if (tokenstr == "-") {
+        type = RuleToken::SUBTRACT_OPERATOR;
+    } else if (tokenstr == "*") {
+        type = RuleToken::MULTIPLY_OPERATOR;
+    } else if (tokenstr == "/") {
+        type = RuleToken::DIVIDE_OPERATOR;
     } else if (tokenstr == "=") {
         type = RuleToken::EQUAL_OPERATOR;
     } else if (tokenstr == ">") {
@@ -566,6 +574,7 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                         results.push(a);
                     }
                     break;
+
                 case ( RuleToken::EQUAL_OPERATOR ):
                     a = results.top(); results.pop();
                     b = results.top(); results.pop();
@@ -587,23 +596,89 @@ bool VariantFilter::passes(Variant& var, string& sample) {
                     }
                     results.push(r);
                     break;
+
                 case ( RuleToken::GREATER_THAN_OPERATOR ):
-                case ( RuleToken::LESS_THAN_OPERATOR ):
                     a = results.top(); results.pop();
                     b = results.top(); results.pop();
                     if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
-                        if (token.type == RuleToken::GREATER_THAN_OPERATOR) {
-                            r.state = (b.number > a.number);
-                        } else {
-                            r.state = (b.number < a.number);
-                        }
+                        r.state = (b.number > a.number);
                     } else {
-                        cerr << "cannot compare (> or <) objects of dissimilar types" << endl;
+                        cerr << "cannot compare (>) objects of dissimilar types" << endl;
                         cerr << a.type << " " << b.type << endl;
                         exit(1);
                     }
                     results.push(r);
                     break;
+
+                case ( RuleToken::LESS_THAN_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
+                        r.state = (b.number < a.number);
+                    } else {
+                        cerr << "cannot compare (<) objects of dissimilar types" << endl;
+                        cerr << a.type << " " << b.type << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+
+                case ( RuleToken::ADD_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
+                        r.number = (b.number + a.number);
+                        r.type = RuleToken::NUMERIC_VARIABLE;
+                    } else {
+                        cerr << "cannot add objects of dissimilar types" << endl;
+                        cerr << a.type << " " << b.type << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+
+                case ( RuleToken::SUBTRACT_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
+                        r.number = (b.number - a.number);
+                        r.type = RuleToken::NUMERIC_VARIABLE;
+                    } else {
+                        cerr << "cannot subtract objects of dissimilar types" << endl;
+                        cerr << a.type << " " << b.type << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+
+                case ( RuleToken::MULTIPLY_OPERATOR ):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
+                        r.number = (b.number * a.number);
+                        r.type = RuleToken::NUMERIC_VARIABLE;
+                    } else {
+                        cerr << "cannot multiply objects of dissimilar types" << endl;
+                        cerr << a.type << " " << b.type << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+
+                case ( RuleToken::DIVIDE_OPERATOR):
+                    a = results.top(); results.pop();
+                    b = results.top(); results.pop();
+                    if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
+                        r.number = (b.number / a.number);
+                        r.type = RuleToken::NUMERIC_VARIABLE;
+                    } else {
+                        cerr << "cannot divide objects of dissimilar types" << endl;
+                        cerr << a.type << " " << b.type << endl;
+                        exit(1);
+                    }
+                    results.push(r);
+                    break;
+
                 case ( RuleToken::AND_OPERATOR ):
                 case ( RuleToken::OR_OPERATOR ):
                     a = results.top(); results.pop();
