@@ -47,6 +47,8 @@ public:
     map<string, int> formatCounts;
     vector<string> sampleNames;
 
+    void updateSamples(vector<string>& newSampleNames);
+
     bool open(string& filename) {
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
@@ -81,6 +83,8 @@ public:
     }
 
     bool is_open(void) { return parsedHeader; }
+
+    bool eof(void) { return _file.eof(); }
 
     bool parseHeader(void);
 
@@ -119,12 +123,14 @@ public:
     vector<string> format;
     map<string, map<string, string> > samples;
     vector<string> sampleNames;
+    vector<string> outputSampleNames;
 
 
 public:
 
     Variant(VariantCallFile& v)
         : sampleNames(v.sampleNames)
+        , outputSampleNames(v.sampleNames)
         , vcf(v)
     { }
 
@@ -141,6 +147,8 @@ public:
     string getInfoValueString(string& key);
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
+    void addFormatField(string& key);
+    void setOutputSampleNames(vector<string>& outputSamples);
      
 
 private:

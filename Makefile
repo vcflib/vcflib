@@ -12,7 +12,10 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfstats.cpp \
 			  vcffilter.cpp \
 			  vcf2tsv.cpp \
-			  vcfgenotypes.cpp
+			  vcfgenotypes.cpp \
+			  vcfannotategenotypes.cpp \
+			  vcfcommonsamples.cpp
+
 BINS = $(BIN_SOURCES:.cpp=)
 
 all: $(OBJECTS) $(BINS)

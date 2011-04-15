@@ -291,6 +291,19 @@ void Variant::addFilter(string& tag) {
         filter += "," + tag;
 }
 
+void Variant::addFormatField(string& key) {
+    bool hasTag = false;
+    for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
+        if (*t == key) {
+            hasTag = true;
+            break;
+        }
+    }
+    if (!hasTag) {
+        format.push_back(key);
+    }
+}
+
 void Variant::printAlt(ostream& out) {
     for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
         out << *i;
@@ -327,7 +340,7 @@ ostream& operator<<(ostream& out, Variant& var) {
     for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
         out << ((f == var.format.begin()) ? "" : ":") << *f;
     }
-    for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
+    for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
         out << "\t";
         map<string, map<string, string> >::iterator sampleItr = var.samples.find(*s);
         if (sampleItr == var.samples.end()) {
@@ -346,6 +359,9 @@ ostream& operator<<(ostream& out, Variant& var) {
     return out;
 }
 
+void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
+    outputSampleNames = samplesToOutput;
+}
 
 
 // shunting yard algorithm
@@ -754,6 +770,19 @@ bool VariantCallFile::openVCF(ifstream& stream) {
     }
 }
 */
+
+void VariantCallFile::updateSamples(vector<string>& newSamples) {
+    sampleNames = newSamples;
+    // regenerate the last line of the header
+    vector<string> headerLines = split(header, '\n');
+    vector<string> colnames = split(headerLines.at(headerLines.size() - 1), '\t'); // get the last, update the samples
+    vector<string> newcolnames;
+    newcolnames.resize(9 + sampleNames.size());
+    copy(colnames.begin(), colnames.begin() + 9, newcolnames.begin());
+    copy(sampleNames.begin(), sampleNames.end(), newcolnames.begin() + 9);
+    headerLines.at(headerLines.size() - 1) = join(newcolnames, "\t");
+    header = join(headerLines, "\n");
+}
 
 bool VariantCallFile::parseHeader(void) {
     header = "";
