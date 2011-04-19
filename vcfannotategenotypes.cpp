@@ -96,7 +96,6 @@ int main(int argc, char** argv) {
         while (varA.sequenceName < varB.sequenceName
                 || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)
                 && !variantFileA.eof()) {
-            // XXX annotate with blanks, continue
             annotateWithBlankGenotypes(varA, annotag);
             cout << varA << endl;
             variantFileA.getNextVariant(varA);

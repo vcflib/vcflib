@@ -48,6 +48,7 @@ public:
     vector<string> sampleNames;
 
     void updateSamples(vector<string>& newSampleNames);
+    void addHeaderLine(string& line);
 
     bool open(string& filename) {
         file = &_file;

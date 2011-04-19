@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     
     // write the new header
     cout << variantFileA.header << endl;
-    
+ 
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFileA.getNextVariant(varA)) {
         cout << varA << endl;

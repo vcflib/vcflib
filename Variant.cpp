@@ -55,6 +55,15 @@ void Variant::parse(string& line) {
             }
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
+            if (samplefields.size() != format.size()) {
+                continue; // just ignore it... we can't parse malformed (or 'null') sample specs
+                /*
+                cerr << "inconsistent number of fields for sample " << name << endl
+                     << "format is " << join(format, ":") << endl
+                     << "sample is " << *sample << endl;
+                exit(1);
+                */
+            }
             for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
                 samples[name][*f] = *i; ++i;
             }
@@ -465,7 +474,7 @@ void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens, map<string
                 tokens.push(RuleToken(lastToken, variables));
                 lastToken = "";
             }
-        } else if (isOperatorChar(c) || isParanChar(c)) {
+        } else if (!inToken && (isOperatorChar(c) || isParanChar(c))) {
             inToken = false;
             if (lastToken.size() > 0) {
                 tokens.push(RuleToken(lastToken, variables));
@@ -781,6 +790,13 @@ void VariantCallFile::updateSamples(vector<string>& newSamples) {
     copy(colnames.begin(), colnames.begin() + 9, newcolnames.begin());
     copy(sampleNames.begin(), sampleNames.end(), newcolnames.begin() + 9);
     headerLines.at(headerLines.size() - 1) = join(newcolnames, "\t");
+    header = join(headerLines, "\n");
+}
+
+// TODO cleanup, store header lines instead of bulk header
+void VariantCallFile::addHeaderLine(string& line) {
+    vector<string> headerLines = split(header, '\n');
+    headerLines.insert(headerLines.end() - 1, line);
     header = join(headerLines, "\n");
 }
 
