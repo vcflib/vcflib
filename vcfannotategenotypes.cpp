@@ -91,29 +91,39 @@ int main(int argc, char** argv) {
 
     cout << variantFileA.header << endl;
 
+    if (variantFileA.done()) {
+        cout << "is done" << endl;
+    }
+
+    if (variantFileB.done()) {
+        cout << "is done" << endl;
+    }
+
+
     do {
 
-        while (varA.sequenceName < varB.sequenceName
+        while (!variantFileA.done()
+                && varA.sequenceName < varB.sequenceName
                 || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)
-                && !variantFileA.eof()) {
+                && !variantFileA.done()) {
             annotateWithBlankGenotypes(varA, annotag);
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
 
-        while (varB.sequenceName < varA.sequenceName
+        while (!variantFileB.done() && varB.sequenceName < varA.sequenceName
                 || (varB.sequenceName == varA.sequenceName && varB.position < varA.position)
-                && !variantFileB.eof()) {
+                && !variantFileB.done()) {
             variantFileB.getNextVariant(varB);
         }
 
-        while (varA.sequenceName == varB.sequenceName && varA.position == varB.position) {
+        while (!variantFileA.done() && varA.sequenceName == varB.sequenceName && varA.position == varB.position) {
             annotateWithGenotypes(varA, varB, annotag);
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
         
-    } while (!variantFileA.eof() && !variantFileB.eof());
+    } while (!variantFileA.done() && !variantFileB.done());
 
     return 0;
 

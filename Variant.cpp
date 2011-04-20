@@ -864,12 +864,15 @@ bool VariantCallFile::getNextVariant(Variant& var) {
     if (firstRecord) {
         var.parse(line);
         firstRecord = false;
+        _done = false;
         return true;
     }
     if (std::getline(*file, line)) {
         var.parse(line);
+        _done = false;
         return true;
     } else {
+        _done = true;
         return false;
     }
 }

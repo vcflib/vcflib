@@ -46,6 +46,7 @@ public:
     map<string, VariantFieldType> formatTypes;
     map<string, int> formatCounts;
     vector<string> sampleNames;
+    bool _done;
 
     void updateSamples(vector<string>& newSampleNames);
     void addHeaderLine(string& line);
@@ -69,23 +70,25 @@ public:
     VariantCallFile(void) { }
 
     // open a file
-    VariantCallFile(string& filename) : file(&_file) { 
+    VariantCallFile(string& filename) : file(&_file), _done(false) { 
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
     }
 
     // use an existing stream as our file
-    VariantCallFile(ifstream& stream) : file(&stream) { 
+    VariantCallFile(ifstream& stream) : file(&stream), _done(false) { 
         parsedHeader = parseHeader();
     }
 
-    VariantCallFile(istream& stream) : file(&stream) { 
+    VariantCallFile(istream& stream) : file(&stream), _done(false) { 
         parsedHeader = parseHeader();
     }
 
     bool is_open(void) { return parsedHeader; }
 
     bool eof(void) { return _file.eof(); }
+
+    bool done(void) { return _done; }
 
     bool parseHeader(void);
 
