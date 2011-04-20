@@ -32,6 +32,14 @@ bool hasNonRef(map<string, int>& genotype) {
     return genotype.find("1") != genotype.end();
 }
 
+bool isHomRef(map<string, int>& genotype) {
+    return isHom(genotype) && !hasNonRef(genotype);
+}
+
+bool isHomNonRef(map<string, int>& genotype) {
+    return isHom(genotype) && hasNonRef(genotype);
+}
+
 bool isNull(map<string, int>& genotype) {
     return genotype.find(".") != genotype.end();
 }
@@ -98,16 +106,28 @@ int main(int argc, char** argv) {
 
     string line;
 
-    line = "##INFO=<ID=" + otherGenoTag
-        + ".site.positive_discrepancy,Number=1,Type=Integer,Description=\"Estimated positive discrepancy rate of "
-        + otherGenoTag + " genotypes, where positive discrepancies are all cases where an alternate allele is called in "
-        + otherGenoTag + " but none is represented in GT\">";
+    line = "##INFO=<ID=" + otherGenoTag + ".genotypes.count,Number=1,Type=Integer,Description=\"Count of genotypes under comparison.\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag + ".genotypes.alternate_count,Number=1,Type=Integer,Description=\"Count of alternate genotypes in the first file.\">";
     variantFile.addHeaderLine(line);
 
     line = "##INFO=<ID=" + otherGenoTag
-        + ".site.negative_discrepancy,Number=1,Type=Integer,Description=\"Estimated negative discrepancy rate of "
-        + otherGenoTag + " genotypes, where negative discrepancies are all cases where an alternate allele is not called in "
-        + otherGenoTag + " but is represented in GT\">";
+        + ".site.alternate_positive_discrepancy,Number=1,Type=Integer,Description=\"Estimated positive discrepancy rate of "
+        + otherGenoTag + " genotypes, where positive discrepancies are all cases where an alternate allele is called GT "
+        + " but none is represented in " + otherGenoTag + " or " + otherGenoTag + " is null/no-call\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.alternate_negative_discrepancy,Number=1,Type=Integer,Description=\"Estimated negative discrepancy rate of "
+        + otherGenoTag + " genotypes, where negative discrepancies are all cases where no alternate allele is called in "
+        + " GT but an alternate is represented in " + otherGenoTag + ", including no-calls or partly null genotypes\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.alternate_null_discrepancy,Number=1,Type=Integer,Description=\"Estimated null discrepancy rate of "
+        + otherGenoTag + " genotypes, where null discrepancies are all cases where GT is specified and contains an alternate but "
+        + otherGenoTag + " is null.  Cases where GT is null or partly null are excluded.\">";
     variantFile.addHeaderLine(line);
 
     line = "##INFO=<ID=" + otherGenoTag
@@ -121,9 +141,33 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine(line);
 
     line = "##INFO=<ID=" + otherGenoTag
-        + ".site.null_discrepancy,Number=1,Type=Integer,Description=\"Estimated null discrepancy rate of "
-        + otherGenoTag + " genotypes, where null discrepancies are all cases where GT is specified but "
-        + otherGenoTag + " is null.  Cases where GT is null or partly null are excluded.\">";
+        + ".site.non_reference_discrepancy,Number=1,Type=Float,Description=\"Estimated non-reference discrepancy relative to "
+        + otherGenoTag + " genotypes,\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.non_reference_discrepancy.count,Number=1,Type=Int,Description=\"non-reference discrepancy normalizer relative to "
+        + otherGenoTag + " genotypes,\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.non_reference_discrepancy.normalizer,Number=1,Type=Int,Description=\"non-reference discrepancy count relative to "
+        + otherGenoTag + " genotypes,\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.non_reference_sensitivity,Number=1,Type=Float,Description=\"Estimated non-reference sensitivity relative to "
+        + otherGenoTag + " genotypes,\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.non_reference_sensitivity.count,Number=1,Type=Int,Description=\"non-reference sensitivity normalizer relative to "
+        + otherGenoTag + " genotypes,\">";
+    variantFile.addHeaderLine(line);
+
+    line = "##INFO=<ID=" + otherGenoTag
+        + ".site.non_reference_sensitivity.normalizer,Number=1,Type=Int,Description=\"non-reference sensitivity count relative to "
+        + otherGenoTag + " genotypes,\">";
     variantFile.addHeaderLine(line);
 
     cout << variantFile.header << endl;
@@ -138,11 +182,16 @@ int main(int argc, char** argv) {
 
         map<string, int> genotypeComparisonCounts;
         int gtCount = var.samples.size();
+        int gtAltCount = 0; // number of alternate-containing genotypes in the first file
         int pdCount = 0; // positive discrepancy count
         int ndCount = 0; // negative discrepancy count
         int nnCount = 0; // null discrepancy count
         int cdCount = 0; // call discrepancy count
         int ccCount = 0; // call concordance count
+        int nrdCount = 0; // non-reference discrepancy count
+        int nrdNormalizer = 0; // divisor for nrd rate
+        int nrsCount = 0; // non-reference sensitivity count
+        int nrsNormalizer = 0; // divisor for nrs rate
 
         for (; s != sEnd; ++s) {
             map<string, string>& sample = s->second;
@@ -160,6 +209,10 @@ int main(int argc, char** argv) {
             //cout << gtspecA << " " << gtspecB << endl;
             ++genotypeComparisonCounts[gtspecA + "_" + gtspecB];
 
+            if (hasNonRef(genotypeA)) {
+                ++gtAltCount;
+            }
+
             if (genotypeA != genotypeB) {
                 if (isNull(genotypeA)) {
                     // TODO handle this somehow, maybe via a different flag?
@@ -169,21 +222,43 @@ int main(int argc, char** argv) {
                 } else if (hasNonRef(genotypeA)) {
                     if (hasNonRef(genotypeB)) { // they cannot be the same, but they both represent an alternate
                         ++cdCount;  // the calls are discrepant
-                    } else if (isNull(genotypeB)) {
-                        ++nnCount;
                     } else { // the other call does not have an alternate
-                        ++ndCount;
+                        ++pdCount;
+                        // it is also null
+                        if (isNull(genotypeB)) {
+                            ++nnCount;
+                        }
                     }
                 } else { // the current genotype has no non-ref alternate
                     if (hasNonRef(genotypeB)) {
-                        ++pdCount;
-                    } else if (isNull(genotypeB)) {
-                        ++nnCount;
+                        ++ndCount;
+                        if (isNull(genotypeB)) {
+                            ++nnCount;
+                        }
                     }
                 }
             } else {
-                ++ccCount;
+                if (!isNull(genotypeA)) {
+                    ++ccCount;
+                }
             }
+
+
+            if (!(isNull(genotypeA) || isNull(genotypeB))
+                    && !(isHomRef(genotypeA) && isHomRef(genotypeB))) {
+                ++nrdNormalizer;
+                if (genotypeA != genotypeB) {
+                    ++nrdCount;
+                }
+            }
+
+            if (!(isNull(genotypeB) || isHomRef(genotypeB))) {
+                ++nrsNormalizer;
+                if (!(isNull(genotypeA) || isHomRef(genotypeA))) {
+                    ++nrsCount;
+                }
+            }
+
         }
 
         for (map<string, int>::iterator g = genotypeComparisonCounts.begin();
@@ -193,25 +268,61 @@ int main(int argc, char** argv) {
             var.info[otherGenoTag + ".genotypes." + g->first] = c.str();
         }
 
+        stringstream gtc;
+        gtc << gtCount;
+        var.info[otherGenoTag + ".genotypes.count"] = gtc.str();
+
+        stringstream gtac;
+        gtac << gtAltCount;
+        var.info[otherGenoTag + ".genotypes.alternate_count"] = gtac.str();
+
         stringstream pd;
-        pd << (double) pdCount;// / (double) gtCount;
-        var.info[otherGenoTag + ".site.positive_discrepancy"] = pd.str();
+        pd << pdCount;
+        var.info[otherGenoTag + ".site.alternate_positive_discrepancy"] = pd.str();
 
         stringstream nd;
-        nd << (double) ndCount;// / (double) gtCount;
-        var.info[otherGenoTag + ".site.negative_discrepancy"] = nd.str();
+        nd << ndCount;
+        var.info[otherGenoTag + ".site.alternate_negative_discrepancy"] = nd.str();
+
+        stringstream nn;
+        nn << nnCount;
+        var.info[otherGenoTag + ".site.alternate_null_discrepancy"] = nn.str();
 
         stringstream cd;
-        cd << (double) cdCount;// / (double) gtCount;
+        cd << cdCount;
         var.info[otherGenoTag + ".site.call_discrepancy"] = cd.str();
 
         stringstream cc;
-        cc << (double) ccCount;// / (double) gtCount;
+        cc << ccCount;
         var.info[otherGenoTag + ".site.call_concordance"] = cc.str();
 
-        stringstream nn;
-        nn << (double) nnCount;// / (double) gtCount;
-        var.info[otherGenoTag + ".site.null_discrepancy"] = nn.str();
+        stringstream nrdc;
+        nrdc << nrdCount;
+        var.info[otherGenoTag + ".site.non_reference_discrepancy.count"] = nrdc.str();
+
+        stringstream nrdn;
+        nrdn << nrdNormalizer;
+        var.info[otherGenoTag + ".site.non_reference_discrepancy.normalizer"] = nrdn.str();
+
+        if (nrdNormalizer > 0) {
+            stringstream nrd;
+            nrd << (double) nrdCount / (double) nrdNormalizer;
+            var.info[otherGenoTag + ".site.non_reference_discrepancy"] = nrd.str();
+        }
+
+        stringstream nrsc;
+        nrsc << nrsCount;
+        var.info[otherGenoTag + ".site.non_reference_sensitivity.count"] = nrsc.str();
+
+        stringstream nrsn;
+        nrsn << nrsNormalizer;
+        var.info[otherGenoTag + ".site.non_reference_sensitivity.normalizer"] = nrsn.str();
+
+        if (nrsNormalizer > 0) {
+            stringstream nrs;
+            nrs << (double) nrsCount / (double) nrsNormalizer;
+            var.info[otherGenoTag + ".site.non_reference_sensitivity"] = nrs.str();
+        }
 
         cout << var << endl;
 

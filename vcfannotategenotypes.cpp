@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
             variantFileA.getNextVariant(varA);
         }
         
-    } while (variantFileA.getNextVariant(varA) && variantFileB.getNextVariant(varB));
+    } while (!variantFileA.eof() && !variantFileB.eof());
 
     return 0;
 
