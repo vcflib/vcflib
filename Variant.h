@@ -327,4 +327,21 @@ public:
 
 };
 
+
+// genotype manipulation
+
+map<string, int> decomposeGenotype(string& genotype);
+
+bool isHet(map<string, int>& genotype);
+
+bool isHom(map<string, int>& genotype);
+
+bool hasNonRef(map<string, int>& genotype);
+
+bool isHomRef(map<string, int>& genotype);
+
+bool isHomNonRef(map<string, int>& genotype);
+
+bool isNull(map<string, int>& genotype);
+
 } // end namespace VCF

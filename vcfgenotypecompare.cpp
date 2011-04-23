@@ -7,43 +7,6 @@
 using namespace std;
 using namespace vcf;
 
-map<string, int> decomposeGenotype(string& genotype) {
-    string splitter = "/";
-    if (genotype.find("|") != string::npos) {
-        splitter = "|";
-    }
-    vector<string> haps = split(genotype, splitter);
-    map<string, int> decomposed;
-    for (vector<string>::iterator h = haps.begin(); h != haps.end(); ++h) {
-        ++decomposed[*h];
-    }
-    return decomposed;
-}
-
-bool isHet(map<string, int>& genotype) {
-    return genotype.size() > 1;
-}
-
-bool isHom(map<string, int>& genotype) {
-    return genotype.size() == 1;
-}
-
-bool hasNonRef(map<string, int>& genotype) {
-    return genotype.find("1") != genotype.end();
-}
-
-bool isHomRef(map<string, int>& genotype) {
-    return isHom(genotype) && !hasNonRef(genotype);
-}
-
-bool isHomNonRef(map<string, int>& genotype) {
-    return isHom(genotype) && hasNonRef(genotype);
-}
-
-bool isNull(map<string, int>& genotype) {
-    return genotype.find(".") != genotype.end();
-}
-
 string genotypeSpec(map<string, int>& genotype) {
     string gtspec;
     if (isNull(genotype)) {

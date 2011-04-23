@@ -89,6 +89,10 @@ int main(int argc, char** argv) {
     variantFileA.getNextVariant(varA);
     variantFileB.getNextVariant(varB);
 
+    string line = "##INFO=<ID=" + annotag + ".has_variant,Number=0,Type=Flag,Description=\"True if "
+        + annotag + " has a called alternate among samples under comparison.\">";
+    variantFileA.addHeaderLine(line);
+
     cout << variantFileA.header << endl;
 
     if (variantFileA.done()) {
@@ -119,6 +123,8 @@ int main(int argc, char** argv) {
 
         while (!variantFileA.done() && varA.sequenceName == varB.sequenceName && varA.position == varB.position) {
             annotateWithGenotypes(varA, varB, annotag);
+            // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
+            varA.infoFlags[annotag + ".has_variant"] = true;
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
