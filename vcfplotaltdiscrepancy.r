@@ -19,7 +19,7 @@ vcf.numberOfSites <- length(vcf[, tag.genotypes_alternate_count])
 vcf.totalAltAlleles <- sum(vcf[, tag.genotypes_alternate_count])
 vcf.positiveDiscrepancy <- sum(vcf[, tag.alternate_positive_discrepancy]) / sum(vcf[, tag.genotypes_alternate_count])
 vcf.negativeDiscrepancy <- sum(vcf[, tag.alternate_negative_discrepancy]) / sum(vcf[, tag.genotypes_alternate_count])
-vcf.sitesTruePositive <- sum(vcf[, tag.has_variant]) / nrow(vcf)
+vcf.sitesTruePositive <- mean(vcf[, tag.has_variant])
 
 #cat('number of sites', vcf.numberOfSites, '\n')
 #cat('total alternate alleles', vcf.totalAltAlleles, '\n')
@@ -69,6 +69,12 @@ byac$cfs <- as.vector(cbind(tapply(byac$ac, byac$ac, function(i) sum(subset(byac
 
 # inappropriate collapse via averaging of fdr
 #byac$alternate_pdlt <- as.vector(cbind(tapply(byac$ac, byac$ac, function(i) mean(subset(byac, ac <= i, select=fdr)))))
+
+byac$alternate_pdr <- as.vector(cbind(tapply(byac$ac, byac$ac, function(i) { 
+    s <- subset(byac, ac == i, select=c(fpc, alleles))
+    return(sum(s$fpc) / sum(s$alleles))
+})))
+
 # use this one
 byac$alternate_pdlt <- as.vector(cbind(tapply(byac$ac, byac$ac, function(i) { 
     s <- subset(byac, ac <= i, select=c(fpc, alleles))
@@ -104,21 +110,73 @@ byac$nrdlt <- as.vector(cbind(tapply(byac$ac, byac$ac, function(i) {
 })))
 
 
-pdf(paste(filename, '.', tag, '.FDR.vs.AC.pdf', sep=''))
+pdf(paste(filename, '.', tag, '.FDR.vs.AC.smooth.pdf', sep=''))
 par(cex=0.75)
 par(mar=c(5,4,4,5) + 0.1)
-plot(byac$alternate_pdgt, ylim=c(0,1.0),
-    xlab='alternate allele count', xaxt='n',
-    ylab='', yaxt='n', type='l', col='blue')
+plot(byac$cfa, ylim=c(0,1.0),
+    xlab='alternate allele count (AC)', xaxt='n',
+    ylab='', yaxt='n', type='l', col='red')
 axis(2, at=seq(0,1,0.1), labels=seq(0,1,0.1))
 axis(1, at=seq(0,max(byac$ac),10), labels=seq(0,max(byac$ac),10), cex=0.75)
 grid(lty=5)
 par(new=T)
-title(paste(filename, 'putative false discovery rate versus', tag))
+title(paste(filename, 'putative false discovery rate versus', tag, '(smoothed)'))
 par(new=T)
 countTicks <- seq(0,1,0.1) * vcf.numberOfSites
 axis(4, at=seq(0,1,0.1), labels=round(countTicks))
 mtext("number of sites", side=4, line=3, cex=0.75)
+par(new=T)
+#plot(byac$alternate_pdlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='green')
+plot(byac$site_fpr, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n')
+par(new=T)
+lines(byac$ac, predict(loess(byac$alternate_pdr ~ byac$ac, span=0.5)), col="green")
+par(new=T)
+plot(byac$cfa, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='red')
+par(new=T)
+plot(byac$cfs, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='purple')
+par(new=T)
+#plot(byac$site_fprgt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='magenta')
+#par(new=T)
+#plot(byac$site_fprlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='blue')
+lines(byac$ac, predict(loess(byac$site_fpr ~ byac$ac, span=0.5)), col="blue")
+par(new=T)
+#plot(byac$nrslt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='yellow')
+lines(byac$ac, predict(loess(byac$nrs ~ byac$ac, span=0.5)), col="magenta")
+par(new=T)
+#plot(byac$nrdlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='brown')
+lines(byac$ac, predict(loess(byac$nrd ~ byac$ac, span=0.5)), col="brown")
+#par(new=T)
+#plot(vcf$AC, vcf[, paste(tag, '.site.alternate_positive_discrepancy', sep='')] / vcf[, paste(tag, '.genotypes.alternate_count', sep='')],
+#    pch=16, cex=0.5, col='grey',
+#    ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n',)
+par(new=T, cex=0.65)
+mtext(paste("allele FDR: ", round(vcf.positiveDiscrepancy, digits=4), ", site FDR: ", round(1 - vcf.sitesTruePositive, digits=4), sep=''))
+par(new=T, cex=0.65)
+legend('topleft', c('cumulative alt alleles', 'cumulative sites', 'alt genotypes fdr', 'sites fdr', 'non-ref sensitivity', 'non-ref discrepancy', 'site FDR at AC'),
+    fill=c('red', 'purple', 'green', 'blue', 'magenta', 'brown', 'black'))
+#legend('topleft', c('cumulative alt alleles', 'cumulative sites', 'alt alleles fdr >= alt count', 'alt alleles fdr <= alt count', 'sites fdr >= alt count', 'sites fdr <= alt count', 'non-ref sensitivity <= alt count', 'non-ref discrepancy <= alt count'),
+#    fill=c('red', 'purple', 'blue', 'green', 'magenta', 'cyan', 'yellow', 'brown'))
+garbage <- dev.off()
+
+
+
+pdf(paste(filename, '.', tag, '.FDR.vs.AC.cumulative.pdf', sep=''))
+par(cex=0.75)
+par(mar=c(5,4,4,5) + 0.1)
+plot(byac$cfa, ylim=c(0,1.0),
+    xlab='alternate allele count (AC)', xaxt='n',
+    ylab='', yaxt='n', type='l', col='red')
+axis(2, at=seq(0,1,0.1), labels=seq(0,1,0.1))
+axis(1, at=seq(0,max(byac$ac),10), labels=seq(0,max(byac$ac),10), cex=0.75)
+grid(lty=5)
+par(new=T)
+title(paste(filename, 'putative false discovery rate versus', tag, '(cumulative)'))
+par(new=T)
+countTicks <- seq(0,1,0.1) * vcf.numberOfSites
+axis(4, at=seq(0,1,0.1), labels=round(countTicks))
+mtext("number of sites", side=4, line=3, cex=0.75)
+par(new=T)
+plot(byac$site_fpr, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n')
 par(new=T)
 plot(byac$alternate_pdlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='green')
 par(new=T)
@@ -126,18 +184,25 @@ plot(byac$cfa, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', co
 par(new=T)
 plot(byac$cfs, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='purple')
 par(new=T)
-plot(byac$site_fprgt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='magenta')
+#plot(byac$site_fprgt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='magenta')
+#par(new=T)
+plot(byac$site_fprlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='blue')
+#lines(byac$ac, predict(loess(byac$site_fpr ~ byac$ac, span=0.5)), col="blue")
 par(new=T)
-plot(byac$site_fprlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='cyan')
-par(new=T)
-plot(byac$nrslt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='yellow')
+plot(byac$nrslt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='magenta')
+#lines(byac$ac, predict(loess(byac$nrs ~ byac$ac, span=0.5)), col="magenta")
 par(new=T)
 plot(byac$nrdlt, ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='brown')
+#lines(byac$ac, predict(loess(byac$nrd ~ byac$ac, span=0.5)), col="brown")
 #par(new=T)
 #plot(vcf$AC, vcf[, paste(tag, '.site.alternate_positive_discrepancy', sep='')] / vcf[, paste(tag, '.genotypes.alternate_count', sep='')],
 #    pch=16, cex=0.5, col='grey',
 #    ylim=c(0,1.0), xlab='', xaxt='n', ylab='', yaxt='n',)
 par(new=T, cex=0.65)
-legend('topleft', c('cumulative alt alleles', 'cumulative sites', 'alt alleles fdr >= alt count', 'alt alleles fdr <= alt count', 'sites fdr >= alt count', 'sites fdr <= alt count', 'non-ref sensitivity <= alt count', 'non-ref discrepancy <= alt count'),
-    fill=c('red', 'purple', 'blue', 'green', 'magenta', 'cyan', 'yellow', 'brown'))
+mtext(paste("allele FDR: ", round(vcf.positiveDiscrepancy, digits=4), ", site FDR: ", round(1 - vcf.sitesTruePositive, digits=4), sep=''))
+par(new=T, cex=0.65)
+legend('topleft', c('cumulative alt alleles', 'cumulative sites', 'alt genotypes fdr', 'sites fdr', 'non-ref sensitivity', 'non-ref discrepancy', 'site FDR at AC'),
+    fill=c('red', 'purple', 'green', 'blue', 'magenta', 'brown', 'black'))
+#legend('topleft', c('cumulative alt alleles', 'cumulative sites', 'alt alleles fdr >= alt count', 'alt alleles fdr <= alt count', 'sites fdr >= alt count', 'sites fdr <= alt count', 'non-ref sensitivity <= alt count', 'non-ref discrepancy <= alt count'),
+#    fill=c('red', 'purple', 'blue', 'green', 'magenta', 'cyan', 'yellow', 'brown'))
 garbage <- dev.off()

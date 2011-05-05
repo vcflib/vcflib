@@ -821,12 +821,28 @@ bool VariantCallFile::parseHeader(void) {
                 // including either a = or , in the first or second field
                 if (entryType == "INFO" || entryType == "FORMAT") {
                     vector<string> fields = split(entryData, "=,");
-                    assert(fields[0] == "ID");
+                    if (fields[0] != "ID") {
+                        cerr << "header parse error at:" << endl
+                             << "fields[0] != \"ID\"" << endl
+                             << line << endl;
+                        exit(1);
+                    }
                     string id = fields[1];
-                    assert(fields[2] == "Number");
+                    if (fields[2] != "Number") {
+                        cerr << "header parse error at:" << endl
+                             << "fields[2] != \"Number\"" << endl
+                             << line << endl;
+                        exit(1);
+                    }
                     int number;
+                    // XXX TODO VCF has variable numbers of fields...
                     convert(fields[3].c_str(), number);
-                    assert(fields[4] == "Type");
+                    if (fields[4] != "Type") {
+                        cerr << "header parse error at:" << endl
+                             << "fields[4] != \"Type\"" << endl
+                             << line << endl;
+                        exit(1);
+                    }
                     VariantFieldType type = typeStrToVariantFieldType(fields[5]);
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
