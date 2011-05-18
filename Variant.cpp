@@ -909,12 +909,12 @@ bool VariantCallFile::parseHeader(void) {
     header = "";
 
     if (usingTabix) {
-        header = tabixFile.getHeader();
+        tabixFile->getHeader(header);
         if (header.empty()) {
             cerr << "error: no VCF header" << endl;
             exit(1);
         }
-        tabixFile.getNextLine(line);
+        tabixFile->getNextLine(line);
         firstRecord = true;
     } else {
         while (std::getline(*file, line)) {
@@ -927,6 +927,7 @@ bool VariantCallFile::parseHeader(void) {
                     exit(1);
                 }
                 firstRecord = true;
+                break;
             }
         }
     }
@@ -1002,6 +1003,7 @@ bool VariantCallFile::parseHeader(void) {
             }
         }
     }
+    return true;
 }
 
 bool VariantCallFile::getNextVariant(Variant& var) {
@@ -1012,7 +1014,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         return true;
     }
     if (usingTabix) {
-        if (tabixFile.getNextLine(line)) {
+        if (tabixFile->getNextLine(line)) {
             var.parse(line);
             _done = false;
             return true;
@@ -1042,8 +1044,8 @@ bool VariantCallFile::setRegion(string region) {
     if (dots != string::npos) {
         region.replace(dots, 2, "-");
     }
-    if (tabixFile.setRegion(region)) {
-        if (tabixFile.getNextLine(line)) {
+    if (tabixFile->setRegion(region)) {
+        if (tabixFile->getNextLine(line)) {
             return true;
         } else {
             return false;

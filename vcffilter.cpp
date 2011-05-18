@@ -14,6 +14,9 @@ void printSummary(char** argv) {
          << "    -t, --tag             tag vcf records as filtered with this tag instead of suppressing them" << endl
          << "    -v, --invert          inverts the filter, e.g. grep -v" << endl
          << "    -o, --or              use logical OR instead of AND to combine filters" << endl
+         << "    -r, --region          specify a region on which to target the filtering, requires a BGZF" << endl
+         << "                          compressed file which has been indexed with tabix.  any number of" << endl
+         << "                          regions may be specified." << endl
          << endl
          << "Filter the specified vcf file using the set of filters." << endl
          << "Filters are specified in the form \"<ID> <operator> <value>:" << endl
@@ -60,6 +63,7 @@ int main(int argc, char** argv) {
     vector<VariantFilter> genofilters;
     string tag = "";
     string filterSpec;
+    vector<string> regions;
 
     if (argc == 1)
         printSummary(argv);
@@ -75,13 +79,14 @@ int main(int argc, char** argv) {
             {"tag", required_argument, 0, 't'},
             {"invert", no_argument, 0, 'v'},
             {"or", no_argument, 0, 'o'},
+            {"region", required_argument, 0, 'r'},
             //{"length",  no_argument, &printLength, true},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvof:g:t:",
+        c = getopt_long (argc, argv, "hvof:g:t:r:",
                          long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -126,6 +131,10 @@ int main(int argc, char** argv) {
           case 'o':
             logicalOr = true;
             break;
+
+          case 'r':
+            regions.push_back(optarg);
+            break;
           
           case '?':
             /* getopt_long already printed an error message. */
@@ -141,8 +150,9 @@ int main(int argc, char** argv) {
     filterSpec = filterSpec.substr(1); // strip leading " "
 
     VariantCallFile variantFile;
+    string inputFilename;
     if (optind == argc - 1) {
-        string inputFilename = argv[optind];
+        inputFilename = argv[optind];
         variantFile.open(inputFilename);
     } else {
         variantFile.open(std::cin);
@@ -172,35 +182,47 @@ int main(int argc, char** argv) {
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
-    while (variantFile.getNextVariant(var)) {
-        if (!genofilters.empty()) {
-            for (vector<VariantFilter>::iterator f = genofilters.begin(); f != genofilters.end(); ++f) {
-                f->removeFilteredGenotypes(var);
-            }
+
+    vector<string>::iterator regionItr = regions.begin();
+
+    do {
+
+        if (!inputFilename.empty() && !regions.empty()) {
+            string regionStr = *regionItr++;
+            variantFile.setRegion(regionStr);
         }
-        if (!infofilters.empty()) {
-            bool passes = passesFilters(var, infofilters, logicalOr);
-            if (invert) {
-                passes = !passes;
+
+        while (variantFile.getNextVariant(var)) {
+            if (!genofilters.empty()) {
+                for (vector<VariantFilter>::iterator f = genofilters.begin(); f != genofilters.end(); ++f) {
+                    f->removeFilteredGenotypes(var);
+                }
             }
-            if (passes) {
-                if (!tag.empty()) {
-                    var.addFilter(tag);
-                    cout << var << endl;
-                } else {
+            if (!infofilters.empty()) {
+                bool passes = passesFilters(var, infofilters, logicalOr);
+                if (invert) {
+                    passes = !passes;
+                }
+                if (passes) {
+                    if (!tag.empty()) {
+                        var.addFilter(tag);
+                        cout << var << endl;
+                    } else {
+                        cout << variantFile.line << endl;
+                    }
+                } else if (!tag.empty()) {
                     cout << variantFile.line << endl;
                 }
-            } else if (!tag.empty()) {
-                cout << variantFile.line << endl;
-            }
-        } else {
-            if (genofilters.empty()) {
-                cout << variantFile.line << endl;
             } else {
-                cout << var << endl;
+                if (genofilters.empty()) {
+                    cout << variantFile.line << endl;
+                } else {
+                    cout << var << endl;
+                }
             }
         }
-    }
+
+    } while (regionItr != regions.end());
 
     return 0;
 

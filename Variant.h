@@ -41,7 +41,7 @@ class VariantCallFile {
 public:
 
     istream* file;
-    Tabix tabixFile;
+    Tabix* tabixFile;
 
     bool usingTabix;
 
@@ -63,31 +63,45 @@ public:
     void addHeaderLine(string& line);
 
     bool open(string& filename) {
+        vector<string> filenameParts = split(filename, ".");
+        if (filenameParts.back() == "vcf") {
+            return openFile(filename);
+        } else if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
+            return openTabix(filename);
+        }
+    }
+
+    bool openFile(string& filename) {
         usingTabix = false;
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
+        return parsedHeader;
     }
 
     bool openTabix(string& filename) {
         usingTabix = true;
-        tabixFile = Tabix(filename);
+        tabixFile = new Tabix(filename);
         parsedHeader = parseHeader();
+        return parsedHeader;
     }
 
     bool open(istream& stream) {
         usingTabix = false;
         file = &stream;
         parsedHeader = parseHeader();
+        return parsedHeader;
     }
 
     bool open(ifstream& stream) {
         usingTabix = false;
         file = &stream;
         parsedHeader = parseHeader();
+        return parsedHeader;
     }
 
     VariantCallFile(void) { }
+    ~VariantCallFile(void) { delete tabixFile; }
 
     bool is_open(void) { return parsedHeader; }
 
@@ -99,7 +113,7 @@ public:
 
     bool getNextVariant(Variant& var);
 
-    bool setRegion(string& region);
+    bool setRegion(string region);
 
 private:
     bool firstRecord;

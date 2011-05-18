@@ -18,7 +18,8 @@ int main(int argc, char** argv) {
 
     string filename = argv[1];
 
-    VariantCallFile variantFile(filename);
+    VariantCallFile variantFile;
+    variantFile.open(filename);
     if (!variantFile.is_open()) {
         cerr << "could not open " << filename << endl;
         return 1;

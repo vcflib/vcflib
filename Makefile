@@ -46,5 +46,6 @@ $(BINS): $(BIN_SOURCES) $(OBJECTS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
+	cd tabixpp && make clean
 
 .PHONY: clean all
