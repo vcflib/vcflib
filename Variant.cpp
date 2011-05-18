@@ -30,6 +30,9 @@ void Variant::parse(string& line) {
     filter = fields.at(6);
     vector<string> infofields = split(fields.at(7), ';');
     for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
+        if (*f == ".") {
+            continue;
+        }
         vector<string> kv = split(*f, '=');
         if (kv.size() == 2) {
             info[kv.at(0)] = kv.at(1);
@@ -343,7 +346,14 @@ ostream& operator<<(ostream& out, Variant& var) {
         out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << i->second;
     }
     for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
-        out << ((i == var.infoFlags.end()) ? "" : ";") << i->first;
+        if (i == var.infoFlags.end()) {
+            out << "";
+        } else if (i == var.infoFlags.begin() && var.info.empty()) {
+            out << "";
+        } else {
+            out << ";";
+        }
+        out << i->first;
     }
     out << "\t";
     for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
@@ -835,8 +845,15 @@ bool VariantCallFile::parseHeader(void) {
                         exit(1);
                     }
                     int number;
+                    string numberstr = fields[3].c_str();
                     // XXX TODO VCF has variable numbers of fields...
-                    convert(fields[3].c_str(), number);
+                    if (numberstr == "A") {
+                        number = ALLELE_NUMBER;
+                    } else if (numberstr == "G") {
+                        number = GENOTYPE_NUMBER;
+                    } else {
+                        convert(numberstr, number);
+                    }
                     if (fields[4] != "Type") {
                         cerr << "header parse error at:" << endl
                              << "fields[4] != \"Type\"" << endl

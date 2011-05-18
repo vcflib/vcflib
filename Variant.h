@@ -24,6 +24,10 @@ enum VariantFieldType { FIELD_FLOAT = 0
                       , FIELD_UNKNOWN
                       };
 
+enum VariantFieldNumber { ALLELE_NUMBER = -2
+                        , GENOTYPE_NUMBER = -1
+                        };
+
 VariantFieldType typeStrToFieldType(string& typeStr);
 ostream& operator<<(ostream& out, VariantFieldType type);
 

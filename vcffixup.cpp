@@ -52,6 +52,10 @@ int main(int argc, char** argv) {
     // ensure that AC is listed as an info field
     string line = "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">";
     variantFile.addHeaderLine(line);
+    line = "##INFO=<ID=AF,Number=1,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">";
+    variantFile.addHeaderLine(line);
+    line = "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">";
+    variantFile.addHeaderLine(line);
 
     // write the new header
     cout << variantFile.header << endl;
@@ -59,11 +63,15 @@ int main(int argc, char** argv) {
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         stringstream ac;
-        ac << countAlts(var);
+        int altcount = countAlts(var);
+        ac << altcount;
         var.info["AC"] = ac.str();
         stringstream ns;
         ns << var.samples.size();
         var.info["NS"] = ns.str();
+        stringstream af;
+        af << (double) altcount / (double) var.samples.size();
+        var.info["AF"] = af.str();
         cout << var << endl;
     }
 

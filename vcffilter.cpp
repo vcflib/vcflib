@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "split.h"
 #include <getopt.h>
+#include <deque>
 
 using namespace std;
 using namespace vcf;
@@ -171,8 +172,30 @@ int main(int argc, char** argv) {
     }
     cout << variantFile.header << endl;
 
+    // holds records from the same site--- output the records chunk-wise
+    deque<string> variantOutputDeque;
+
+    int lastPosition = 0;
+    string lastSequenceName;
+    bool lastPositionPassed = true;
+
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
+        //cout << var.position << " " << lastPosition << endl;
+        if (var.position > lastPosition || var.sequenceName != lastSequenceName) {
+            if (lastPositionPassed) {
+                while (!variantOutputDeque.empty()) {
+                    string& v = variantOutputDeque.back();
+                    cout << v << endl;
+                    variantOutputDeque.pop_back();
+                }
+            } else {
+                variantOutputDeque.clear();
+            }
+            lastPositionPassed = true;
+            lastPosition = var.position;
+            lastSequenceName = var.sequenceName;
+        }
         if (!genofilters.empty()) {
             for (vector<VariantFilter>::iterator f = genofilters.begin(); f != genofilters.end(); ++f) {
                 f->removeFilteredGenotypes(var);
@@ -186,19 +209,30 @@ int main(int argc, char** argv) {
             if (passes) {
                 if (!tag.empty()) {
                     var.addFilter(tag);
-                    cout << var << endl;
+                    stringstream s; s << var;
+                    variantOutputDeque.push_front(s.str());
                 } else {
-                    cout << variantFile.line << endl;
+                    variantOutputDeque.push_front(variantFile.line);
                 }
             } else if (!tag.empty()) {
-                cout << variantFile.line << endl;
+                variantOutputDeque.push_front(variantFile.line);
             }
+            lastPositionPassed &= passes;
         } else {
             if (genofilters.empty()) {
-                cout << variantFile.line << endl;
+                variantOutputDeque.push_front(variantFile.line);
             } else {
-                cout << var << endl;
+                stringstream s; s << var;
+                variantOutputDeque.push_front(s.str());
             }
+        }
+    }
+
+    if (lastPositionPassed) {
+        while (!variantOutputDeque.empty()) {
+            string& v = variantOutputDeque.back();
+            cout << v << endl;
+            variantOutputDeque.pop_back();
         }
     }
 
