@@ -10,6 +10,7 @@
 #include <queue>
 #include "split.h"
 #include "join.h"
+#include "tabixpp/tabix.hpp"
 
 using namespace std;
 
@@ -40,6 +41,9 @@ class VariantCallFile {
 public:
 
     istream* file;
+    Tabix tabixFile;
+
+    bool usingTabix;
 
     string header;
     string line; // the current line
@@ -59,37 +63,31 @@ public:
     void addHeaderLine(string& line);
 
     bool open(string& filename) {
+        usingTabix = false;
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
     }
 
+    bool openTabix(string& filename) {
+        usingTabix = true;
+        tabixFile = Tabix(filename);
+        parsedHeader = parseHeader();
+    }
+
     bool open(istream& stream) {
+        usingTabix = false;
         file = &stream;
         parsedHeader = parseHeader();
     }
 
     bool open(ifstream& stream) {
+        usingTabix = false;
         file = &stream;
         parsedHeader = parseHeader();
     }
 
     VariantCallFile(void) { }
-
-    // open a file
-    VariantCallFile(string& filename) : file(&_file), _done(false) { 
-        _file.open(filename.c_str(), ifstream::in);
-        parsedHeader = parseHeader();
-    }
-
-    // use an existing stream as our file
-    VariantCallFile(ifstream& stream) : file(&stream), _done(false) { 
-        parsedHeader = parseHeader();
-    }
-
-    VariantCallFile(istream& stream) : file(&stream), _done(false) { 
-        parsedHeader = parseHeader();
-    }
 
     bool is_open(void) { return parsedHeader; }
 
@@ -100,6 +98,8 @@ public:
     bool parseHeader(void);
 
     bool getNextVariant(Variant& var);
+
+    bool setRegion(string& region);
 
 private:
     bool firstRecord;

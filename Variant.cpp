@@ -905,21 +905,48 @@ void VariantCallFile::addHeaderLine(string& line) {
 }
 
 bool VariantCallFile::parseHeader(void) {
+
     header = "";
-    while (std::getline(*file, line)) {
-        if (line.substr(0,2) == "##") {
-            // meta-information lines
+
+    if (usingTabix) {
+        header = tabixFile.getHeader();
+        if (header.empty()) {
+            cerr << "error: no VCF header" << endl;
+            exit(1);
+        }
+        tabixFile.getNextLine(line);
+        firstRecord = true;
+    } else {
+        while (std::getline(*file, line)) {
+            if (line.substr(0,1) == "#") {
+                header += line + '\n';
+            } else {
+                // done with header
+                if (header.empty()) {
+                    cerr << "error: no VCF header" << endl;
+                    exit(1);
+                }
+                firstRecord = true;
+            }
+        }
+    }
+
+    vector<string> headerLines = split(header, "\n");
+    for (vector<string>::iterator h = headerLines.begin(); h != headerLines.end(); ++h) {
+        string headerLine = *h;
+        if (headerLine.substr(0,2) == "##") {
+            // meta-information headerLines
             // TODO parse into map from info/format key to type
             // ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
             // ##FORMAT=<ID=CB,Number=1,Type=String,Description="Called by S(Sanger), M(UMich), B(BI)">
-            size_t found = line.find_first_of("=");
-            string entryType = line.substr(2, found - 2);
+            size_t found = headerLine.find_first_of("=");
+            string entryType = headerLine.substr(2, found - 2);
             // handle reference here, no "<" and ">" given
                 //} else if (entryType == "reference") {
-            size_t dataStart = line.find_first_of("<");
-            size_t dataEnd = line.find_first_of(">");
+            size_t dataStart = headerLine.find_first_of("<");
+            size_t dataEnd = headerLine.find_first_of(">");
             if (dataStart != string::npos && dataEnd != string::npos) {
-                string entryData = line.substr(dataStart + 1, dataEnd - dataStart - 1);
+                string entryData = headerLine.substr(dataStart + 1, dataEnd - dataStart - 1);
                 // XXX bad; this will break if anyone ever moves the order
                 // of the fields around to include a "long form" string
                 // including either a = or , in the first or second field
@@ -928,14 +955,14 @@ bool VariantCallFile::parseHeader(void) {
                     if (fields[0] != "ID") {
                         cerr << "header parse error at:" << endl
                              << "fields[0] != \"ID\"" << endl
-                             << line << endl;
+                             << headerLine << endl;
                         exit(1);
                     }
                     string id = fields[1];
                     if (fields[2] != "Number") {
                         cerr << "header parse error at:" << endl
                              << "fields[2] != \"Number\"" << endl
-                             << line << endl;
+                             << headerLine << endl;
                         exit(1);
                     }
                     int number;
@@ -951,7 +978,7 @@ bool VariantCallFile::parseHeader(void) {
                     if (fields[4] != "Type") {
                         cerr << "header parse error at:" << endl
                              << "fields[4] != \"Type\"" << endl
-                             << line << endl;
+                             << headerLine << endl;
                         exit(1);
                     }
                     VariantFieldType type = typeStrToVariantFieldType(fields[5]);
@@ -966,24 +993,14 @@ bool VariantCallFile::parseHeader(void) {
                     }
                 }
             }
-        } else if (line.substr(0,1) == "#") {
-            // field name line
-            vector<string> fields = split(line, '\t');
+        } else if (headerLine.substr(0,1) == "#") {
+            // field name headerLine
+            vector<string> fields = split(headerLine, '\t');
             if (fields.size() > 8) {
                 sampleNames.resize(fields.size() - 9);
                 copy(fields.begin() + 9, fields.end(), sampleNames.begin());
             }
-        } else {
-            // done with header
-            if (header.empty()) {
-                cerr << "error: no VCF header" << endl;
-                exit(1);
-            }
-            firstRecord = true;
-            header.resize(header.size() - 1);
-            return true;
         }
-        header += line + '\n';
     }
 }
 
@@ -994,12 +1011,44 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         _done = false;
         return true;
     }
-    if (std::getline(*file, line)) {
-        var.parse(line);
-        _done = false;
-        return true;
+    if (usingTabix) {
+        if (tabixFile.getNextLine(line)) {
+            var.parse(line);
+            _done = false;
+            return true;
+        } else {
+            _done = true;
+            return false;
+        }
     } else {
-        _done = true;
+        if (std::getline(*file, line)) {
+            var.parse(line);
+            _done = false;
+            return true;
+        } else {
+            _done = true;
+            return false;
+        }
+    }
+}
+
+bool VariantCallFile::setRegion(string region) {
+    if (!usingTabix) {
+        cerr << "cannot setRegion on a non-tabix indexed file" << endl;
+        exit(1);
+    }
+    size_t dots = region.find("..");
+    // convert between bamtools/freebayes style region string and tabix/samtools style
+    if (dots != string::npos) {
+        region.replace(dots, 2, "-");
+    }
+    if (tabixFile.setRegion(region)) {
+        if (tabixFile.getNextLine(line)) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
         return false;
     }
 }

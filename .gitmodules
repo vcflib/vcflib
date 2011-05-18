@@ -1,0 +1,3 @@
+[submodule "tabixpp"]
+	path = tabixpp
+	url = git://github.com/ekg/tabixpp.git

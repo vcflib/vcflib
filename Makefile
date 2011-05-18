@@ -23,6 +23,10 @@ BIN_SOURCES = vcfecho.cpp \
 
 BINS = $(BIN_SOURCES:.cpp=)
 
+TABIX = tabixpp/tabix.o
+
+INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
+
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
@@ -31,11 +35,14 @@ CXXFLAGS = -O3
 gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
-$(OBJECTS): $(SOURCES) $(HEADERS)
-	$(CXX) -c -o $@ $(*F).cpp $(LDFLAGS) $(CXXFLAGS) $(INCLUDES)
+$(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX)
+	$(CXX) -c -o $@ $(*F).cpp  $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+
+$(TABIX):
+	cd tabixpp && make
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS)
-	$(CXX) $(OBJECTS) $@.cpp -o $@ $(LDFLAGS) $(CXXFLAGS) $(INCLUDES)
+	$(CXX) $(OBJECTS) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
