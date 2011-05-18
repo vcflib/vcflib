@@ -7,15 +7,15 @@
 using namespace std;
 using namespace vcf;
 
-int countAlts(Variant& var) {
+int countAlts(Variant& var, int alleleIndex) {
     int alts = 0;
-    for (map<string, map<string, string> >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-        map<string, string>& sample = s->second;
-        map<string, string>::iterator gt = sample.find("GT");
+    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
+        map<string, vector<string> >& sample = s->second;
+        map<string, vector<string> >::iterator gt = sample.find("GT");
         if (gt != sample.end()) {
-            map<string, int> genotype = decomposeGenotype(gt->second);
-            for (map<string, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-                if (g->first != "0" && g->first != ".") {
+            map<int, int> genotype = decomposeGenotype(gt->second.front());
+            for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+                if (g->first == alleleIndex) {
                     alts += g->second;
                 }
             }
@@ -50,9 +50,9 @@ int main(int argc, char** argv) {
 
     // TODO check if AC is present
     // ensure that AC is listed as an info field
-    string line = "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">";
+    string line = "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">";
     variantFile.addHeaderLine(line);
-    line = "##INFO=<ID=AF,Number=1,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">";
+    line = "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">";
     variantFile.addHeaderLine(line);
     line = "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">";
     variantFile.addHeaderLine(line);
@@ -63,15 +63,23 @@ int main(int argc, char** argv) {
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         stringstream ac;
-        int altcount = countAlts(var);
-        ac << altcount;
-        var.info["AC"] = ac.str();
         stringstream ns;
         ns << var.samples.size();
-        var.info["NS"] = ns.str();
-        stringstream af;
-        af << (double) altcount / (double) var.samples.size();
-        var.info["AF"] = af.str();
+        var.info["NS"].clear();
+        var.info["NS"].push_back(ns.str());
+
+        var.info["AC"].clear();
+        var.info["AF"].clear();
+
+        for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
+            string& allele = *a;
+            int altcount = countAlts(var, var.getAlleleIndex(allele));
+            ac << altcount;
+            var.info["AC"].push_back(ac.str());
+            stringstream af;
+            af << (double) altcount / (double) var.samples.size();
+            var.info["AF"].push_back(af.str());
+        }
         cout << var << endl;
     }
 

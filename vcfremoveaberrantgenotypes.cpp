@@ -8,17 +8,24 @@ using namespace std;
 using namespace vcf;
 
 void stripAberrant(Variant& var) {
-    map<string, map<string, string> >::iterator s = var.samples.begin();
+    map<string, map<string, vector<string> > >::iterator s = var.samples.begin();
     while (s != var.samples.end()) {
-        map<string, string>& sample = s->second;
-        map<string, int> genotype = decomposeGenotype(sample["GT"]);
-        int altobs = 0;
+        map<string, vector<string> >& sample = s->second;
+        map<int, int> genotype = decomposeGenotype(sample["GT"].front());
         int refobs = 0;
-        convert(sample["RA"], refobs);
-        convert(sample["AA"], altobs);
-        if (isHomRef(genotype) && altobs > 0
-            || isHomNonRef(genotype) && refobs > 0) {
+        convert(sample["RA"].front(), refobs);
+        if (isHomNonRef(genotype) && refobs > 0) {
             var.samples.erase(s++);
+        } else if (isHomRef(genotype)) {
+            for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
+                int alleleIndex = var.alleleIndecies[*a];
+                int altobs = 0;
+                convert(sample["AA"].at(alleleIndex), altobs);
+                if (altobs > 0) {
+                    var.samples.erase(s++);
+                    break;
+                }
+            }
         } else {
             ++s;
         }

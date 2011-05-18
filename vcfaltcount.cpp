@@ -27,10 +27,10 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         //cout << var << endl;
-        for (map<string, map<string, string> >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
+        for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
             //string& name = s->first;
-            map<string, string>& sample = s->second;
-            string& genotype = sample["GT"];
+            map<string, vector<string> >& sample = s->second;
+            string& genotype = sample["GT"].front();
             vector<string> gt = split(genotype, "|/");
             int alt = 0;
             for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {

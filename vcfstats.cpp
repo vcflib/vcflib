@@ -121,23 +121,23 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-        for (map<string, map<string, string> >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
+        for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
 
             string name = s->first;
-            map<string, string>& sample = s->second;
+            map<string, vector<string> >& sample = s->second;
 
             sitecount[name] += 1;
 
             int gq;
-            if (convert(sample["GQ"], gq)) {
+            if (convert(sample["GQ"].front(), gq)) {
                 gqsum[name] += gq;
             }
 
             int dp;
-            if (convert(sample["DP"], dp))
+            if (convert(sample["DP"].front(), dp))
                 dpsum[name] += dp;
 
-            string& genotype = sample["GT"];
+            string& genotype = sample["GT"].front();
             vector<string> gt = split(genotype, "|/");
 
             int alt = 0;

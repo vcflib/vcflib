@@ -13,12 +13,12 @@ bool samplesDiffer(vector<string>& samples, Variant& var) {
 
     for (vector<string>::iterator s = samples.begin(); s != samples.end(); ++s) {
         string& sampleName = *s;
-        map<string, map<string, string> >::iterator f = var.samples.find(sampleName);
+        map<string, map<string, vector<string> > >::iterator f = var.samples.find(sampleName);
         if (f != var.samples.end()) {
-            map<string, string>& sample = f->second;
-            map<string, string>::iterator gt = sample.find("GT");
+            map<string, vector<string> >& sample = f->second;
+            map<string, vector<string> >::iterator gt = sample.find("GT");
             if (gt != sample.end()) {
-                string& thisGenotype = gt->second;
+                string& thisGenotype = gt->second.front();
                 if (genotype.empty()) {
                     genotype = thisGenotype;
                 } else {

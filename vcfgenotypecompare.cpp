@@ -7,7 +7,8 @@
 using namespace std;
 using namespace vcf;
 
-string genotypeSpec(map<string, int>& genotype) {
+// TODO fix this for multi-allelic!!!!
+string genotypeSpec(map<int, int>& genotype) {
     string gtspec;
     if (isNull(genotype)) {
         gtspec = "NN";
@@ -140,8 +141,8 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         // for each sample, check GT against <other-genotype-tag>
         // tally stats, and append to info
-        map<string, map<string, string> >::iterator s     = var.samples.begin();
-        map<string, map<string, string> >::iterator sEnd  = var.samples.end();
+        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin();
+        map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
 
         map<string, int> genotypeComparisonCounts;
         int gtCount = var.samples.size();
@@ -157,14 +158,14 @@ int main(int argc, char** argv) {
         int nrsNormalizer = 0; // divisor for nrs rate
 
         for (; s != sEnd; ++s) {
-            map<string, string>& sample = s->second;
+            map<string, vector<string> >& sample = s->second;
             const string& name = s->first;
             // decompose genotypes into counts of strings
             // to facilitate comparison
-            string& gtA = sample["GT"];
-            string& gtB = sample[otherGenoTag];
-            map<string, int> genotypeA = decomposeGenotype(gtA);
-            map<string, int> genotypeB = decomposeGenotype(gtB);
+            string& gtA = sample["GT"].front();
+            string& gtB = sample[otherGenoTag].front();
+            map<int, int> genotypeA = decomposeGenotype(gtA);
+            map<int, int> genotypeB = decomposeGenotype(gtB);
 
             string gtspecA = genotypeSpec(genotypeA);
             string gtspecB = genotypeSpec(genotypeB);
@@ -228,63 +229,64 @@ int main(int argc, char** argv) {
                 g != genotypeComparisonCounts.end(); ++g) {
             stringstream c;
             c << g->second;
-            var.info[otherGenoTag + ".genotypes." + g->first] = c.str();
+            vector<string>& t = var.info[otherGenoTag + ".genotypes." + g->first];
+            t.clear(); t.push_back(c.str());
         }
 
         stringstream gtc;
         gtc << gtCount;
-        var.info[otherGenoTag + ".genotypes.count"] = gtc.str();
+        var.info[otherGenoTag + ".genotypes.count"].push_back(gtc.str());
 
         stringstream gtac;
         gtac << gtAltCount;
-        var.info[otherGenoTag + ".genotypes.alternate_count"] = gtac.str();
+        var.info[otherGenoTag + ".genotypes.alternate_count"].push_back(gtac.str());
 
         stringstream pd;
         pd << pdCount;
-        var.info[otherGenoTag + ".site.alternate_positive_discrepancy"] = pd.str();
+        var.info[otherGenoTag + ".site.alternate_positive_discrepancy"].push_back(pd.str());
 
         stringstream nd;
         nd << ndCount;
-        var.info[otherGenoTag + ".site.alternate_negative_discrepancy"] = nd.str();
+        var.info[otherGenoTag + ".site.alternate_negative_discrepancy"].push_back(nd.str());
 
         stringstream nn;
         nn << nnCount;
-        var.info[otherGenoTag + ".site.alternate_null_discrepancy"] = nn.str();
+        var.info[otherGenoTag + ".site.alternate_null_discrepancy"].push_back(nn.str());
 
         stringstream cd;
         cd << cdCount;
-        var.info[otherGenoTag + ".site.call_discrepancy"] = cd.str();
+        var.info[otherGenoTag + ".site.call_discrepancy"].push_back(cd.str());
 
         stringstream cc;
         cc << ccCount;
-        var.info[otherGenoTag + ".site.call_concordance"] = cc.str();
+        var.info[otherGenoTag + ".site.call_concordance"].push_back(cc.str());
 
         stringstream nrdc;
         nrdc << nrdCount;
-        var.info[otherGenoTag + ".site.non_reference_discrepancy.count"] = nrdc.str();
+        var.info[otherGenoTag + ".site.non_reference_discrepancy.count"].push_back(nrdc.str());
 
         stringstream nrdn;
         nrdn << nrdNormalizer;
-        var.info[otherGenoTag + ".site.non_reference_discrepancy.normalizer"] = nrdn.str();
+        var.info[otherGenoTag + ".site.non_reference_discrepancy.normalizer"].push_back(nrdn.str());
 
         if (nrdNormalizer > 0) {
             stringstream nrd;
             nrd << (double) nrdCount / (double) nrdNormalizer;
-            var.info[otherGenoTag + ".site.non_reference_discrepancy"] = nrd.str();
+            var.info[otherGenoTag + ".site.non_reference_discrepancy"].push_back(nrd.str());
         }
 
         stringstream nrsc;
         nrsc << nrsCount;
-        var.info[otherGenoTag + ".site.non_reference_sensitivity.count"] = nrsc.str();
+        var.info[otherGenoTag + ".site.non_reference_sensitivity.count"].push_back(nrsc.str());
 
         stringstream nrsn;
         nrsn << nrsNormalizer;
-        var.info[otherGenoTag + ".site.non_reference_sensitivity.normalizer"] = nrsn.str();
+        var.info[otherGenoTag + ".site.non_reference_sensitivity.normalizer"].push_back(nrsn.str());
 
         if (nrsNormalizer > 0) {
             stringstream nrs;
             nrs << (double) nrsCount / (double) nrsNormalizer;
-            var.info[otherGenoTag + ".site.non_reference_sensitivity"] = nrs.str();
+            var.info[otherGenoTag + ".site.non_reference_sensitivity"].push_back(nrs.str());
         }
 
         cout << var << endl;

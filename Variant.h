@@ -28,6 +28,9 @@ enum VariantFieldNumber { ALLELE_NUMBER = -2
                         , GENOTYPE_NUMBER = -1
                         };
 
+const int INDEX_NONE = -1;
+const int NULL_ALLELE = -1;
+
 VariantFieldType typeStrToFieldType(string& typeStr);
 ostream& operator<<(ostream& out, VariantFieldType type);
 
@@ -122,14 +125,18 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
+    map<string, int> alleleIndecies;  // reverse lookup for alleles
+    // TODO
+    // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
+    // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec
     string filter;
     double quality;
     VariantFieldType infoType(string& key);
-    map<string, string> info;
+    map<string, vector<string> > info;  // vector<string> allows for lists by Genotypes or Alternates
     map<string, bool> infoFlags;
     VariantFieldType formatType(string& key);
     vector<string> format;
-    map<string, map<string, string> > samples;
+    map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
     vector<string> sampleNames;
     vector<string> outputSampleNames;
 
@@ -144,19 +151,22 @@ public:
 
     void parse(string& line);
     void addFilter(string& tag);
-    bool getValueBool(string& key, string& sample);
-    double getValueFloat(string& key, string& sample);
-    string getValueString(string& key, string& sample);
-    bool getSampleValueBool(string& key, string& sample);
-    double getSampleValueFloat(string& key, string& sample);
-    string getSampleValueString(string& key, string& sample);
-    bool getInfoValueBool(string& key);
-    double getInfoValueFloat(string& key);
-    string getInfoValueString(string& key);
+    bool getValueBool(string& key, string& sample, int index = INDEX_NONE);
+    double getValueFloat(string& key, string& sample, int index = INDEX_NONE);
+    string getValueString(string& key, string& sample, int index = INDEX_NONE);
+    bool getSampleValueBool(string& key, string& sample, int index = INDEX_NONE);
+    double getSampleValueFloat(string& key, string& sample, int index = INDEX_NONE);
+    string getSampleValueString(string& key, string& sample, int index = INDEX_NONE);
+    bool getInfoValueBool(string& key, int index = INDEX_NONE);
+    double getInfoValueFloat(string& key, int index = INDEX_NONE);
+    string getInfoValueString(string& key, int index = INDEX_NONE);
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
+    int getAlleleIndex(string& allele);
     void addFormatField(string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
+    // TODO
+    //void setInfoField(string& key, string& val);
      
 
 private:
@@ -326,7 +336,8 @@ public:
     queue<RuleToken> rules;  // tokens, prefix notation
     VariantFilterType type;
     VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables);
-    bool passes(Variant& var, string& sample);
+    bool passes(Variant& var, string& sample); // all alts pass
+    bool passes(Variant& var, string& sample, string& allele);
     void removeFilteredGenotypes(Variant& var);
 
 };
@@ -334,18 +345,21 @@ public:
 
 // genotype manipulation
 
-map<string, int> decomposeGenotype(string& genotype);
+// TODO
+//map<string, int> decomposeGenotype(string& genotype);
 
-bool isHet(map<string, int>& genotype);
+map<int, int> decomposeGenotype(string& genotype);
 
-bool isHom(map<string, int>& genotype);
+bool isHet(map<int, int>& genotype);
 
-bool hasNonRef(map<string, int>& genotype);
+bool isHom(map<int, int>& genotype);
 
-bool isHomRef(map<string, int>& genotype);
+bool hasNonRef(map<int, int>& genotype);
 
-bool isHomNonRef(map<string, int>& genotype);
+bool isHomRef(map<int, int>& genotype);
 
-bool isNull(map<string, int>& genotype);
+bool isHomNonRef(map<int, int>& genotype);
+
+bool isNull(map<int, int>& genotype);
 
 } // end namespace VCF

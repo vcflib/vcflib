@@ -10,12 +10,12 @@ void annotateWithBlankGenotypes(Variant& var, string& annotationTag) {
 
     var.addFormatField(annotationTag);
 
-    map<string, map<string, string> >::iterator s     = var.samples.begin(); 
-    map<string, map<string, string> >::iterator sEnd  = var.samples.end();
+    map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
+    map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
 
     for (; s != sEnd; ++s) {
-        map<string, string>& sample = s->second;
-        sample[annotationTag] = "./."; // means "no genotype" genotype
+        map<string, vector<string> >& sample = s->second;
+        sample[annotationTag].push_back("./."); // means "no genotype" genotype
     }
 }
 
@@ -23,19 +23,19 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
 
     varA.addFormatField(annotationTag);
 
-    map<string, map<string, string> >::iterator s     = varA.samples.begin(); 
-    map<string, map<string, string> >::iterator sEnd  = varA.samples.end();
+    map<string, map<string, vector<string> > >::iterator s     = varA.samples.begin(); 
+    map<string, map<string, vector<string> > >::iterator sEnd  = varA.samples.end();
 
     for (; s != sEnd; ++s) {
-        map<string, string>& sample = s->second;
+        map<string, vector<string> >& sample = s->second;
         const string& name = s->first;
-        map<string, map<string, string> >::iterator o = varB.samples.find(name);
+        map<string, map<string, vector<string> > >::iterator o = varB.samples.find(name);
         if (o == varB.samples.end()) {
-            sample[annotationTag] = "./."; // means "no genotype"
+            sample[annotationTag].push_back("./."); // means "no genotype"
         } else {
-            map<string, string>& other = o->second;
-            string& otherGenotype = other["GT"];
-            sample[annotationTag] = otherGenotype;
+            map<string, vector<string> >& other = o->second;
+            string& otherGenotype = other["GT"].front();
+            sample[annotationTag].push_back(otherGenotype);
         }
     }
 

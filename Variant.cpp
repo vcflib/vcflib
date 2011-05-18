@@ -26,6 +26,14 @@ void Variant::parse(string& line) {
     alleles.resize(alt.size()+1);
     std::copy(alt.begin(), alt.end(), alleles.begin()+1);
 
+    // set up reverse lookup of allele index
+    alleleIndecies.clear();
+    int i = 0;
+    for (vector<string>::iterator a = alleles.begin();
+            a != alleles.end(); ++a, ++i) {
+        alleleIndecies[*a] = i;
+    }
+
     convert(fields.at(5), quality);
     filter = fields.at(6);
     vector<string> infofields = split(fields.at(7), ';');
@@ -35,7 +43,7 @@ void Variant::parse(string& line) {
         }
         vector<string> kv = split(*f, '=');
         if (kv.size() == 2) {
-            info[kv.at(0)] = kv.at(1);
+            info[kv.at(0)] = split(kv.at(1), ',');
         } else if (kv.size() == 1) {
             infoFlags[kv.at(0)] = true;
         }
@@ -68,7 +76,7 @@ void Variant::parse(string& line) {
                 */
             }
             for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-                samples[name][*f] = *i; ++i;
+                samples[name][*f] = split(*i, ','); ++i;
             }
         }
         if (sampleName != sampleNames.end()) {
@@ -145,12 +153,21 @@ VariantFieldType Variant::formatType(string& key) {
     }
 }
 
-bool Variant::getInfoValueBool(string& key) {
+bool Variant::getInfoValueBool(string& key, int index) {
     map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
+        int count = vcf.infoCounts[key];
+        if (index == INDEX_NONE) {
+            if (count != 1) {
+                cerr << "no field index supplied and field count != 1" << endl;
+                exit(1);
+            } else {
+                index = 0;
+            }
+        }
         VariantFieldType type = s->second;
         if (type == FIELD_BOOL) {
             map<string, bool>::iterator b = infoFlags.find(key);
@@ -164,18 +181,27 @@ bool Variant::getInfoValueBool(string& key) {
     }
 }
 
-string Variant::getInfoValueString(string& key) {
+string Variant::getInfoValueString(string& key, int index) {
     map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
+        int count = vcf.infoCounts[key];
+        if (index == INDEX_NONE) {
+            if (count != 1) {
+                cerr << "no field index supplied and field count != 1" << endl;
+                exit(1);
+            } else {
+                index = 0;
+            }
+        }
         VariantFieldType type = s->second;
         if (type == FIELD_STRING) {
-            map<string, string>::iterator b = info.find(key);
+            map<string, vector<string> >::iterator b = info.find(key);
             if (b == info.end())
                 return "";
-            return b->second;
+            return b->second.at(index);
         } else {
             cerr << "not string type " << key << endl;
             return "";
@@ -183,7 +209,7 @@ string Variant::getInfoValueString(string& key) {
     }
 }
 
-double Variant::getInfoValueFloat(string& key) {
+double Variant::getInfoValueFloat(string& key, int index) {
     map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         if (key == "QUAL") {
@@ -192,14 +218,23 @@ double Variant::getInfoValueFloat(string& key) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
+        int count = vcf.infoCounts[key];
+        if (index == INDEX_NONE) {
+            if (count != 1) {
+                cerr << "no field index supplied and field count != 1" << endl;
+                exit(1);
+            } else {
+                index = 0;
+            }
+        }
         VariantFieldType type = s->second;
         if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
-            map<string, string>::iterator b = info.find(key);
+            map<string, vector<string> >::iterator b = info.find(key);
             if (b == info.end())
                 return false;
             double r;
-            if (!convert(b->second, r)) {
-                cerr << "could not convert field " << b->second << " to " << type << endl;
+            if (!convert(b->second.at(index), r)) {
+                cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
                 exit(1);
             }
             return r;
@@ -209,60 +244,90 @@ double Variant::getInfoValueFloat(string& key) {
     }
 }
 
-bool Variant::getSampleValueBool(string& key, string& sample) {
+bool Variant::getSampleValueBool(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
+        int count = vcf.formatCounts[key];
+        if (index == INDEX_NONE) {
+            if (count != 1) {
+                cerr << "no field index supplied and field count != 1" << endl;
+                exit(1);
+            } else {
+                index = 0;
+            }
+        }
         VariantFieldType type = s->second;
-        map<string, string>& sampleData = samples[sample];
+        map<string, vector<string> >& sampleData = samples[sample];
         if (type == FIELD_BOOL) {
-            map<string, string>::iterator b = sampleData.find(key);
+            map<string, vector<string> >::iterator b = sampleData.find(key);
             if (b == sampleData.end())
                 return false;
             else
                 return true;
         } else {
-            cerr << "not string type " << key << endl;
+            cerr << "not bool type " << key << endl;
         }
     }
 }
 
-string Variant::getSampleValueString(string& key, string& sample) {
+string Variant::getSampleValueString(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
+        int count = vcf.formatCounts[key];
+        if (index == INDEX_NONE) {
+            if (count != 1) {
+                cerr << "no field index supplied and field count != 1" << endl;
+                exit(1);
+            } else {
+                index = 0;
+            }
+        }
         VariantFieldType type = s->second;
-        map<string, string>& sampleData = samples[sample];
+        map<string, vector<string> >& sampleData = samples[sample];
         if (type == FIELD_STRING) {
-            map<string, string>::iterator b = sampleData.find(key);
-            if (b == sampleData.end())
+            map<string, vector<string> >::iterator b = sampleData.find(key);
+            if (b == sampleData.end()) {
                 return "";
-            return b->second;
+            } else {
+                return b->second.at(index);
+            }
         } else {
             cerr << "not string type " << key << endl;
         }
     }
 }
 
-double Variant::getSampleValueFloat(string& key, string& sample) {
+double Variant::getSampleValueFloat(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
+        // XXX TODO wrap this with a function call
+        int count = vcf.formatCounts[key];
+        if (index == INDEX_NONE) {
+            if (count != 1) {
+                cerr << "no field index supplied and field count != 1" << endl;
+                exit(1);
+            } else {
+                index = 0;
+            }
+        }
         VariantFieldType type = s->second;
-        map<string, string>& sampleData = samples[sample];
+        map<string, vector<string> >& sampleData = samples[sample];
         if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
-            map<string, string>::iterator b = sampleData.find(key);
+            map<string, vector<string> >::iterator b = sampleData.find(key);
             if (b == sampleData.end())
                 return false;
             double r;
-            if (!convert(b->second, r)) {
-                cerr << "could not convert field " << b->second << " to " << type << endl;
+            if (!convert(b->second.at(index), r)) {
+                cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
                 exit(1);
             }
             return r;
@@ -272,27 +337,37 @@ double Variant::getSampleValueFloat(string& key, string& sample) {
     }
 }
 
-bool Variant::getValueBool(string& key, string& sample) {
+bool Variant::getValueBool(string& key, string& sample, int index) {
     if (sample.empty()) { // an empty sample name means
-        return getInfoValueBool(key);
+        return getInfoValueBool(key, index);
     } else {
-        return getSampleValueBool(key, sample);
+        return getSampleValueBool(key, sample, index);
     }
 }
 
-double Variant::getValueFloat(string& key, string& sample) {
+double Variant::getValueFloat(string& key, string& sample, int index) {
     if (sample.empty()) { // an empty sample name means
-        return getInfoValueFloat(key);
+        return getInfoValueFloat(key, index);
     } else {
-        return getSampleValueFloat(key, sample);
+        return getSampleValueFloat(key, sample, index);
     }
 }
 
-string Variant::getValueString(string& key, string& sample) {
+string Variant::getValueString(string& key, string& sample, int index) {
     if (sample.empty()) { // an empty sample name means
-        return getInfoValueString(key);
+        return getInfoValueString(key, index);
     } else {
-        return getSampleValueString(key, sample);
+        return getSampleValueString(key, sample, index);
+    }
+}
+
+int Variant::getAlleleIndex(string& allele) {
+    map<string, int>::iterator f = alleleIndecies.find(allele);
+    if (f == alleleIndecies.end()) {
+        cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
+        exit(1);
+    } else {
+        return f->second;
     }
 }
 
@@ -337,13 +412,13 @@ ostream& operator<<(ostream& out, Variant& var) {
         << var.position << "\t"
         << var.id << "\t"
         << var.ref << "\t";
-    // report the list of alterbate alleles.
+    // report the list of alternate alleles.
     var.printAlt(out);
     out << "\t"
         << var.quality << "\t"
         << var.filter << "\t";
-    for (map<string, string>::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-        out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << i->second;
+    for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
+        out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
     }
     for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
         if (i == var.infoFlags.end()) {
@@ -361,16 +436,16 @@ ostream& operator<<(ostream& out, Variant& var) {
     }
     for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
         out << "\t";
-        map<string, map<string, string> >::iterator sampleItr = var.samples.find(*s);
+        map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(*s);
         if (sampleItr == var.samples.end()) {
             out << ".";
         } else {
-            map<string, string>& sample = sampleItr->second;
+            map<string, vector<string> >& sample = sampleItr->second;
             if (sample.size() == 0) {
                 out << ".";
             } else {
                 for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                    out << ((f == var.format.begin()) ? "" : ":") << sample[*f];
+                    out << ((f == var.format.begin()) ? "" : ":") << join(sample[*f], ",");
                 }
             }
         }
@@ -528,12 +603,31 @@ VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype, ma
     //cerr << join(" ", tokens) << endl;
 }
 
+// all alts pass
 bool VariantFilter::passes(Variant& var, string& sample) {
+    for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
+        string& allele = *a;
+        if (!passes(var, sample, allele)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
     // to evaluate a rpn boolean queue with embedded numbers and variables
     // make a result stack, use float to allow comparison of floating point
     // numbers, booleans, and integers
     stack<RuleToken> results;
     queue<RuleToken> rulesCopy = rules; // copy
+
+    int index;
+    if (allele.empty()) {
+        index = 0; // apply to the whole record
+    } else {
+        // apply to a specific allele
+        index = var.getAlleleIndex(allele);
+    }
 
     while (!rulesCopy.empty()) {
         RuleToken& token = rulesCopy.front();
@@ -559,19 +653,19 @@ bool VariantFilter::passes(Variant& var, string& sample) {
 
                 if (type == FIELD_INTEGER || type == FIELD_FLOAT) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
-                    token.number = var.getValueFloat(token.value, sample);
+                    token.number = var.getValueFloat(token.value, sample, index);
                     //cerr << "number: " << token.number << endl;
                 } else if (type == FIELD_BOOL) {
                     token.type = RuleToken::BOOLEAN_VARIABLE;
-                    token.state = var.getValueBool(token.value, sample);
+                    token.state = var.getValueBool(token.value, sample, index);
                     //cerr << "state: " << token.state << endl;
                 } else if (type == FIELD_STRING) {
                     //cout << "token.value = " << token.value << endl;
                     token.type = RuleToken::STRING_VARIABLE;
-                    token.str = var.getValueString(token.value, sample);
+                    token.str = var.getValueString(token.value, sample, index);
                 } else if (isString(token)) {
                     token.type = RuleToken::STRING_VARIABLE;
-                    token.str = var.getValueString(token.value, sample);
+                    token.str = var.getValueString(token.value, sample, index);
                     //cerr << "string: " << token.str << endl;
                 }
             } else {
@@ -913,6 +1007,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
 
 // genotype manipulation
 
+/*
 map<string, int> decomposeGenotype(string& genotype) {
     string splitter = "/";
     if (genotype.find("|") != string::npos) {
@@ -925,29 +1020,54 @@ map<string, int> decomposeGenotype(string& genotype) {
     }
     return decomposed;
 }
+*/
 
-bool isHet(map<string, int>& genotype) {
+map<int, int> decomposeGenotype(string& genotype) {
+    string splitter = "/";
+    if (genotype.find("|") != string::npos) {
+        splitter = "|";
+    }
+    vector<string> haps = split(genotype, splitter);
+    map<int, int> decomposed;
+    for (vector<string>::iterator h = haps.begin(); h != haps.end(); ++h) {
+        int alt;
+        if (*h == ".") {
+            ++decomposed[NULL_ALLELE];
+        } else {
+            convert(*h, alt);
+            ++decomposed[alt];
+        }
+    }
+    return decomposed;
+}
+
+bool isHet(map<int, int>& genotype) {
     return genotype.size() > 1;
 }
 
-bool isHom(map<string, int>& genotype) {
+bool isHom(map<int, int>& genotype) {
     return genotype.size() == 1;
 }
 
-bool hasNonRef(map<string, int>& genotype) {
-    return genotype.find("1") != genotype.end();
+bool hasNonRef(map<int, int>& genotype) {
+    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+        if (g->first != 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
-bool isHomRef(map<string, int>& genotype) {
+bool isHomRef(map<int, int>& genotype) {
     return isHom(genotype) && !hasNonRef(genotype);
 }
 
-bool isHomNonRef(map<string, int>& genotype) {
+bool isHomNonRef(map<int, int>& genotype) {
     return isHom(genotype) && hasNonRef(genotype);
 }
 
-bool isNull(map<string, int>& genotype) {
-    return genotype.find(".") != genotype.end();
+bool isNull(map<int, int>& genotype) {
+    return genotype.find(NULL_ALLELE) != genotype.end();
 }
 
 } // end namespace vcf

@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-        map<string, map<string, string> >::iterator s     = var.samples.begin(); 
-        map<string, map<string, string> >::iterator sEnd  = var.samples.end();
+        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
+        map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
         cout << var.sequenceName << "\t"
              << var.position     << "\t"
@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
         var.printAlleles(cout); cout << "\t"; 
         
         for (; s != sEnd; ++s) {
-            map<string, string>& sample = s->second;
-            string& genotype = sample["GT"];
+            map<string, vector<string> >& sample = s->second;
+            string& genotype = sample["GT"].front(); // XXX assumes we can only have one GT value
             vector<string> gt = split(genotype, "|/");
             
             // report the sample and it's genotype

@@ -59,13 +59,13 @@ int main(int argc, char** argv) {
              << var.filter;
 
         for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-            string value;
+            vector<string> value;
             string& name = *i;
-            map<string, string>::iterator f = var.info.find(name);
+            map<string, vector<string> >::iterator f = var.info.find(name);
             if (f != var.info.end()) {
                 value = f->second;
             }
-            cout << "\t" << value;
+            cout << "\t" << join(value, ",");
         }
 
         for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
