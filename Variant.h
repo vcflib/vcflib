@@ -125,7 +125,7 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
-    map<string, int> alleleIndecies;  // reverse lookup for alleles
+    map<string, int> altAlleleIndecies;  // reverse lookup for alleles
     // TODO
     // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
     // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec

@@ -27,11 +27,11 @@ void Variant::parse(string& line) {
     std::copy(alt.begin(), alt.end(), alleles.begin()+1);
 
     // set up reverse lookup of allele index
-    alleleIndecies.clear();
+    altAlleleIndecies.clear();
     int i = 0;
-    for (vector<string>::iterator a = alleles.begin();
-            a != alleles.end(); ++a, ++i) {
-        alleleIndecies[*a] = i;
+    for (vector<string>::iterator a = alt.begin();
+            a != alt.end(); ++a, ++i) {
+        altAlleleIndecies[*a] = i;
     }
 
     convert(fields.at(5), quality);
@@ -362,8 +362,8 @@ string Variant::getValueString(string& key, string& sample, int index) {
 }
 
 int Variant::getAlleleIndex(string& allele) {
-    map<string, int>::iterator f = alleleIndecies.find(allele);
-    if (f == alleleIndecies.end()) {
+    map<string, int>::iterator f = altAlleleIndecies.find(allele);
+    if (f == altAlleleIndecies.end()) {
         cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
         exit(1);
     } else {
@@ -605,7 +605,7 @@ VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype, ma
 
 // all alts pass
 bool VariantFilter::passes(Variant& var, string& sample) {
-    for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
+    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
         string& allele = *a;
         if (!passes(var, sample, allele)) {
             return false;
