@@ -906,11 +906,11 @@ void VariantCallFile::addHeaderLine(string& line) {
 
 bool VariantCallFile::parseHeader(void) {
 
-    header = "";
+    string headerStr = "";
 
     if (usingTabix) {
-        tabixFile->getHeader(header);
-        if (header.empty()) {
+        tabixFile->getHeader(headerStr);
+        if (headerStr.empty()) {
             cerr << "error: no VCF header" << endl;
             exit(1);
         }
@@ -919,10 +919,10 @@ bool VariantCallFile::parseHeader(void) {
     } else {
         while (std::getline(*file, line)) {
             if (line.substr(0,1) == "#") {
-                header += line + '\n';
+                headerStr += line + '\n';
             } else {
                 // done with header
-                if (header.empty()) {
+                if (headerStr.empty()) {
                     cerr << "error: no VCF header" << endl;
                     exit(1);
                 }
@@ -931,6 +931,14 @@ bool VariantCallFile::parseHeader(void) {
             }
         }
     }
+
+    return parseHeader(headerStr);
+
+}
+
+bool VariantCallFile::parseHeader(string& h) {
+
+    header = h; // stores the header in the object instance
 
     vector<string> headerLines = split(header, "\n");
     for (vector<string>::iterator h = headerLines.begin(); h != headerLines.end(); ++h) {

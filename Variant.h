@@ -100,6 +100,11 @@ public:
         return parsedHeader;
     }
 
+    bool openForOutput(string& headerStr) {
+        parsedHeader = parseHeader(headerStr);
+        return parsedHeader;
+    }
+
     VariantCallFile(void) { }
     ~VariantCallFile(void) { delete tabixFile; }
 
@@ -108,6 +113,8 @@ public:
     bool eof(void) { return _file.eof(); }
 
     bool done(void) { return _done; }
+
+    bool parseHeader(string& headerStr);
 
     bool parseHeader(void);
 
