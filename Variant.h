@@ -1,3 +1,6 @@
+#ifndef __VARIANT_H
+#define __VARIANT_H
+
 #include <vector>
 #include <map>
 #include <string>
@@ -385,3 +388,5 @@ bool isHomNonRef(map<int, int>& genotype);
 bool isNull(map<int, int>& genotype);
 
 } // end namespace VCF
+
+#endif
