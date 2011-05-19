@@ -1,3 +1,6 @@
+#ifndef __CONVERT_H
+#define __CONVERT_H
+
 #include <sstream>
 
 // converts the string into the specified type, setting r to the converted
@@ -8,3 +11,5 @@ bool convert(const std::string& s, T& r) {
     iss >> r;
     return (iss.fail() || ((std::size_t) iss.tellg()) != s.size()) ? false : true;
 }
+
+#endif
