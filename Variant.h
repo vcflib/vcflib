@@ -72,7 +72,6 @@ public:
     }
 
     bool openFile(string& filename) {
-        usingTabix = false;
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
@@ -87,14 +86,12 @@ public:
     }
 
     bool open(istream& stream) {
-        usingTabix = false;
         file = &stream;
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
     bool open(ifstream& stream) {
-        usingTabix = false;
         file = &stream;
         parsedHeader = parseHeader();
         return parsedHeader;
@@ -105,8 +102,12 @@ public:
         return parsedHeader;
     }
 
-    VariantCallFile(void) { }
-    ~VariantCallFile(void) { delete tabixFile; }
+    VariantCallFile(void) : usingTabix(false) { }
+    ~VariantCallFile(void) {
+        if (usingTabix) {
+            delete tabixFile;
+        }
+    }
 
     bool is_open(void) { return parsedHeader; }
 
