@@ -160,6 +160,10 @@ bool Variant::getInfoValueBool(string& key, int index) {
         exit(1);
     } else {
         int count = vcf.infoCounts[key];
+        // XXX TODO, fix for Genotype variants...
+        if (count != ALLELE_NUMBER) {
+            index = 0;
+        }
         if (index == INDEX_NONE) {
             if (count != 1) {
                 cerr << "no field index supplied and field count != 1" << endl;
@@ -188,6 +192,10 @@ string Variant::getInfoValueString(string& key, int index) {
         exit(1);
     } else {
         int count = vcf.infoCounts[key];
+        // XXX TODO, fix for Genotype variants...
+        if (count != ALLELE_NUMBER) {
+            index = 0;
+        }
         if (index == INDEX_NONE) {
             if (count != 1) {
                 cerr << "no field index supplied and field count != 1" << endl;
@@ -219,6 +227,10 @@ double Variant::getInfoValueFloat(string& key, int index) {
         exit(1);
     } else {
         int count = vcf.infoCounts[key];
+        // XXX TODO, fix for Genotype variants...
+        if (count != ALLELE_NUMBER) {
+            index = 0;
+        }
         if (index == INDEX_NONE) {
             if (count != 1) {
                 cerr << "no field index supplied and field count != 1" << endl;
@@ -251,6 +263,10 @@ bool Variant::getSampleValueBool(string& key, string& sample, int index) {
         exit(1);
     } else {
         int count = vcf.formatCounts[key];
+        // XXX TODO, fix for Genotype variants...
+        if (count != ALLELE_NUMBER) {
+            index = 0;
+        }
         if (index == INDEX_NONE) {
             if (count != 1) {
                 cerr << "no field index supplied and field count != 1" << endl;
@@ -280,6 +296,10 @@ string Variant::getSampleValueString(string& key, string& sample, int index) {
         exit(1);
     } else {
         int count = vcf.formatCounts[key];
+        // XXX TODO, fix for Genotype variants...
+        if (count != ALLELE_NUMBER) {
+            index = 0;
+        }
         if (index == INDEX_NONE) {
             if (count != 1) {
                 cerr << "no field index supplied and field count != 1" << endl;
@@ -311,6 +331,10 @@ double Variant::getSampleValueFloat(string& key, string& sample, int index) {
     } else {
         // XXX TODO wrap this with a function call
         int count = vcf.formatCounts[key];
+        // XXX TODO, fix for Genotype variants...
+        if (count != ALLELE_NUMBER) {
+            index = 0;
+        }
         if (index == INDEX_NONE) {
             if (count != 1) {
                 cerr << "no field index supplied and field count != 1" << endl;
