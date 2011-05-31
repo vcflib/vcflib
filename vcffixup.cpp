@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 
         for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
             string& allele = *a;
-            int altcount = countAlts(var, var.getAlleleIndex(allele));
+            int altcount = countAlts(var, var.getAlleleIndex(allele) + 1);
             ac << altcount;
             var.info["AC"].push_back(ac.str());
             stringstream af;

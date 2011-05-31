@@ -28,7 +28,7 @@ void Variant::parse(string& line) {
 
     // set up reverse lookup of allele index
     altAlleleIndecies.clear();
-    int i = 1;
+    int i = 0;
     for (vector<string>::iterator a = alt.begin();
             a != alt.end(); ++a, ++i) {
         altAlleleIndecies[*a] = i;
