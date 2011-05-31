@@ -24,6 +24,21 @@ int countAlts(Variant& var, int alleleIndex) {
     return alts;
 }
 
+int countAlleles(Variant& var) {
+    int alleles = 0;
+    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
+        map<string, vector<string> >& sample = s->second;
+        map<string, vector<string> >::iterator gt = sample.find("GT");
+        if (gt != sample.end()) {
+            map<int, int> genotype = decomposeGenotype(gt->second.front());
+            for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+                alleles += g->second;
+            }
+        }
+    }
+    return alleles;
+}
+
 int main(int argc, char** argv) {
 
     if (argc != 2) {
@@ -48,14 +63,15 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
-    // TODO check if AC is present
-    // ensure that AC is listed as an info field
-    string line = "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">";
-    variantFile.addHeaderLine(line);
-    line = "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">";
-    variantFile.addHeaderLine(line);
-    line = "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">";
-    variantFile.addHeaderLine(line);
+    // remove header lines we're going to add
+    variantFile.removeInfoHeaderLine("AC");
+    variantFile.removeInfoHeaderLine("AF");
+    variantFile.removeInfoHeaderLine("NS");
+
+    // and add them back, so as not to duplicate them if they are already there
+    variantFile.addHeaderLine("##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">");
+    variantFile.addHeaderLine("##INFO=<ID=AF,Number=A,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">");
+    variantFile.addHeaderLine("##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">");
 
     // write the new header
     cout << variantFile.header << endl;
@@ -71,13 +87,15 @@ int main(int argc, char** argv) {
         var.info["AC"].clear();
         var.info["AF"].clear();
 
+        int allelecount = countAlleles(var);
+
         for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
             string& allele = *a;
             int altcount = countAlts(var, var.getAlleleIndex(allele));
             ac << altcount;
             var.info["AC"].push_back(ac.str());
             stringstream af;
-            af << (double) altcount / (double) var.samples.size();
+            af << (double) altcount / (double) allelecount;
             var.info["AF"].push_back(af.str());
         }
         cout << var << endl;

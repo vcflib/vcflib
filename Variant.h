@@ -63,7 +63,9 @@ public:
     bool _done;
 
     void updateSamples(vector<string>& newSampleNames);
-    void addHeaderLine(string& line);
+    void addHeaderLine(string line);
+    void removeInfoHeaderLine(string line);
+    void removeGenoHeaderLine(string line);
 
     bool open(string& filename) {
         vector<string> filenameParts = split(filename, ".");
@@ -164,6 +166,10 @@ public:
     map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
     vector<string> sampleNames;
     vector<string> outputSampleNames;
+
+    //void addInfoInt(string& tag, int value);
+    //void addInfoFloat(string& tag, double value);
+    //void addInfoString(string& tag, string& value);
 
 
 public:

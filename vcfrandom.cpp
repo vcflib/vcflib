@@ -46,7 +46,6 @@ int main(int argc, char** argv) {
         var.filter = ".";
         var.ref = atgc.at(rand() % 4);
         var.quality = 100;
-        var.alt.push_back(atgc.at(rand() % 4));
         stringstream s;
         s << rand() % 100;
         var.info["DP"].push_back(s.str());
@@ -55,6 +54,9 @@ int main(int argc, char** argv) {
         var.position = i;
         for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
             string& name = *s;
+            var.alt.clear();
+            var.alt.push_back(atgc.at(rand() % 4));
+            var.alt.push_back(atgc.at(rand() % 4));
             var.samples[name]["GT"].push_back("0/1");
             stringstream dp;
             dp << floor(rand() % 100);

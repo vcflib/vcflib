@@ -28,7 +28,7 @@ void Variant::parse(string& line) {
 
     // set up reverse lookup of allele index
     altAlleleIndecies.clear();
-    int i = 0;
+    int i = 1;
     for (vector<string>::iterator a = alt.begin();
             a != alt.end(); ++a, ++i) {
         altAlleleIndecies[*a] = i;
@@ -898,10 +898,44 @@ void VariantCallFile::updateSamples(vector<string>& newSamples) {
 }
 
 // TODO cleanup, store header lines instead of bulk header
-void VariantCallFile::addHeaderLine(string& line) {
+void VariantCallFile::addHeaderLine(string line) {
     vector<string> headerLines = split(header, '\n');
     headerLines.insert(headerLines.end() - 1, line);
     header = join(headerLines, "\n");
+}
+
+void VariantCallFile::removeInfoHeaderLine(string tag) {
+    vector<string> headerLines = split(header, '\n');
+    vector<string> newHeader;
+    string id = "ID=" + tag;
+    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
+        string& line = *s;
+        if (line.find("##INFO") == 0) {
+            if (line.find(id) == string::npos) {
+                newHeader.push_back(line);
+            }
+        } else {
+            newHeader.push_back(line);
+        }
+    }
+    header = join(newHeader, "\n");
+}
+
+void VariantCallFile::removeGenoHeaderLine(string tag) {
+    vector<string> headerLines = split(header, '\n');
+    vector<string> newHeader;
+    string id = "ID=" + tag;
+    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
+        string& line = *s;
+        if (line.find("##FORMAT") == 0) {
+            if (line.find(id) == string::npos) {
+                newHeader.push_back(line);
+            }
+        } else {
+            newHeader.push_back(line);
+        }
+    }
+    header = join(newHeader, "\n");
 }
 
 bool VariantCallFile::parseHeader(void) {
