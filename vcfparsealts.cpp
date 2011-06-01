@@ -18,19 +18,20 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    cout << variantFile.header << endl;
+    cout << variantFile.header;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         map<string, vector<VariantAllele> > variants = var.parsedAlternates();
         cout << var << endl;
         for (map<string, vector<VariantAllele> >::iterator va = variants.begin(); va != variants.end(); ++va) {
-            cout << va->first << " :: ";
+            cout << " ( " << va->first << " :: ";
             vector<VariantAllele>& vars = va->second;
             vector<VariantAllele>::iterator g = vars.begin();
             for (; g != vars.end(); ++g) {
-                cout << *g << ";  ";
+                cout << *g << "; ";
             }
+            cout << " ) ";
         }
         cout << endl;
     }
