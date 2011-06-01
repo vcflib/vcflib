@@ -14,6 +14,7 @@
 #include "split.h"
 #include "join.h"
 #include "tabixpp/tabix.hpp"
+#include "smithwaterman/SmithWatermanGotoh.h"
 
 using namespace std;
 
@@ -136,6 +137,17 @@ private:
 
 };
 
+class VariantAllele {
+    friend ostream& operator<<(ostream& out, VariantAllele& var);
+public:
+    string ref;
+    string alt;
+    unsigned long position;
+    VariantAllele(string r, string a, unsigned long p)
+        : ref(r), alt(a), position(p)
+    { }
+};
+
 class Variant {
 
     friend ostream& operator<<(ostream& out, Variant& var);
@@ -153,6 +165,7 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndecies;  // reverse lookup for alleles
+    map<string, vector<VariantAllele> > parsedAlternates(void);
     // TODO
     // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
     // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec

@@ -1187,4 +1187,111 @@ bool isNull(map<int, int>& genotype) {
     return genotype.find(NULL_ALLELE) != genotype.end();
 }
 
+map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
+
+    map<string, vector<VariantAllele> > variantAlleles;
+
+    // padding is used to ensure a stable alignment of the alternates to the reference
+    // without having to go back and look at the full reference sequence
+    int paddingLen = 100;
+    string padding(paddingLen, 'Z');
+    string reference = padding + ref + padding;
+    //const unsigned int referenceLen = 2 * paddingLen + ref.size();
+
+    // passed to sw.Align
+    unsigned int referencePos;
+
+    // constants for SmithWaterman algorithm
+    float matchScore = 10.0f;
+    float mismatchScore = -9.0f;
+    float gapOpenPenalty = 15.0f;
+    float gapExtendPenalty = 6.66f;
+
+    string cigar;
+
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+
+        string& alternate = *a;
+        vector<VariantAllele>& variants = variantAlleles[alternate];
+        string alternateQuery = padding + alternate + padding;
+        //const unsigned int alternateLen = alternate.size();
+
+        CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
+        sw.Align(referencePos, cigar, reference.c_str(), (unsigned int) reference.size(), alternateQuery.c_str(), (unsigned int) alternateQuery.size());
+
+        int altpos = 0;
+        int refpos = 0;
+        int len;
+        string slen;
+        vector<pair<int, char> > cigarData;
+
+        for (string::iterator c = cigar.begin(); c != cigar.end(); ++c) {
+            switch (*c) {
+                case 'I':
+                    len = atoi(slen.c_str());
+                    slen.clear();
+                    cigarData.push_back(make_pair(len, *c));
+                    variants.push_back(VariantAllele("", alternateQuery.substr(altpos, len), refpos - paddingLen + position));
+                    altpos += len;
+                    break;
+                case 'D':
+                    len = atoi(slen.c_str());
+                    slen.clear();
+                    cigarData.push_back(make_pair(len, *c));
+                    variants.push_back(VariantAllele(reference.substr(refpos, len), "", refpos - paddingLen + position));
+                    refpos += len;
+                    break;
+                case 'M':
+                    {
+                        len = atoi(slen.c_str());
+                        slen.clear();
+                        cigarData.push_back(make_pair(len, *c));
+                        string refmatch = reference.substr(refpos, len);
+                        string altmatch = alternateQuery.substr(altpos, len);
+                        bool inmismatch = false;
+                        int mismatchStart = 0;
+                        for (int i = 0; i < refmatch.size(); ++i) {
+                            if (refmatch.at(i) == altmatch.at(i)) {
+                                if (inmismatch) {
+                                    variants.push_back(VariantAllele(
+                                                refmatch.substr(mismatchStart, i - mismatchStart),
+                                                altmatch.substr(mismatchStart, i - mismatchStart),
+                                                refpos - paddingLen + position));
+                                }
+                                inmismatch = false;
+                            } else {
+                                if (!inmismatch) {
+                                    mismatchStart = i;
+                                    inmismatch = true;
+                                }
+                            }
+                            ++refpos;
+                            ++altpos;
+                        }
+                    }
+                    break;
+                case 'S':
+                    len = atoi(slen.c_str());
+                    slen.clear();
+                    cigarData.push_back(make_pair(len, *c));
+                    refpos += len;
+                    altpos += len;
+                    break;
+                default:
+                    len = 0;
+                    slen += *c;
+                    break;
+            }
+        }
+
+    }
+
+    return variantAlleles;
+}
+
+ostream& operator<<(ostream& out, VariantAllele& var) {
+    out << var.position << " " << var.ref << " -> " << var.alt;
+    return out;
+}
+
 } // end namespace vcf

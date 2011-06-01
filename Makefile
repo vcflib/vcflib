@@ -6,10 +6,12 @@ SOURCES = Variant.cpp \
 		  split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
+# TODO
+#vcfstats.cpp
+
 BIN_SOURCES = vcfecho.cpp \
 			  vcfaltcount.cpp \
 			  vcfhetcount.cpp \
-			  vcfstats.cpp \
 			  vcffilter.cpp \
 			  vcf2tsv.cpp \
 			  vcfgenotypes.cpp \
@@ -20,11 +22,14 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfclassify.cpp \
 			  vcfsamplediff.cpp \
 			  vcfremoveaberrantgenotypes.cpp \
-			  vcfrandom.cpp
+			  vcfrandom.cpp \
+			  vcfparsealts.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 
 TABIX = tabixpp/tabix.o
+
+SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
 
 INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
 
@@ -42,11 +47,15 @@ $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX)
 $(TABIX):
 	cd tabixpp && make
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS)
-	$(CXX) $(OBJECTS) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(SMITHWATERMAN):
+	cd smithwaterman && make
+
+$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	cd tabixpp && make clean
+	cd smithwaterman && make clean
 
 .PHONY: clean all
