@@ -1259,7 +1259,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
                                     variants.push_back(VariantAllele(
                                                 refmatch.substr(mismatchStart, i - mismatchStart),
                                                 altmatch.substr(mismatchStart, i - mismatchStart),
-                                                refpos - paddingLen + position));
+                                                mismatchStart - paddingLen + position));
                                 }
                                 inmismatch = false;
                             } else {
