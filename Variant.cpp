@@ -1191,6 +1191,9 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 
+    // add the reference allele
+    variantAlleles[ref].push_back(VariantAllele(ref, ref, position));
+
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
     int paddingLen = 100;
