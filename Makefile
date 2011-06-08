@@ -23,7 +23,8 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfsamplediff.cpp \
 			  vcfremoveaberrantgenotypes.cpp \
 			  vcfrandom.cpp \
-			  vcfparsealts.cpp
+			  vcfparsealts.cpp \
+			  vcfstats.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 

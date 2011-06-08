@@ -12,4 +12,11 @@ bool convert(const std::string& s, T& r) {
     return (iss.fail() || ((std::size_t) iss.tellg()) != s.size()) ? false : true;
 }
 
+template<typename T>
+std::string convert(const T& r) {
+    std::ostringstream iss;
+    iss << r;
+    return iss.str();
+}
+
 #endif
