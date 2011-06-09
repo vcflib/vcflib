@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
          << endl
          << "mnp length frequency distribution" << endl
          << "length\tcount" << endl;
-    for (int i = 1; i <= maxmnp; ++i) {
+    for (int i = 2; i <= maxmnp; ++i) {
         int mnp = mnps[i];
         cout << i << "\t"
              << (mnp > 0 ? convert(mnp) : "")
