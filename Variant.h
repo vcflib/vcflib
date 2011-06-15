@@ -15,6 +15,7 @@
 #include "join.h"
 #include "tabixpp/tabix.hpp"
 #include "smithwaterman/SmithWatermanGotoh.h"
+#include "convert.h"
 
 using namespace std;
 
@@ -354,15 +355,6 @@ inline bool isBoolean(const RuleToken& token) {
 
 inline bool isVariable(const RuleToken& token) {
     return isNumeric(token) || isString(token) || isBoolean(token);
-}
-
-// converts the string into the specified type, setting r to the converted
-// value and returning true/false on success or failure
-template<typename T>
-bool convert(const string& s, T& r) {
-    istringstream iss(s);
-    iss >> r;
-    return (iss.fail() || iss.tellg() != s.size()) ? false : true;
 }
 
 void tokenizeFilterSpec(string& filterspec, stack<RuleToken>& tokens, map<string, VariantFieldType>& variables);
