@@ -1197,9 +1197,18 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
     int paddingLen = 100;
-    string padding(paddingLen, 'Z');
+    char padChar = 'Z';
+    char anchorChar = 'Q';
+    string padding(paddingLen, padChar);
     string reference = padding + ref + padding;
-    //const unsigned int referenceLen = 2 * paddingLen + ref.size();
+
+    // this 'anchored' string is done for stability
+    // the assumption is that there should be a positional match in the first base
+    // this is true for VCF 4.1, and standard best practices
+    // using the anchor char ensures this without other kinds of realignment
+    string reference_M = reference;
+    reference_M[paddingLen] = anchorChar;
+    //cout << reference_M << endl;
 
     // passed to sw.Align
     unsigned int referencePos;
@@ -1217,10 +1226,17 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
         string& alternate = *a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
         string alternateQuery = padding + alternate + padding;
+
+        // again, the _M string is for stability of alignment aganist VCF alts
+        string alternateQuery_M = alternateQuery;
+        alternateQuery_M[paddingLen] = anchorChar;
+        //cout << alternateQuery_M << endl;
         //const unsigned int alternateLen = alternate.size();
 
         CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
-        sw.Align(referencePos, cigar, reference.c_str(), (unsigned int) reference.size(), alternateQuery.c_str(), (unsigned int) alternateQuery.size());
+        sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+
+        // left-realign the alignment...
 
         int altpos = 0;
         int refpos = 0;
