@@ -4,3 +4,6 @@
 [submodule "smithwaterman"]
 	path = smithwaterman
 	url = git://github.com/ekg/smithwaterman.git
+[submodule "multichoose"]
+	path = multichoose
+	url = git://github.com/ekg/multichoose.git

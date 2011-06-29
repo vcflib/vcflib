@@ -18,7 +18,7 @@ void stripAberrant(Variant& var) {
             var.samples.erase(s++);
         } else if (isHomRef(genotype)) {
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                int alleleIndex = var.altAlleleIndecies[*a];
+                int alleleIndex = var.altAlleleIndexes[*a];
                 int altobs = 0;
                 convert(sample["AA"].at(alleleIndex), altobs);
                 if (altobs > 0) {

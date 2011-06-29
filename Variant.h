@@ -16,6 +16,7 @@
 #include "tabixpp/tabix.hpp"
 #include "smithwaterman/SmithWatermanGotoh.h"
 #include "convert.h"
+#include "multichoose/multichoose.h"
 
 using namespace std;
 
@@ -165,7 +166,7 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
-    map<string, int> altAlleleIndecies;  // reverse lookup for alleles
+    map<string, int> altAlleleIndexes;  // reverse lookup for alleles
     map<string, vector<VariantAllele> > parsedAlternates(void);
     // TODO
     // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
@@ -207,9 +208,10 @@ public:
     string getInfoValueString(string& key, int index = INDEX_NONE);
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
-    int getAlleleIndex(string& allele);
+    int getAltAlleleIndex(string& allele);
     void addFormatField(string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
+    map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
     // TODO
     //void setInfoField(string& key, string& val);
      

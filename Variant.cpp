@@ -27,11 +27,11 @@ void Variant::parse(string& line) {
     std::copy(alt.begin(), alt.end(), alleles.begin()+1);
 
     // set up reverse lookup of allele index
-    altAlleleIndecies.clear();
+    altAlleleIndexes.clear();
     int i = 0;
     for (vector<string>::iterator a = alt.begin();
             a != alt.end(); ++a, ++i) {
-        altAlleleIndecies[*a] = i;
+        altAlleleIndexes[*a] = i;
     }
 
     convert(fields.at(5), quality);
@@ -385,9 +385,9 @@ string Variant::getValueString(string& key, string& sample, int index) {
     }
 }
 
-int Variant::getAlleleIndex(string& allele) {
-    map<string, int>::iterator f = altAlleleIndecies.find(allele);
-    if (f == altAlleleIndecies.end()) {
+int Variant::getAltAlleleIndex(string& allele) {
+    map<string, int>::iterator f = altAlleleIndexes.find(allele);
+    if (f == altAlleleIndexes.end()) {
         cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
         exit(1);
     } else {
@@ -650,7 +650,7 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
         index = 0; // apply to the whole record
     } else {
         // apply to a specific allele
-        index = var.getAlleleIndex(allele);
+        index = var.getAltAlleleIndex(allele);
     }
 
     while (!rulesCopy.empty()) {
@@ -1295,6 +1295,27 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
 ostream& operator<<(ostream& out, VariantAllele& var) {
     out << var.position << " " << var.ref << " -> " << var.alt;
     return out;
+}
+
+map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
+
+    map<pair<int, int>, int> genotypeIndexes;
+    //map<int, map<Genotype*, int> > vcfGenotypeOrder;
+    vector<int> indexes;
+    for (int i = 0; i < alleles.size(); ++i) {
+        indexes.push_back(i);
+    }
+    int ploidy = 2; // ONLY diploid
+    vector<vector<int> > genotypes = multichoose(ploidy, indexes);
+    for (vector<vector<int> >::iterator g = genotypes.begin(); g != genotypes.end(); ++g) {
+        sort(g->begin(), g->end());  // enforce e.g. 0/1, 0/2, 1/2 ordering over reverse
+        // XXX this does not handle non-diploid!!!!
+        int j = g->front();
+        int k = g->back();
+        genotypeIndexes[make_pair(j, k)] = (k * (k + 1) / 2) + j;
+    }
+    return genotypeIndexes;
+
 }
 
 } // end namespace vcf
