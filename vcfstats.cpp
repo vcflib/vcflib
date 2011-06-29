@@ -104,9 +104,11 @@ int main(int argc, char** argv) {
     int insertedbases = 0;
     int deletedbases = 0;
     int totalmnps = 0;
+    int totalcomplex = 0;
     map<int, int> insertions;
     map<int, int> deletions;
     map<int, int> mnps;
+    map<int, int> complexsubs;
 
     do {
 
@@ -133,16 +135,27 @@ int main(int argc, char** argv) {
                         ++mnps[var.ref.size()]; // not entirely correct
                     }
                 } else {
+                    map<string, vector<VariantAllele> > alternates = var.parsedAlternates();
                     if (var.ref.size() > alternate.size()) {
                         int diff = var.ref.size() - alternate.size();
-                        ++totaldeletions;
                         deletedbases += diff;
-                        ++deletions[diff];
+                        if (alternates[alternate].size() > 1) {
+                            ++totalcomplex;
+                            ++complexsubs[-diff];
+                        } else {
+                            ++totaldeletions;
+                            ++deletions[diff];
+                        }
                     } else {
                         int diff = alternate.size() - var.ref.size();
-                        ++totalinsertions;
                         insertedbases += diff;
-                        ++insertions[diff];
+                        if (alternates[alternate].size() > 1) {
+                            ++totalcomplex;
+                            ++complexsubs[diff];
+                        } else {
+                            ++totalinsertions;
+                            ++insertions[diff];
+                        }
                     }
                 }
             }
@@ -179,6 +192,7 @@ int main(int argc, char** argv) {
          << "snps:\t" << snps << endl
          << "indels:\t" << totalinsertions + totaldeletions << endl
          << "mnps:\t" << totalmnps << endl
+         << "complex:\t" << totalcomplex << endl
          << endl
          << "ts/tv ratio:\t" << (double) transitions / (double) transversions << endl
          << endl
@@ -204,6 +218,13 @@ int main(int argc, char** argv) {
         cout << i << "\t"
              << (mnp > 0 ? convert(mnp) : "")
              << endl;
+    }
+    cout << endl;
+
+    cout << "complex event frequency distribution" << endl
+         << "length\tcount" << endl;
+    for (map<int, int>::iterator i = complexsubs.begin(); i != complexsubs.end(); ++i) {
+        cout << i->first << "\t" << i->second << endl;
     }
 
     return 0;
