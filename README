@@ -9,8 +9,8 @@ individuals.  The current specification can be found on the 1000 Genomes wiki
 (http://www.1000genomes.org/wiki/doku.php?id=1000_genomes:analysis:vcf4.0).
 
 This library provides a simple API to map each VCF record into a C++ class.
-See vcfstats.cpp for example usage.
+See included applications for example usage.
 
-Presently vcflib does not attempt to use tag information in the header to
-determine the datatype of each field in the site info and sample records, but
-this is planned for a subsequent revision.
+note: vcflib includes submodules, so to obtain vcflib you have to use:
+
+  % git clone --recursive <repo>
