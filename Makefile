@@ -32,7 +32,6 @@ BINS = $(BIN_SOURCES:.cpp=)
 TABIX = tabixpp/tabix.o
 
 SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
-LEFTALIGN = smithwaterman/LeftAlign.o smithwaterman/IndelAllele.o
 
 INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
 
@@ -48,13 +47,13 @@ $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX)
 	$(CXX) -c -o $@ $(*F).cpp  $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 $(TABIX):
-	cd tabixpp && $(make)
+	cd tabixpp && $(MAKE)
 
 $(SMITHWATERMAN):
-	cd smithwaterman && $(make)
+	cd smithwaterman && $(MAKE)
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(LEFTALIGN) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

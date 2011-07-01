@@ -15,6 +15,7 @@ void annotateWithBlankGenotypes(Variant& var, string& annotationTag) {
 
     for (; s != sEnd; ++s) {
         map<string, vector<string> >& sample = s->second;
+        sample[annotationTag].clear(); // means "no genotype" genotype
         sample[annotationTag].push_back("./."); // means "no genotype" genotype
     }
 }
@@ -30,6 +31,7 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
         map<string, vector<string> >& sample = s->second;
         const string& name = s->first;
         map<string, map<string, vector<string> > >::iterator o = varB.samples.find(name);
+        sample[annotationTag].clear();
         if (o == varB.samples.end()) {
             sample[annotationTag].push_back("./."); // means "no genotype"
         } else {
