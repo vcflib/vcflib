@@ -32,14 +32,11 @@ int main(int argc, char** argv) {
     // write header
 
     // defaults
-    cout << "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\t";
+    cout << "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER";
     
     // configurable info field
     for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-        if (i != infofields.begin()) {
-            cout << "\t";
-        }
-        cout << *i;
+        cout << "\t" << *i;
     }
     for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
         cout << "\t" << *i;
@@ -49,38 +46,50 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-        cout << var.sequenceName << "\t"
-             << var.position << "\t"
-             << var.id << "\t"
-             << var.ref << "\t";
-        var.printAlt(cout);
-        cout << "\t"
-             << var.quality << "\t"
-             << var.filter;
+        int altindex = 0;
+        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a, ++altindex) {
 
-        for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-            vector<string> value;
-            string& name = *i;
-            map<string, vector<string> >::iterator f = var.info.find(name);
-            if (f != var.info.end()) {
-                value = f->second;
+            string& altallele = *a;
+
+            cout << var.sequenceName << "\t"
+                 << var.position << "\t"
+                 << var.id << "\t"
+                 << var.ref << "\t"
+                 << altallele << "\t"
+                 << var.quality << "\t"
+                 << var.filter;
+
+            for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
+                vector<string> value;
+                string& name = *i;
+                map<string, vector<string> >::iterator f = var.info.find(name);
+                if (f != var.info.end()) {
+                    value = f->second;
+                }
+                if (value.size() == 1) {
+                    cout << "\t" << value.front();
+                } else if (value.size() == var.alt.size()) {
+                    cout << "\t" << value.at(altindex);
+                } else {
+                    cout << "\t"; // null
+                }
             }
-            cout << "\t" << join(value, ",");
-        }
 
-        for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
-            string value;
-            string& name = *i;
-            map<string, bool>::iterator f = var.infoFlags.find(name);
-            cout << "\t";
-            if (f != var.infoFlags.end()) {
-                cout << "TRUE";
-            } else {
-                cout << "FALSE";
+            for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
+                string value;
+                string& name = *i;
+                map<string, bool>::iterator f = var.infoFlags.find(name);
+                cout << "\t";
+                if (f != var.infoFlags.end()) {
+                    cout << 1;
+                } else {
+                    cout << 0;
+                }
             }
-        }
 
-        cout << endl;
+            cout << endl;
+
+        }
 
     }
 
