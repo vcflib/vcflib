@@ -119,6 +119,7 @@ int main(int argc, char** argv) {
 
         while (variantFile.getNextVariant(var)) {
             ++variantSites;
+            map<string, vector<VariantAllele> > alternates = var.parsedAlternates();
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                 ++variantAlleles;
                 string& alternate = *a;
@@ -132,30 +133,31 @@ int main(int argc, char** argv) {
                         }
                     } else {
                         ++totalmnps;
-                        ++mnps[var.ref.size()]; // not entirely correct
+                        if (alternates[alternate].size() > 1) {
+                        } else {
+                            VariantAllele& va = alternates[alternate].front();
+                            ++mnps[va.alt.size()]; // not entirely correct
+                        }
+                    }
+                } else if (var.ref.size() > alternate.size()) {
+                    int diff = var.ref.size() - alternate.size();
+                    deletedbases += diff;
+                    if (alternates[alternate].size() > 1) {
+                        ++totalcomplex;
+                        ++complexsubs[-diff];
+                    } else {
+                        ++totaldeletions;
+                        ++deletions[diff];
                     }
                 } else {
-                    map<string, vector<VariantAllele> > alternates = var.parsedAlternates();
-                    if (var.ref.size() > alternate.size()) {
-                        int diff = var.ref.size() - alternate.size();
-                        deletedbases += diff;
-                        if (alternates[alternate].size() > 1) {
-                            ++totalcomplex;
-                            ++complexsubs[-diff];
-                        } else {
-                            ++totaldeletions;
-                            ++deletions[diff];
-                        }
+                    int diff = alternate.size() - var.ref.size();
+                    insertedbases += diff;
+                    if (alternates[alternate].size() > 1) {
+                        ++totalcomplex;
+                        ++complexsubs[diff];
                     } else {
-                        int diff = alternate.size() - var.ref.size();
-                        insertedbases += diff;
-                        if (alternates[alternate].size() > 1) {
-                            ++totalcomplex;
-                            ++complexsubs[diff];
-                        } else {
-                            ++totalinsertions;
-                            ++insertions[diff];
-                        }
+                        ++totalinsertions;
+                        ++insertions[diff];
                     }
                 }
             }
