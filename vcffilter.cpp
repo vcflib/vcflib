@@ -9,8 +9,10 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
          << "options:" << endl 
-         << "    -f, --info-filter     specifies a filter to apply to the info fields of records" << endl
+         << "    -f, --info-filter     specifies a filter to apply to the info fields of records," << endl
+         << "                          removes alleles which do not pass the filter" << endl
          << "    -g, --genotype-filter specifies a filter to apply to the genotype fields of records" << endl
+         << "    -s, --filter-sites    filter entire records, not just alleles" << endl
          << "    -t, --tag             tag vcf records as filtered with this tag instead of suppressing them" << endl
          << "    -v, --invert          inverts the filter, e.g. grep -v" << endl
          << "    -o, --or              use logical OR instead of AND to combine filters" << endl
@@ -28,7 +30,7 @@ void printSummary(char** argv) {
          << endl
          << "Any number of filters may be specified.  They are combined via logical AND" << endl
          << "unless --or is specified on the command line.  Obtain logical negation through" << endl
-         << "the use of parentheses, e.g. !( DP = 10)." << endl
+         << "the use of parentheses, e.g. ! ( DP = 10)." << endl
          << endl
          << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
          << "though it does not appear in the INFO fields." << endl
@@ -36,13 +38,21 @@ void printSummary(char** argv) {
     exit(0);
 }
 
-bool passesFilters(Variant& var, vector<VariantFilter>& filters, bool logicalOr) {
+bool passesFilters(Variant& var, vector<VariantFilter>& filters, bool logicalOr, string alt = "") {
     for (vector<VariantFilter>::iterator f = filters.begin(); f != filters.end(); ++f) {
         string s = "";
         if (logicalOr) {
-            if (f->passes(var, s)) return true;
+            if (alt.empty()) {
+                if (f->passes(var, s)) return true;
+            } else {
+                if (f->passes(var, s, alt)) return true;
+            }
         } else {
-            if (!f->passes(var, s)) return false;
+            if (alt.empty()) {
+                if (!f->passes(var, s)) return false;
+            } else {
+                if (!f->passes(var, s, alt)) return false;
+            }
         }
     }
     if (logicalOr)
@@ -57,6 +67,7 @@ int main(int argc, char** argv) {
     int c;
     bool invert = false;
     bool logicalOr = false;
+    bool filterSites = false;
     vector<string> infofilterStrs;
     vector<VariantFilter> infofilters;
     vector<string> genofilterStrs;
@@ -74,6 +85,7 @@ int main(int argc, char** argv) {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
             {"help", no_argument, 0, 'h'},
+            {"filter-sites", no_argument, 0, 's'},
             {"info-filter",  required_argument, 0, 'f'},
             {"genotype-filter",  required_argument, 0, 'g'},
             {"tag", required_argument, 0, 't'},
@@ -86,7 +98,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvof:g:t:r:",
+        c = getopt_long (argc, argv, "hvsof:g:t:r:",
                          long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -108,6 +120,10 @@ int main(int argc, char** argv) {
           case 'f':
             filterSpec += " " + string(optarg);
             infofilterStrs.push_back(string(optarg));
+            break;
+
+          case 's':
+            filterSites = true;
             break;
  
           case 'g':
@@ -199,19 +215,35 @@ int main(int argc, char** argv) {
                 }
             }
             if (!infofilters.empty()) {
-                bool passes = passesFilters(var, infofilters, logicalOr);
-                if (invert) {
-                    passes = !passes;
-                }
-                if (passes) {
-                    if (!tag.empty()) {
-                        var.addFilter(tag);
-                        cout << var << endl;
-                    } else {
+                if (filterSites) {
+                    bool passes = passesFilters(var, infofilters, logicalOr);
+                    if (invert) {
+                        passes = !passes;
+                    }
+                    if (passes) {
+                        if (!tag.empty()) {
+                            var.addFilter(tag);
+                            cout << var << endl;
+                        } else {
+                            cout << variantFile.line << endl;
+                        }
+                    } else if (!tag.empty()) {
                         cout << variantFile.line << endl;
                     }
-                } else if (!tag.empty()) {
-                    cout << variantFile.line << endl;
+                } else { // filter out alleles which pass
+                    // removes the failing alleles
+                    vector<string> failingAlts;
+                    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+                        if (!passesFilters(var, infofilters, logicalOr, *a)) {
+                            failingAlts.push_back(*a);
+                        }
+                    }
+                    for (vector<string>::iterator a = failingAlts.begin(); a != failingAlts.end(); ++a) {
+                        var.removeAlt(*a);
+                    }
+                    if (!var.alt.empty()) {
+                        cout << var << endl;
+                    }
                 }
             } else {
                 if (genofilters.empty()) {

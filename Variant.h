@@ -186,6 +186,8 @@ public:
     //void addInfoFloat(string& tag, double value);
     //void addInfoString(string& tag, string& value);
 
+    void removeAlt(string& altallele);
+
 
 public:
 
@@ -209,6 +211,7 @@ public:
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
     int getAltAlleleIndex(string& allele);
+    void updateAlleleIndexes(void);
     void addFormatField(string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
@@ -387,6 +390,8 @@ public:
 //map<string, int> decomposeGenotype(string& genotype);
 
 map<int, int> decomposeGenotype(string& genotype);
+
+string genotypeToString(map<int, int>& genotype);
 
 bool isHet(map<int, int>& genotype);
 

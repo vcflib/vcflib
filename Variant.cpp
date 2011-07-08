@@ -1158,6 +1158,22 @@ map<int, int> decomposeGenotype(string& genotype) {
     return decomposed;
 }
 
+string genotypeToString(map<int, int>& genotype) {
+    vector<int> s;
+    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+        int a = g->first;
+        int c = g->second;
+        for (int i = 0; i < c; ++i) s.push_back(a);
+    }
+    sort(s.begin(), s.end());
+    vector<string> r;
+    for (vector<int>::iterator i = s.begin(); i != s.end(); ++i) {
+        if (*i == NULL_ALLELE) r.push_back(".");
+        else r.push_back(convert(*i));
+    }
+    return join(r, "/"); // TODO adjust for phased/unphased
+}
+
 bool isHet(map<int, int>& genotype) {
     return genotype.size() > 1;
 }
@@ -1331,6 +1347,80 @@ map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
         genotypeIndexes[make_pair(j, k)] = (k * (k + 1) / 2) + j;
     }
     return genotypeIndexes;
+
+}
+
+void Variant::updateAlleleIndexes(void) {
+    // adjust the allele index
+    altAlleleIndexes.clear();
+    int m = 0;
+    for (vector<string>::iterator a = alt.begin();
+            a != alt.end(); ++a, ++m) {
+        altAlleleIndexes[*a] = m;
+    }
+}
+
+// TODO only works on "A"llele variant fields
+void Variant::removeAlt(string& altAllele) {
+
+    int altIndex = getAltAlleleIndex(altAllele);
+
+    for (map<string, int>::iterator c = vcf.infoCounts.begin(); c != vcf.infoCounts.end(); ++c) {
+        int count = c->second;
+        if (count == ALLELE_NUMBER) {
+            string key = c->first;
+            map<string, vector<string> >::iterator v = info.find(key);
+            if (v != info.end()) {
+                vector<string>& vals = v->second;
+                vector<string> tokeep;
+                int i = 0;
+                for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
+                    if (i != altIndex) {
+                        tokeep.push_back(*a);
+                    }
+                }
+                vals = tokeep;
+            }
+        }
+    }
+
+    vector<string> newalt;
+    map<int, int> alleleIndexMapping;
+    int i = 0; // current index
+    int j = 0; // new index
+    // setup the new alt string
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a, ++i) {
+        if (i != altIndex) {
+            newalt.push_back(*a);
+            // get the mapping between new and old allele indexes
+            alleleIndexMapping[i] = j;
+            ++j;
+        } else {
+            alleleIndexMapping[i] = NULL_ALLELE;
+        }
+    }
+
+    // fix the sample genotypes, removing reference to the old allele
+    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
+        map<string, vector<string> >& sample = s->second;
+        map<int, int> genotype = decomposeGenotype(sample["GT"].front());
+        map<int, int> newGenotype;
+        for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+            newGenotype[alleleIndexMapping[g->first]] = g->second;
+        }
+        sample["GT"].clear();
+        sample["GT"].push_back(genotypeToString(newGenotype));
+    }
+
+    // reset the alt
+    alt = newalt;
+
+    // and the alleles
+    alleles.clear();
+    alleles.push_back(ref);
+    alleles.insert(alleles.end(), alt.begin(), alt.end());
+
+    updateAlleleIndexes();
 
 }
 
