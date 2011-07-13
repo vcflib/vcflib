@@ -1210,6 +1210,13 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
     // add the reference allele
     variantAlleles[ref].push_back(VariantAllele(ref, ref, position));
 
+    // single SNP case, no ambiguity possible, no need to spend a lot of
+    // compute aligning ref and alt fields
+    if (alt.size() == 1 && alt.front().size() == 1) {
+        variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+        return variantAlleles;
+    }
+
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
     int paddingLen = 100;
