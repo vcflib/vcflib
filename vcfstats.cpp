@@ -105,6 +105,8 @@ int main(int argc, char** argv) {
     int deletedbases = 0;
     int totalmnps = 0;
     int totalcomplex = 0;
+    int mismatchbases = 0;
+    int mnpbases = 0;
     map<int, int> insertions;
     map<int, int> deletions;
     map<int, int> mnps;
@@ -126,6 +128,7 @@ int main(int argc, char** argv) {
                 if (var.ref.size() == alternate.size()) {
                     if (var.ref.size() == 1) {
                         ++snps;
+                        ++mismatchbases;
                         if (isTransition(var.ref, alternate)) {
                             ++transitions;
                         } else {
@@ -134,9 +137,16 @@ int main(int argc, char** argv) {
                     } else {
                         ++totalmnps;
                         if (alternates[alternate].size() > 1) {
+                            // TODO not handled
+                            // should decompose multi-base alleles
+                            //vector<VariantAllele>& vav = alternate[alternate];
+                            //for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
+                            //}
                         } else {
                             VariantAllele& va = alternates[alternate].front();
                             ++mnps[va.alt.size()]; // not entirely correct
+                            mismatchbases += var.alt.size();
+                            mnpbases += var.alt.size();
                         }
                     }
                 } else if (var.ref.size() > alternate.size()) {
@@ -192,9 +202,11 @@ int main(int argc, char** argv) {
          << "total variant alleles:\t" << variantAlleles << endl
          << endl
          << "snps:\t" << snps << endl
-         << "indels:\t" << totalinsertions + totaldeletions << endl
          << "mnps:\t" << totalmnps << endl
+         << "indels:\t" << totalinsertions + totaldeletions << endl
          << "complex:\t" << totalcomplex << endl
+         << endl
+         << "mismatches:\t" << mismatchbases << endl
          << endl
          << "ts/tv ratio:\t" << (double) transitions / (double) transversions << endl
          << endl
@@ -221,7 +233,8 @@ int main(int argc, char** argv) {
              << (mnp > 0 ? convert(mnp) : "")
              << endl;
     }
-    cout << endl;
+    cout << "total bases in mnps:\t" << mnpbases << endl
+         << endl;
 
     cout << "complex event frequency distribution" << endl
          << "length\tcount" << endl;
