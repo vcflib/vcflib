@@ -25,11 +25,14 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfrandom.cpp \
 			  vcfparsealts.cpp \
 			  vcfstats.cpp \
-			  vcfflatten.cpp
+			  vcfflatten.cpp \
+			  vcfprimers.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 
 TABIX = tabixpp/tabix.o
+
+FASTAHACK = fastahack/Fasta.o
 
 SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
 
@@ -52,12 +55,16 @@ $(TABIX):
 $(SMITHWATERMAN):
 	cd smithwaterman && $(MAKE)
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(FASTAHACK):
+	cd fastahack && $(MAKE)
+
+$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	cd tabixpp && make clean
 	cd smithwaterman && make clean
+	cd fastahack && make clean
 
 .PHONY: clean all

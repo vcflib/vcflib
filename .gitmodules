@@ -7,3 +7,6 @@
 [submodule "multichoose"]
 	path = multichoose
 	url = git://github.com/ekg/multichoose.git
+[submodule "fastahack"]
+	path = fastahack
+	url = git://github.com/ekg/fastahack.git
