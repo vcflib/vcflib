@@ -30,7 +30,7 @@ void printSummary(char** argv) {
          << endl
          << "Any number of filters may be specified.  They are combined via logical AND" << endl
          << "unless --or is specified on the command line.  Obtain logical negation through" << endl
-         << "the use of parentheses, e.g. ! ( DP = 10)." << endl
+         << "the use of parentheses, e.g. ! \"( DP = 10 )\"" << endl
          << endl
          << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
          << "though it does not appear in the INFO fields." << endl
@@ -233,15 +233,25 @@ int main(int argc, char** argv) {
                 } else { // filter out alleles which pass
                     // removes the failing alleles
                     vector<string> failingAlts;
+                    vector<string> passingAlts;
                     for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                         if (!passesFilters(var, infofilters, logicalOr, *a)) {
                             failingAlts.push_back(*a);
+                        } else {
+                            passingAlts.push_back(*a);
                         }
                     }
-                    for (vector<string>::iterator a = failingAlts.begin(); a != failingAlts.end(); ++a) {
-                        var.removeAlt(*a);
-                    }
-                    if (!var.alt.empty()) {
+                    if (tag.empty()) { // if there is no specified tag, just remove the failing alts
+                        for (vector<string>::iterator a = failingAlts.begin(); a != failingAlts.end(); ++a) {
+                            var.removeAlt(*a);
+                        }
+                        if (!var.alt.empty()) {
+                            cout << var << endl;
+                        }
+                    } else { // otherwise, apply the tag
+                        if (!passingAlts.empty()) {
+                            var.addFilter(tag);
+                        }
                         cout << var << endl;
                     }
                 }

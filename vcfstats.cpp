@@ -145,8 +145,8 @@ int main(int argc, char** argv) {
                         } else {
                             VariantAllele& va = alternates[alternate].front();
                             ++mnps[va.alt.size()]; // not entirely correct
-                            mismatchbases += var.alt.size();
-                            mnpbases += var.alt.size();
+                            mismatchbases += va.alt.size();
+                            mnpbases += va.alt.size();
                         }
                     }
                 } else if (var.ref.size() > alternate.size()) {
