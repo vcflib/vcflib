@@ -454,22 +454,24 @@ ostream& operator<<(ostream& out, Variant& var) {
         }
         out << i->first;
     }
-    out << "\t";
-    for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-        out << ((f == var.format.begin()) ? "" : ":") << *f;
-    }
-    for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
+    if (!var.format.empty()) {
         out << "\t";
-        map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(*s);
-        if (sampleItr == var.samples.end()) {
-            out << ".";
-        } else {
-            map<string, vector<string> >& sample = sampleItr->second;
-            if (sample.size() == 0) {
+        for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
+            out << ((f == var.format.begin()) ? "" : ":") << *f;
+        }
+        for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
+            out << "\t";
+            map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(*s);
+            if (sampleItr == var.samples.end()) {
                 out << ".";
             } else {
-                for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                    out << ((f == var.format.begin()) ? "" : ":") << join(sample[*f], ",");
+                map<string, vector<string> >& sample = sampleItr->second;
+                if (sample.size() == 0) {
+                    out << ".";
+                } else {
+                    for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
+                        out << ((f == var.format.begin()) ? "" : ":") << join(sample[*f], ",");
+                    }
                 }
             }
         }
