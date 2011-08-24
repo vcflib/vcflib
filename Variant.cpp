@@ -665,7 +665,6 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
             // must evaluate it before pushing it onto the stack
             if (token.isVariable) {
                 //cout << "is variable" << endl;
-                //cout << "is variable" << endl;
                 // look up the variable using the Variant, depending on our filter type
                 //cout << "token.value " << token.value << endl;
                 VariantFieldType type;
