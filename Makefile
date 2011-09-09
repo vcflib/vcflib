@@ -26,7 +26,8 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfparsealts.cpp \
 			  vcfstats.cpp \
 			  vcfflatten.cpp \
-			  vcfprimers.cpp
+			  vcfprimers.cpp \
+			  vcfnumalt.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 

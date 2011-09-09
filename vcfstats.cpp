@@ -125,47 +125,37 @@ int main(int argc, char** argv) {
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                 ++variantAlleles;
                 string& alternate = *a;
-                if (var.ref.size() == alternate.size()) {
-                    if (var.ref.size() == 1) {
-                        ++snps;
-                        ++mismatchbases;
-                        if (isTransition(var.ref, alternate)) {
-                            ++transitions;
+                vector<VariantAllele>& vav = alternates[alternate];
+                if (vav.size() > 1) {
+                    ++totalcomplex;
+                }
+                for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
+                    VariantAllele& va = *v;
+                    //cout << va.ref << "/" << va.alt << endl;
+
+                    if (va.ref.size() == va.alt.size()) {
+                        if (va.ref.size() == 1) {
+                            ++snps;
+                            ++mismatchbases;
+                            if (isTransition(va.ref, va.alt)) {
+                                ++transitions;
+                            } else {
+                                ++transversions;
+                            }
                         } else {
-                            ++transversions;
-                        }
-                    } else {
-                        ++totalmnps;
-                        if (alternates[alternate].size() > 1) {
-                            // TODO not handled
-                            // should decompose multi-base alleles
-                            //vector<VariantAllele>& vav = alternate[alternate];
-                            //for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
-                            //}
-                        } else {
-                            VariantAllele& va = alternates[alternate].front();
+                            ++totalmnps;
                             ++mnps[va.alt.size()]; // not entirely correct
                             mismatchbases += va.alt.size();
                             mnpbases += va.alt.size();
                         }
-                    }
-                } else if (var.ref.size() > alternate.size()) {
-                    int diff = var.ref.size() - alternate.size();
-                    deletedbases += diff;
-                    if (alternates[alternate].size() > 1) {
-                        ++totalcomplex;
-                        ++complexsubs[-diff];
-                    } else {
+                    } else if (va.ref.size() > va.alt.size()) {
+                        int diff = va.ref.size() - va.alt.size();
+                        deletedbases += diff;
                         ++totaldeletions;
                         ++deletions[diff];
-                    }
-                } else {
-                    int diff = alternate.size() - var.ref.size();
-                    insertedbases += diff;
-                    if (alternates[alternate].size() > 1) {
-                        ++totalcomplex;
-                        ++complexsubs[diff];
                     } else {
+                        int diff = va.alt.size() - va.ref.size();
+                        insertedbases += diff;
                         ++totalinsertions;
                         ++insertions[diff];
                     }
@@ -233,14 +223,15 @@ int main(int argc, char** argv) {
              << (mnp > 0 ? convert(mnp) : "")
              << endl;
     }
-    cout << "total bases in mnps:\t" << mnpbases << endl
-         << endl;
+    cout << "total bases in mnps:\t" << mnpbases << endl;
 
+    /*
     cout << "complex event frequency distribution" << endl
          << "length\tcount" << endl;
     for (map<int, int>::iterator i = complexsubs.begin(); i != complexsubs.end(); ++i) {
         cout << i->first << "\t" << i->second << endl;
     }
+    */
 
     return 0;
 
