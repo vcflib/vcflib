@@ -215,6 +215,8 @@ public:
     void addFormatField(string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
+    int getNumSamples(void);
+    int getNumValidGenotypes(void);
     // TODO
     //void setInfoField(string& key, string& val);
      
