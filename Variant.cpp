@@ -67,16 +67,22 @@ void Variant::parse(string& line) {
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
             if (samplefields.size() != format.size()) {
-                continue; // just ignore it... we can't parse malformed (or 'null') sample specs
-                /*
-                cerr << "inconsistent number of fields for sample " << name << endl
-                     << "format is " << join(format, ":") << endl
-                     << "sample is " << *sample << endl;
-                exit(1);
-                */
+                // allow "./." as a genotype, as many callers do it despite 
+                // going against the sample specs.
+                if (samplefields.size() == 1 && *i == "./.")
+                    samples[name]["GT"].push_back(*i);
+                // continue; // just ignore it... we can't parse malformed (or 'null') sample specs
+                // /*
+                // cerr << "inconsistent number of fields for sample " << name << endl
+                //      << "format is " << join(format, ":") << endl
+                //      << "sample is " << *sample << endl;
+                // exit(1);
+                // *
             }
-            for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-                samples[name][*f] = split(*i, ','); ++i;
+            else {
+                for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
+                    samples[name][*f] = split(*i, ','); ++i;
+                }
             }
         }
         if (sampleName != sampleNames.end()) {
