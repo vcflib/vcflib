@@ -262,6 +262,23 @@ double Variant::getInfoValueFloat(string& key, int index) {
     }
 }
 
+int Variant::getNumSamples(void) {
+    return sampleNames.size();
+}
+
+int Variant::getNumValidGenotypes(void) {
+    int valid_genotypes = 0;
+    map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
+    map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();
+    for (; s != sEnd; ++s) {
+        map<string, vector<string> > sample_info = s->second;
+        if (sample_info["GT"].front() != "./.") {
+            valid_genotypes++;
+        }
+    }
+    return valid_genotypes;
+}
+
 bool Variant::getSampleValueBool(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
     if (s == vcf.infoTypes.end()) {
