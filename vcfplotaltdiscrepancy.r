@@ -13,6 +13,7 @@ vcf <- subset(read.table(pipe('cat /dev/stdin'), header=T), AC > 0)
 filename <- commandArgs(TRUE)[1]
 tag <- commandArgs(TRUE)[2]
 
+tag.genotypes_count <- paste(tag, '.genotypes.alternate_count', sep='')
 tag.genotypes_alternate_count <- paste(tag, '.genotypes.alternate_count', sep='')
 tag.non_reference_discrepancy_count <- paste(tag, '.site.non_reference_discrepancy.count', sep='')
 tag.non_reference_discrepancy_normalizer <- paste(tag, '.site.non_reference_discrepancy.normalizer', sep='')
@@ -36,10 +37,10 @@ min_sites <- 5  # number of sites required for "simple plotting"
 #ggsave(paste(filename, '.', tag, '.PD.vs.AC.boxplot.ac_lt_20.pdf', sep=''))
 
 
-#cat('number of sites', vcf.numberOfSites, '\n')
-#cat('total alternate alleles', vcf.totalAltAlleles, '\n')
-#cat('positive discrepancy', vcf.positiveDiscrepancy, '\n')
-#cat('negative discrepancy', vcf.negativeDiscrepancy, '\n')
+cat('number of sites', vcf.numberOfSites, '\n')
+cat('total alternate alleles', vcf.totalAltAlleles, '\n')
+cat('positive discrepancy', vcf.positiveDiscrepancy, '\n')
+cat('negative discrepancy', vcf.negativeDiscrepancy, '\n')
 
 #x <- cbind(tapply(vcf, as.list(seq(0,max(vcf$AC))),
 #    function(x) {
@@ -85,6 +86,8 @@ byac$site_tpc <- as.vector(cbind(by(byac$ac, byac$ac,
 byac$site_fpc <- byac$sites - byac$site_tpc
 # site detection fpr is 1 - true positive rate
 byac$site_fpr <- 1 - ( byac$site_tpc / byac$sites )
+
+summary(byac)
 
 #print(byac$sites)
 #print(byac$site_tpc)
@@ -270,7 +273,7 @@ garbage <- dev.off()
 
 
 
-pdf(paste(filename, '.', tag, '.PD.vs.AC.cumulative.simple.ac_lt_20.pdf', sep=''))
+pdf(paste(filename, '.', tag, '.PD.vs.AC.instantaneous.ac_lt_20.pdf', sep=''))
 #par(cex=0.75)
 par(mar=c(5,4,4,5) + 0.1)
 plot(byac$sites, ylim=c(0,max(byac$sites)), xlim=c(0,20),
@@ -283,15 +286,15 @@ par(new=T)
 axis(1, at=seq(0,max(byac$ac),1), labels=seq(0,max(byac$ac),1))
 grid(lty=5)
 par(new=T)
-plot(byac$sites, ylim=c(0,max(byac$sites)), xlim=c(0,20),type='l', pch=19, col='blue', xlab='', xaxt='n', ylab='', yaxt='n')
+plot(byac$sites, ylim=c(0,max(byac$sites)), xlim=c(0,20), type='o', pch=19, col='blue', xlab='', xaxt='n', ylab='', yaxt='n')
 par(new=T)
-title(paste(filename, 'positive discrepancy versus', tag, '(cumulative)'))
+title(paste(filename, 'positive discrepancy versus', tag, '(instantaneous)'))
 par(new=T)
 mtext("number of sites", side=2, line=3) #, cex=0.75)
 #par(new=T)
 #plot(byac$site_fprlt, ylim=c(0,1.0), xlim=c(0,20),  xlab='', xaxt='n', ylab='', yaxt='n', type='l', col='blue')
 par(new=T)
-plot(byac_gtsites$ac, byac_gtsites$site_tpc, ylim=c(0,max(byac$sites)), xlim=c(0,20), xlab='', xaxt='n', ylab='', yaxt='n', col='red', pch=19, type='l')
+plot(byac_gtsites$ac, byac_gtsites$site_tpc, ylim=c(0,max(byac$sites)), xlim=c(0,20), xlab='', xaxt='n', ylab='', yaxt='n', col='red', pch=19, type='o')
 par(new=T) #, cex=0.65)
 mtext(paste("site PD: ", round(1 - vcf.sitesTruePositive, digits=4), sep=''))
 par(new=T) #, cex=0.65)

@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
                         ++nnCount;  // null discrepancy, the second set makes a call, this one does not
                     }
                 } else if (hasNonRef(genotypeA)) {
-                    if (hasNonRef(genotypeB)) { // they cannot be the same, but they both represent an alternate
+                    if (!isNull(genotypeB) && hasNonRef(genotypeB)) { // they cannot be the same, but they both represent an alternate
                         ++cdCount;  // the calls are discrepant
                     } else { // the other call does not have an alternate
                         ++pdCount;
@@ -194,11 +194,11 @@ int main(int argc, char** argv) {
                         }
                     }
                 } else { // the current genotype has no non-ref alternate
-                    if (hasNonRef(genotypeB)) {
+                    if (!isNull(genotypeB) && hasNonRef(genotypeB)) {
                         ++ndCount;
-                        if (isNull(genotypeB)) {
-                            ++nnCount;
-                        }
+                    }
+                    if (isNull(genotypeB)) {
+                        ++nnCount;
                     }
                 }
             } else {
