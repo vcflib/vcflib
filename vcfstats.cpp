@@ -6,9 +6,27 @@
 using namespace std;
 using namespace vcf;
 
-bool isTransition(string& ref, string& alt) {
+bool isTransition(const string& ref, const string& alt) {
     if (((ref == "A" && alt == "G") || (ref == "G" && alt == "A")) ||
         ((ref == "C" && alt == "T") || (ref == "T" && alt == "C"))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool isDeamination(const string& ref, const string& alt) {
+    if ((ref == "A" && alt == "G") ||
+        (ref == "C" && alt == "T")) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool isAmination(const string& ref, const string& alt) {
+    if ((ref == "G" && alt == "A") ||
+        (ref == "T" && alt == "C")) {
         return true;
     } else {
         return false;
@@ -95,10 +113,13 @@ int main(int argc, char** argv) {
     vector<string>::iterator regionItr = regions.begin();
 
     int variantAlleles = 0;
+    int uniqueVariantAlleles = 0;
     int variantSites = 0;
     int snps = 0;
     int transitions = 0;
     int transversions = 0;
+    int deaminations = 0;
+    int aminations = 0;
     int totalinsertions = 0;
     int totaldeletions = 0;
     int insertedbases = 0;
@@ -122,43 +143,74 @@ int main(int argc, char** argv) {
         while (variantFile.getNextVariant(var)) {
             ++variantSites;
             map<string, vector<VariantAllele> > alternates = var.parsedAlternates();
+            map<VariantAllele, vector<string> > uniqueVariants;
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                ++variantAlleles;
                 string& alternate = *a;
                 vector<VariantAllele>& vav = alternates[alternate];
                 if (vav.size() > 1) {
                     ++totalcomplex;
                 }
                 for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
-                    VariantAllele& va = *v;
-                    //cout << va.ref << "/" << va.alt << endl;
+                    uniqueVariants[*v].push_back(alternate);
+                }
+            }
+            uniqueVariantAlleles += uniqueVariants.size();
+            variantAlleles += var.alt.size();
 
-                    if (va.ref.size() == va.alt.size()) {
-                        if (va.ref.size() == 1) {
-                            ++snps;
-                            ++mismatchbases;
-                            if (isTransition(va.ref, va.alt)) {
+            for (map<VariantAllele, vector<string> >::iterator v = uniqueVariants.begin(); v != uniqueVariants.end(); ++v) {
+                const VariantAllele& va = v->first;
+                //cout << va.ref << "/" << va.alt << endl;
+
+                if (va.ref.size() == va.alt.size()) {
+                    if (va.ref.size() == 1) {
+                        ++snps;
+                        ++mismatchbases;
+                        if (isTransition(va.ref, va.alt)) {
+                            ++transitions;
+                        } else {
+                            ++transversions;
+                        }
+                        if (isAmination(va.ref, va.alt)) {
+                            ++aminations;
+                        }
+                        if (isDeamination(va.ref, va.alt)) {
+                            ++deaminations;
+                        }
+                    } else {
+                        ++totalmnps;
+                        ++mnps[va.alt.size()]; // not entirely correct
+                        string::const_iterator r = va.ref.begin();
+                        for (string::const_iterator a = va.alt.begin(); a != va.alt.end(); ++a, ++r) {
+                            string rstr = string(*r, 1);
+                            string astr = string(*a, 1);
+                            if (rstr == astr) {
+                                continue;
+                            }
+                            if (isTransition(rstr, astr)) {
                                 ++transitions;
                             } else {
                                 ++transversions;
                             }
-                        } else {
-                            ++totalmnps;
-                            ++mnps[va.alt.size()]; // not entirely correct
-                            mismatchbases += va.alt.size();
-                            mnpbases += va.alt.size();
+                            if (isAmination(rstr, astr)) {
+                                ++aminations;
+                            }
+                            if (isDeamination(rstr, astr)) {
+                                ++deaminations;
+                            }
+                            ++mismatchbases;
+                            ++mnpbases;
                         }
-                    } else if (va.ref.size() > va.alt.size()) {
-                        int diff = va.ref.size() - va.alt.size();
-                        deletedbases += diff;
-                        ++totaldeletions;
-                        ++deletions[diff];
-                    } else {
-                        int diff = va.alt.size() - va.ref.size();
-                        insertedbases += diff;
-                        ++totalinsertions;
-                        ++insertions[diff];
                     }
+                } else if (va.ref.size() > va.alt.size()) {
+                    int diff = va.ref.size() - va.alt.size();
+                    deletedbases += diff;
+                    ++totaldeletions;
+                    ++deletions[diff];
+                } else {
+                    int diff = va.alt.size() - va.ref.size();
+                    insertedbases += diff;
+                    ++totalinsertions;
+                    ++insertions[diff];
                 }
             }
         }
@@ -190,6 +242,7 @@ int main(int argc, char** argv) {
 
     cout << "total variant sites:\t" << variantSites << endl
          << "total variant alleles:\t" << variantAlleles << endl
+         << "unique variant alleles:\t" << uniqueVariantAlleles << endl
          << endl
          << "snps:\t" << snps << endl
          << "mnps:\t" << totalmnps << endl
@@ -199,6 +252,7 @@ int main(int argc, char** argv) {
          << "mismatches:\t" << mismatchbases << endl
          << endl
          << "ts/tv ratio:\t" << (double) transitions / (double) transversions << endl
+         << "deamination ratio:\t" << (double) deaminations / aminations << endl
          << endl
          << "ins/del length frequency distribution" << endl
          << "length\tins\tdel\tins/del" << endl;

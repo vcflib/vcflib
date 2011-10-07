@@ -141,13 +141,19 @@ private:
 
 class VariantAllele {
     friend ostream& operator<<(ostream& out, VariantAllele& var);
+    friend bool operator<(const VariantAllele& a, const VariantAllele& b);
 public:
     string ref;
     string alt;
+    string repr;
     unsigned long position;
     VariantAllele(string r, string a, unsigned long p)
         : ref(r), alt(a), position(p)
-    { }
+    {
+        stringstream s;
+        s << position << ":" << ref << "/" << alt;
+        repr = s.str();
+    }
 };
 
 class Variant {

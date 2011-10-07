@@ -1337,6 +1337,10 @@ ostream& operator<<(ostream& out, VariantAllele& var) {
     return out;
 }
 
+bool operator<(const VariantAllele& a, const VariantAllele& b) {
+    return a.repr < b.repr;
+}
+
 map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
 
     map<pair<int, int>, int> genotypeIndexes;
