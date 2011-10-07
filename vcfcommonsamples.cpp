@@ -6,6 +6,25 @@
 using namespace std;
 using namespace vcf;
 
+template<class T>
+vector<T> intersection(vector<T>& a, vector<T>& b) {
+    map<T, bool> inA;
+    map<T, bool> inAB;
+    for (typename vector<T>::iterator i = a.begin(); i != a.end(); ++i) {
+        inA[*i] = true;
+    }
+    for (typename vector<T>::iterator i = b.begin(); i != b.end(); ++i) {
+        if (inA.find(*i) != inA.end()) {
+            inAB[*i] = true;
+        }
+    }
+    vector<T> aIb;
+    for (typename map<T, bool>::iterator i = inAB.begin(); i != inAB.end(); ++i) {
+        aIb.push_back(i->first);
+    }
+    return aIb;
+}
+
 int main(int argc, char** argv) {
 
     if (argc != 3) {
@@ -44,18 +63,13 @@ int main(int argc, char** argv) {
     Variant varA(variantFileA);
     Variant varB(variantFileB);
 
-    map<string, bool> samplesInB;
-    // get the samples from the second file
-    for (vector<string>::iterator s = variantFileB.sampleNames.begin();
-            s != variantFileB.sampleNames.end(); ++s) {
-        samplesInB[*s] = true;
-    }
+    vector<string> commonSamples = intersection(variantFileA.sampleNames, variantFileB.sampleNames);
 
     // update sample list in header
-    variantFileA.updateSamples(variantFileB.sampleNames);
+    variantFileA.updateSamples(commonSamples);
 
     // and restrict the output sample names in the variant to those we are keeping
-    varA.setOutputSampleNames(variantFileB.sampleNames);
+    varA.setOutputSampleNames(commonSamples);
     
     // write the new header
     cout << variantFileA.header << endl;
