@@ -181,8 +181,8 @@ int main(int argc, char** argv) {
                         ++mnps[va.alt.size()]; // not entirely correct
                         string::const_iterator r = va.ref.begin();
                         for (string::const_iterator a = va.alt.begin(); a != va.alt.end(); ++a, ++r) {
-                            string rstr = string(*r, 1);
-                            string astr = string(*a, 1);
+                            string rstr = string(1, *r);
+                            string astr = string(1, *a);
                             if (rstr == astr) {
                                 continue;
                             }
