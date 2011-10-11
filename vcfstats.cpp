@@ -16,7 +16,7 @@ bool isTransition(const string& ref, const string& alt) {
 }
 
 bool isDeamination(const string& ref, const string& alt) {
-    if ((ref == "A" && alt == "G") ||
+    if ((ref == "G" && alt == "A") ||
         (ref == "C" && alt == "T")) {
         return true;
     } else {
@@ -25,7 +25,7 @@ bool isDeamination(const string& ref, const string& alt) {
 }
 
 bool isAmination(const string& ref, const string& alt) {
-    if ((ref == "G" && alt == "A") ||
+    if ((ref == "A" && alt == "G") ||
         (ref == "T" && alt == "C")) {
         return true;
     } else {
