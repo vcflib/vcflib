@@ -27,6 +27,22 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
     map<string, map<string, vector<string> > >::iterator s     = varA.samples.begin(); 
     map<string, map<string, vector<string> > >::iterator sEnd  = varA.samples.end();
 
+    map<string, int> varAAlleleInts;
+    int i = 1;
+    for (vector<string>::iterator a = varA.alt.begin(); a != varA.alt.end(); ++a, ++i) {
+        varAAlleleInts[*a] = i;
+    }
+
+    map<int, int> varBconvertToVarA; // maps alleles in the second file to allele numbers for the first
+    varBconvertToVarA[0] = 0; // reference == reference!
+    i = 1;
+    for (vector<string>::iterator a = varB.alt.begin(); a != varB.alt.end(); ++a, ++i) {
+        map<string, int>::iterator ita = varAAlleleInts.find(*a);
+        if (ita != varAAlleleInts.end()) {
+            varBconvertToVarA[i] = ita->second;
+        }
+    }
+
     for (; s != sEnd; ++s) {
         map<string, vector<string> >& sample = s->second;
         const string& name = s->first;
@@ -37,7 +53,18 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
         } else {
             map<string, vector<string> >& other = o->second;
             string& otherGenotype = other["GT"].front();
-            sample[annotationTag].push_back(otherGenotype);
+            // XXX this must compare the genotypes in the two files
+            map<int, int> gtB = decomposeGenotype(otherGenotype);
+            map<int, int> gtnew;
+            for (map<int, int>::iterator g = gtB.begin(); g != gtB.end(); ++g) {
+                map<int, int>::iterator f = varBconvertToVarA.find(g->first);
+                if (f != varBconvertToVarA.end()) {
+                    gtnew[f->second] += g->second;
+                } else {
+                    gtnew[-1] += g->second;
+                }
+            }
+            sample[annotationTag].push_back(genotypeToString(gtnew));
         }
     }
 
