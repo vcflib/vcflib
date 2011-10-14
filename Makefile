@@ -19,6 +19,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfcommonsamples.cpp \
 			  vcfremovesamples.cpp \
 			  vcfkeepsamples.cpp \
+			  vcfsamplenames.cpp \
 			  vcfgenotypecompare.cpp \
 			  vcffixup.cpp \
 			  vcfclassify.cpp \
