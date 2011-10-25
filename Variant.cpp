@@ -1204,6 +1204,14 @@ bool isNull(map<int, int>& genotype) {
     return genotype.find(NULL_ALLELE) != genotype.end();
 }
 
+int ploidy(map<int, int>& genotype) {
+    int i = 0;
+    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+        i += g->second;
+    }
+    return i;
+}
+
 map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
 
     map<string, vector<VariantAllele> > variantAlleles;

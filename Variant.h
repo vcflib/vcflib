@@ -411,6 +411,8 @@ bool isHomNonRef(map<int, int>& genotype);
 
 bool isNull(map<int, int>& genotype);
 
+int ploidy(map<int, int>& genotype);
+
 } // end namespace VCF
 
 #endif
