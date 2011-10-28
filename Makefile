@@ -17,9 +17,6 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfgenotypes.cpp \
 			  vcfannotategenotypes.cpp \
 			  vcfcommonsamples.cpp \
-			  vcfremovesamples.cpp \
-			  vcfkeepsamples.cpp \
-			  vcfsamplenames.cpp \
 			  vcfgenotypecompare.cpp \
 			  vcffixup.cpp \
 			  vcfclassify.cpp \
@@ -30,8 +27,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfstats.cpp \
 			  vcfflatten.cpp \
 			  vcfprimers.cpp \
-			  vcfnumalt.cpp \
-			  vcfcleancomplex.cpp
+			  vcfnumalt.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 
