@@ -197,6 +197,12 @@ int main(int argc, char** argv) {
     }
     cout << variantFile.header << endl;
 
+    /*
+    if (genofilters.empty() && tag.empty()) {
+        variantFile.parseSamples = false;
+    }
+    */
+
     Variant var(variantFile);
 
     vector<string>::iterator regionItr = regions.begin();

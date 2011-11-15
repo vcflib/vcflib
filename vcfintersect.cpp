@@ -11,7 +11,7 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl 
          << "    -b, --bed          use intervals provided by this BED file" << endl
-         << "    -v, --inverse      invert the selection, printing only records which would" << endl
+         << "    -i, --inverse      invert the selection, printing only records which would" << endl
          << "                       not have been printed out" << endl
          << endl
          << "Intersect the records in the VCF file with targets provided in a BED file." << endl
@@ -38,8 +38,9 @@ int main(int argc, char** argv) {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
             {"help", no_argument, 0, 'h'},
-            {"invert", no_argument, 0, 'v'},
+            {"invert", no_argument, 0, 'i'},
             {"bed",  required_argument, 0, 'b'},
+            {"vcf",  required_argument, 0, 'v'},
             {"contained",  no_argument, 0, 'c'},
             {"overlapping", no_argument, 0, 'o'},
             {0, 0, 0, 0}
@@ -105,6 +106,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    variantFile.parseSamples = false; // faster
+
     cout << variantFile.header;
 
     Variant var(variantFile);
@@ -112,9 +115,9 @@ int main(int argc, char** argv) {
         BedTarget record(var.sequenceName, var.position, var.position + var.ref.size(), "");
         vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
         if (!invert && !overlaps.empty()) {
-            cout << var << endl;
+            cout << variantFile.line << endl;
         } else if (invert && overlaps.empty()) {
-            cout << var << endl;
+            cout << variantFile.line << endl;
         }
     }
 

@@ -2,7 +2,7 @@
 
 namespace vcf {
 
-void Variant::parse(string& line) {
+void Variant::parse(string& line, bool parseSamples) {
 
     // clean up potentially variable data structures
     info.clear();
@@ -49,7 +49,8 @@ void Variant::parse(string& line) {
         }
     }
     // check if we have samples specified
-    if (fields.size() > 8) {
+    // and that we are supposed to parse them
+    if (parseSamples && fields.size() > 8) {
         format = split(fields.at(8), ':');
         // if the format changed, we have to rebuild the samples
         if (fields.at(8) != lastFormat) {
@@ -1098,14 +1099,14 @@ bool VariantCallFile::parseHeader(string& h) {
 
 bool VariantCallFile::getNextVariant(Variant& var) {
     if (firstRecord) {
-        var.parse(line);
+        var.parse(line, parseSamples);
         firstRecord = false;
         _done = false;
         return true;
     }
     if (usingTabix) {
         if (tabixFile->getNextLine(line)) {
-            var.parse(line);
+            var.parse(line, parseSamples);
             _done = false;
             return true;
         } else {
@@ -1114,7 +1115,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         }
     } else {
         if (std::getline(*file, line)) {
-            var.parse(line);
+            var.parse(line, parseSamples);
             _done = false;
             return true;
         } else {
@@ -1251,7 +1252,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
 
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
-    int paddingLen = 100;
+    int paddingLen = 10;
     char padChar = 'Z';
     char anchorChar = 'Q';
     string padding(paddingLen, padChar);

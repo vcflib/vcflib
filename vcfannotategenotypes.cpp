@@ -136,6 +136,12 @@ int main(int argc, char** argv) {
 
     do {
 
+        while (!variantFileB.done() && varB.sequenceName < varA.sequenceName
+                || (varB.sequenceName == varA.sequenceName && varB.position < varA.position)
+                && !variantFileB.done()) {
+            variantFileB.getNextVariant(varB);
+        }
+
         while (!variantFileA.done()
                 && varA.sequenceName < varB.sequenceName
                 || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)

@@ -63,6 +63,7 @@ public:
     map<string, VariantFieldType> formatTypes;
     map<string, int> formatCounts;
     vector<string> sampleNames;
+    bool parseSamples;
     bool _done;
 
     void updateSamples(vector<string>& newSampleNames);
@@ -110,7 +111,7 @@ public:
         return parsedHeader;
     }
 
-    VariantCallFile(void) : usingTabix(false) { }
+    VariantCallFile(void) : usingTabix(false), parseSamples(true) { }
     ~VariantCallFile(void) {
         if (usingTabix) {
             delete tabixFile;
@@ -174,6 +175,7 @@ public:
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
     map<string, vector<VariantAllele> > parsedAlternates(void);
+    string originalLine; // the literal of the record, as read
     // TODO
     // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
     // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec
@@ -203,7 +205,7 @@ public:
         , vcf(v)
     { }
 
-    void parse(string& line);
+    void parse(string& line, bool parseSamples = true);
     void addFilter(string& tag);
     bool getValueBool(string& key, string& sample, int index = INDEX_NONE);
     double getValueFloat(string& key, string& sample, int index = INDEX_NONE);
