@@ -32,7 +32,9 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfprimers.cpp \
 			  vcfnumalt.cpp \
 			  vcfcleancomplex.cpp \
-			  vcfintersect.cpp
+			  vcfintersect.cpp \
+			  vcfannotate.cpp \
+			  vcfafpath.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 
