@@ -12,6 +12,7 @@ void printSummary(char** argv) {
          << "options:" << endl 
          << "    -b, --bed   use annotations provided by this BED file" << endl
          << "    -k, --key   use this INFO field key for the annotations" << endl
+         << "    -d, --default  use this INFO field key for records without annotations" << endl
          << endl
          << "Intersect the records in the VCF file with targets provided in a BED file." << endl
          << "Intersections are done on the reference sequences in the VCF file." << endl
@@ -24,6 +25,7 @@ int main(int argc, char** argv) {
 
     string bedFileName;
     string annotationInfoKey;
+    string defaultAnnotationValue;
 
     if (argc == 1)
         printSummary(argv);
@@ -37,12 +39,13 @@ int main(int argc, char** argv) {
             {"help", no_argument, 0, 'h'},
             {"bed",  required_argument, 0, 'b'},
             {"key",  required_argument, 0, 'k'},
+            {"default",  required_argument, 0, 'd'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hb:k:",
+        c = getopt_long (argc, argv, "hb:k:d:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -55,6 +58,10 @@ int main(int argc, char** argv) {
 
             case 'k':
                 annotationInfoKey = string(optarg);
+                break;
+
+            case 'd':
+                defaultAnnotationValue = string(optarg);
                 break;
 
             case 'h':
@@ -108,6 +115,8 @@ int main(int argc, char** argv) {
                 annotations.push_back((*t)->desc);
             }
             var.info[annotationInfoKey].push_back(join(annotations, ":"));
+        } else if (!defaultAnnotationValue.empty()) {
+            var.info[annotationInfoKey].push_back(defaultAnnotationValue);
         }
         cout << var << endl;
     }
@@ -115,4 +124,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-
