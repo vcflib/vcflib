@@ -138,8 +138,8 @@ VariantFieldType typeStrToVariantFieldType(string& typeStr) {
 }
 
 VariantFieldType Variant::infoType(string& key) {
-    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         if (key == "QUAL") { // hack to use QUAL as an "info" field
             return FIELD_INTEGER;
         }
@@ -151,8 +151,8 @@ VariantFieldType Variant::infoType(string& key) {
 }
 
 VariantFieldType Variant::formatType(string& key) {
-    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
-    if (s == vcf.formatTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+    if (s == vcf->formatTypes.end()) {
         cerr << "no format field " << key << endl;
         exit(1);
     } else {
@@ -161,12 +161,12 @@ VariantFieldType Variant::formatType(string& key) {
 }
 
 bool Variant::getInfoValueBool(string& key, int index) {
-    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        int count = vcf.infoCounts[key];
+        int count = vcf->infoCounts[key];
         // XXX TODO, fix for Genotype variants...
         if (count != ALLELE_NUMBER) {
             index = 0;
@@ -193,12 +193,12 @@ bool Variant::getInfoValueBool(string& key, int index) {
 }
 
 string Variant::getInfoValueString(string& key, int index) {
-    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        int count = vcf.infoCounts[key];
+        int count = vcf->infoCounts[key];
         // XXX TODO, fix for Genotype variants...
         if (count != ALLELE_NUMBER) {
             index = 0;
@@ -225,15 +225,15 @@ string Variant::getInfoValueString(string& key, int index) {
 }
 
 double Variant::getInfoValueFloat(string& key, int index) {
-    map<string, VariantFieldType>::iterator s = vcf.infoTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         if (key == "QUAL") {
             return quality;
         }
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        int count = vcf.infoCounts[key];
+        int count = vcf->infoCounts[key];
         // XXX TODO, fix for Genotype variants...
         if (count != ALLELE_NUMBER) {
             index = 0;
@@ -281,12 +281,12 @@ int Variant::getNumValidGenotypes(void) {
 }
 
 bool Variant::getSampleValueBool(string& key, string& sample, int index) {
-    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        int count = vcf.formatCounts[key];
+        int count = vcf->formatCounts[key];
         // XXX TODO, fix for Genotype variants...
         if (count != ALLELE_NUMBER) {
             index = 0;
@@ -314,12 +314,12 @@ bool Variant::getSampleValueBool(string& key, string& sample, int index) {
 }
 
 string Variant::getSampleValueString(string& key, string& sample, int index) {
-    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
-        int count = vcf.formatCounts[key];
+        int count = vcf->formatCounts[key];
         // XXX TODO, fix for Genotype variants...
         if (count != ALLELE_NUMBER) {
             index = 0;
@@ -348,13 +348,13 @@ string Variant::getSampleValueString(string& key, string& sample, int index) {
 }
 
 double Variant::getSampleValueFloat(string& key, string& sample, int index) {
-    map<string, VariantFieldType>::iterator s = vcf.formatTypes.find(key);
-    if (s == vcf.infoTypes.end()) {
+    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+    if (s == vcf->infoTypes.end()) {
         cerr << "no info field " << key << endl;
         exit(1);
     } else {
         // XXX TODO wrap this with a function call
-        int count = vcf.formatCounts[key];
+        int count = vcf->formatCounts[key];
         // XXX TODO, fix for Genotype variants...
         if (count != ALLELE_NUMBER) {
             index = 0;
@@ -1125,6 +1125,16 @@ bool VariantCallFile::getNextVariant(Variant& var) {
     }
 }
 
+bool VariantCallFile::setRegion(string seq, long int start, long int end) {
+    stringstream regionstr;
+    if (end) {
+        regionstr << seq << ":" << start << "-" << end;
+    } else {
+        regionstr << seq << ":" << start;
+    }
+    setRegion(regionstr.str());
+}
+
 bool VariantCallFile::setRegion(string region) {
     if (!usingTabix) {
         cerr << "cannot setRegion on a non-tabix indexed file" << endl;
@@ -1236,7 +1246,7 @@ int ploidy(map<int, int>& genotype) {
     return i;
 }
 
-map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
+map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 
@@ -1306,14 +1316,22 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(void) {
                     len = atoi(slen.c_str());
                     slen.clear();
                     cigarData.push_back(make_pair(len, *c));
-                    variants.push_back(VariantAllele("", alternateQuery.substr(altpos, len), refpos - paddingLen + position));
+                    if (includePreviousBaseForIndels) {
+                        variants.push_back(VariantAllele(alternateQuery.substr(altpos - 1, 1), alternateQuery.substr(altpos - 1, len + 1), refpos - paddingLen + position - 1));
+                    } else {
+                        variants.push_back(VariantAllele("", alternateQuery.substr(altpos, len), refpos - paddingLen + position));
+                    }
                     altpos += len;
                     break;
                 case 'D':
                     len = atoi(slen.c_str());
                     slen.clear();
                     cigarData.push_back(make_pair(len, *c));
-                    variants.push_back(VariantAllele(reference.substr(refpos, len), "", refpos - paddingLen + position));
+                    if (includePreviousBaseForIndels) {
+                        variants.push_back(VariantAllele(reference.substr(refpos - 1, len + 1), reference.substr(refpos - 1, 1), refpos - paddingLen + position - 1));
+                    } else {
+                        variants.push_back(VariantAllele(reference.substr(refpos, len), "", refpos - paddingLen + position));
+                    }
                     refpos += len;
                     break;
                 case 'M':
@@ -1409,7 +1427,7 @@ void Variant::removeAlt(string& altAllele) {
 
     int altIndex = getAltAlleleIndex(altAllele);
 
-    for (map<string, int>::iterator c = vcf.infoCounts.begin(); c != vcf.infoCounts.end(); ++c) {
+    for (map<string, int>::iterator c = vcf->infoCounts.begin(); c != vcf->infoCounts.end(); ++c) {
         int count = c->second;
         if (count == ALLELE_NUMBER) {
             string key = c->first;

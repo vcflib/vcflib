@@ -34,6 +34,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfcleancomplex.cpp \
 			  vcfintersect.cpp \
 			  vcfannotate.cpp \
+			  vcfallelicprimitives.cpp \
 			  vcfafpath.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)

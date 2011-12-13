@@ -131,6 +131,7 @@ public:
     bool getNextVariant(Variant& var);
 
     bool setRegion(string region);
+    bool setRegion(string seq, long int start, long int end = 0);
 
 private:
     bool firstRecord;
@@ -163,7 +164,7 @@ class Variant {
 
 public:
 
-    VariantCallFile& vcf;
+    VariantCallFile* vcf;
     string sequenceName;
     unsigned long position;
     string id;
@@ -174,7 +175,7 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
-    map<string, vector<VariantAllele> > parsedAlternates(void);
+    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false);
     string originalLine; // the literal of the record, as read
     // TODO
     // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
@@ -199,10 +200,12 @@ public:
 
 public:
 
+    Variant() { }
+
     Variant(VariantCallFile& v)
         : sampleNames(v.sampleNames)
         , outputSampleNames(v.sampleNames)
-        , vcf(v)
+        , vcf(&v)
     { }
 
     void parse(string& line, bool parseSamples = true);
