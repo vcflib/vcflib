@@ -78,7 +78,6 @@ int main(int argc, char** argv) {
  
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
-        stringstream ac;
         stringstream ns;
         ns << var.samples.size();
         var.info["NS"].clear();
@@ -92,6 +91,7 @@ int main(int argc, char** argv) {
         for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
             string& allele = *a;
             int altcount = countAlts(var, var.getAltAlleleIndex(allele) + 1);
+            stringstream ac;
             ac << altcount;
             var.info["AC"].push_back(ac.str());
             stringstream af;

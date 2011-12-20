@@ -208,6 +208,9 @@ public:
         , vcf(&v)
     { }
 
+    void setVariantCallFile(VariantCallFile& v);
+    void setVariantCallFile(VariantCallFile* v);
+
     void parse(string& line, bool parseSamples = true);
     void addFilter(string& tag);
     bool getValueBool(string& key, string& sample, int index = INDEX_NONE);

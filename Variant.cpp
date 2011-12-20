@@ -61,18 +61,14 @@ void Variant::parse(string& line, bool parseSamples) {
         vector<string>::iterator sample = fields.begin() + 9;
         for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
             string& name = *sampleName;
-            if (*sample == ".") {
+            if (*sample == "." || *sample == "./.") {
                 samples.erase(name);
                 continue;
             }
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
             if (samplefields.size() != format.size()) {
-                // allow "./." as a genotype, as many callers do it despite 
-                // going against the sample specs.
-                if (samplefields.size() == 1 && *i == "./.")
-                    samples[name]["GT"].push_back(*i);
-                // continue; // just ignore it... we can't parse malformed (or 'null') sample specs
+                // ignore this case... malformed (or 'null') sample specs are caught above
                 // /*
                 // cerr << "inconsistent number of fields for sample " << name << endl
                 //      << "format is " << join(format, ":") << endl
@@ -100,6 +96,18 @@ void Variant::parse(string& line, bool parseSamples) {
         }
     }
     //return true; // we should be catching exceptions...
+}
+
+void Variant::setVariantCallFile(VariantCallFile& v) {
+    sampleNames = v.sampleNames;
+    outputSampleNames = v.sampleNames;
+    vcf = &v;
+}
+
+void Variant::setVariantCallFile(VariantCallFile* v) {
+    sampleNames = v->sampleNames;
+    outputSampleNames = v->sampleNames;
+    vcf = v;
 }
 
 ostream& operator<<(ostream& out, VariantFieldType type) {
@@ -494,7 +502,13 @@ ostream& operator<<(ostream& out, Variant& var) {
                     out << ".";
                 } else {
                     for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                        out << ((f == var.format.begin()) ? "" : ":") << join(sample[*f], ",");
+                        map<string, vector<string> >::iterator g = sample.find(*f);
+                        out << ((f == var.format.begin()) ? "" : ":");
+                        if (g != sample.end()) {
+                            out << join(g->second, ",");
+                        } else {
+                            out << ".";
+                        }
                     }
                 }
             }

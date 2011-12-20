@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 
     // and restrict the output sample names in the variant to those we are keeping
     varA.setOutputSampleNames(commonSamples);
-    
+ 
     // write the new header
     cout << variantFileA.header << endl;
  

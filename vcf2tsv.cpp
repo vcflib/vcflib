@@ -65,11 +65,13 @@ int main(int argc, char** argv) {
                 map<string, vector<string> >::iterator f = var.info.find(name);
                 if (f != var.info.end()) {
                     value = f->second;
-                }
-                if (value.size() == 1) {
-                    cout << "\t" << value.front();
-                } else if (value.size() == var.alt.size()) {
-                    cout << "\t" << value.at(altindex);
+                    if (value.size() == 1) {
+                        cout << "\t" << value.front();
+                    } else if (value.size() == var.alt.size()) {
+                        cout << "\t" << value.at(altindex);
+                    } else {
+                        cout << "\t"; // null
+                    }
                 } else {
                     cout << "\t"; // null
                 }
