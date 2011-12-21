@@ -35,19 +35,23 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
+    vector<string> fieldsToErase;
+    vector<string> infoIds = variantFile.infoIds();
+    for (vector<string>::iterator i = infoIds.begin(); i != infoIds.end(); ++i) {
+	if (!fieldsToKeep.count(*i)) {
+	    fieldsToErase.push_back(*i);
+	    variantFile.removeInfoHeaderLine(*i);
+	}
+    }
+
     // write the header
-    cout << variantFile.header;
+    cout << variantFile.header << endl;
  
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
-	vector<string> fieldsToErase;
-	for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-	    if (!fieldsToKeep.count(i->first)) {
-		fieldsToErase.push_back(i->first);
-	    }
-	}
 	for (vector<string>::iterator f = fieldsToErase.begin(); f != fieldsToErase.end(); ++f) {
 	    var.info.erase(*f);
+	    var.infoFlags.erase(*f);
 	}
         cout << var << endl;
     }

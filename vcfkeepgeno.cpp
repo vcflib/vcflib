@@ -7,6 +7,7 @@
 using namespace std;
 using namespace vcf;
 
+
 int main(int argc, char** argv) {
 
     if (argc < 3) {
@@ -19,9 +20,11 @@ int main(int argc, char** argv) {
 
     string filename = argv[1];
 
+    vector<string> newFormat;
     set<string> fieldsToKeep;
     for (int i = 2; i < argc; ++i) {
         fieldsToKeep.insert(argv[i]);
+	newFormat.push_back(argv[i]);
     }
 
     VariantCallFile variantFile;
@@ -37,23 +40,19 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
+    vector<string> formatIds = variantFile.formatIds();
+    for (vector<string>::iterator i = formatIds.begin(); i != formatIds.end(); ++i) {
+	if (!fieldsToKeep.count(*i)) {
+	    variantFile.removeGenoHeaderLine(*i);
+	}
+    }
+
     // write the header
-    cout << variantFile.header;
+    cout << variantFile.header << endl;
  
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
-	vector<string> fieldsToErase;
-	for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-	    if (!fieldsToKeep.count(i->first)) {
-		fieldsToErase.push_back(i->first);
-	    }
-	}
-	for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-	    map<string, vector<string> >& sample = s->second;
-	    for (vector<string>::iterator f = fieldsToErase.begin(); f != fieldsToErase.end(); ++f) {
-		sample.erase(*f);
-	    }
-	}
+	var.format = newFormat;
         cout << var << endl;
     }
 

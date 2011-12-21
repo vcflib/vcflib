@@ -967,6 +967,44 @@ void VariantCallFile::addHeaderLine(string line) {
     header = join(headerLines, "\n");
 }
 
+vector<string> VariantCallFile::infoIds(void) {
+    vector<string> tags;
+    vector<string> headerLines = split(header, '\n');
+    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
+        string& line = *s;
+        if (line.find("##INFO") == 0) {
+	    size_t pos = line.find("ID=");
+	    if (pos != string::npos) {
+		pos += 3;
+		size_t tagend = line.find(",", pos);
+		if (tagend != string::npos) {
+		    tags.push_back(line.substr(pos, tagend - pos));
+		}
+	    }
+	}
+    }
+    return tags;
+}
+
+vector<string> VariantCallFile::formatIds(void) {
+    vector<string> tags;
+    vector<string> headerLines = split(header, '\n');
+    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
+        string& line = *s;
+        if (line.find("##FORMAT") == 0) {
+	    size_t pos = line.find("ID=");
+	    if (pos != string::npos) {
+		pos += 3;
+		size_t tagend = line.find(",", pos);
+		if (tagend != string::npos) {
+		    tags.push_back(line.substr(pos, tagend - pos));
+		}
+	    }
+	}
+    }
+    return tags;
+}
+
 void VariantCallFile::removeInfoHeaderLine(string tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
