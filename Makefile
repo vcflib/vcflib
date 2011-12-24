@@ -40,6 +40,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfkeepinfo.cpp \
 			  vcfkeepgeno.cpp \
 			  vcfafpath.cpp \
+			  vcfdistance.cpp \
 			  vcfrandomsample.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
