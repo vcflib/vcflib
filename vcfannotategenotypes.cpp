@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "split.h"
 #include <string>
+#include <list>
 #include <iostream>
 
 using namespace std;
@@ -125,45 +126,72 @@ int main(int argc, char** argv) {
 
     cout << variantFileA.header << endl;
 
-    if (variantFileA.done()) {
-        cout << "is done" << endl;
-    }
-
-    if (variantFileB.done()) {
-        cout << "is done" << endl;
-    }
-
-
     do {
 
-        while (!variantFileB.done() && varB.sequenceName < varA.sequenceName
-                || (varB.sequenceName == varA.sequenceName && varB.position < varA.position)
-                && !variantFileB.done()) {
+	// this is broken.  to do it right, it'll be necessary to get reference ids from the fasta reference used to make the alignments...
+        if (!variantFileB.done()
+	       && (varB.sequenceName != varA.sequenceName
+		   || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
+	    ) {
             variantFileB.getNextVariant(varB);
         }
 
-        while (!variantFileA.done()
-                && varA.sequenceName < varB.sequenceName
-                || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)
-                && !variantFileA.done()) {
-            annotateWithBlankGenotypes(varA, annotag);
+	if (!variantFileA.done()
+	       && (varA.sequenceName != varB.sequenceName
+		   || (varA.sequenceName == varB.sequenceName && varA.position < varB.position))
+	    ) {
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
 
-        while (!variantFileB.done() && varB.sequenceName < varA.sequenceName
-                || (varB.sequenceName == varA.sequenceName && varB.position < varA.position)
-                && !variantFileB.done()) {
-            variantFileB.getNextVariant(varB);
-        }
+	vector<Variant> varsA;
+	vector<Variant> varsB;
+
+	bool hasMultipleAlts = false;
 
         while (!variantFileA.done() && varA.sequenceName == varB.sequenceName && varA.position == varB.position) {
-            annotateWithGenotypes(varA, varB, annotag);
-            // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
-            varA.infoFlags[annotag + ".has_variant"] = true;
-            cout << varA << endl;
-            variantFileA.getNextVariant(varA);
+	    // accumulate all the alts at the current position
+	    varsA.push_back(varA);
+	    varsB.push_back(varB);
+	    if (varA.alt.size() > 1 || varB.alt.size() > 1)
+		hasMultipleAlts = true;
+	    variantFileA.getNextVariant(varA);
+	    variantFileB.getNextVariant(varB);
         }
+
+	// multiple lines per position
+	if (!hasMultipleAlts && (varsA.size() > 1 || varsB.size() > 1)) {
+
+	    map<pair<string, string>, Variant> varsAParsed;
+	    map<pair<string, string>, Variant> varsBParsed;	
+	    for (vector<Variant>::iterator v = varsA.begin(); v != varsA.end(); ++v) {
+		varsAParsed[make_pair(v->ref, v->alt.front())] = *v;
+	    }
+	    for (vector<Variant>::iterator v = varsB.begin(); v != varsB.end(); ++v) {
+		varsBParsed[make_pair(v->ref, v->alt.front())] = *v;
+	    }
+	    
+	    for (map<string, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
+		Variant& varA = vs->second;
+		if (varsBParsed.find(varA.alt.front()) != varsBParsed.end()) {
+		    Variant& varB = varsBParsed[varA.alt.front()];
+		    annotateWithGenotypes(varA, varB, annotag);
+		    varA.infoFlags[annotag + ".has_variant"] = true;
+		} else {
+		    annotateWithBlankGenotypes(varA, annotag);
+		}
+		cout << varA << endl;
+	    }
+
+	} else {
+	    Variant& varA = vars.front();
+	    Variant& varB = vars.back();
+	    annotateWithGenotypes(varA, varB, annotag);
+	    // XXX TODO, and also allow for records with multiple alts
+	    // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
+	    varA.infoFlags[annotag + ".has_variant"] = true;
+	    cout << varA << endl;
+	}
         
     } while (!variantFileA.done() && !variantFileB.done());
 

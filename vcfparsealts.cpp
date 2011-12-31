@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         map<string, vector<VariantAllele> > variants = var.parsedAlternates();
-        cout << var << endl;
+	cout << var << endl;
         for (map<string, vector<VariantAllele> >::iterator va = variants.begin(); va != variants.end(); ++va) {
             cout << " ( " << va->first << " :: ";
             vector<VariantAllele>& vars = va->second;

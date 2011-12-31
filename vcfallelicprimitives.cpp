@@ -37,7 +37,9 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    cout << variantFile.header;
+    variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
+    variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
+    cout << variantFile.header << endl;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
@@ -51,11 +53,41 @@ int main(int argc, char** argv) {
         bool includePreviousBaseForIndels = true;
         map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels);
         set<VariantAllele> alleles;
+
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
             for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
                 alleles.insert(*va);
             }
         }
+
+	map<VariantAllele, double> alleleFrequencies;
+	map<VariantAllele, int> alleleCounts;
+
+	bool hasAf = false;
+	if (var.info.find("AF") != var.info.end()) {
+	    hasAf = true;
+	    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+		vector<VariantAllele>& vars = varAlleles[*a];
+		for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+		    double freq;
+		    convert(var.info["AF"].at(var.altAlleleIndexes[*a]), freq);
+		    alleleFrequencies[*va] += freq;
+		}
+	    }
+	}
+
+	bool hasAc = false;
+	if (var.info.find("AC") != var.info.end()) {
+	    hasAc = true;
+	    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+		vector<VariantAllele>& vars = varAlleles[*a];
+		for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+		    int freq;
+		    convert(var.info["AC"].at(var.altAlleleIndexes[*a]), freq);
+		    alleleCounts[*va] += freq;
+		}
+	    }
+	}
 
         //map<long unsigned int, Variant> variants;
         vector<Variant> variants;
@@ -64,6 +96,21 @@ int main(int argc, char** argv) {
                 // ref allele
                 continue;
             }
+	    string type;
+	    int len = 0;
+	    if (a->ref.size() > a->alt.size()) {
+		type = "del";
+		len = a->ref.size() - a->alt.size();
+	    } else if (a->ref.size() < a->alt.size()) {
+		len = a->alt.size() - a->ref.size();
+		type = "ins";
+	    } else if (a->ref.size() == a->alt.size()) {
+		if (a->ref.size() == 1) {
+		    type = "snp";
+		} else {
+		    type = "mnp";
+		}
+	    }
             //cout << a->ref << "/" << a->alt << endl;
             /*
             if (variants.find(a->position) == variants.end()) {
@@ -78,6 +125,15 @@ int main(int argc, char** argv) {
             newvar.quality = var.quality;
             newvar.filter = ".";
             newvar.id = ".";
+	    newvar.format = var.format;
+	    newvar.info["TYPE"].push_back(type);
+	    newvar.info["LEN"].push_back(convert(len));
+	    if (hasAf) {
+		newvar.info["AF"].push_back(convert(alleleFrequencies[*a]));
+	    }
+	    if (hasAc) {
+		newvar.info["AC"].push_back(convert(alleleCounts[*a]));
+	    }
             variants.push_back(newvar);
             Variant& v = variants.back();
             v.sequenceName = var.sequenceName;

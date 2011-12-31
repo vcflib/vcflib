@@ -7,39 +7,6 @@
 using namespace std;
 using namespace vcf;
 
-// union of lines in headers of input files
-string unionInfoHeaderLines(string& s1, string& s2) {
-    vector<string> lines1 = split(s1, "\n");
-    vector<string> lines2 = split(s2, "\n");
-    vector<string> result;
-    set<string> l2;
-    string lastHeaderLine; // this one needs to be at the end
-    for (vector<string>::iterator s = lines2.begin(); s != lines2.end(); ++s) {
-	if (s->substr(0,6) == "##INFO") {
-	    l2.insert(*s);
-	}
-    }
-    for (vector<string>::iterator s = lines1.begin(); s != lines1.end(); ++s) {
-	if (l2.count(*s)) {
-	    l2.erase(*s);
-	}
-	if (s->substr(0,6) == "#CHROM") {
-	    lastHeaderLine = *s;
-	} else {
-	    result.push_back(*s);
-	}
-    }
-    for (set<string>::iterator s = l2.begin(); s != l2.end(); ++s) {
-	result.push_back(*s);
-    }
-    if (lastHeaderLine.empty()) {
-	cerr << "could not find CHROM POS ... header line" << endl;
-	exit(1);
-    }
-    result.push_back(lastHeaderLine);
-    return join(result, "\n");
-}
-
 // adds non-overlapping info fields from varB to varA
 void addInfo(Variant& varA, Variant& varB) {
     for (map<string, vector<string> >::iterator i = varB.info.begin(); i != varB.info.end(); ++i) {

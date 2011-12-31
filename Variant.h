@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stack>
 #include <queue>
+#include <set>
 #include "split.h"
 #include "join.h"
 #include "tabixpp/tabix.hpp"
@@ -424,6 +425,10 @@ bool isHomNonRef(map<int, int>& genotype);
 bool isNull(map<int, int>& genotype);
 
 int ploidy(map<int, int>& genotype);
+
+string unionInfoHeaderLines(string& s1, string& s2);
+
+vector<string>& unique(vector<string>& strings);
 
 } // end namespace VCF
 
