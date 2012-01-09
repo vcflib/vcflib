@@ -179,6 +179,9 @@ public:
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false);
+
+    map<string, string> extendedAlternates(long int newPosition, long int length);
+
     string originalLine; // the literal of the record, as read
     // TODO
     // the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j
@@ -236,7 +239,6 @@ public:
     int getNumValidGenotypes(void);
     // TODO
     //void setInfoField(string& key, string& val);
-     
 
 private:
     string lastFormat;

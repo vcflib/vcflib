@@ -171,10 +171,10 @@ int main(int argc, char** argv) {
 		varsBParsed[make_pair(v->ref, v->alt.front())] = *v;
 	    }
 	    
-	    for (map<string, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
+	    for (map<pair<string, string>, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
 		Variant& varA = vs->second;
-		if (varsBParsed.find(varA.alt.front()) != varsBParsed.end()) {
-		    Variant& varB = varsBParsed[varA.alt.front()];
+		if (varsBParsed.find(make_pair(varA.ref, varA.alt.front())) != varsBParsed.end()) {
+		    Variant& varB = varsBParsed[make_pair(varA.ref, varA.alt.front())]; // TODO cleanup
 		    annotateWithGenotypes(varA, varB, annotag);
 		    varA.infoFlags[annotag + ".has_variant"] = true;
 		} else {
@@ -184,8 +184,8 @@ int main(int argc, char** argv) {
 	    }
 
 	} else {
-	    Variant& varA = vars.front();
-	    Variant& varB = vars.back();
+	    Variant& varA = varsA.front();
+	    Variant& varB = varsB.back();
 	    annotateWithGenotypes(varA, varB, annotag);
 	    // XXX TODO, and also allow for records with multiple alts
 	    // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site

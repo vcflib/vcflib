@@ -42,7 +42,12 @@ public:
 
 class BedReader : public ifstream {
 
+    bool _isOpen;
+
 public:
+
+    bool isOpen(void) { return _isOpen; }
+
     vector<BedTarget> targets;
     map<string, IntervalTree<BedTarget*> > intervals; // intervals by reference sequence
 
@@ -69,7 +74,7 @@ public:
 
     }
 
-    vector<BedTarget*> targetsContaining(BedTarget& target) {
+    vector<BedTarget*> targetsContained(BedTarget& target) {
         vector<Interval<BedTarget*> > results;
         intervals[target.seq].findContained(target.left, target.right, results);
         vector<BedTarget*> contained;
@@ -89,7 +94,16 @@ public:
         return overlapping;
     }
 
-    BedReader(string& fname) {
+    BedReader(void)
+	: _isOpen(false)
+    { }
+
+    BedReader(string& fname)
+	: _isOpen(false) {
+	open(fname);
+    }
+
+    void open(const string& fname) {
         open(fname.c_str());
         targets = entries();
         map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
@@ -99,6 +113,7 @@ public:
         for (map<string, vector<Interval<BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
             intervals[s->first] = IntervalTree<BedTarget*>(s->second);
         }
+	_isOpen = true;
     }
 
 };

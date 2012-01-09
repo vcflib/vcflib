@@ -40,6 +40,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfkeepinfo.cpp \
 			  vcfkeepgeno.cpp \
 			  vcfafpath.cpp \
+			  vcfcountalleles.cpp \
 			  vcfdistance.cpp \
 			  vcfrandomsample.cpp
 
