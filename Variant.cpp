@@ -1514,9 +1514,10 @@ void Variant::removeAlt(string& altAllele) {
 
     vector<string> newalt;
     map<int, int> alleleIndexMapping;
+    // setup the new alt string
+    alleleIndexMapping[0] = 0;
     int i = 0; // current index
     int j = 0; // new index
-    // setup the new alt string
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a, ++i) {
         if (i != altIndex) {
             newalt.push_back(*a);
@@ -1534,7 +1535,7 @@ void Variant::removeAlt(string& altAllele) {
         map<int, int> genotype = decomposeGenotype(sample["GT"].front());
         map<int, int> newGenotype;
         for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-            newGenotype[alleleIndexMapping[g->first]] = g->second;
+            newGenotype[alleleIndexMapping[g->first] + 1] = g->second;
         }
         sample["GT"].clear();
         sample["GT"].push_back(genotypeToString(newGenotype));

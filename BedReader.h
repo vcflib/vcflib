@@ -40,9 +40,10 @@ public:
 };
 
 
-class BedReader : public ifstream {
+class BedReader {
 
     bool _isOpen;
+    ifstream file;
 
 public:
 
@@ -55,13 +56,13 @@ public:
 
         vector<BedTarget> entries;
 
-        if (!is_open()) {
+        if (!isOpen()) {
             cerr << "bed targets file is not open" << endl;
             exit(1);
         }
 
         string line;
-        while (std::getline(*this, line)) {
+        while (std::getline(file, line)) {
             vector<string> fields = split(line, " \t");
             BedTarget entry(strip(fields[0]),
                             atoi(strip(fields[1]).c_str()),
@@ -104,7 +105,8 @@ public:
     }
 
     void open(const string& fname) {
-        open(fname.c_str());
+        file.open(fname.c_str());
+	_isOpen = true;
         targets = entries();
         map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
         for (vector<BedTarget>::iterator t = targets.begin(); t != targets.end(); ++t) {
@@ -113,7 +115,6 @@ public:
         for (map<string, vector<Interval<BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
             intervals[s->first] = IntervalTree<BedTarget*>(s->second);
         }
-	_isOpen = true;
     }
 
 };

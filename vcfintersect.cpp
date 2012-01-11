@@ -149,6 +149,10 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    if (usingBED) {
+	variantFile.parseSamples = false;
+    }
+
     VariantCallFile otherVariantFile;
     if (!vcfFileName.empty()) {
 	otherVariantFile.open(vcfFileName);
@@ -228,7 +232,7 @@ int main(int argc, char** argv) {
 	    }
 	}
 
-	if (!bedFileName.empty()) {
+	if (usingBED) {
 	    BedTarget record(var.sequenceName, var.position, var.position + var.ref.size(), "");
 	    vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
 
@@ -359,6 +363,7 @@ int main(int argc, char** argv) {
 
     }
 
+    exit(0);  // why?
     return 0;
 
 }
