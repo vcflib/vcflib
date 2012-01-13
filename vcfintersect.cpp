@@ -279,7 +279,6 @@ int main(int argc, char** argv) {
 		    if (outputVariants.find(v) == outputVariants.end()) {
 			outputVariants.insert(v);
 			variants[v->position].push_back(v);
-			v->infoFlags["special"] = true;
 		    }
 		}
 
@@ -352,7 +351,6 @@ int main(int argc, char** argv) {
 		    // somehow sort the records and combine them?
 		    map<long int, vector<Variant*> > variants;
 		    for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {
-			(*o)->infoFlags["processed"] = true;
 			if ((*o)->position <= var.position && // check ensures proper ordering of variants on output
 			    outputVariants.find(*o) == outputVariants.end()) {
 			    outputVariants.insert(*o);
@@ -362,12 +360,10 @@ int main(int argc, char** argv) {
 		    // add in the current variant, if it has alts left
 		    if (!var.alt.empty()) {
 			variants[var.position].push_back(&var);
-			var.infoFlags["input"] = true;
 		    }
 
 		    for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
 			for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
-			    (*o)->infoFlags["overlap"] = true;
 			    cout << **o << endl;
 			    lastOutputPosition = max(lastOutputPosition, (*o)->position);
 			}
