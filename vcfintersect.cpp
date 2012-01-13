@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
 
     set<Variant*> outputVariants;
 
-    long int lastOutputPosition = 0;
+    long unsigned int lastOutputPosition = 0;
     string lastSequenceName;
 
     cout << variantFile.header;
@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
 	    if (unioning) {
 		vector<Interval<Variant*> > previousRecords;
 		long int lastSeqLength = reference.sequenceLength(lastSequenceName);
-		variantIntervals[var.sequenceName].findContained(lastOutputPosition, lastSeqLength, previousRecords);
+		variantIntervals[lastSequenceName].findContained(lastOutputPosition, lastSeqLength, previousRecords);
 		for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
 		    Variant* v = r->value;
 		    if (outputVariants.find(v) == outputVariants.end()) {
@@ -228,6 +228,7 @@ int main(int argc, char** argv) {
 			cout << *v << endl;  // does this output everything in correct order?
 		    }
 		}
+		lastSequenceName = var.sequenceName;
 		lastOutputPosition = 0;
 	    }
 	}
@@ -258,10 +259,46 @@ int main(int argc, char** argv) {
 		overlapping.push_back(r->value);
 	    }
 
+
+	    if (unioning) {
+
+		// unioning strategy
+
+		// write out all the records from the last file
+		// between the last one printed out and the first
+		// one we're about to print out
+
+		vector<Interval<Variant*> > previousRecords;
+
+		variantIntervals[var.sequenceName].findContained(lastOutputPosition, var.position - windowsize, previousRecords);
+
+		map<long int, vector<Variant*> > variants;
+
+		for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
+		    Variant* v = r->value;
+		    if (outputVariants.find(v) == outputVariants.end()) {
+			outputVariants.insert(v);
+			variants[v->position].push_back(v);
+			v->infoFlags["special"] = true;
+		    }
+		}
+
+		for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
+		    for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
+			cout << **o << endl;
+			lastOutputPosition = max(lastOutputPosition, (*o)->position);
+		    }
+		}
+
+		// TODO find the duplicates for the other file
+	    }
+
+
 	    if (overlapping.empty()) {
 
 		if (unioning) {
 		    cout << var << endl;
+		    lastOutputPosition = max(lastOutputPosition, var.position);
 		}
 
 	    } else {
@@ -293,28 +330,6 @@ int main(int argc, char** argv) {
 		    }
 		}
 
-		if (unioning) {
-
-		    // unioning strategy
-
-		    // write out all the records from the last file
-		    // between the last one printed out and the first
-		    // one we're about to print out
-
-		    vector<Interval<Variant*> > previousRecords;
-
-		    variantIntervals[var.sequenceName].findContained(lastOutputPosition, haplotypeStart, previousRecords);
-
-		    for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
-			Variant* v = r->value;
-			if (outputVariants.find(v) == outputVariants.end()) {
-			    outputVariants.insert(v);
-			    cout << *v << endl;  // does this output everything in correct order?
-			}
-		    }
-		    // TODO find the duplicates for the other file
-		}
-
 		// determine the non-intersecting alts
 		vector<string> altsToRemove;
 		for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
@@ -337,23 +352,31 @@ int main(int argc, char** argv) {
 		    // somehow sort the records and combine them?
 		    map<long int, vector<Variant*> > variants;
 		    for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {
-			if (outputVariants.find(*o) == outputVariants.end()) {
+			(*o)->infoFlags["processed"] = true;
+			if ((*o)->position <= var.position && // check ensures proper ordering of variants on output
+			    outputVariants.find(*o) == outputVariants.end()) {
 			    outputVariants.insert(*o);
 			    variants[(*o)->position].push_back(*o);
 			}
 		    }
+		    // add in the current variant, if it has alts left
 		    if (!var.alt.empty()) {
 			variants[var.position].push_back(&var);
+			var.infoFlags["input"] = true;
 		    }
+
 		    for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
 			for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
+			    (*o)->infoFlags["overlap"] = true;
 			    cout << **o << endl;
+			    lastOutputPosition = max(lastOutputPosition, (*o)->position);
 			}
 		    }
 		} else {
 		    // if any alts remain, output the variant record
 		    if (!var.alt.empty()) {
 			cout << var << endl;
+			lastOutputPosition = max(lastOutputPosition, var.position);
 		    }
 		}
 
@@ -361,6 +384,23 @@ int main(int argc, char** argv) {
 
 	}
 
+    }
+
+
+    // if unioning, and any variants remain, output them
+    if (unioning) {
+	for (map<string, list<Variant> >::iterator chrom = otherVariants.find(lastSequenceName);
+	     chrom != otherVariants.end();
+	     ++chrom) {
+	    for (list<Variant>::iterator v = chrom->second.begin(); v != chrom->second.end(); ++v) {
+		Variant* variant = &*v;
+		if (outputVariants.find(variant) == outputVariants.end()) {
+		    outputVariants.insert(variant);
+		    cout << *variant << endl;
+		    // TODO guarantee sorting
+		}
+	    }
+	}
     }
 
     exit(0);  // why?
