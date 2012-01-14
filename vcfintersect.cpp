@@ -270,7 +270,7 @@ int main(int argc, char** argv) {
 
 		vector<Interval<Variant*> > previousRecords;
 
-		variantIntervals[var.sequenceName].findContained(lastOutputPosition, var.position - windowsize, previousRecords);
+		variantIntervals[var.sequenceName].findOverlapping(lastOutputPosition, var.position - windowsize, previousRecords);
 
 		map<long int, vector<Variant*> > variants;
 

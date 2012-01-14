@@ -111,6 +111,5 @@ int main(int argc, char** argv) {
     // flush the rest of the variant records if there are any
 
     return 0;
-
 }
 
