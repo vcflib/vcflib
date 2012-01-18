@@ -295,7 +295,7 @@ int main(int argc, char** argv) {
 
 	    if (overlapping.empty()) {
 
-		if (unioning) {
+		if (unioning || (intersecting && invert)) {
 		    cout << var << endl;
 		    lastOutputPosition = max(lastOutputPosition, var.position);
 		}
@@ -336,7 +336,8 @@ int main(int argc, char** argv) {
 		    int relativeStart = var.position - haplotypeStart;
 		    haplotype.replace(relativeStart, var.ref.size(), *a);
 		    map<string, vector<Variant*> >::iterator h = haplotypes.find(haplotype);
-		    if ((intersecting && h == haplotypes.end())
+		    if ((intersecting && !invert && h == haplotypes.end())
+			|| (intersecting && invert && h != haplotypes.end())
 			|| (unioning && h != haplotypes.end())) {
 			altsToRemove.push_back(*a);
 		    }
