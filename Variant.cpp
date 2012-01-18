@@ -13,6 +13,7 @@ void Variant::parse(string& line, bool parseSamples) {
 
     // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
     vector<string> fields = split(line, '\t');
+
     sequenceName = fields.at(0);
     char* end; // dummy variable for strtoll
     position = strtoll(fields.at(1).c_str(), &end, 10);
@@ -36,17 +37,19 @@ void Variant::parse(string& line, bool parseSamples) {
 
     convert(fields.at(5), quality);
     filter = fields.at(6);
-    vector<string> infofields = split(fields.at(7), ';');
-    for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
-        if (*f == ".") {
-            continue;
-        }
-        vector<string> kv = split(*f, '=');
-        if (kv.size() == 2) {
-            info[kv.at(0)] = split(kv.at(1), ',');
-        } else if (kv.size() == 1) {
-            infoFlags[kv.at(0)] = true;
-        }
+    if (fields.size() > 7) {
+	vector<string> infofields = split(fields.at(7), ';');
+	for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
+	    if (*f == ".") {
+		continue;
+	    }
+	    vector<string> kv = split(*f, '=');
+	    if (kv.size() == 2) {
+		info[kv.at(0)] = split(kv.at(1), ',');
+	    } else if (kv.size() == 1) {
+		infoFlags[kv.at(0)] = true;
+	    }
+	}
     }
     // check if we have samples specified
     // and that we are supposed to parse them
@@ -95,6 +98,7 @@ void Variant::parse(string& line, bool parseSamples) {
             exit(1);
         }
     }
+
     //return true; // we should be catching exceptions...
 }
 
@@ -1130,6 +1134,8 @@ bool VariantCallFile::parseHeader(string& h) {
                         number = ALLELE_NUMBER;
                     } else if (numberstr == "G") {
                         number = GENOTYPE_NUMBER;
+		    } else if (numberstr == ".") {
+			number = 1;
                     } else {
                         convert(numberstr, number);
                     }
@@ -1160,6 +1166,7 @@ bool VariantCallFile::parseHeader(string& h) {
             }
         }
     }
+
     return true;
 }
 
@@ -1491,7 +1498,7 @@ void Variant::updateAlleleIndexes(void) {
 // TODO only works on "A"llele variant fields
 void Variant::removeAlt(string& altAllele) {
 
-    int altIndex = getAltAlleleIndex(altAllele);
+    int altIndex = getAltAlleleIndex(altAllele);  // this is the alt-relative index, 0-based
 
     for (map<string, int>::iterator c = vcf->infoCounts.begin(); c != vcf->infoCounts.end(); ++c) {
         int count = c->second;
@@ -1512,14 +1519,16 @@ void Variant::removeAlt(string& altAllele) {
         }
     }
 
+    int altSpecIndex = altIndex + 1; // this is the genotype-spec index, ref=0, 1-based for alts
+
     vector<string> newalt;
     map<int, int> alleleIndexMapping;
     // setup the new alt string
-    alleleIndexMapping[0] = 0;
-    int i = 0; // current index
-    int j = 0; // new index
+    alleleIndexMapping[0] = 0; // reference allele remains the same
+    int i = 1; // current index
+    int j = 1; // new index
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a, ++i) {
-        if (i != altIndex) {
+        if (i != altSpecIndex) {
             newalt.push_back(*a);
             // get the mapping between new and old allele indexes
             alleleIndexMapping[i] = j;
@@ -1535,7 +1544,7 @@ void Variant::removeAlt(string& altAllele) {
         map<int, int> genotype = decomposeGenotype(sample["GT"].front());
         map<int, int> newGenotype;
         for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-            newGenotype[alleleIndexMapping[g->first] + 1] = g->second;
+            newGenotype[alleleIndexMapping[g->first]] = g->second;
         }
         sample["GT"].clear();
         sample["GT"].push_back(genotypeToString(newGenotype));
