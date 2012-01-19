@@ -98,17 +98,25 @@ int main(int argc, char** argv) {
             }
 	    string type;
 	    int len = 0;
-	    if (a->ref.size() > a->alt.size()) {
-		type = "del";
-		len = a->ref.size() - a->alt.size();
-	    } else if (a->ref.size() < a->alt.size()) {
-		len = a->alt.size() - a->ref.size();
-		type = "ins";
-	    } else if (a->ref.size() == a->alt.size()) {
-		if (a->ref.size() == 1) {
-		    type = "snp";
+	    if (a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
+		if (a->ref.size() > a->alt.size()) {
+		    type = "del";
+		    len = a->ref.size() - a->alt.size();
+		} else if (a->ref.size() < a->alt.size()) {
+		    len = a->alt.size() - a->ref.size();
+		    type = "ins";
+		}
+	    } else {
+		if (a->ref.size() == a->alt.size()) {
+		    len = a->ref.size();
+		    if (a->ref.size() == 1) {
+			type = "snp";
+		    } else {
+			type = "mnp";
+		    }
 		} else {
-		    type = "mnp";
+		    len = abs((int) a->ref.size() - (int) a->alt.size());
+		    type = "complex";
 		}
 	    }
             //cout << a->ref << "/" << a->alt << endl;

@@ -1369,7 +1369,6 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         // again, the _M string is for stability of alignment aganist VCF alts
         string alternateQuery_M = alternateQuery;
         alternateQuery_M[paddingLen] = anchorChar;
-        //cout << alternateQuery_M << endl;
         //const unsigned int alternateLen = alternate.size();
 
         CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
@@ -1390,7 +1389,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                     slen.clear();
                     cigarData.push_back(make_pair(len, *c));
                     if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(alternateQuery.substr(altpos - 1, 1), alternateQuery.substr(altpos - 1, len + 1), refpos - paddingLen + position - 1));
+                        variants.push_back(VariantAllele(reference.substr(refpos - 1, 1), alternateQuery.substr(altpos - 1, len + 1), refpos - paddingLen + position - 1));
                     } else {
                         variants.push_back(VariantAllele("", alternateQuery.substr(altpos, len), refpos - paddingLen + position));
                     }
@@ -1401,7 +1400,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                     slen.clear();
                     cigarData.push_back(make_pair(len, *c));
                     if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(reference.substr(refpos - 1, len + 1), reference.substr(refpos - 1, 1), refpos - paddingLen + position - 1));
+                        variants.push_back(VariantAllele(reference.substr(refpos - 1, len + 1), alternateQuery.substr(altpos - 1, 1), altpos - paddingLen + position - 1));
                     } else {
                         variants.push_back(VariantAllele(reference.substr(refpos, len), "", refpos - paddingLen + position));
                     }
@@ -1415,25 +1414,34 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                         string refmatch = reference.substr(refpos, len);
                         string altmatch = alternateQuery.substr(altpos, len);
                         bool inmismatch = false;
+			int mismatchRefPosStart = refpos;
                         int mismatchStart = 0;
                         for (int i = 0; i < refmatch.size(); ++i) {
                             if (refmatch.at(i) == altmatch.at(i)) {
                                 if (inmismatch) {
                                     variants.push_back(VariantAllele(
-                                                refmatch.substr(mismatchStart, i - mismatchStart),
-                                                altmatch.substr(mismatchStart, i - mismatchStart),
-                                                mismatchStart - paddingLen + position));
+							   refmatch.substr(mismatchStart, i - mismatchStart),
+							   altmatch.substr(mismatchStart, i - mismatchStart),
+							   mismatchRefPosStart - paddingLen + position));
                                 }
                                 inmismatch = false;
                             } else {
                                 if (!inmismatch) {
-                                    mismatchStart = i;
+				    mismatchRefPosStart = refpos;
+				    mismatchStart = i;
                                     inmismatch = true;
                                 }
                             }
                             ++refpos;
                             ++altpos;
                         }
+			if (inmismatch) {
+			    variants.push_back(VariantAllele(
+						   refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+						   altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+						   mismatchRefPosStart - paddingLen + position));
+			}
+
                     }
                     break;
                 case 'S':
@@ -1448,8 +1456,32 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                     slen += *c;
                     break;
             }
-        }
 
+	    // if the last two variants have the same alt position,
+	    // take the one which covers more ref or alt sequence
+	    // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
+	    if (variants.size() > 1) {
+		VariantAllele& varA = variants.at(variants.size() - 2);
+		VariantAllele& varB = variants.back();
+		if (varA.position == varB.position) {
+		    if (varA.ref.size() == varB.ref.size()) {
+			if (varA.alt.size() >= varB.alt.size()) {
+			    variants.pop_back();
+			} else {
+			    VariantAllele varB_copy = variants.back();
+			    variants.pop_back(); variants.pop_back();
+			    variants.push_back(varB_copy);
+			}
+		    } else if (varA.ref.size() > varB.ref.size()) {
+			variants.pop_back();
+		    } else {
+			VariantAllele varB_copy = variants.back();
+			variants.pop_back(); variants.pop_back();
+			variants.push_back(varB_copy);
+		    }
+		}
+	    }
+        }
     }
 
     return variantAlleles;
