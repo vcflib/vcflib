@@ -1519,6 +1519,28 @@ void Variant::removeAlt(string& altAllele) {
         }
     }
 
+    for (map<string, int>::iterator c = vcf->formatCounts.begin(); c != vcf->formatCounts.end(); ++c) {
+        int count = c->second;
+        if (count == ALLELE_NUMBER) {
+            string key = c->first;
+	    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
+		map<string, vector<string> >& sample = s->second;
+		map<string, vector<string> >::iterator v = sample.find(key);
+		if (v != sample.end()) {
+		    vector<string>& vals = v->second;
+		    vector<string> tokeep;
+		    int i = 0;
+		    for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
+			if (i != altIndex) {
+			    tokeep.push_back(*a);
+			}
+		    }
+		    vals = tokeep;
+		}
+	    }
+        }
+    }
+
     int altSpecIndex = altIndex + 1; // this is the genotype-spec index, ref=0, 1-based for alts
 
     vector<string> newalt;
@@ -1544,7 +1566,7 @@ void Variant::removeAlt(string& altAllele) {
         map<int, int> genotype = decomposeGenotype(sample["GT"].front());
         map<int, int> newGenotype;
         for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-            newGenotype[alleleIndexMapping[g->first]] = g->second;
+            newGenotype[alleleIndexMapping[g->first]] += g->second;
         }
         sample["GT"].clear();
         sample["GT"].push_back(genotypeToString(newGenotype));

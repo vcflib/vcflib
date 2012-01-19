@@ -32,7 +32,9 @@ int countAlleles(Variant& var) {
         if (gt != sample.end()) {
             map<int, int> genotype = decomposeGenotype(gt->second.front());
             for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-                alleles += g->second;
+		if (g->first != NULL_ALLELE) {
+		    alleles += g->second;
+		}
             }
         }
     }
@@ -67,11 +69,13 @@ int main(int argc, char** argv) {
     variantFile.removeInfoHeaderLine("AC");
     variantFile.removeInfoHeaderLine("AF");
     variantFile.removeInfoHeaderLine("NS");
+    variantFile.removeInfoHeaderLine("AN");
 
     // and add them back, so as not to duplicate them if they are already there
     variantFile.addHeaderLine("##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">");
     variantFile.addHeaderLine("##INFO=<ID=AF,Number=A,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">");
     variantFile.addHeaderLine("##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">");
+    variantFile.addHeaderLine("##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes\">");
 
     // write the new header
     cout << variantFile.header << endl;
@@ -85,6 +89,7 @@ int main(int argc, char** argv) {
 
         var.info["AC"].clear();
         var.info["AF"].clear();
+	var.info["AN"].clear();
 
         int allelecount = countAlleles(var);
 
@@ -97,6 +102,9 @@ int main(int argc, char** argv) {
             stringstream af;
             af << (double) altcount / (double) allelecount;
             var.info["AF"].push_back(af.str());
+	    stringstream an;
+	    an << allelecount;
+	    var.info["AN"].push_back(an.str());
         }
         cout << var << endl;
     }
