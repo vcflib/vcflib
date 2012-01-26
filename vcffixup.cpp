@@ -92,6 +92,9 @@ int main(int argc, char** argv) {
 	var.info["AN"].clear();
 
         int allelecount = countAlleles(var);
+	stringstream an;
+	an << allelecount;
+	var.info["AN"].push_back(an.str());
 
         for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
             string& allele = *a;
@@ -102,9 +105,6 @@ int main(int argc, char** argv) {
             stringstream af;
             af << (double) altcount / (double) allelecount;
             var.info["AF"].push_back(af.str());
-	    stringstream an;
-	    an << allelecount;
-	    var.info["AN"].push_back(an.str());
         }
         cout << var << endl;
     }
