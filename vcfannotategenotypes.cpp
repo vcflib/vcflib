@@ -149,7 +149,19 @@ int main(int argc, char** argv) {
 
 	bool hasMultipleAlts = false;
 
-        while (!variantFileA.done() && varA.sequenceName == varB.sequenceName && varA.position == varB.position) {
+	long int thisPosition = 0;
+	string thisSequenceName;
+	if (varA.position == varB.position
+	    && varA.sequenceName == varB.sequenceName) {
+	    thisPosition = varA.position;
+	    thisSequenceName = varA.sequenceName;
+	}
+        while (!variantFileA.done()
+	       && !variantFileB.done()
+	       && thisPosition == varA.position
+	       && thisSequenceName == varA.sequenceName
+	       && varA.sequenceName == varB.sequenceName
+	       && varA.position == varB.position) {
 	    // accumulate all the alts at the current position
 	    varsA.push_back(varA);
 	    varsB.push_back(varB);
@@ -183,9 +195,9 @@ int main(int argc, char** argv) {
 		cout << varA << endl;
 	    }
 
-	} else {
+	} else if (!varsA.empty() && !varsB.empty()) { // one line per multi-allelic
 	    Variant& varA = varsA.front();
-	    Variant& varB = varsB.back();
+	    Variant& varB = varsB.front();
 	    annotateWithGenotypes(varA, varB, annotag);
 	    // XXX TODO, and also allow for records with multiple alts
 	    // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
