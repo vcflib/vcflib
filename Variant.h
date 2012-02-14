@@ -240,6 +240,8 @@ public:
     // TODO
     //void setInfoField(string& key, string& val);
 
+    float getAAF(void);
+    
 private:
     string lastFormat;
 
