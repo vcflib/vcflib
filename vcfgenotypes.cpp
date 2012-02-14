@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
                 cout << var.alleles[index];
                 if (g != (gt.end()-1)) cout << "/";
             }
+            cout << ":" << genotypeValue(genotype);
             cout << "\t";
         }
         cout << endl;

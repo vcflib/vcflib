@@ -428,6 +428,11 @@ bool isNull(map<int, int>& genotype);
 
 int ploidy(map<int, int>& genotype);
 
+// return a number describing the count of alternate alleles
+// for a given genotype. 0 = homref, 1 = het, 
+//                       2 = homnonref, -1 m= unknown
+int genotypeValue(string & genotype);
+
 string unionInfoHeaderLines(string& s1, string& s2);
 
 vector<string>& unique(vector<string>& strings);

@@ -1319,6 +1319,15 @@ int ploidy(map<int, int>& genotype) {
     return i;
 }
 
+int genotypeValue(string & genotype) {
+    map<int, int> gt_map = decomposeGenotype(genotype);
+    if      (isHomRef(gt_map))    return 0;
+    else if (isHet(gt_map))       return 1;
+    else if (isHomNonRef(gt_map)) return 2;
+    else if (isNull(gt_map))      return -1;
+    else cerr << "error, undefined genotype class." << endl;
+}
+
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels) {
 
     map<string, vector<VariantAllele> > variantAlleles;
