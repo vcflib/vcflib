@@ -545,6 +545,26 @@ float Variant::getAAF(void) {
     return ((float) tot_alt_alleles / (float) (2.0 * num_valid_genotypes));
 }
 
+float Variant::getNucleotideDiversity(void) {
+    
+    int num_valid_genotypes = 0;
+    int tot_alt_alleles = 0;
+    map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
+    map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();
+    for (; s != sEnd; ++s) {
+        map<string, vector<string> > sample_info = s->second;
+        int gt_val = genotypeValue(sample_info["GT"].front());
+        if (gt_val >= 0) {
+            num_valid_genotypes++;
+            tot_alt_alleles += gt_val;
+        }
+    }
+    int num_chroms = 2 * num_valid_genotypes;
+    float p = ((float) tot_alt_alleles / (float) (2.0 * num_chroms));
+    float q = 1.0 - p;
+    return (float) (num_chroms/(num_chroms-1.0)) * (2.0 * p * q);
+}
+
 
 // shunting yard algorithm
 void infixToPrefix(queue<RuleToken> tokens, queue<RuleToken>& prefixtokens) {

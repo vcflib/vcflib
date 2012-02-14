@@ -240,7 +240,14 @@ public:
     // TODO
     //void setInfoField(string& key, string& val);
 
+    // return the alternate allele frequency. 
+    // -1.0 if more than one alternate allele
     float getAAF(void);
+    // return pi_hat (nucleotide diversity)
+    // -1.0 if more than one alternate allele
+    // Derived from Population Genetics: A Concise Guide,
+    // 2nd ed., p.45, John Gillespie
+    float getNucleotideDiversity(void);
     
 private:
     string lastFormat;

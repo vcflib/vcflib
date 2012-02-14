@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
         var.printAlt(cout);     cout << "\t"; 
         var.printAlleles(cout); cout << "\t"; 
         cout << var.getAAF() << "\t";
+        cout << var.getNucleotideDiversity() << "\t";
         for (; s != sEnd; ++s) {
             map<string, vector<string> >& sample = s->second;
             string& genotype = sample["GT"].front(); // XXX assumes we can only have one GT value
