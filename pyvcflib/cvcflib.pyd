@@ -1,0 +1,23 @@
+from cpython cimport bool
+from libcpp.vector cimport vector
+from libcpp.map cimport map
+from cython.operator cimport dereference as deref
+
+cdef extern from *:
+    ctypedef char* const_char_ptr "const char*"
+
+cdef extern from "<string>" namespace "std":
+    cdef cppclass string:
+        string()
+        string(char *)
+        #char *c_str()
+        const_char_ptr c_str()
+
+        bint operator==(string&)
+        bint operator==(char*)
+
+cdef extern from "Variant.h":
+    cdef cppclass VariantCallFile:
+        VariantCallFile()
+        bint openFile(string filename)
+        bint getNextVariant()
