@@ -83,7 +83,7 @@ public:
         }
     }
 
-    bool openFile(string& filename) {
+    bool openFile(string filename) {
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
