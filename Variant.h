@@ -74,7 +74,7 @@ public:
     vector<string> infoIds(void);
     vector<string> formatIds(void);
 
-    bool open(string& filename) {
+    bool open(string filename) {
         vector<string> filenameParts = split(filename, ".");
         if (filenameParts.back() == "vcf") {
             return openFile(filename);
