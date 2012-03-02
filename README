@@ -20,3 +20,5 @@ note: vcflib includes submodules, so to obtain vcflib you have to use:
 To build the pyvcflib Cython / Python wrapper for vcflib, use:
 
   % python setup.py install
+  
+  % python test.py
