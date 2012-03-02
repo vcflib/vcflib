@@ -20,7 +20,7 @@ cdef extern from "<string>" namespace "std":
 cdef extern from "Variant.h" namespace "vcf":
     cdef cppclass VariantCallFile:
         VariantCallFile()
-        bint openFile(string &)
+        bint open(string &)
         bint getNextVariant(Variant)
 
     cdef cppclass Variant:
@@ -131,7 +131,6 @@ cdef class PyVariant:
                 inc(it)
             return dict
 
-
 cdef PyVariant create_variant(Variant *v):
     cdef PyVariant pyvar = PyVariant.__new__(PyVariant)
     pyvar._thisptr = v
@@ -142,7 +141,7 @@ cdef class VariantFile:
     
     def __cinit__(self, vcf_file):
         self.vcffile_ptr = new VariantCallFile()
-        self.vcffile_ptr.openFile(string(vcf_file))
+        self.vcffile_ptr.open(string(vcf_file))
     
     def __dealloc__(self):
         del self.vcffile_ptr
