@@ -36,12 +36,20 @@ cdef extern from "Variant.h" namespace "vcf":
 
 
 cdef class PyVariant:
-    def __init__(self):
-        self._var = None
+    cdef Variant *thisptr
+    def __init__(self, v):
+        self.thisptr = v
+    def __dealloc__(self):
+        del self.thisptr
 
-cdef PyVariant create_variant(Variant v):
-    cdef PyVariant pyvar = PyVariant.__new__(PyVariant())
-    pyvar_var = v
+    property chrom:
+        """ the chromosome of the variant"""
+        def __get__(self):
+            return self.thisptr.ref.c_str()
+
+cdef PyVariant create_variant(Variant *v):
+    cdef PyVariant pyvar = PyVariant.__new__(PyVariant)
+    pyvar.thisptr = v
     return pyvar
 
 cdef class VariantFile:
@@ -58,9 +66,9 @@ cdef class VariantFile:
         return self
 
     def __next__(self):
-        cdef Variant var
-        success = self.vcffile_ptr.getNextVariant(var)
+        cdef Variant *variant = new Variant()
+        success = self.vcffile_ptr.getNextVariant(deref(variant))
         if success:
-            return create_variant(var)
+            return create_variant(variant)
         else:
-            return self.next()
+            raise StopIteration
