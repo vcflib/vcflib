@@ -12,6 +12,7 @@
 #include <stack>
 #include <queue>
 #include <set>
+#include <sstream>
 #include "split.h"
 #include "join.h"
 #include "tabixpp/tabix.hpp"
@@ -161,6 +162,7 @@ public:
     }
 };
 
+
 class Variant {
 
     friend ostream& operator<<(ostream& out, Variant& var);
@@ -203,6 +205,17 @@ public:
 
     void removeAlt(string& altallele);
 
+    // metrics describing the number and type of the genotypes
+    // present for this variant.
+    unsigned int num_hom_ref;     // how many hom_ref gts are there?
+    unsigned int num_het;         // how many het gts are there?
+    unsigned int num_hom_alt;     // how many hom_alt gts are there?
+    unsigned int num_unknown;     // how many unknown gts are there?
+    unsigned int num_valid;       // how many valid (i.e., !unknown) gts are there?
+    unsigned int num_alt_alleles; // how many alternate alleles are there?
+    
+    vector<string>  gts;     // vector of genotypes (AA AG, etc.) for each sample (in order)
+    vector<char> gt_types;// vector of genotypes (0, 1, 2, etc.) for each sample (in order)
 
 public:
 
@@ -212,6 +225,7 @@ public:
         : sampleNames(v.sampleNames)
         , outputSampleNames(v.sampleNames)
         , vcf(&v)
+        , parsedGenotypes(false)
     { }
 
     void setVariantCallFile(VariantCallFile& v);
@@ -239,7 +253,15 @@ public:
     int getNumValidGenotypes(void);
     // TODO
     //void setInfoField(string& key, string& val);
-
+    
+    // have we already ripped through the genotypes and tabulated
+    // the genotype metrics and counts?  if so, we only want to do
+    // it oce, so we can prevent doing it multiple times if we know
+    // it's been done
+    bool parsedGenotypes;
+    // loop through the genotypes and tabulate genotype metrics
+    void parseGenotypes(void);
+    
     // return the alternate allele frequency. 
     // -1.0 if more than one alternate allele
     float getAAF(void);
@@ -248,6 +270,8 @@ public:
     // Derived from Population Genetics: A Concise Guide,
     // 2nd ed., p.45, John Gillespie
     float getNucleotideDiversity(void);
+    
+    
     
 private:
     string lastFormat;
