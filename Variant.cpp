@@ -82,6 +82,7 @@ void Variant::parse(string& line, bool parseSamples) {
             else {
                 for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
                     samples[name][*f] = split(*i, ','); ++i;
+                    // collect statistics about the current (and each) genotype
                     tabulateGenotype(samples[name]["GT"].front());
                 }
             }
