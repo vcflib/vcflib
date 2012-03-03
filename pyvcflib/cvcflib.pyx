@@ -130,6 +130,18 @@ cdef class PyVariant:
                 dict[deref(it).first.c_str()] = string_map2dict(deref(it).second)
                 inc(it)
             return dict
+            
+    # additional methods
+    property aaf:
+        """return the alternate allele frequency for the variant"""
+        def __get__(self):
+            return self._thisptr.getAAF()
+    property pi:
+        """return the site-specific nucleotide diversity for the variant"""
+        def __get__(self):
+            return self._thisptr.getNucleotideDiversity()
+
+
 
 cdef PyVariant create_variant(Variant *v):
     cdef PyVariant pyvar = PyVariant.__new__(PyVariant)
