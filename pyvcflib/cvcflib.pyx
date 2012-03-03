@@ -50,12 +50,11 @@ cdef extern from "Variant.h" namespace "vcf":
         unsigned int num_alt_alleles # how many alternate alleles are there?
         vector[string] gts           # a vector of the nucl. genotypes for each
                                      # sample. (e.g. [AA AG GG]). in sample order
+        vector[int] gt_types        # a vector of the genotype classes for each
+                                     # sample. (e.g. [0 1 2). in sample order
         # custom methods
         float getAAF()
         float getNucleotideDiversity()
-        
-        bint parsedGenotypes
-        void parseGenotypes()
 
 
 # data structure conversion functions
@@ -65,6 +64,13 @@ cdef list string_vec2list(vector[string] sv):
     """
     cdef size_t size = sv.size(), i
     return [sv.at(i).c_str() for i in range(size)]
+    
+cdef list int_vec2list(vector[int] sv):
+    """
+    convert an STL vector<string> to a list
+    """
+    cdef size_t size = sv.size(), i
+    return [sv.at(i) for i in range(size)]
 
 # data structure conversion functions
 cdef dict string_map2dict(map[string, vector[string] ] sm):
@@ -146,33 +152,27 @@ cdef class PyVariant:
     property num_hom_ref:
         """ the count of homozygous for the ref allele gts"""
         def __get__(self):
-            if not self._thisptr.parsedGenotypes:
-                self._thisptr.parseGenotypes()
             return self._thisptr.num_hom_ref
     property num_het:
         """ the count of heterozygous gts"""
         def __get__(self):
-            if not self._thisptr.parsedGenotypes:
-                self._thisptr.parseGenotypes()
             return self._thisptr.num_het
     property num_hom_alt:
         """ the count of homozygous for the alt allele gts"""
         def __get__(self):
-            if not self._thisptr.parsedGenotypes:
-                self._thisptr.parseGenotypes()
             return self._thisptr.num_hom_alt
     property num_unknown:
         """ the count of unknown gts"""
         def __get__(self):
-            if not self._thisptr.parsedGenotypes:
-                self._thisptr.parseGenotypes()
             return self._thisptr.num_unknown
     property gts:
-        """ return a list of the genotypes (AA, AG) in order by sample"""
+        """ return a list of the genotypes (AA, AG, GG) in order by sample"""
         def __get__(self):
-            if not self._thisptr.parsedGenotypes:
-                self._thisptr.parseGenotypes()
             return string_vec2list(self._thisptr.gts)
+    property gt_types:
+        """ return a list of the genotypes (0, 1, 2) in order by sample"""
+        def __get__(self):
+            return int_vec2list(self._thisptr.gt_types)
             
     # additional methods
     property aaf:

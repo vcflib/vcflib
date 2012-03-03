@@ -215,7 +215,7 @@ public:
     unsigned int num_alt_alleles; // how many alternate alleles are there?
     
     vector<string>  gts;     // vector of genotypes (AA AG, etc.) for each sample (in order)
-    vector<char> gt_types;// vector of genotypes (0, 1, 2, etc.) for each sample (in order)
+    vector<int> gt_types;// vector of genotypes (0, 1, 2, etc.) for each sample (in order)
 
 public:
 
@@ -225,7 +225,12 @@ public:
         : sampleNames(v.sampleNames)
         , outputSampleNames(v.sampleNames)
         , vcf(&v)
-        , parsedGenotypes(false)
+        , num_hom_ref(0)
+        , num_het(0)
+        , num_hom_alt(0)
+        , num_unknown(0)
+        , num_alt_alleles(0)
+        , num_valid (0)
     { }
 
     void setVariantCallFile(VariantCallFile& v);
@@ -254,14 +259,6 @@ public:
     // TODO
     //void setInfoField(string& key, string& val);
     
-    // have we already ripped through the genotypes and tabulated
-    // the genotype metrics and counts?  if so, we only want to do
-    // it oce, so we can prevent doing it multiple times if we know
-    // it's been done
-    bool parsedGenotypes;
-    // loop through the genotypes and tabulate genotype metrics
-    void parseGenotypes(void);
-    
     // return the alternate allele frequency. 
     // -1.0 if more than one alternate allele
     float getAAF(void);
@@ -275,7 +272,7 @@ public:
     
 private:
     string lastFormat;
-
+    void tabulateGenotype(string numeric_genotype);
 };
 
 // from BamTools

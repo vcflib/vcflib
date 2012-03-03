@@ -82,6 +82,7 @@ void Variant::parse(string& line, bool parseSamples) {
             else {
                 for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
                     samples[name][*f] = split(*i, ','); ++i;
+                    tabulateGenotype(samples[name]["GT"].front());
                 }
             }
         }
@@ -527,75 +528,53 @@ void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
 
 
 // returns a struct with the count of each type of genotype
-void Variant::parseGenotypes(void) {
-
-    num_hom_ref = num_het = num_hom_alt = num_unknown = 0;
-    num_alt_alleles = num_valid= 0;
+void Variant::tabulateGenotype(string numeric_genotype) {
     
-    map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
-    map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();
-    for (; s != sEnd; ++s) {
-        map<string, vector<string> > sample = s->second;
-        string& numeric_genotype = sample["GT"].front();
-        int gt_val = genotypeValue(numeric_genotype);
-        switch (gt_val)
-        {
-            case 0:
-                num_hom_ref++; 
-                num_valid++; 
-                break;
-            case 1:
-                num_het++;
-                num_valid++;
-                num_alt_alleles++;
-                break;
-            case 2:
-                num_hom_alt++;
-                num_valid++;
-                num_alt_alleles += 2;
-                break;
-            case -1:
-                num_unknown++; 
-                break;
-        }
-
-        vector<string> allele_nums = split(numeric_genotype, "|/");
-        ostringstream genotype;
-        vector<string>::iterator a    = allele_nums.begin();
-        vector<string>::iterator aEnd = allele_nums.end();
-        for (; a != aEnd; ++a) {
-            int index = atoi(a->c_str());
-            genotype << alleles[index];
-        }
-        // add the allele genotype (e.g., AG) and genotype class (e.g. 0,1,2)
-        // to the list for each sample. 
-        gts.push_back(genotype.str());
-        gt_types.push_back(gt_val);
-        // TO DO
-        //gt_phases.push_back(gt_val);
+    int gt_val = genotypeValue(numeric_genotype);
+    switch (gt_val)
+    {
+        case 0:
+            num_hom_ref++; 
+            num_valid++; 
+            break;
+        case 1:
+            num_het++;
+            num_valid++;
+            num_alt_alleles++;
+            break;
+        case 2:
+            num_hom_alt++;
+            num_valid++;
+            num_alt_alleles += 2;
+            break;
+        case -1:
+            num_unknown++; 
+            break;
     }
+
+    vector<string> allele_nums = split(numeric_genotype, "|/");
+    ostringstream genotype;
+    vector<string>::iterator a    = allele_nums.begin();
+    vector<string>::iterator aEnd = allele_nums.end();
+    for (; a != aEnd; ++a) {
+        int index = atoi(a->c_str());
+        genotype << alleles[index];
+    }
+    // add the allele genotype (e.g., AG) and genotype class (e.g. 0,1,2)
+    // to the list for each sample. 
+    gts.push_back(genotype.str());
+    gt_types.push_back(gt_val);
+    // TO DO
+    //gt_phases.push_back(gt_val);
 }
 
 float Variant::getAAF(void) {
-    
-    // only incur the cost of looping through the genotypes
-    // if it hasn't been done already.
-    if (!parsedGenotypes) {
-        parseGenotypes();
-        parsedGenotypes = true;
-    }
-    
     if (alleles.size() > 2)
         return -1.0;
     return ((float) num_alt_alleles / (float) (2.0 *num_valid));
 }
 
 float Variant::getNucleotideDiversity(void) {
-    
-    if (!parsedGenotypes) {
-        parseGenotypes();
-        parsedGenotypes = true;
-    }
     int num_chroms = 2 * num_valid;
     float p = ((float) num_alt_alleles / (float) (2.0 * num_chroms));
     float q = 1.0 - p;

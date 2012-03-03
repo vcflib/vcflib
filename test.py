@@ -11,5 +11,5 @@ for var in vcf_file:
           #var.samples \
     print var.chrom, var.pos, var.id, var.ref, \
         var.alt, var.num_hom_ref, \
-        var.num_het, var.num_hom_alt, var.gts
+        var.num_het, var.num_hom_alt, var.gts[0:10], var.gt_types[0:10]
         #var.num_unknown, var.num_valid, var.num_alt_alleles
