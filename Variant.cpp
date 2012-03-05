@@ -481,9 +481,13 @@ ostream& operator<<(ostream& out, Variant& var) {
     out << "\t"
         << var.quality << "\t"
         << var.filter << "\t";
-    for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
+    // INFO
+    if (!var.info.empty()) {
+        for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
         out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+        }
     }
+    else out << ".";
     for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
         if (i == var.infoFlags.end()) {
             out << "";
@@ -525,7 +529,7 @@ ostream& operator<<(ostream& out, Variant& var) {
     return out;
 }
 
-// needed for __repr__ support in pyvcflib
+// ARQ: needed for __repr__ support in pyvcflib
 string Variant::repr(void) {
     ostringstream s;
     s << *this;
@@ -1150,6 +1154,8 @@ bool VariantCallFile::parseHeader(void) {
                     cerr << "error: no VCF header" << endl;
                     exit(1);
                 }
+                // strip last newline to prevent extra newline via split()
+                headerStr[headerStr.size() - 1] = '\0';
                 firstRecord = true;
                 break;
             }

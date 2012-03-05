@@ -241,7 +241,7 @@ public:
         gt_phases.reserve(1000);
     }
 
-    string repr(void); // needed for __repr__ support in pyvcflib
+    string repr(void); // ARQ: needed for __repr__ support in pyvcflib
 
     void setVariantCallFile(VariantCallFile& v);
     void setVariantCallFile(VariantCallFile* v);
