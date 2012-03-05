@@ -28,6 +28,7 @@ cdef extern from "Variant.h" namespace "vcf":
         VariantCallFile()
         bint open(string &)
         bint getNextVariant(Variant)
+        string header # contains the entire header
 
     cdef cppclass Variant:
         Variant(VariantCallFile &)
@@ -161,6 +162,11 @@ cdef class VariantFile:
             return create_variant(variant)
         else:
             raise StopIteration
+
+    property header:
+        """ the entire VCF file's header"""
+        def __get__(self):
+            return self.vcffile_ptr.header.c_str()
 
 
 cdef class VariantRecord:
