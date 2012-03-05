@@ -241,7 +241,7 @@ public:
         gt_phases.reserve(1000);
     }
 
-    string echo(void); // return a string version of <<
+    string repr(void); // needed for __repr__ support in pyvcflib
 
     void setVariantCallFile(VariantCallFile& v);
     void setVariantCallFile(VariantCallFile* v);

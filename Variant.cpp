@@ -525,7 +525,8 @@ ostream& operator<<(ostream& out, Variant& var) {
     return out;
 }
 
-string Variant::echo(void) {
+// needed for __repr__ support in pyvcflib
+string Variant::repr(void) {
     ostringstream s;
     s << *this;
     return s.str();
