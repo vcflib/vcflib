@@ -50,14 +50,16 @@ cdef extern from "Variant.h" namespace "vcf":
         unsigned int num_alt_alleles # how many alternate alleles are there?
         vector[string] gts           # a vector of the nucl. genotypes for each
                                      # sample. (e.g. [AA AG GG]). in sample order
-        vector[int] gt_types        # a vector of the genotype classes for each
+        vector[int] gt_types         # a vector of the genotype classes for each
                                      # sample. (e.g. [0 1 2). in sample order
+        # TO DO.  Figure out why Cython doesn't handle bool here.
+        vector[int] gt_phases        # a vector of booleans described the phase 
+                                     # of each gt for each sample (in order)
         # custom methods
         float getAAF()
         float getNucleotideDiversity()
 
-
-# data structure conversion functions
+    
 cdef list string_vec2list(vector[string] sv):
     """
     convert an STL vector<string> to a list
@@ -67,10 +69,17 @@ cdef list string_vec2list(vector[string] sv):
     
 cdef list int_vec2list(vector[int] sv):
     """
-    convert an STL vector<string> to a list
+    convert an STL vector<int> to a list
     """
     cdef size_t size = sv.size(), i
     return [sv.at(i) for i in range(size)]
+
+cdef list bool_vec2list(vector[int] sv):
+    """
+    convert an STL vector<bool> to a list
+    """
+    cdef size_t size = sv.size(), i
+    return [sv.at(i) > 0 for i in range(size)]
 
 # data structure conversion functions
 cdef dict string_map2dict(map[string, vector[string] ] sm):
@@ -173,6 +182,12 @@ cdef class PyVariant:
         """ return a list of the genotypes (0, 1, 2) in order by sample"""
         def __get__(self):
             return int_vec2list(self._thisptr.gt_types)
+    property gt_phases:
+        """ return a list of the phase state of the genotypes 
+            (True = phased, False = unphased) in order by sample
+        """
+        def __get__(self):
+            return bool_vec2list(self._thisptr.gt_phases)
             
     # additional methods
     property aaf:
