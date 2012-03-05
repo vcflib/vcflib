@@ -533,6 +533,9 @@ void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
 // returns a struct with the count of each type of genotype
 void Variant::tabulateGenotype(string numeric_genotype) {
     
+    // what class of genotype do we have?
+    // 0 = hom_ref, 1=het, 2=hom_alt, -1=unknown.
+    // tabulate our counts of all genotype stats accordingly.
     int gt_val = genotypeValue(numeric_genotype);
     switch (gt_val)
     {
@@ -554,8 +557,11 @@ void Variant::tabulateGenotype(string numeric_genotype) {
             num_unknown++; 
             break;
     }
-
+    // is this a phased genotype? 
+    bool phased = (numeric_genotype.find('|') == string::npos) ? false : true;
+    // break the strings into each numeic allele. [0,0] or [0,1]
     vector<string> allele_nums = split(numeric_genotype, "|/");
+
     ostringstream genotype;
     vector<string>::iterator a    = allele_nums.begin();
     vector<string>::iterator aEnd = allele_nums.end();
@@ -567,8 +573,7 @@ void Variant::tabulateGenotype(string numeric_genotype) {
     // to the list for each sample. 
     gts.push_back(genotype.str());
     gt_types.push_back(gt_val);
-    // TO DO
-    //gt_phases.push_back(gt_val);
+    gt_phases.push_back(phased);
 }
 
 float Variant::getAAF(void) {
