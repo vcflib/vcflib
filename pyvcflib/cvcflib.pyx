@@ -67,7 +67,9 @@ cdef extern from "Variant.h" namespace "vcf":
         float getAAF()
         float getNucleotideDiversity()
         bint isSNP()
+        bint isTransition()
         bint isINDEL()
+        bint isDeletion()
 
 
 
@@ -316,12 +318,12 @@ cdef class VariantRecord:
     property is_snp:
         """return whether or not the variant is a SNP"""
         def __get__(self):
-            return self._thisptr.isSNP():
+            return self._thisptr.isSNP()
 
     property is_indel:
         """return whether or not the variant is an INDEL"""
         def __get__(self):
-            return self._thisptr.isINDEL():
+            return self._thisptr.isINDEL()
                 
     property var_type:
         """return the type of variant
@@ -329,9 +331,28 @@ cdef class VariantRecord:
         """
         def __get__(self):
             if self._thisptr.isSNP():
-                return "SNP"
+                return "snp"
             elif self._thisptr.isINDEL():
-                return "INDEL"
+                return "indel"
             else:
-                return "UNKNOWN"
+                return "unknown"
+
+    property var_subtype:
+        """return the sub_type of variant
+           valid values if type == SNP: ts, tv
+           valid values if type == INDEL: ins, del
+        """
+        def __get__(self):
+            if self._thisptr.isSNP():
+                if self._thisptr.isTransition():
+                    return "ts"
+                else:
+                    return "tv"
+            elif self._thisptr.isINDEL():
+                if self._thisptr.isDeletion():
+                    return "del"
+                else:
+                    return "ins"
+            else:
+                return "unknown"
 

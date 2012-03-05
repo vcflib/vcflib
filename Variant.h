@@ -278,8 +278,13 @@ public:
     // Derived from Population Genetics: A Concise Guide,
     // 2nd ed., p.45, John Gillespie
     float getNucleotideDiversity(void);
+    // tests for SNPs and SNP types
     bool isSNP(void);
+    bool isTransition(void);
+    // tests for INDELs and INDEL types
     bool isINDEL(void);
+    bool isDeletion(void);
+    
     
 private:
     string lastFormat;

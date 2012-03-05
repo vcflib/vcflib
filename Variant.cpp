@@ -603,24 +603,62 @@ float Variant::getNucleotideDiversity(void) {
 
 bool Variant::isSNP(void) {
     if (ref.size() > 1) return false;
-
+    if (alt.size() > 1) return false;
+    
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string alt = *a;
-        if ((alt.size() != 1)  || (alt == "."))
+        string alt_allele = *a;
+        if ((alt.size() != 1)  || (alt_allele == "."))
             return false;
     }
     return true;
 }
 
+bool Variant::isTransition(void) {
+    if (isSNP()) {
+        // if multiple alts, it is unclear if we have a transition
+        if (alt.size() > 1) return false;
+        // just one alt allele
+        string alt_allele = alt[0];
+        if ((ref == "A" && alt_allele == "G") || 
+            (ref == "G" && alt_allele == "A") ||
+            (ref == "C" && alt_allele == "T") || 
+            (ref == "T" && alt_allele == "C")
+            ) 
+        {
+            return true;
+        } 
+        else return false;
+    }
+    else return false;
+}
+
 bool Variant::isINDEL(void) {
     if (ref.size() > 1) return true;
+    if (alt.size() > 1) return false;
 
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string alt = *a;
-        if ((alt.size() != ref.size()) || (alt == "."))
+        string alt_allele = *a;
+        if ((alt.size() != ref.size()) || (alt_allele == "."))
             return true;
     }
     return false;
+}
+
+bool Variant::isDeletion(void) {
+    if (isINDEL()) {
+        // if multiple alts, it is unclear if we have a transition
+        if (alt.size() > 1) return false;
+        // just one alt allele
+        string alt_allele = alt[0];
+        if ((ref.size() > alt_allele.size()) ||
+            (ref != "." && alt_allele == ".")
+           )
+        {
+            return true;
+        } 
+        else return false;
+    }
+    else return false;
 }
 
 
