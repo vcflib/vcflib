@@ -38,18 +38,18 @@ void Variant::parse(string& line, bool parseSamples) {
     convert(fields.at(5), quality);
     filter = fields.at(6);
     if (fields.size() > 7) {
-	vector<string> infofields = split(fields.at(7), ';');
-	for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
-	    if (*f == ".") {
-		continue;
-	    }
-	    vector<string> kv = split(*f, '=');
-	    if (kv.size() == 2) {
-		info[kv.at(0)] = split(kv.at(1), ',');
-	    } else if (kv.size() == 1) {
-		infoFlags[kv.at(0)] = true;
-	    }
-	}
+    vector<string> infofields = split(fields.at(7), ';');
+    for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
+        if (*f == ".") {
+        continue;
+        }
+        vector<string> kv = split(*f, '=');
+        if (kv.size() == 2) {
+        info[kv.at(0)] = split(kv.at(1), ',');
+        } else if (kv.size() == 1) {
+        infoFlags[kv.at(0)] = true;
+        }
+    }
     }
     // check if we have samples specified
     // and that we are supposed to parse them
@@ -83,7 +83,7 @@ void Variant::parse(string& line, bool parseSamples) {
                 for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
                     vector<string> val = split(*i, ',');
                     samples[name][*f] = val; ++i;
-                    // collect statistics about the current (and each) genotype
+                    // ARQ: collect statistics about the current (and each) genotype
                     if (*f == "GT")
                         tabulateGenotype(val.front());
                 }
@@ -536,7 +536,7 @@ void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
 }
 
 
-// returns a struct with the count of each type of genotype
+// ARQ: returns a struct with the count of each type of genotype
 void Variant::tabulateGenotype(string numeric_genotype) {
     
     // what class of genotype do we have?
@@ -1046,10 +1046,10 @@ vector<string>& unique(vector<string>& strings) {
     set<string> uniq;
     vector<string> res;
     for (vector<string>::const_iterator s = strings.begin(); s != strings.end(); ++s) {
-	if (uniq.find(*s) == uniq.end()) {
-	    res.push_back(*s);
-	    uniq.insert(*s);
-	}
+        if (uniq.find(*s) == uniq.end()) {
+            res.push_back(*s);
+            uniq.insert(*s);
+        }
     }
     strings = res;
     return strings;
@@ -1061,15 +1061,15 @@ vector<string> VariantCallFile::infoIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##INFO") == 0) {
-	    size_t pos = line.find("ID=");
-	    if (pos != string::npos) {
-		pos += 3;
-		size_t tagend = line.find(",", pos);
-		if (tagend != string::npos) {
-		    tags.push_back(line.substr(pos, tagend - pos));
-		}
-	    }
-	}
+            size_t pos = line.find("ID=");
+            if (pos != string::npos) {
+            pos += 3;
+            size_t tagend = line.find(",", pos);
+                if (tagend != string::npos) {
+                    tags.push_back(line.substr(pos, tagend - pos));
+                }
+            }
+        }
     }
     return tags;
 }
@@ -1080,15 +1080,15 @@ vector<string> VariantCallFile::formatIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##FORMAT") == 0) {
-	    size_t pos = line.find("ID=");
-	    if (pos != string::npos) {
-		pos += 3;
-		size_t tagend = line.find(",", pos);
-		if (tagend != string::npos) {
-		    tags.push_back(line.substr(pos, tagend - pos));
-		}
-	    }
-	}
+            size_t pos = line.find("ID=");
+            if (pos != string::npos) {
+                pos += 3;
+                size_t tagend = line.find(",", pos);
+                if (tagend != string::npos) {
+                    tags.push_back(line.substr(pos, tagend - pos));
+                }
+            }
+        }
     }
     return tags;
 }
@@ -1154,9 +1154,7 @@ bool VariantCallFile::parseHeader(void) {
             }
         }
     }
-
     return parseHeader(headerStr);
-
 }
 
 bool VariantCallFile::parseHeader(string& h) {
@@ -1204,8 +1202,8 @@ bool VariantCallFile::parseHeader(string& h) {
                         number = ALLELE_NUMBER;
                     } else if (numberstr == "G") {
                         number = GENOTYPE_NUMBER;
-		    } else if (numberstr == ".") {
-			number = 1;
+            } else if (numberstr == ".") {
+            number = 1;
                     } else {
                         convert(numberstr, number);
                     }
@@ -1417,7 +1415,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     int paddingLen = max(10, (int) (2 * ref.size()));  // dynamically determine optimum padding length
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
         string& alternate = *a;
-	paddingLen = max(paddingLen, (int) (2 * alternate.size()));
+    paddingLen = max(paddingLen, (int) (2 * alternate.size()));
     }
     char padChar = 'Z';
     char anchorChar = 'Q';
@@ -1497,33 +1495,33 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                         string refmatch = reference.substr(refpos, len);
                         string altmatch = alternateQuery.substr(altpos, len);
                         bool inmismatch = false;
-			int mismatchRefPosStart = refpos;
+            int mismatchRefPosStart = refpos;
                         int mismatchStart = 0;
                         for (int i = 0; i < refmatch.size(); ++i) {
                             if (refmatch.at(i) == altmatch.at(i)) {
                                 if (inmismatch) {
                                     variants.push_back(VariantAllele(
-							   refmatch.substr(mismatchStart, i - mismatchStart),
-							   altmatch.substr(mismatchStart, i - mismatchStart),
-							   mismatchRefPosStart - paddingLen + position));
+                               refmatch.substr(mismatchStart, i - mismatchStart),
+                               altmatch.substr(mismatchStart, i - mismatchStart),
+                               mismatchRefPosStart - paddingLen + position));
                                 }
                                 inmismatch = false;
                             } else {
                                 if (!inmismatch) {
-				    mismatchRefPosStart = refpos;
-				    mismatchStart = i;
+                    mismatchRefPosStart = refpos;
+                    mismatchStart = i;
                                     inmismatch = true;
                                 }
                             }
                             ++refpos;
                             ++altpos;
                         }
-			if (inmismatch) {
-			    variants.push_back(VariantAllele(
-						   refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-						   altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-						   mismatchRefPosStart - paddingLen + position));
-			}
+            if (inmismatch) {
+                variants.push_back(VariantAllele(
+                           refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+                           altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+                           mismatchRefPosStart - paddingLen + position));
+            }
 
                     }
                     break;
@@ -1540,30 +1538,30 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                     break;
             }
 
-	    // if the last two variants have the same alt position,
-	    // take the one which covers more ref or alt sequence
-	    // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
-	    if (variants.size() > 1) {
-		VariantAllele& varA = variants.at(variants.size() - 2);
-		VariantAllele& varB = variants.back();
-		if (varA.position == varB.position) {
-		    if (varA.ref.size() == varB.ref.size()) {
-			if (varA.alt.size() >= varB.alt.size()) {
-			    variants.pop_back();
-			} else {
-			    VariantAllele varB_copy = variants.back();
-			    variants.pop_back(); variants.pop_back();
-			    variants.push_back(varB_copy);
-			}
-		    } else if (varA.ref.size() > varB.ref.size()) {
-			variants.pop_back();
-		    } else {
-			VariantAllele varB_copy = variants.back();
-			variants.pop_back(); variants.pop_back();
-			variants.push_back(varB_copy);
-		    }
-		}
-	    }
+        // if the last two variants have the same alt position,
+        // take the one which covers more ref or alt sequence
+        // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
+        if (variants.size() > 1) {
+        VariantAllele& varA = variants.at(variants.size() - 2);
+        VariantAllele& varB = variants.back();
+        if (varA.position == varB.position) {
+            if (varA.ref.size() == varB.ref.size()) {
+            if (varA.alt.size() >= varB.alt.size()) {
+                variants.pop_back();
+            } else {
+                VariantAllele varB_copy = variants.back();
+                variants.pop_back(); variants.pop_back();
+                variants.push_back(varB_copy);
+            }
+            } else if (varA.ref.size() > varB.ref.size()) {
+            variants.pop_back();
+            } else {
+            VariantAllele varB_copy = variants.back();
+            variants.pop_back(); variants.pop_back();
+            variants.push_back(varB_copy);
+            }
+        }
+        }
         }
     }
 
@@ -1638,21 +1636,21 @@ void Variant::removeAlt(string& altAllele) {
         int count = c->second;
         if (count == ALLELE_NUMBER) {
             string key = c->first;
-	    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
-		map<string, vector<string> >& sample = s->second;
-		map<string, vector<string> >::iterator v = sample.find(key);
-		if (v != sample.end()) {
-		    vector<string>& vals = v->second;
-		    vector<string> tokeep;
-		    int i = 0;
-		    for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
-			if (i != altIndex) {
-			    tokeep.push_back(*a);
-			}
-		    }
-		    vals = tokeep;
-		}
-	    }
+        for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
+        map<string, vector<string> >& sample = s->second;
+        map<string, vector<string> >::iterator v = sample.find(key);
+        if (v != sample.end()) {
+            vector<string>& vals = v->second;
+            vector<string> tokeep;
+            int i = 0;
+            for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
+            if (i != altIndex) {
+                tokeep.push_back(*a);
+            }
+            }
+            vals = tokeep;
+        }
+        }
         }
     }
 
@@ -1707,26 +1705,26 @@ string unionInfoHeaderLines(string& s1, string& s2) {
     set<string> l2;
     string lastHeaderLine; // this one needs to be at the end
     for (vector<string>::iterator s = lines2.begin(); s != lines2.end(); ++s) {
-	if (s->substr(0,6) == "##INFO") {
-	    l2.insert(*s);
-	}
+    if (s->substr(0,6) == "##INFO") {
+        l2.insert(*s);
+    }
     }
     for (vector<string>::iterator s = lines1.begin(); s != lines1.end(); ++s) {
-	if (l2.count(*s)) {
-	    l2.erase(*s);
-	}
-	if (s->substr(0,6) == "#CHROM") {
-	    lastHeaderLine = *s;
-	} else {
-	    result.push_back(*s);
-	}
+    if (l2.count(*s)) {
+        l2.erase(*s);
+    }
+    if (s->substr(0,6) == "#CHROM") {
+        lastHeaderLine = *s;
+    } else {
+        result.push_back(*s);
+    }
     }
     for (set<string>::iterator s = l2.begin(); s != l2.end(); ++s) {
-	result.push_back(*s);
+    result.push_back(*s);
     }
     if (lastHeaderLine.empty()) {
-	cerr << "could not find CHROM POS ... header line" << endl;
-	exit(1);
+    cerr << "could not find CHROM POS ... header line" << endl;
+    exit(1);
     }
     result.push_back(lastHeaderLine);
     return join(result, "\n");

@@ -232,7 +232,14 @@ public:
         , num_unknown(0)
         , num_alt_alleles(0)
         , num_valid (0)
-    { }
+        , gts()
+        , gt_types()
+        , gt_phases()
+    {
+        gts.reserve(1000);
+        gt_types.reserve(1000);
+        gt_phases.reserve(1000);
+    }
 
     string echo(void); // return a string version of <<
 
