@@ -17,6 +17,13 @@ cdef extern from "<string>" namespace "std":
         bint operator==(char*)
         
 
+###############################################
+# Cython definitions of the C++ vcflib classes
+# 1. VariantCallFile: exposed to Python as
+#    VariantFile (below)
+# 2. Variant: exposed to Python as
+#    VariantRecord (below)
+###############################################
 cdef extern from "Variant.h" namespace "vcf":
     cdef cppclass VariantCallFile:
         VariantCallFile()
@@ -92,8 +99,32 @@ cdef dict string_map2dict(map[string, vector[string] ] sm):
         dict[deref(it).first.c_str()] = string_vec2list(deref(it).second)
         inc(it)
     return dict
+    
 
-cdef class PyVariant:
+cdef class VariantFile:
+    """
+    """
+    cdef VariantCallFile *vcffile_ptr
+
+    def __cinit__(self, vcf_file):
+        self.vcffile_ptr = new VariantCallFile()
+        self.vcffile_ptr.open(string(vcf_file))
+
+    def __dealloc__(self):
+        del self.vcffile_ptr
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        cdef Variant *variant = new Variant(deref(self.vcffile_ptr))
+        success = self.vcffile_ptr.getNextVariant(deref(variant))
+        if success:
+            return create_variant(variant)
+        else:
+            raise StopIteration
+
+cdef class VariantRecord:
     """
     A Python wrapper class for vcflib's Variant class.
     """
@@ -103,38 +134,47 @@ cdef class PyVariant:
     def __dealloc__(self):
         del self._thisptr
 
+    # core attributes from VCF spec
     property chrom:
         """ the chromosome of the variant"""
         def __get__(self):
             return self._thisptr.sequenceName.c_str()
+
     property pos:
         """ the 1-based position of the variant"""
         def __get__(self):
             return self._thisptr.position
+
     property id:
         """ the database id for the variant"""
         def __get__(self):
             return self._thisptr.id.c_str()
+
     property ref:
         """ the reference allele for the variant"""
         def __get__(self):
             return self._thisptr.ref.c_str()
+
     property alt:
         """ the alternate allele for the variant"""
         def __get__(self):
             return string_vec2list(self._thisptr.alt)
+
     property qual:
         """ the PHRED-like variant quality estimate"""
         def __get__(self):
             return self._thisptr.quality
+
     property filter:
         """ the filters that are applicable to this variant"""
         def __get__(self):
             return self._thisptr.filter.c_str()
+
     property info:
         """ the set of annotations variant"""
         def __get__(self):
             return string_map2dict(self._thisptr.info)
+
     property format:
         """ the format of the genotypes for this variant"""
         def __get__(self):
@@ -174,6 +214,16 @@ cdef class PyVariant:
         """ the count of unknown gts"""
         def __get__(self):
             return self._thisptr.num_unknown
+    property num_valid:
+        """ the count of valid (i.e., !unknown) gts"""
+        def __get__(self):
+            return self._thisptr.num_valid
+    property num_alt_alleles:
+        """ the count of observed alternate alleles 
+            (note alleles, not gts)
+        """
+        def __get__(self):
+            return self._thisptr.num_alt_alleles
     property gts:
         """ return a list of the genotypes (AA, AG, GG) in order by sample"""
         def __get__(self):
@@ -188,7 +238,7 @@ cdef class PyVariant:
         """
         def __get__(self):
             return bool_vec2list(self._thisptr.gt_phases)
-            
+
     # additional methods
     property aaf:
         """return the alternate allele frequency for the variant"""
@@ -201,28 +251,9 @@ cdef class PyVariant:
 
 
 
-cdef PyVariant create_variant(Variant *v):
-    cdef PyVariant pyvar = PyVariant.__new__(PyVariant)
+cdef VariantRecord create_variant(Variant *v):
+    cdef VariantRecord pyvar = VariantRecord.__new__(VariantRecord)
     pyvar._thisptr = v
     return pyvar
 
-cdef class VariantFile:
-    cdef VariantCallFile *vcffile_ptr
-    
-    def __cinit__(self, vcf_file):
-        self.vcffile_ptr = new VariantCallFile()
-        self.vcffile_ptr.open(string(vcf_file))
-    
-    def __dealloc__(self):
-        del self.vcffile_ptr
-        
-    def __iter__(self):
-        return self
 
-    def __next__(self):
-        cdef Variant *variant = new Variant(deref(self.vcffile_ptr))
-        success = self.vcffile_ptr.getNextVariant(deref(variant))
-        if success:
-            return create_variant(variant)
-        else:
-            raise StopIteration
