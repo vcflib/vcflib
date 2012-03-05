@@ -31,6 +31,7 @@ cdef extern from "Variant.h" namespace "vcf":
 
     cdef cppclass Variant:
         Variant(VariantCallFile &)
+        string echo() # "print" Variant to string. for __repr__
 
         # core VCF fields
         string sequenceName
@@ -175,14 +176,10 @@ cdef class VariantRecord:
         del self._thisptr
 
     def __repr__(self):
-        #TODO
-        pass
+        o = self._thisptr.echo()
+        return o.c_str()
         
     def __hash__(self):
-        #TODO
-        pass
-
-    def __eq__(self):
         #TODO
         pass
 

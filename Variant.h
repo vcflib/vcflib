@@ -214,8 +214,9 @@ public:
     unsigned int num_valid;       // how many valid (i.e., !unknown) gts are there?
     unsigned int num_alt_alleles; // how many alternate alleles are there?
     
-    vector<string>  gts;     // vector of genotypes (AA AG, etc.) for each sample (in order)
-    vector<int> gt_types;// vector of genotypes (0, 1, 2, etc.) for each sample (in order)
+    vector<string>  gts;    // vector of genotypes (AA AG, etc.) for each sample (in order)
+    vector<int> gt_types;   // vector of genotypes (0, 1, 2, etc.) for each sample (in order)
+    vector<int> gt_phases; // vector of booleans described the phase of each gt for each sample (in order)
 
 public:
 
@@ -232,6 +233,8 @@ public:
         , num_alt_alleles(0)
         , num_valid (0)
     { }
+
+    string echo(void); // return a string version of <<
 
     void setVariantCallFile(VariantCallFile& v);
     void setVariantCallFile(VariantCallFile* v);

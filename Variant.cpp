@@ -525,6 +525,12 @@ ostream& operator<<(ostream& out, Variant& var) {
     return out;
 }
 
+string Variant::echo(void) {
+    ostringstream s;
+    s << *this;
+    return s.str();
+}
+
 void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
     outputSampleNames = samplesToOutput;
 }
