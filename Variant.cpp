@@ -587,6 +587,7 @@ void Variant::tabulateGenotype(string numeric_genotype) {
     gt_phases.push_back(phased);
 }
 
+// ARQ methods
 float Variant::getAAF(void) {
     if (alleles.size() > 2)
         return -1.0;
@@ -599,6 +600,29 @@ float Variant::getNucleotideDiversity(void) {
     float q = 1.0 - p;
     return (float) (num_chroms/(num_chroms-1.0)) * (2.0 * p * q);
 }
+
+bool Variant::isSNP(void) {
+    if (ref.size() > 1) return false;
+
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+        string alt = *a;
+        if ((alt.size() != 1)  || (alt == "."))
+            return false;
+    }
+    return true;
+}
+
+bool Variant::isINDEL(void) {
+    if (ref.size() > 1) return true;
+
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+        string alt = *a;
+        if ((alt.size() != ref.size()) || (alt == "."))
+            return true;
+    }
+    return false;
+}
+
 
 
 // shunting yard algorithm

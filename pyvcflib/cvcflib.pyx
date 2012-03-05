@@ -66,6 +66,8 @@ cdef extern from "Variant.h" namespace "vcf":
         # custom methods
         float getAAF()
         float getNucleotideDiversity()
+        bint isSNP()
+        bint isINDEL()
 
 
 
@@ -310,3 +312,26 @@ cdef class VariantRecord:
         """return the site-specific nucleotide diversity for the variant"""
         def __get__(self):
             return self._thisptr.getNucleotideDiversity()
+
+    property is_snp:
+        """return whether or not the variant is a SNP"""
+        def __get__(self):
+            return self._thisptr.isSNP():
+
+    property is_indel:
+        """return whether or not the variant is an INDEL"""
+        def __get__(self):
+            return self._thisptr.isINDEL():
+                
+    property var_type:
+        """return the type of variant
+           valid values: SNP, INDEL, SV (future)
+        """
+        def __get__(self):
+            if self._thisptr.isSNP():
+                return "SNP"
+            elif self._thisptr.isINDEL():
+                return "INDEL"
+            else:
+                return "UNKNOWN"
+

@@ -269,6 +269,7 @@ public:
     // TODO
     //void setInfoField(string& key, string& val);
     
+    // ARQ methods
     // return the alternate allele frequency. 
     // -1.0 if more than one alternate allele
     float getAAF(void);
@@ -277,8 +278,8 @@ public:
     // Derived from Population Genetics: A Concise Guide,
     // 2nd ed., p.45, John Gillespie
     float getNucleotideDiversity(void);
-    
-    
+    bool isSNP(void);
+    bool isINDEL(void);
     
 private:
     string lastFormat;
