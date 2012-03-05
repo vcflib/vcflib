@@ -12,10 +12,9 @@ cdef extern from "<string>" namespace "std":
         string(char *)
         #char *c_str()
         const_char_ptr c_str()
-
         bint operator==(string&)
         bint operator==(char*)
-        
+
 
 ###############################################
 # Cython definitions of the C++ vcflib classes
@@ -66,20 +65,30 @@ cdef extern from "Variant.h" namespace "vcf":
         float getAAF()
         float getNucleotideDiversity()
 
-    
+
+
+###############################################
+# Utility function to convert from STL data
+# structures (e.g., vector and map) to
+# Python data structures (e.g., list and dict)
+#
+# TODO: how to template vec2list?
+###############################################
 cdef list string_vec2list(vector[string] sv):
     """
     convert an STL vector<string> to a list
     """
     cdef size_t size = sv.size(), i
     return [sv.at(i).c_str() for i in range(size)]
-    
+
+
 cdef list int_vec2list(vector[int] sv):
     """
     convert an STL vector<int> to a list
     """
     cdef size_t size = sv.size(), i
     return [sv.at(i) for i in range(size)]
+
 
 cdef list bool_vec2list(vector[int] sv):
     """
@@ -88,7 +97,7 @@ cdef list bool_vec2list(vector[int] sv):
     cdef size_t size = sv.size(), i
     return [sv.at(i) > 0 for i in range(size)]
 
-# data structure conversion functions
+
 cdef dict string_map2dict(map[string, vector[string] ] sm):
     """
     convert an STL map<string, vector<string> > to a dict
@@ -99,10 +108,38 @@ cdef dict string_map2dict(map[string, vector[string] ] sm):
         dict[deref(it).first.c_str()] = string_vec2list(deref(it).second)
         inc(it)
     return dict
-    
 
+
+cdef VariantRecord create_variant(Variant *v):
+    """
+    A utility function to store a C++ Variant object
+    in a Python object that can be accessed by the user.
+    """
+    cdef VariantRecord pyvar = VariantRecord.__new__(VariantRecord)
+    pyvar._thisptr = v
+    return pyvar
+
+
+################################################
+# The Python interface, which consists of the 
+# following classes:
+# 1. VariantFile - open and iterate through a
+#       VCF file.  each iteration yields a
+#       instance of VariantRecord (#2)
+# 2. VariantRecord - a class containing the core
+#       VCF variant attributes (e.g., REF, ALT)
+#       as well as many other useful, derived 
+#       attributes (e.g., aaf, pi, etc.)
+################################################
 cdef class VariantFile:
     """
+    A Python class for iterating through each record in
+    a VCF file.
+    
+    Example usage:
+       vcf_file = pyvcflib.VariantFile("sample.vcf")
+       for var in vcf_file:
+           print var.chrom, var.pos, var.ref, var.alt
     """
     cdef VariantCallFile *vcffile_ptr
 
@@ -124,15 +161,30 @@ cdef class VariantFile:
         else:
             raise StopIteration
 
+
 cdef class VariantRecord:
     """
     A Python wrapper class for vcflib's Variant class.
     """
     cdef Variant *_thisptr
+
     def __init__(self):
         pass
+
     def __dealloc__(self):
         del self._thisptr
+
+    def __repr__(self):
+        #TODO
+        pass
+        
+    def __hash__(self):
+        #TODO
+        pass
+
+    def __eq__(self):
+        #TODO
+        pass
 
     # core attributes from VCF spec
     property chrom:
@@ -197,41 +249,49 @@ cdef class VariantRecord:
                 dict[deref(it).first.c_str()] = string_map2dict(deref(it).second)
                 inc(it)
             return dict
-            
+
     property num_hom_ref:
         """ the count of homozygous for the ref allele gts"""
         def __get__(self):
             return self._thisptr.num_hom_ref
+
     property num_het:
         """ the count of heterozygous gts"""
         def __get__(self):
             return self._thisptr.num_het
+
     property num_hom_alt:
         """ the count of homozygous for the alt allele gts"""
         def __get__(self):
             return self._thisptr.num_hom_alt
+
     property num_unknown:
         """ the count of unknown gts"""
         def __get__(self):
             return self._thisptr.num_unknown
+
     property num_valid:
         """ the count of valid (i.e., !unknown) gts"""
         def __get__(self):
             return self._thisptr.num_valid
+
     property num_alt_alleles:
         """ the count of observed alternate alleles 
             (note alleles, not gts)
         """
         def __get__(self):
             return self._thisptr.num_alt_alleles
+
     property gts:
         """ return a list of the genotypes (AA, AG, GG) in order by sample"""
         def __get__(self):
             return string_vec2list(self._thisptr.gts)
+
     property gt_types:
         """ return a list of the genotypes (0, 1, 2) in order by sample"""
         def __get__(self):
             return int_vec2list(self._thisptr.gt_types)
+
     property gt_phases:
         """ return a list of the phase state of the genotypes 
             (True = phased, False = unphased) in order by sample
@@ -239,21 +299,12 @@ cdef class VariantRecord:
         def __get__(self):
             return bool_vec2list(self._thisptr.gt_phases)
 
-    # additional methods
     property aaf:
         """return the alternate allele frequency for the variant"""
         def __get__(self):
             return self._thisptr.getAAF()
+
     property pi:
         """return the site-specific nucleotide diversity for the variant"""
         def __get__(self):
             return self._thisptr.getNucleotideDiversity()
-
-
-
-cdef VariantRecord create_variant(Variant *v):
-    cdef VariantRecord pyvar = VariantRecord.__new__(VariantRecord)
-    pyvar._thisptr = v
-    return pyvar
-
-
