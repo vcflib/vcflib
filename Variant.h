@@ -114,7 +114,7 @@ public:
         return parsedHeader;
     }
 
-    VariantCallFile(void) : usingTabix(false), parseSamples(true) { }
+    VariantCallFile(void) : usingTabix(false), parseSamples(true), justSetRegion(false) { }
     ~VariantCallFile(void) {
         if (usingTabix) {
             delete tabixFile;
@@ -138,6 +138,7 @@ public:
 
 private:
     bool firstRecord;
+    bool justSetRegion;
     bool usingFile;
     ifstream _file;
     bool parsedHeader;

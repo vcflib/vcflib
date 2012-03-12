@@ -1171,14 +1171,23 @@ bool VariantCallFile::parseHeader(string& h) {
 }
 
 bool VariantCallFile::getNextVariant(Variant& var) {
-    if (firstRecord) {
+    if (firstRecord && !justSetRegion) {
         var.parse(line, parseSamples);
         firstRecord = false;
         _done = false;
         return true;
     }
     if (usingTabix) {
-        if (tabixFile->getNextLine(line)) {
+	if (justSetRegion && !line.empty()) {
+	    if (firstRecord) {
+		firstRecord = false;
+	    }
+	    var.parse(line, parseSamples);
+	    line.clear();
+	    justSetRegion = false;
+            _done = false;
+            return true;
+	} else if (tabixFile->getNextLine(line)) {
             var.parse(line, parseSamples);
             _done = false;
             return true;
@@ -1220,6 +1229,7 @@ bool VariantCallFile::setRegion(string region) {
     }
     if (tabixFile->setRegion(region)) {
         if (tabixFile->getNextLine(line)) {
+	    justSetRegion = true;
             return true;
         } else {
             return false;
