@@ -12,6 +12,7 @@
 #include <stack>
 #include <queue>
 #include <set>
+#include <sstream>
 #include "split.h"
 #include "join.h"
 #include "tabixpp/tabix.hpp"
@@ -74,7 +75,7 @@ public:
     vector<string> infoIds(void);
     vector<string> formatIds(void);
 
-    bool open(string& filename) {
+    bool open(string filename) {
         vector<string> filenameParts = split(filename, ".");
         if (filenameParts.back() == "vcf") {
             return openFile(filename);
@@ -83,7 +84,7 @@ public:
         }
     }
 
-    bool openFile(string& filename) {
+    bool openFile(string filename) {
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
@@ -162,6 +163,7 @@ public:
     }
 };
 
+
 class Variant {
 
     friend ostream& operator<<(ostream& out, Variant& var);
@@ -204,6 +206,18 @@ public:
 
     void removeAlt(string& altallele);
 
+    // metrics describing the number and type of the genotypes
+    // present for this variant.
+    unsigned int num_hom_ref;     // how many hom_ref gts are there?
+    unsigned int num_het;         // how many het gts are there?
+    unsigned int num_hom_alt;     // how many hom_alt gts are there?
+    unsigned int num_unknown;     // how many unknown gts are there?
+    unsigned int num_valid;       // how many valid (i.e., !unknown) gts are there?
+    unsigned int num_alt_alleles; // how many alternate alleles are there?
+    
+    vector<string>  gts;    // vector of genotypes (AA AG, etc.) for each sample (in order)
+    vector<int> gt_types;   // vector of genotypes (0, 1, 2, etc.) for each sample (in order)
+    vector<int> gt_phases; // vector of booleans described the phase of each gt for each sample (in order)
 
 public:
 
@@ -213,7 +227,22 @@ public:
         : sampleNames(v.sampleNames)
         , outputSampleNames(v.sampleNames)
         , vcf(&v)
-    { }
+        , num_hom_ref(0)
+        , num_het(0)
+        , num_hom_alt(0)
+        , num_unknown(0)
+        , num_alt_alleles(0)
+        , num_valid (0)
+        , gts()
+        , gt_types()
+        , gt_phases()
+    {
+        gts.reserve(1000);
+        gt_types.reserve(1000);
+        gt_phases.reserve(1000);
+    }
+
+    string repr(void); // ARQ: needed for __repr__ support in pyvcflib
 
     void setVariantCallFile(VariantCallFile& v);
     void setVariantCallFile(VariantCallFile* v);
@@ -240,10 +269,27 @@ public:
     int getNumValidGenotypes(void);
     // TODO
     //void setInfoField(string& key, string& val);
-
+    
+    // ARQ methods
+    // return the alternate allele frequency. 
+    // -1.0 if more than one alternate allele
+    float getAAF(void);
+    // return pi_hat (nucleotide diversity)
+    // -1.0 if more than one alternate allele
+    // Derived from Population Genetics: A Concise Guide,
+    // 2nd ed., p.45, John Gillespie
+    float getNucleotideDiversity(void);
+    // tests for SNPs and SNP types
+    bool isSNP(void);
+    bool isTransition(void);
+    // tests for INDELs and INDEL types
+    bool isINDEL(void);
+    bool isDeletion(void);
+    
+    
 private:
     string lastFormat;
-
+    void tabulateGenotype(string numeric_genotype);
 };
 
 // from BamTools
@@ -428,6 +474,11 @@ bool isHomNonRef(map<int, int>& genotype);
 bool isNull(map<int, int>& genotype);
 
 int ploidy(map<int, int>& genotype);
+
+// return a number describing the count of alternate alleles
+// for a given genotype. 0 = homref, 1 = het, 
+//                       2 = homnonref, -1 m= unknown
+int genotypeValue(string & genotype);
 
 string unionInfoHeaderLines(string& s1, string& s2);
 
