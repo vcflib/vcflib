@@ -39,7 +39,8 @@ int main(int argc, char** argv) {
              << var.ref          << "\t";
         var.printAlt(cout);     cout << "\t"; 
         var.printAlleles(cout); cout << "\t"; 
-        
+        cout << var.getAAF() << "\t";
+        cout << var.getNucleotideDiversity() << "\t";
         for (; s != sEnd; ++s) {
             map<string, vector<string> >& sample = s->second;
             string& genotype = sample["GT"].front(); // XXX assumes we can only have one GT value
@@ -52,6 +53,7 @@ int main(int argc, char** argv) {
                 cout << var.alleles[index];
                 if (g != (gt.end()-1)) cout << "/";
             }
+            cout << ":" << genotypeValue(genotype);
             cout << "\t";
         }
         cout << endl;

@@ -14,3 +14,11 @@ See included applications for example usage.
 note: vcflib includes submodules, so to obtain vcflib you have to use:
 
   % git clone --recursive <repo>
+
+
+==============================================================================
+To build the pyvcflib Cython / Python wrapper for vcflib, use:
+
+  % python setup.py install
+  
+  % python test.py
