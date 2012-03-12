@@ -139,6 +139,7 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
 
     while (variantFile.getNextVariant(var)) {
+	cout << "next: " << var << endl;
         // for each sample, check GT against <other-genotype-tag>
         // tally stats, and append to info
         map<string, map<string, vector<string> > >::iterator s     = var.samples.begin();

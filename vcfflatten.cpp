@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    cout << variantFile.header;
+    cout << variantFile.header << endl;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {

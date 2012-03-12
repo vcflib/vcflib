@@ -22,6 +22,7 @@ void printSummary(char** argv) {
 	 << "    -u, --union-vcf FILE      use this VCF for set union generation" << endl
 	 << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
 	 << "    -r, --reference FILE      FASTA reference file, required with -i and -u" << endl
+	 << "    -l, --loci                output whole loci when one alternate allele matches" << endl
          << endl
 	 << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
 	 << endl
@@ -45,6 +46,7 @@ int main(int argc, char** argv) {
     bool contained = true;
     bool overlapping = false;
     int windowsize = 30;
+    bool loci = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -64,12 +66,13 @@ int main(int argc, char** argv) {
             {"overlapping", no_argument, 0, 'o'},
 	    {"window-size", required_argument, 0, 'w'},
 	    {"reference", required_argument, 0, 'r'},
+	    {"loci", no_argument, 0, 'l'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvcob:i:u:w:r:",
+        c = getopt_long (argc, argv, "hvclob:i:u:w:r:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -110,6 +113,10 @@ int main(int argc, char** argv) {
             case 'o':
                 overlapping = true;
                 break;
+
+	    case 'l':
+	        loci = true;
+	        break;
 
             case 'h':
                 printSummary(argv);
@@ -209,7 +216,7 @@ int main(int argc, char** argv) {
     long unsigned int lastOutputPosition = 0;
     string lastSequenceName;
 
-    cout << variantFile.header;
+    cout << variantFile.header << endl;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
@@ -344,8 +351,12 @@ int main(int argc, char** argv) {
 		}
 
 		// remove the non-overlapping (intersecting) or overlapping (unioning) alts
-		for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
-		    var.removeAlt(*a);
+		if (intersecting && loci && altsToRemove.size() != var.alt.size()) {
+		    // we have a match in loci mode, so we should output the whole loci, not just the matching sequence
+		} else {
+		    for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
+			var.removeAlt(*a);
+		    }
 		}
 
 		if (unioning) {

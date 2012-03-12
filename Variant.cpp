@@ -1091,6 +1091,9 @@ bool VariantCallFile::parseHeader(void) {
 
 bool VariantCallFile::parseHeader(string& h) {
 
+    if (h.substr(h.size() - 1, 1) == "\n") {
+	h.erase(h.size() - 1, 1); // remove trailing newline
+    }
     header = h; // stores the header in the object instance
 
     vector<string> headerLines = split(header, "\n");

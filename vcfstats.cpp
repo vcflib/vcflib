@@ -62,6 +62,7 @@ void printSummary(char** argv) {
          << "                          regions may be specified." << endl
          << "    -a, --add-info        add the statistics intermediate information to the VCF file," << endl
          << "                          writing out VCF records instead of summary statistics" << endl
+	 << "    -l, --no-length-frequency   don't out the indel and mnp length-frequency spectra" << endl
          << endl
          << "Prints statistics about variants in the input VCF file." << endl;
 }
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
 
     vector<string> regions;
     bool addTags = false;
+    bool lengthFrequency = true;
 
     int c;
     while (true) {
@@ -81,46 +83,51 @@ int main(int argc, char** argv) {
             {"help", no_argument, 0, 'h'},
             {"region", required_argument, 0, 'r'},
             {"add", no_argument, 0, 'a'},
+            {"no-length-frequency", no_argument, 0, 'l'},
             //{"length",  no_argument, &printLength, true},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "har:",
+        c = getopt_long (argc, argv, "hlar:",
                          long_options, &option_index);
 
-      /* Detect the end of the options. */
+	/* Detect the end of the options. */
           if (c == -1)
             break;
  
           switch (c)
-            {
+	  {
             case 0:
-            /* If this option set a flag, do nothing else now. */
-            if (long_options[option_index].flag != 0)
-              break;
-            printf ("option %s", long_options[option_index].name);
-            if (optarg)
-              printf (" with arg %s", optarg);
-            printf ("\n");
-            break;
+		/* If this option set a flag, do nothing else now. */
+		if (long_options[option_index].flag != 0)
+		    break;
+		printf ("option %s", long_options[option_index].name);
+		if (optarg)
+		    printf (" with arg %s", optarg);
+		printf ("\n");
+		break;
 
-          case 'h':
-            printSummary(argv);
-            exit(0);
-            break;
-
-          case 'r':
-            regions.push_back(optarg);
-            break;
-
-          case 'a':
-            addTags = true;
-            break;
-          
-          default:
-            abort ();
+	    case 'h':
+		printSummary(argv);
+		exit(0);
+		break;
+		
+	    case 'r':
+		regions.push_back(optarg);
+		break;
+		
+	    case 'l':
+		lengthFrequency = false;
+		break;
+		
+	    case 'a':
+		addTags = true;
+		break;
+		
+	    default:
+		abort ();
           }
       }
 
@@ -345,31 +352,35 @@ int main(int argc, char** argv) {
              << "mismatches:\t" << mismatchbases << endl
              << endl
              << "ts/tv ratio:\t" << (double) transitions / (double) transversions << endl
-             << "deamination ratio:\t" << (double) deaminations / aminations << endl
-             << endl
-             << "ins/del length frequency distribution" << endl
-             << "length\tins\tdel\tins/del" << endl;
-        for (int i = 1; i <= maxindel; ++i) {
-            int ins = insertions[i];
-            int del = deletions[i];
-            cout << i << "\t"
-                 << (ins > 0 ? convert(ins) : "" ) << "\t"
-                 << (del > 0 ? convert(del) : "") << "\t"
-                 << (ins > 0 && del > 0 ? convert((double) ins / (double) del) : "")
-                 << endl;
-        }
+             << "deamination ratio:\t" << (double) deaminations / aminations << endl;
+	if (lengthFrequency) {
+	    cout << endl
+		 << "ins/del length frequency distribution" << endl
+		 << "length\tins\tdel\tins/del" << endl;
+	    for (int i = 1; i <= maxindel; ++i) {
+		int ins = insertions[i];
+		int del = deletions[i];
+		cout << i << "\t"
+		     << (ins > 0 ? convert(ins) : "" ) << "\t"
+		     << (del > 0 ? convert(del) : "") << "\t"
+		     << (ins > 0 && del > 0 ? convert((double) ins / (double) del) : "")
+		     << endl;
+	    }
+	}
         cout << endl
              << "insertion alleles / deletion alleles:\t" << (double) totalinsertions / (double) totaldeletions << endl
              << "inserted bases / deleted bases:\t" << (double) insertedbases / (double) deletedbases << endl
-             << endl
-             << "mnp length frequency distribution" << endl
-             << "length\tcount" << endl;
-        for (int i = 2; i <= maxmnp; ++i) {
-            int mnp = mnps[i];
-            cout << i << "\t"
-                 << (mnp > 0 ? convert(mnp) : "")
-                 << endl;
-        }
+             << endl;
+	if (lengthFrequency) {
+	    cout << "mnp length frequency distribution" << endl
+		 << "length\tcount" << endl;
+	    for (int i = 2; i <= maxmnp; ++i) {
+		int mnp = mnps[i];
+		cout << i << "\t"
+		     << (mnp > 0 ? convert(mnp) : "")
+		     << endl;
+	    }
+	}
         cout << "total bases in mnps:\t" << mnpbases << endl;
 
         /*

@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
 
     // write the new header
-    cout << variantFile.header;
+    cout << variantFile.header << endl;
  
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {

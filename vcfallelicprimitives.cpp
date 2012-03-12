@@ -155,6 +155,8 @@ int main(int argc, char** argv) {
             v.alt.push_back(a->alt);
         }
 
+	// TODO genotypes!
+
         //for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
         for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
             cout << *v << endl;

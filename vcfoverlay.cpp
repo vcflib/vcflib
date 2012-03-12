@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    cout << variantFiles.begin()->second.first->header;
+    cout << variantFiles.begin()->second.first->header << endl;
 
     while (!linesByPrecedence.empty()) {
         // get the lowest entry in the buffer of observed lines
