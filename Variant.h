@@ -179,7 +179,7 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
-    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false);
+    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false, bool useMNPs = false);
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
