@@ -38,18 +38,18 @@ void Variant::parse(string& line, bool parseSamples) {
     convert(fields.at(5), quality);
     filter = fields.at(6);
     if (fields.size() > 7) {
-    vector<string> infofields = split(fields.at(7), ';');
-    for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
-        if (*f == ".") {
-        continue;
-        }
-        vector<string> kv = split(*f, '=');
-        if (kv.size() == 2) {
-        info[kv.at(0)] = split(kv.at(1), ',');
-        } else if (kv.size() == 1) {
-        infoFlags[kv.at(0)] = true;
-        }
-    }
+	vector<string> infofields = split(fields.at(7), ';');
+	for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
+	    if (*f == ".") {
+		continue;
+	    }
+	    vector<string> kv = split(*f, '=');
+	    if (kv.size() == 2) {
+		info[kv.at(0)] = split(kv.at(1), ',');
+	    } else if (kv.size() == 1) {
+		infoFlags[kv.at(0)] = true;
+	    }
+	}
     }
     // check if we have samples specified
     // and that we are supposed to parse them
@@ -81,11 +81,7 @@ void Variant::parse(string& line, bool parseSamples) {
             }
             else {
                 for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-                    vector<string> val = split(*i, ',');
-                    samples[name][*f] = val; ++i;
-                    // ARQ: collect statistics about the current (and each) genotype
-                    if (*f == "GT")
-                        tabulateGenotype(val.front());
+                    samples[name][*f] = split(*i, ','); ++i;
                 }
             }
         }
@@ -481,13 +477,9 @@ ostream& operator<<(ostream& out, Variant& var) {
     out << "\t"
         << var.quality << "\t"
         << var.filter << "\t";
-    // INFO
-    if (!var.info.empty()) {
-        for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
+    for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
         out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
-        }
     }
-    else out << ".";
     for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
         if (i == var.infoFlags.end()) {
             out << "";
@@ -529,138 +521,9 @@ ostream& operator<<(ostream& out, Variant& var) {
     return out;
 }
 
-// ARQ: needed for __repr__ support in pyvcflib
-string Variant::repr(void) {
-    ostringstream s;
-    s << *this;
-    return s.str();
-}
-
 void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
     outputSampleNames = samplesToOutput;
 }
-
-
-// ARQ: returns a struct with the count of each type of genotype
-void Variant::tabulateGenotype(string numeric_genotype) {
-    
-    // what class of genotype do we have?
-    // 0 = hom_ref, 1=het, 2=hom_alt, -1=unknown.
-    // tabulate our counts of all genotype stats accordingly.
-    int gt_val = genotypeValue(numeric_genotype);
-    switch (gt_val)
-    {
-        case 0:
-            num_hom_ref++; 
-            num_valid++; 
-            break;
-        case 1:
-            num_het++;
-            num_valid++;
-            num_alt_alleles++;
-            break;
-        case 2:
-            num_hom_alt++;
-            num_valid++;
-            num_alt_alleles += 2;
-            break;
-        case -1:
-            num_unknown++; 
-            break;
-    }
-    // is this a phased genotype? 
-    bool phased = (numeric_genotype.find('|') == string::npos) ? false : true;
-    // break the strings into each numeic allele. [0,0] or [0,1]
-    vector<string> allele_nums = split(numeric_genotype, "|/");
-
-    ostringstream genotype;
-    vector<string>::iterator a    = allele_nums.begin();
-    vector<string>::iterator aEnd = allele_nums.end();
-    for (; a != aEnd; ++a) {
-        int index = atoi(a->c_str());
-        genotype << alleles[index];
-    }
-    // add the allele genotype (e.g., AG) and genotype class (e.g. 0,1,2)
-    // to the list for each sample. 
-    gts.push_back(genotype.str());
-    gt_types.push_back(gt_val);
-    gt_phases.push_back(phased);
-}
-
-// ARQ methods
-float Variant::getAAF(void) {
-    if (alleles.size() > 2)
-        return -1.0;
-    return ((float) num_alt_alleles / (float) (2.0 *num_valid));
-}
-
-float Variant::getNucleotideDiversity(void) {
-    int num_chroms = 2 * num_valid;
-    float p = ((float) num_alt_alleles / (float) (2.0 * num_chroms));
-    float q = 1.0 - p;
-    return (float) (num_chroms/(num_chroms-1.0)) * (2.0 * p * q);
-}
-
-bool Variant::isSNP(void) {
-    if (ref.size() > 1) return false;
-    if (alt.size() > 1) return false;
-    
-    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string alt_allele = *a;
-        if ((alt.size() != 1)  || (alt_allele == "."))
-            return false;
-    }
-    return true;
-}
-
-bool Variant::isTransition(void) {
-    if (isSNP()) {
-        // if multiple alts, it is unclear if we have a transition
-        if (alt.size() > 1) return false;
-        // just one alt allele
-        string alt_allele = alt[0];
-        if ((ref == "A" && alt_allele == "G") || 
-            (ref == "G" && alt_allele == "A") ||
-            (ref == "C" && alt_allele == "T") || 
-            (ref == "T" && alt_allele == "C")
-            ) 
-        {
-            return true;
-        } 
-        else return false;
-    }
-    else return false;
-}
-
-bool Variant::isINDEL(void) {
-    if (ref.size() > 1) return true;
-    if (alt.size() > 1) return false;
-
-    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string alt_allele = *a;
-        if ((alt.size() != ref.size()) || (alt_allele == "."))
-            return true;
-    }
-    return false;
-}
-
-bool Variant::isDeletion(void) {
-    if (isINDEL()) {
-        // if multiple alts, it is unclear if we have a transition
-        if (alt.size() > 1) return false;
-        // just one alt allele
-        string alt_allele = alt[0];
-        if ((ref.size() > alt_allele.size()) ||
-            (ref != "." && alt_allele == ".")
-           )
-        {
-            return true;
-        } 
-        else return false;
-    }
-    else return false;
-}
-
 
 
 // shunting yard algorithm
@@ -1113,10 +976,10 @@ vector<string>& unique(vector<string>& strings) {
     set<string> uniq;
     vector<string> res;
     for (vector<string>::const_iterator s = strings.begin(); s != strings.end(); ++s) {
-        if (uniq.find(*s) == uniq.end()) {
-            res.push_back(*s);
-            uniq.insert(*s);
-        }
+	if (uniq.find(*s) == uniq.end()) {
+	    res.push_back(*s);
+	    uniq.insert(*s);
+	}
     }
     strings = res;
     return strings;
@@ -1128,15 +991,15 @@ vector<string> VariantCallFile::infoIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##INFO") == 0) {
-            size_t pos = line.find("ID=");
-            if (pos != string::npos) {
-            pos += 3;
-            size_t tagend = line.find(",", pos);
-                if (tagend != string::npos) {
-                    tags.push_back(line.substr(pos, tagend - pos));
-                }
-            }
-        }
+	    size_t pos = line.find("ID=");
+	    if (pos != string::npos) {
+		pos += 3;
+		size_t tagend = line.find(",", pos);
+		if (tagend != string::npos) {
+		    tags.push_back(line.substr(pos, tagend - pos));
+		}
+	    }
+	}
     }
     return tags;
 }
@@ -1147,15 +1010,15 @@ vector<string> VariantCallFile::formatIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##FORMAT") == 0) {
-            size_t pos = line.find("ID=");
-            if (pos != string::npos) {
-                pos += 3;
-                size_t tagend = line.find(",", pos);
-                if (tagend != string::npos) {
-                    tags.push_back(line.substr(pos, tagend - pos));
-                }
-            }
-        }
+	    size_t pos = line.find("ID=");
+	    if (pos != string::npos) {
+		pos += 3;
+		size_t tagend = line.find(",", pos);
+		if (tagend != string::npos) {
+		    tags.push_back(line.substr(pos, tagend - pos));
+		}
+	    }
+	}
     }
     return tags;
 }
@@ -1216,14 +1079,14 @@ bool VariantCallFile::parseHeader(void) {
                     cerr << "error: no VCF header" << endl;
                     exit(1);
                 }
-                // strip last newline to prevent extra newline via split()
-                headerStr[headerStr.size() - 1] = '\0';
                 firstRecord = true;
                 break;
             }
         }
     }
+
     return parseHeader(headerStr);
+
 }
 
 bool VariantCallFile::parseHeader(string& h) {
@@ -1274,8 +1137,8 @@ bool VariantCallFile::parseHeader(string& h) {
                         number = ALLELE_NUMBER;
                     } else if (numberstr == "G") {
                         number = GENOTYPE_NUMBER;
-            } else if (numberstr == ".") {
-            number = 1;
+		    } else if (numberstr == ".") {
+			number = 1;
                     } else {
                         convert(numberstr, number);
                     }
@@ -1469,15 +1332,6 @@ int ploidy(map<int, int>& genotype) {
     return i;
 }
 
-int genotypeValue(string & genotype) {
-    map<int, int> gt_map = decomposeGenotype(genotype);
-    if      (isHomRef(gt_map))    return 0;
-    else if (isHet(gt_map))       return 1;
-    else if (isHomNonRef(gt_map)) return 2;
-    else if (isNull(gt_map))      return -1;
-    else cerr << "error, undefined genotype class." << endl;
-}
-
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels) {
 
     map<string, vector<VariantAllele> > variantAlleles;
@@ -1497,7 +1351,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     int paddingLen = max(10, (int) (2 * ref.size()));  // dynamically determine optimum padding length
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
         string& alternate = *a;
-    paddingLen = max(paddingLen, (int) (2 * alternate.size()));
+	paddingLen = max(paddingLen, (int) (2 * alternate.size()));
     }
     char padChar = 'Z';
     char anchorChar = 'Q';
@@ -1577,33 +1431,33 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                         string refmatch = reference.substr(refpos, len);
                         string altmatch = alternateQuery.substr(altpos, len);
                         bool inmismatch = false;
-            int mismatchRefPosStart = refpos;
+			int mismatchRefPosStart = refpos;
                         int mismatchStart = 0;
                         for (int i = 0; i < refmatch.size(); ++i) {
                             if (refmatch.at(i) == altmatch.at(i)) {
                                 if (inmismatch) {
                                     variants.push_back(VariantAllele(
-                               refmatch.substr(mismatchStart, i - mismatchStart),
-                               altmatch.substr(mismatchStart, i - mismatchStart),
-                               mismatchRefPosStart - paddingLen + position));
+							   refmatch.substr(mismatchStart, i - mismatchStart),
+							   altmatch.substr(mismatchStart, i - mismatchStart),
+							   mismatchRefPosStart - paddingLen + position));
                                 }
                                 inmismatch = false;
                             } else {
                                 if (!inmismatch) {
-                    mismatchRefPosStart = refpos;
-                    mismatchStart = i;
+				    mismatchRefPosStart = refpos;
+				    mismatchStart = i;
                                     inmismatch = true;
                                 }
                             }
                             ++refpos;
                             ++altpos;
                         }
-            if (inmismatch) {
-                variants.push_back(VariantAllele(
-                           refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-                           altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-                           mismatchRefPosStart - paddingLen + position));
-            }
+			if (inmismatch) {
+			    variants.push_back(VariantAllele(
+						   refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+						   altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+						   mismatchRefPosStart - paddingLen + position));
+			}
 
                     }
                     break;
@@ -1620,30 +1474,30 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                     break;
             }
 
-        // if the last two variants have the same alt position,
-        // take the one which covers more ref or alt sequence
-        // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
-        if (variants.size() > 1) {
-        VariantAllele& varA = variants.at(variants.size() - 2);
-        VariantAllele& varB = variants.back();
-        if (varA.position == varB.position) {
-            if (varA.ref.size() == varB.ref.size()) {
-            if (varA.alt.size() >= varB.alt.size()) {
-                variants.pop_back();
-            } else {
-                VariantAllele varB_copy = variants.back();
-                variants.pop_back(); variants.pop_back();
-                variants.push_back(varB_copy);
-            }
-            } else if (varA.ref.size() > varB.ref.size()) {
-            variants.pop_back();
-            } else {
-            VariantAllele varB_copy = variants.back();
-            variants.pop_back(); variants.pop_back();
-            variants.push_back(varB_copy);
-            }
-        }
-        }
+	    // if the last two variants have the same alt position,
+	    // take the one which covers more ref or alt sequence
+	    // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
+	    if (variants.size() > 1) {
+		VariantAllele& varA = variants.at(variants.size() - 2);
+		VariantAllele& varB = variants.back();
+		if (varA.position == varB.position) {
+		    if (varA.ref.size() == varB.ref.size()) {
+			if (varA.alt.size() >= varB.alt.size()) {
+			    variants.pop_back();
+			} else {
+			    VariantAllele varB_copy = variants.back();
+			    variants.pop_back(); variants.pop_back();
+			    variants.push_back(varB_copy);
+			}
+		    } else if (varA.ref.size() > varB.ref.size()) {
+			variants.pop_back();
+		    } else {
+			VariantAllele varB_copy = variants.back();
+			variants.pop_back(); variants.pop_back();
+			variants.push_back(varB_copy);
+		    }
+		}
+	    }
         }
     }
 
@@ -1718,21 +1572,21 @@ void Variant::removeAlt(string& altAllele) {
         int count = c->second;
         if (count == ALLELE_NUMBER) {
             string key = c->first;
-        for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
-        map<string, vector<string> >& sample = s->second;
-        map<string, vector<string> >::iterator v = sample.find(key);
-        if (v != sample.end()) {
-            vector<string>& vals = v->second;
-            vector<string> tokeep;
-            int i = 0;
-            for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
-            if (i != altIndex) {
-                tokeep.push_back(*a);
-            }
-            }
-            vals = tokeep;
-        }
-        }
+	    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
+		map<string, vector<string> >& sample = s->second;
+		map<string, vector<string> >::iterator v = sample.find(key);
+		if (v != sample.end()) {
+		    vector<string>& vals = v->second;
+		    vector<string> tokeep;
+		    int i = 0;
+		    for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
+			if (i != altIndex) {
+			    tokeep.push_back(*a);
+			}
+		    }
+		    vals = tokeep;
+		}
+	    }
         }
     }
 
@@ -1787,26 +1641,26 @@ string unionInfoHeaderLines(string& s1, string& s2) {
     set<string> l2;
     string lastHeaderLine; // this one needs to be at the end
     for (vector<string>::iterator s = lines2.begin(); s != lines2.end(); ++s) {
-    if (s->substr(0,6) == "##INFO") {
-        l2.insert(*s);
-    }
+	if (s->substr(0,6) == "##INFO") {
+	    l2.insert(*s);
+	}
     }
     for (vector<string>::iterator s = lines1.begin(); s != lines1.end(); ++s) {
-    if (l2.count(*s)) {
-        l2.erase(*s);
-    }
-    if (s->substr(0,6) == "#CHROM") {
-        lastHeaderLine = *s;
-    } else {
-        result.push_back(*s);
-    }
+	if (l2.count(*s)) {
+	    l2.erase(*s);
+	}
+	if (s->substr(0,6) == "#CHROM") {
+	    lastHeaderLine = *s;
+	} else {
+	    result.push_back(*s);
+	}
     }
     for (set<string>::iterator s = l2.begin(); s != l2.end(); ++s) {
-    result.push_back(*s);
+	result.push_back(*s);
     }
     if (lastHeaderLine.empty()) {
-    cerr << "could not find CHROM POS ... header line" << endl;
-    exit(1);
+	cerr << "could not find CHROM POS ... header line" << endl;
+	exit(1);
     }
     result.push_back(lastHeaderLine);
     return join(result, "\n");
