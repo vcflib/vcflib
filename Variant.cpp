@@ -1332,7 +1332,7 @@ int ploidy(map<int, int>& genotype) {
     return i;
 }
 
-map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels) {
+map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels, bool useMNPs) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 
@@ -1435,12 +1435,23 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                         int mismatchStart = 0;
                         for (int i = 0; i < refmatch.size(); ++i) {
                             if (refmatch.at(i) == altmatch.at(i)) {
-                                if (inmismatch) {
-                                    variants.push_back(VariantAllele(
-							   refmatch.substr(mismatchStart, i - mismatchStart),
-							   altmatch.substr(mismatchStart, i - mismatchStart),
-							   mismatchRefPosStart - paddingLen + position));
-                                }
+
+				if (inmismatch) {
+				    if (refmatch.size() - mismatchStart > 1 && !useMNPs) {
+					for (int j = 0; j < refmatch.size() - mismatchStart; ++j) {
+					    variants.push_back(VariantAllele(
+								   refmatch.substr(mismatchStart + j, 1),
+								   altmatch.substr(mismatchStart + j, 1),
+								   mismatchRefPosStart - paddingLen + position + j));
+					}
+				    } else {
+					variants.push_back(VariantAllele(
+							       refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+							       altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+							       mismatchRefPosStart - paddingLen + position));
+				    }
+				}
+				
                                 inmismatch = false;
                             } else {
                                 if (!inmismatch) {
@@ -1453,10 +1464,19 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                             ++altpos;
                         }
 			if (inmismatch) {
-			    variants.push_back(VariantAllele(
-						   refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-						   altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-						   mismatchRefPosStart - paddingLen + position));
+			    if (refmatch.size() - mismatchStart > 1 && !useMNPs) {
+				for (int j = 0; j < refmatch.size() - mismatchStart; ++j) {
+				    variants.push_back(VariantAllele(
+							   refmatch.substr(mismatchStart + j, 1),
+							   altmatch.substr(mismatchStart + j, 1),
+							   mismatchRefPosStart - paddingLen + position + j));
+				}
+			    } else {
+				variants.push_back(VariantAllele(
+						       refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+						       altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
+						       mismatchRefPosStart - paddingLen + position));
+			    }
 			}
 
                     }

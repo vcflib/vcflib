@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
                  << endl
                  << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
                  << "a single VCF record, split the record into multiple lines, but drop all" << endl
-                 << "INFO fields.  Does not handle genotypes (yet)." << endl;
+                 << "INFO fields.  Does not handle genotypes (yet).  MNPs are split into multiple SNPs." << endl;
             exit(1);
         }
         variantFile.open(filename);
@@ -51,7 +51,8 @@ int main(int argc, char** argv) {
         // unless we are already at the position !
         // take everything which is unique to that allele (records) and append it to the new record
         bool includePreviousBaseForIndels = true;
-        map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels);
+	bool useMNPs = false;
+        map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels, useMNPs);
         set<VariantAllele> alleles;
 
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
