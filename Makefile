@@ -43,7 +43,10 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfcountalleles.cpp \
 			  vcflength.cpp \
 			  vcfdistance.cpp \
-			  vcfrandomsample.cpp
+			  vcfrandomsample.cpp \
+			  vcfremap.cpp \
+			  vcfsitesummarize.cpp \
+			  vcfgeno2haplo.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
 
@@ -51,7 +54,15 @@ TABIX = tabixpp/tabix.o
 
 FASTAHACK = fastahack/Fasta.o
 
-SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
+SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o 
+
+REPEATS = smithwaterman/Repeats.o
+
+INDELALLELE = smithwaterman/IndelAllele.o
+
+DISORDER = smithwaterman/disorder.c
+
+LEFTALIGN = smithwaterman/LeftAlign.o
 
 INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
 
@@ -72,11 +83,19 @@ $(TABIX):
 $(SMITHWATERMAN):
 	cd smithwaterman && $(MAKE)
 
+$(DISORDER): $(SMITHWATERMAN)
+
+$(REPEATS): $(SMITHWATERMAN)
+
+$(LEFTALIGN): $(SMITHWATERMAN)
+
+$(INDELALLELE): $(SMITHWATERMAN)
+
 $(FASTAHACK):
 	cd fastahack && $(MAKE)
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(FASTAHACK) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

@@ -68,7 +68,6 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
             sample[annotationTag].push_back(genotypeToString(gtnew));
         }
     }
-
 }
 
 int main(int argc, char** argv) {

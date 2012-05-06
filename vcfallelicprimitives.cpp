@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "convert.h"
 #include <set>
+#include <getopt.h>
 
 using namespace std;
 using namespace vcf;
@@ -12,22 +13,63 @@ double convertStrDbl(const string& s) {
     return r;
 }
 
+void printSummary(char** argv) {
+    cerr << "usage: " << argv[0] << " [file]" << endl
+	 << endl
+	 << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
+	 << "a single VCF record, split the record into multiple lines, but drop all" << endl
+	 << "INFO fields.  Does not handle genotypes (yet).  MNPs are split into multiple SNPs." << endl;
+    exit(0);
+}
+
 int main(int argc, char** argv) {
 
-    int maxAlleles = 2;
+    bool includePreviousBaseForIndels = true;
+    bool useMNPs = false;
 
     VariantCallFile variantFile;
 
-    if (argc > 1) {
-        string filename = argv[1];
-        if (filename == "--help" || filename == "-h") {
-            cerr << "usage: " << argv[0] << " [file]" << endl
-                 << endl
-                 << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
-                 << "a single VCF record, split the record into multiple lines, but drop all" << endl
-                 << "INFO fields.  Does not handle genotypes (yet).  MNPs are split into multiple SNPs." << endl;
-            exit(1);
+    int c;
+    while (true) {
+        static struct option long_options[] =
+        {
+            /* These options set a flag. */
+            //{"verbose", no_argument,       &verbose_flag, 1},
+            {"help", no_argument, 0, 'h'},
+	    {"use-mnps", no_argument, 0, 'm'},
+            {0, 0, 0, 0}
+        };
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+
+        c = getopt_long (argc, argv, "hm",
+                         long_options, &option_index);
+
+        if (c == -1)
+            break;
+
+        switch (c) {
+
+	    case 'm':
+		useMNPs = true;
+		break;
+
+            case 'h':
+                printSummary(argv);
+                break;
+
+            case '?':
+                printSummary(argv);
+                exit(1);
+                break;
+
+            default:
+                abort ();
         }
+    }
+
+    if (optind < argc) {
+        string filename = argv[1];
         variantFile.open(filename);
     } else {
         variantFile.open(std::cin);
@@ -50,8 +92,7 @@ int main(int argc, char** argv) {
         // build a new vcf record for that position
         // unless we are already at the position !
         // take everything which is unique to that allele (records) and append it to the new record
-        bool includePreviousBaseForIndels = true;
-	bool useMNPs = false;
+
         map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels, useMNPs);
         set<VariantAllele> alleles;
 

@@ -2,6 +2,7 @@
 #define __VARIANT_H
 
 #include <vector>
+#include <list>
 #include <map>
 #include <string>
 #include <iostream>
@@ -16,6 +17,7 @@
 #include "join.h"
 #include "tabixpp/tabix.hpp"
 #include "smithwaterman/SmithWatermanGotoh.h"
+#include "smithwaterman/disorder.h"
 #include "convert.h"
 #include "multichoose/multichoose.h"
 
@@ -179,7 +181,17 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
-    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false, bool useMNPs = false);
+    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
+							 bool useMNPs = false,
+							 bool useEntropy = false,
+							 float matchScore = 10.0f,
+							 float mismatchScore = -9.0f,
+							 float gapOpenPenalty = 15.0f,
+							 float gapExtendPenalty = 6.66f,
+							 float repeatGapExtendPenalty = 0.0f,
+							 string flankingRefLeft = "",
+							 string flankingRefRight = "");
+
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
@@ -432,6 +444,14 @@ int ploidy(map<int, int>& genotype);
 string unionInfoHeaderLines(string& s1, string& s2);
 
 vector<string>& unique(vector<string>& strings);
+
+string mergeCigar(const string& c1, const string& c2);
+vector<pair<int, string> > splitCigar(const string& cigarStr);
+list<pair<int, string> > splitCigarList(const string& cigarStr);
+string joinCigar(const vector<pair<int, string> >& cigar);
+string joinCigarList(const list<pair<int, string> >& cigar);
+bool isEmptyCigarElement(const pair<int, string>& elem);
+
 
 } // end namespace VCF
 

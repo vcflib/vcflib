@@ -139,7 +139,8 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
 
     while (variantFile.getNextVariant(var)) {
-	cout << "next: " << var << endl;
+
+	//cout << "next: " << var << endl;
         // for each sample, check GT against <other-genotype-tag>
         // tally stats, and append to info
         map<string, map<string, vector<string> > >::iterator s     = var.samples.begin();
@@ -161,10 +162,24 @@ int main(int argc, char** argv) {
         for (; s != sEnd; ++s) {
             map<string, vector<string> >& sample = s->second;
             const string& name = s->first;
+
             // decompose genotypes into counts of strings
             // to facilitate comparison
-            string& gtA = sample["GT"].front();
-            string& gtB = sample[otherGenoTag].front();
+
+	    string gtA;
+	    if (sample.find("GT") == sample.end()) {
+		gtA = "./.";
+	    } else {
+		gtA = sample["GT"].front();
+	    }
+
+	    string gtB;
+	    if (sample.find(otherGenoTag) == sample.end()) {
+		gtB = "./.";
+	    } else {
+		gtB = sample[otherGenoTag].front();
+	    }
+
             map<int, int> genotypeA = decomposeGenotype(gtA);
             map<int, int> genotypeB = decomposeGenotype(gtB);
 

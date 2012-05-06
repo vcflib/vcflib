@@ -478,7 +478,9 @@ ostream& operator<<(ostream& out, Variant& var) {
         << var.quality << "\t"
         << var.filter << "\t";
     for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-        out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+	if (!i->second.empty()) {
+	    out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+	}
     }
     for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
         if (i == var.infoFlags.end()) {
@@ -1332,7 +1334,16 @@ int ploidy(map<int, int>& genotype) {
     return i;
 }
 
-map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels, bool useMNPs) {
+map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
+							      bool useMNPs,
+							      bool useEntropy,
+							      float matchScore,
+							      float mismatchScore,
+							      float gapOpenPenalty,
+							      float gapExtendPenalty,
+							      float repeatGapExtendPenalty,
+							      string flankingRefLeft,
+							      string flankingRefRight) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 
@@ -1356,24 +1367,22 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     char padChar = 'Z';
     char anchorChar = 'Q';
     string padding(paddingLen, padChar);
-    string reference = padding + ref + padding;
 
     // this 'anchored' string is done for stability
     // the assumption is that there should be a positional match in the first base
     // this is true for VCF 4.1, and standard best practices
     // using the anchor char ensures this without other kinds of realignment
-    string reference_M = reference;
-    reference_M[paddingLen] = anchorChar;
-    //cout << reference_M << endl;
+    string reference_M;
+    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+	reference_M = padding + ref + padding;
+	reference_M[paddingLen] = anchorChar;
+    } else {
+	reference_M = flankingRefLeft + ref + flankingRefRight;
+	paddingLen = flankingRefLeft.size();
+    }
 
     // passed to sw.Align
     unsigned int referencePos;
-
-    // constants for SmithWaterman algorithm
-    float matchScore = 10.0f;
-    float mismatchScore = -9.0f;
-    float gapOpenPenalty = 15.0f;
-    float gapExtendPenalty = 6.66f;
 
     string cigar;
 
@@ -1381,118 +1390,100 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
         string& alternate = *a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
-        string alternateQuery = padding + alternate + padding;
-
-        // again, the _M string is for stability of alignment aganist VCF alts
-        string alternateQuery_M = alternateQuery;
-        alternateQuery_M[paddingLen] = anchorChar;
+	string alternateQuery_M;
+	if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+	    alternateQuery_M = padding + alternate + padding;
+	    alternateQuery_M[paddingLen] = anchorChar;
+	} else {
+	    alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
+	}
         //const unsigned int alternateLen = alternate.size();
 
         CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
+	if (useEntropy) sw.EnableEntropyGapPenalty(1);
+	if (repeatGapExtendPenalty != 0) sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
         sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
 
         // left-realign the alignment...
 
+        vector<pair<int, string> > cigarData = splitCigar(cigar);
+	if (cigarData.front().second != "M" || cigarData.back().second != "M"
+	    || cigarData.front().first < paddingLen || cigarData.back().first < paddingLen) {
+	    cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
+	    cerr << cigar << endl;
+	    cerr << reference_M << endl;
+	    cerr << alternateQuery_M << endl;
+	    exit(1);
+	} else {
+	    cigarData.front().first -= paddingLen;
+	    cigarData.back().first -= paddingLen;;
+	}
+	cigar = joinCigar(cigarData);
+
         int altpos = 0;
         int refpos = 0;
-        int len;
-        string slen;
-        vector<pair<int, char> > cigarData;
 
-        for (string::iterator c = cigar.begin(); c != cigar.end(); ++c) {
-            switch (*c) {
+        for (vector<pair<int, string> >::iterator e = cigarData.begin(); e != cigarData.end(); ++e) {
+
+	    int len = e->first;
+	    string type = e->second;
+
+            switch (type.at(0)) {
                 case 'I':
-                    len = atoi(slen.c_str());
-                    slen.clear();
-                    cigarData.push_back(make_pair(len, *c));
                     if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(reference.substr(refpos - 1, 1), alternateQuery.substr(altpos - 1, len + 1), refpos - paddingLen + position - 1));
+                        variants.push_back(VariantAllele(ref.substr(refpos - 1, 1), alternate.substr(altpos - 1, len + 1), refpos + position - 1));
                     } else {
-                        variants.push_back(VariantAllele("", alternateQuery.substr(altpos, len), refpos - paddingLen + position));
+                        variants.push_back(VariantAllele("", alternate.substr(altpos, len), refpos + position));
                     }
                     altpos += len;
                     break;
                 case 'D':
-                    len = atoi(slen.c_str());
-                    slen.clear();
-                    cigarData.push_back(make_pair(len, *c));
                     if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(reference.substr(refpos - 1, len + 1), alternateQuery.substr(altpos - 1, 1), altpos - paddingLen + position - 1));
+                        variants.push_back(VariantAllele(ref.substr(refpos - 1, len + 1), alternate.substr(altpos - 1, 1), altpos + position - 1));
                     } else {
-                        variants.push_back(VariantAllele(reference.substr(refpos, len), "", refpos - paddingLen + position));
+                        variants.push_back(VariantAllele(ref.substr(refpos, len), "", refpos + position));
                     }
                     refpos += len;
                     break;
                 case 'M':
                     {
-                        len = atoi(slen.c_str());
-                        slen.clear();
-                        cigarData.push_back(make_pair(len, *c));
-                        string refmatch = reference.substr(refpos, len);
-                        string altmatch = alternateQuery.substr(altpos, len);
-                        bool inmismatch = false;
-			int mismatchRefPosStart = refpos;
-                        int mismatchStart = 0;
-                        for (int i = 0; i < refmatch.size(); ++i) {
-                            if (refmatch.at(i) == altmatch.at(i)) {
-
-				if (inmismatch) {
-				    if (refmatch.size() - mismatchStart > 1 && !useMNPs) {
-					for (int j = 0; j < refmatch.size() - mismatchStart; ++j) {
-					    variants.push_back(VariantAllele(
-								   refmatch.substr(mismatchStart + j, 1),
-								   altmatch.substr(mismatchStart + j, 1),
-								   mismatchRefPosStart - paddingLen + position + j));
-					}
-				    } else {
-					variants.push_back(VariantAllele(
-							       refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-							       altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-							       mismatchRefPosStart - paddingLen + position));
-				    }
-				}
-				
-                                inmismatch = false;
-                            } else {
-                                if (!inmismatch) {
-				    mismatchRefPosStart = refpos;
-				    mismatchStart = i;
-                                    inmismatch = true;
-                                }
-                            }
-                            ++refpos;
-                            ++altpos;
-                        }
-			if (inmismatch) {
-			    if (refmatch.size() - mismatchStart > 1 && !useMNPs) {
-				for (int j = 0; j < refmatch.size() - mismatchStart; ++j) {
-				    variants.push_back(VariantAllele(
-							   refmatch.substr(mismatchStart + j, 1),
-							   altmatch.substr(mismatchStart + j, 1),
-							   mismatchRefPosStart - paddingLen + position + j));
-				}
-			    } else {
-				variants.push_back(VariantAllele(
-						       refmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-						       altmatch.substr(mismatchStart, refmatch.size() - mismatchStart),
-						       mismatchRefPosStart - paddingLen + position));
-			    }
+			for (int i = 0; i < len; ++i) {
+			    variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
+							     alternate.substr(altpos + i, 1),
+							     refpos + i + position));
 			}
-
-                    }
+		    }
+		    refpos += len;
+		    altpos += len;
                     break;
                 case 'S':
-                    len = atoi(slen.c_str());
-                    slen.clear();
-                    cigarData.push_back(make_pair(len, *c));
                     refpos += len;
                     altpos += len;
                     break;
                 default:
-                    len = 0;
-                    slen += *c;
                     break;
             }
+
+	    // deal with MNP representation
+	    if (useMNPs) {
+		vector<VariantAllele> adjustedVariants;
+		for (vector<VariantAllele>::iterator v = variants.begin(); v != variants.end(); ++v) {
+		    if (adjustedVariants.empty()) {
+			adjustedVariants.push_back(*v);
+		    } else {
+			if (adjustedVariants.back().ref.size() == adjustedVariants.back().alt.size()
+			    && adjustedVariants.back().ref != adjustedVariants.back().alt
+			    && v->ref.size() == v->alt.size()
+			    && v->ref != v->alt) {
+			    adjustedVariants.back().ref += v->ref;
+			    adjustedVariants.back().alt += v->alt;
+			} else {
+			    adjustedVariants.push_back(*v);
+			}
+		    }
+		}
+		variants = adjustedVariants;
+	    }
 
 	    // if the last two variants have the same alt position,
 	    // take the one which covers more ref or alt sequence
@@ -1685,5 +1676,96 @@ string unionInfoHeaderLines(string& s1, string& s2) {
     result.push_back(lastHeaderLine);
     return join(result, "\n");
 }
+
+string mergeCigar(const string& c1, const string& c2) {
+    vector<pair<int, string> > cigar1 = splitCigar(c1);
+    vector<pair<int, string> > cigar2 = splitCigar(c2);
+    // check if the middle elements are the same
+    if (cigar1.back().second == cigar2.front().second) {
+        cigar1.back().first += cigar2.front().first;
+        cigar2.erase(cigar2.begin());
+    }
+    for (vector<pair<int, string> >::iterator c = cigar2.begin(); c != cigar2.end(); ++c) {
+        cigar1.push_back(*c);
+    }
+    return joinCigar(cigar1);
+}
+
+vector<pair<int, string> > splitCigar(const string& cigarStr) {
+    vector<pair<int, string> > cigar;
+    string number;
+    string type;
+    // strings go [Number][Type] ...
+    for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
+        char c = *s;
+        if (isdigit(c)) {
+            if (type.empty()) {
+                number += c;
+            } else {
+                // signal for next token, push back the last pair, clean up
+                cigar.push_back(make_pair(atoi(number.c_str()), type));
+                number.clear();
+                type.clear();
+                number += c;
+            }
+        } else {
+            type += c;
+        }
+    }
+    if (!number.empty() && !type.empty()) {
+        cigar.push_back(make_pair(atoi(number.c_str()), type));
+    }
+    return cigar;
+}
+
+list<pair<int, string> > splitCigarList(const string& cigarStr) {
+    list<pair<int, string> > cigar;
+    string number;
+    string type;
+    // strings go [Number][Type] ...
+    for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
+        char c = *s;
+        if (isdigit(c)) {
+            if (type.empty()) {
+                number += c;
+            } else {
+                // signal for next token, push back the last pair, clean up
+                cigar.push_back(make_pair(atoi(number.c_str()), type));
+                number.clear();
+                type.clear();
+                number += c;
+            }
+        } else {
+            type += c;
+        }
+    }
+    if (!number.empty() && !type.empty()) {
+        cigar.push_back(make_pair(atoi(number.c_str()), type));
+    }
+    return cigar;
+}
+
+string joinCigar(const vector<pair<int, string> >& cigar) {
+    string cigarStr;
+    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+        if (c->first) {
+            cigarStr += convert(c->first) + c->second;
+        }
+    }
+    return cigarStr;
+}
+
+string joinCigarList(const list<pair<int, string> >& cigar) {
+    string cigarStr;
+    for (list<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+        cigarStr += convert(c->first) + c->second;
+    }
+    return cigarStr;
+}
+
+bool isEmptyCigarElement(const pair<int, string>& elem) {
+    return elem.first == 0;
+}
+
 
 } // end namespace vcf
