@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     }
 
     if (optind < argc) {
-        string filename = argv[1];
+        string filename = argv[optind];
         variantFile.open(filename);
     } else {
         variantFile.open(std::cin);
