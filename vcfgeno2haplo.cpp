@@ -118,21 +118,26 @@ int main(int argc, char** argv) {
 	//cerr << "cluster size: " << cluster.size() << " " <<  var << endl;
 	//cerr << cluster.size() << endl;
 
+	bool haplotypeCluster = false;
+
 	if (!variantFile.done() && (cluster.empty() || cluster.back().sequenceName == var.sequenceName
-				    && var.position - cluster.back().position + cluster.back().ref.size() <= windowsize)) {
+				    && var.position - cluster.back().position + cluster.back().ref.size() - 1 <= windowsize)) {
 	    cluster.push_back(var);
 	} else {
-	    assert(cluster.size() == 1);
-	    cout << cluster.front() << endl;
-	    cluster.clear();
-	    if (!variantFile.done()) {
-		cluster.push_back(var);
+	    if (cluster.size() == 1) {
+		cout << cluster.front() << endl;
+		cluster.clear();
+		if (!variantFile.done()) {
+		    cluster.push_back(var);
+		}
+	    } else {
+		haplotypeCluster = true;
 	    }
 	}
 
 	// we need to deal with the current cluster, as our next var is outside of bounds
 	// process the last cluster if it's more than 1 var
-	if (cluster.size() > 1) {
+	if (haplotypeCluster) {
 	    // generate haplotype alleles and genotypes!
 	    // get the reference sequence across the haplotype in question
 	    string referenceHaplotype = reference.getSubSequence(cluster.front().sequenceName,
@@ -306,6 +311,7 @@ int main(int argc, char** argv) {
 		}
 	    }
 	    cluster.clear();
+	    cluster.push_back(var);
 	}
     }
 
