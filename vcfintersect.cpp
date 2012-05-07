@@ -360,6 +360,9 @@ int main(int argc, char** argv) {
 		}
 
 		if (unioning) {
+
+		    // TODO if we have AC, add the AC's
+
 		    // somehow sort the records and combine them?
 		    map<long int, vector<Variant*> > variants;
 		    for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {

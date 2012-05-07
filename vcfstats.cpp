@@ -237,7 +237,14 @@ int main(int argc, char** argv) {
                 string& alternate = *a;
                 vector<VariantAllele>& vav = alternates[alternate];
                 if (vav.size() > 1) {
-                    ++totalcomplex;
+		    // check that there are actually multiple non-reference alleles
+		    int nonRefAlleles = 0;
+		    for (vector<VariantAllele>::iterator z = vav.begin(); z != vav.end(); ++z) {
+			if (z->ref != z->alt)
+			    ++nonRefAlleles;
+		    }
+		    if (nonRefAlleles > 1)
+			++totalcomplex;
                 }
                 for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
                     uniqueVariants[*v].push_back(alternate);
