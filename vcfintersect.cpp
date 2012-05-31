@@ -23,6 +23,7 @@ void printSummary(char** argv) {
 	 << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
 	 << "    -r, --reference FILE      FASTA reference file, required with -i and -u" << endl
 	 << "    -l, --loci                output whole loci when one alternate allele matches" << endl
+	 << "    -m, --ref-match           intersect on the basis of record REF string" << endl
          << endl
 	 << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
 	 << endl
@@ -47,6 +48,7 @@ int main(int argc, char** argv) {
     bool overlapping = false;
     int windowsize = 30;
     bool loci = false;
+    bool refmatch = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -67,12 +69,13 @@ int main(int argc, char** argv) {
 	    {"window-size", required_argument, 0, 'w'},
 	    {"reference", required_argument, 0, 'r'},
 	    {"loci", no_argument, 0, 'l'},
+	    {"ref-match", no_argument, 0, 'm'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvclob:i:u:w:r:",
+        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -116,6 +119,10 @@ int main(int argc, char** argv) {
 
 	    case 'l':
 	        loci = true;
+	        break;
+
+	    case 'm':
+	        refmatch = true;
 	        break;
 
             case 'h':
@@ -320,7 +327,7 @@ int main(int argc, char** argv) {
      		}
 
 		// for everything overlapping and the current variant, construct the local haplotype within the bounds
-		// if there is an exact match, the alllele in the current VCF does intersect
+		// if there is an exact match, the allele in the current VCF does intersect
 
 		string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
 		map<string, vector<Variant*> > haplotypes;

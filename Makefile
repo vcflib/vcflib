@@ -12,6 +12,7 @@ OBJECTS= $(SOURCES:.cpp=.o)
 BIN_SOURCES = vcfecho.cpp \
 			  vcfaltcount.cpp \
 			  vcfhetcount.cpp \
+			  vcfhethomratio.cpp \
 			  vcffilter.cpp \
 			  vcf2tsv.cpp \
 			  vcfgenotypes.cpp \
