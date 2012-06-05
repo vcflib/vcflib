@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     }
     cout << endl;
     for (vector<string>::iterator s = variantFile.sampleNames.begin(); s != variantFile.sampleNames.end(); ++s) {
-        cout << (s == variantFile.sampleNames.begin() ? "" : "\t") << hetCounts[*s] / homCounts[*s];
+        cout << (s == variantFile.sampleNames.begin() ? "" : "\t") << (double) hetCounts[*s] / (double) homCounts[*s];
     }
     cout << endl;
 

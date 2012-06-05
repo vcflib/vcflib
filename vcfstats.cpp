@@ -368,6 +368,7 @@ int main(int argc, char** argv) {
 
     } while (regionItr != regions.end());
 
+
     // find the maximum indel size
     int maxindel = 0;
     for (map<int, int>::iterator i = insertions.begin(); i != insertions.end(); ++i) {

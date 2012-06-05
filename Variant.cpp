@@ -1177,10 +1177,14 @@ bool VariantCallFile::parseHeader(string& h) {
 
 bool VariantCallFile::getNextVariant(Variant& var) {
     if (firstRecord && !justSetRegion) {
-        var.parse(line, parseSamples);
-        firstRecord = false;
-        _done = false;
-        return true;
+	if (!line.empty()) {
+	    var.parse(line, parseSamples);
+	    firstRecord = false;
+	    _done = false;
+	    return true;
+	} else {
+	    return false;
+	}
     }
     if (usingTabix) {
 	if (justSetRegion && !line.empty()) {
