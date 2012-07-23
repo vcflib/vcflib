@@ -82,7 +82,9 @@ public:
             return openFile(filename);
         } else if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
             return openTabix(filename);
-        }
+        } else {
+	    return false;
+	}
     }
 
     bool openFile(string& filename) {
@@ -170,7 +172,6 @@ class Variant {
 
 public:
 
-    VariantCallFile* vcf;
     string sequenceName;
     unsigned long position;
     string id;
@@ -209,6 +210,7 @@ public:
     map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
     vector<string> sampleNames;
     vector<string> outputSampleNames;
+    VariantCallFile* vcf;
 
     //void addInfoInt(string& tag, int value);
     //void addInfoFloat(string& tag, double value);
@@ -448,7 +450,10 @@ vector<string>& unique(vector<string>& strings);
 string mergeCigar(const string& c1, const string& c2);
 vector<pair<int, string> > splitCigar(const string& cigarStr);
 list<pair<int, string> > splitCigarList(const string& cigarStr);
+int cigarRefLen(const vector<pair<int, char> >& cigar);
+int cigarRefLen(const vector<pair<int, string> >& cigar);
 string joinCigar(const vector<pair<int, string> >& cigar);
+string joinCigar(const vector<pair<int, char> >& cigar);
 string joinCigarList(const list<pair<int, string> >& cigar);
 bool isEmptyCigarElement(const pair<int, string>& elem);
 

@@ -29,10 +29,10 @@ void Variant::parse(string& line, bool parseSamples) {
 
     // set up reverse lookup of allele index
     altAlleleIndexes.clear();
-    int i = 0;
+    int n = 0;
     for (vector<string>::iterator a = alt.begin();
-            a != alt.end(); ++a, ++i) {
-        altAlleleIndexes[*a] = i;
+            a != alt.end(); ++a, ++n) {
+        altAlleleIndexes[*a] = n;
     }
 
     convert(fields.at(5), quality);
@@ -271,6 +271,7 @@ double Variant::getInfoValueFloat(string& key, int index) {
             return r;
         } else {
             cerr << "unsupported type for variant record " << type << endl;
+	    exit(1);
         }
     }
 }
@@ -621,7 +622,7 @@ RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) 
 void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens, map<string, VariantFieldType>& variables) {
     string lastToken = "";
     bool inToken = false;
-    for (int i = 0; i < filterspec.size(); ++i) {
+    for (unsigned int i = 0; i <  filterspec.size(); ++i) {
         char c = filterspec.at(i);
         if (c == ' ' || c == '\n') {
             inToken = false;
@@ -711,24 +712,24 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
                 //cout << "is variable" << endl;
                 // look up the variable using the Variant, depending on our filter type
                 //cout << "token.value " << token.value << endl;
-                VariantFieldType type;
+                VariantFieldType vtype;
                 if (sample.empty()) { // means we are record-specific
-                    type = var.infoType(token.value);
+                    vtype = var.infoType(token.value);
                 } else {
-                    type = var.formatType(token.value);
+                    vtype = var.formatType(token.value);
                     //cout << "type = " << type << endl;
                 }
                 //cout << "type: " << type << endl;
 
-                if (type == FIELD_INTEGER || type == FIELD_FLOAT) {
+                if (vtype == FIELD_INTEGER || vtype == FIELD_FLOAT) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = var.getValueFloat(token.value, sample, index);
                     //cerr << "number: " << token.number << endl;
-                } else if (type == FIELD_BOOL) {
+                } else if (vtype == FIELD_BOOL) {
                     token.type = RuleToken::BOOLEAN_VARIABLE;
                     token.state = var.getValueBool(token.value, sample, index);
                     //cerr << "state: " << token.state << endl;
-                } else if (type == FIELD_STRING) {
+                } else if (vtype == FIELD_STRING) {
                     //cout << "token.value = " << token.value << endl;
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = var.getValueString(token.value, sample, index);
@@ -802,7 +803,7 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
                         r.state = (b.number > a.number);
                     } else {
                         cerr << "cannot compare (>) objects of dissimilar types" << endl;
-                        cerr << a.type << " " << b.type << endl;
+			;                        cerr << a.type << " " << b.type << endl;
                         exit(1);
                     }
                     results.push(r);
@@ -1047,13 +1048,13 @@ void VariantCallFile::removeGenoHeaderLine(string tag) {
     vector<string> newHeader;
     string id = "ID=" + tag;
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
-        if (line.find("##FORMAT") == 0) {
-            if (line.find(id) == string::npos) {
-                newHeader.push_back(line);
+        string& headerLine = *s;
+        if (headerLine.find("##FORMAT") == 0) {
+            if (headerLine.find(id) == string::npos) {
+                newHeader.push_back(headerLine);
             }
         } else {
-            newHeader.push_back(line);
+            newHeader.push_back(headerLine);
         }
     }
     header = join(newHeader, "\n");
@@ -1091,12 +1092,12 @@ bool VariantCallFile::parseHeader(void) {
 
 }
 
-bool VariantCallFile::parseHeader(string& h) {
+bool VariantCallFile::parseHeader(string& hs) {
 
-    if (h.substr(h.size() - 1, 1) == "\n") {
-	h.erase(h.size() - 1, 1); // remove trailing newline
+    if (hs.substr(hs.size() - 1, 1) == "\n") {
+	hs.erase(hs.size() - 1, 1); // remove trailing newline
     }
-    header = h; // stores the header in the object instance
+    header = hs; // stores the header in the object instance
 
     vector<string> headerLines = split(header, "\n");
     for (vector<string>::iterator h = headerLines.begin(); h != headerLines.end(); ++h) {
@@ -1759,12 +1760,42 @@ string joinCigar(const vector<pair<int, string> >& cigar) {
     return cigarStr;
 }
 
+string joinCigar(const vector<pair<int, char> >& cigar) {
+    string cigarStr;
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+        if (c->first) {
+            cigarStr += convert(c->first) + string(1, c->second);
+        }
+    }
+    return cigarStr;
+}
+
 string joinCigarList(const list<pair<int, string> >& cigar) {
     string cigarStr;
     for (list<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
         cigarStr += convert(c->first) + c->second;
     }
     return cigarStr;
+}
+
+int cigarRefLen(const vector<pair<int, char> >& cigar) {
+    int len = 0;
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+	if (c->second == 'M' || c->second == 'D' || c->second == 'X') {
+	    len += c->first;
+	}
+    }
+    return len;
+}
+
+int cigarRefLen(const vector<pair<int, string> >& cigar) {
+    int len = 0;
+    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+	if (c->second == "M" || c->second == "D" || c->second == "X") {
+	    len += c->first;
+	}
+    }
+    return len;
 }
 
 bool isEmptyCigarElement(const pair<int, string>& elem) {

@@ -9,14 +9,14 @@ template<typename T>
 bool convert(const std::string& s, T& r) {
     std::istringstream iss(s);
     iss >> r;
-    return (iss.fail() || ((std::size_t) iss.tellg()) != s.size()) ? false : true;
+    return iss.eof() ? true : false;
 }
 
 template<typename T>
 std::string convert(const T& r) {
     std::ostringstream iss;
     iss << r;
-    return iss.str();
+    return s;
 }
 
 #endif

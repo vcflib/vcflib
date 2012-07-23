@@ -150,12 +150,14 @@ int main(int argc, char** argv) {
     }
 
     VariantCallFile variantFile;
+    bool usingstdin = false;
     string inputFilename;
     if (optind == argc - 1) {
         inputFilename = argv[optind];
         variantFile.open(inputFilename);
     } else {
         variantFile.open(std::cin);
+	usingstdin = true;
     }
 
     if (!variantFile.is_open()) {
@@ -169,7 +171,16 @@ int main(int argc, char** argv) {
 
     VariantCallFile otherVariantFile;
     if (!vcfFileName.empty()) {
-	otherVariantFile.open(vcfFileName);
+	if (vcfFileName == "-") {
+	    if (usingstdin) {
+		cerr << "cannot open both VCF file streams from stdin" << endl;
+		exit(1);
+	    } else {
+		otherVariantFile.open(std::cin);
+	    }
+	} else {
+	    otherVariantFile.open(vcfFileName);
+	}
 	if (!otherVariantFile.is_open()) {
 	    cerr << "could not open VCF file " << vcfFileName << endl;
 	    exit(1);

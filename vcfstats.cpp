@@ -184,6 +184,9 @@ int main(int argc, char** argv) {
         variantFile.addHeaderLine("##INFO=<ID=mismatches,Number=A,Type=Integer,Description=\"Total number of mismatches in the alternate allele\">");
         variantFile.addHeaderLine("##INFO=<ID=insertions,Number=A,Type=Integer,Description=\"Total number of inserted bases in the alternate allele\">");
         variantFile.addHeaderLine("##INFO=<ID=deletions,Number=A,Type=Integer,Description=\"Total number of deleted bases in the alternate allele\">");
+        variantFile.addHeaderLine("##INFO=<ID=cigar,Number=A,Type=String,Description=\"The CIGAR-style representation of the alternate allele as aligned to the reference\">");
+	variantFile.addHeaderLine("##INFO=<ID=reflen,Number=1,Type=Integer,Description=\"The length of the reference allele\">");
+	variantFile.addHeaderLine("##INFO=<ID=altlen,Number=A,Type=Integer,Description=\"The length of the alternate allele\">");
         cout << variantFile.header << endl;
     }
 
@@ -212,7 +215,7 @@ int main(int argc, char** argv) {
     map<int, int> mnps;
     map<int, int> complexsubs;
 
-    bool includePreviousBaseForIndels = true;
+    bool includePreviousBaseForIndels = false;
     bool useMNPs = true;
     bool useEntropy = false;
 
@@ -233,8 +236,13 @@ int main(int argc, char** argv) {
 										  gapOpenPenalty,
 										  gapExtendPenalty);
             map<VariantAllele, vector<string> > uniqueVariants;
+	    
+	    vector<string> cigars;
+	    
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                 string& alternate = *a;
+		if (addTags)
+		    var.info["altlen"].push_back(convert(alternate.size()));
                 vector<VariantAllele>& vav = alternates[alternate];
                 if (vav.size() > 1) {
 		    // check that there are actually multiple non-reference alleles
@@ -249,7 +257,44 @@ int main(int argc, char** argv) {
                 for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
                     uniqueVariants[*v].push_back(alternate);
                 }
+
+		if (addTags) {
+		    string cigar;
+		    pair<int, string> element;
+		    for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
+			VariantAllele& va = *v;
+			if (va.ref != va.alt) {
+			    if (element.second == "M") {
+				cigar += convert(element.first) + element.second;
+				element.second = ""; element.first = 0;
+			    }
+			    if (va.ref.size() == va.alt.size()) {
+				cigar += convert(va.ref.size()) + "X";
+			    } else if (va.ref.size() > va.alt.size()) {
+				cigar += convert(va.ref.size() - va.alt.size()) + "D";
+			    } else {
+				cigar += convert(va.alt.size() - va.ref.size()) + "I";
+			    }
+			} else {
+			    if (element.second == "M") {
+				element.first += va.ref.size();
+			    } else {
+				element = make_pair(va.ref.size(), "M");
+			    }
+			}
+		    }
+		    if (element.second == "M") {
+			cigar += convert(element.first) + element.second;
+		    }
+		    element.second = ""; element.first = 0;
+		    cigars.push_back(cigar);
+		}
             }
+
+	    if (addTags) {
+		var.info["cigar"] = cigars;
+		var.info["reflen"].push_back(convert(var.ref.size()));
+	    }
 
             variantAlleles += var.alt.size();
             map<string, AlleleStats> alleleStats;
@@ -257,6 +302,7 @@ int main(int argc, char** argv) {
             for (map<VariantAllele, vector<string> >::iterator v = uniqueVariants.begin(); v != uniqueVariants.end(); ++v) {
                 const VariantAllele& va = v->first;
                 vector<string>& alternates = v->second;
+
                 if (!addTags) { // don't add any tag information if we're not going to output it
                     alternates.clear();
                 }

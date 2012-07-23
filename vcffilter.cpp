@@ -14,6 +14,7 @@ void printSummary(char** argv) {
          << "    -g, --genotype-filter specifies a filter to apply to the genotype fields of records" << endl
          << "    -s, --filter-sites    filter entire records, not just alleles" << endl
          << "    -t, --tag             tag vcf records as filtered with this tag instead of suppressing them" << endl
+	 << "    -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag" << endl
          << "    -v, --invert          inverts the filter, e.g. grep -v" << endl
          << "    -o, --or              use logical OR instead of AND to combine filters" << endl
          << "    -r, --region          specify a region on which to target the filtering, requires a BGZF" << endl
@@ -74,6 +75,7 @@ int main(int argc, char** argv) {
     vector<VariantFilter> genofilters;
     string tag = "";
     string filterSpec;
+    string alleleTag;
     vector<string> regions;
 
     if (argc == 1)
@@ -89,6 +91,7 @@ int main(int argc, char** argv) {
             {"info-filter",  required_argument, 0, 'f'},
             {"genotype-filter",  required_argument, 0, 'g'},
             {"tag", required_argument, 0, 't'},
+	    {"allele-tag", required_argument, 0, 'a'},
             {"invert", no_argument, 0, 'v'},
             {"or", no_argument, 0, 'o'},
             {"region", required_argument, 0, 'r'},
@@ -98,7 +101,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvsof:g:t:r:",
+        c = getopt_long (argc, argv, "hvsof:g:t:r:a:",
                          long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -125,6 +128,10 @@ int main(int argc, char** argv) {
           case 's':
             filterSites = true;
             break;
+
+	  case 'a':
+	    alleleTag = optarg;
+	    break;
  
           case 'g':
             filterSpec += " genotypes filtered with: " + string(optarg);
@@ -195,6 +202,11 @@ int main(int argc, char** argv) {
         }
         variantFile.header += *l + ((l + 1 == headerlines.end()) ? "" : "\n");
     }
+
+    if (!alleleTag.empty()) {
+	variantFile.addHeaderLine("##INFO=<ID="+ alleleTag +",Number=A,Type=String,Description=\"" + tag + " if this allele passes the filters, '.' if not, filters are: " + filterSpec + ".\">");
+    }
+
     cout << variantFile.header << endl;
 
     /*
@@ -228,23 +240,33 @@ int main(int argc, char** argv) {
                     }
                     if (passes) {
                         if (!tag.empty()) {
-                            var.addFilter(tag);
+			    if (alleleTag.empty()) {
+				var.addFilter(tag);
+			    } else {
+				var.info[alleleTag].clear();
+				for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+				    var.info[alleleTag].push_back(tag);
+				}
+			    }
                             cout << var << endl;
                         } else {
-                            cout << variantFile.line << endl;
+                            cout << var << endl;
                         }
                     } else if (!tag.empty()) {
-                        cout << variantFile.line << endl;
+                        cout << var << endl;
                     }
                 } else { // filter out alleles which pass
                     // removes the failing alleles
                     vector<string> failingAlts;
                     vector<string> passingAlts;
+		    vector<bool> passes;
                     for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                         if (!passesFilters(var, infofilters, logicalOr, *a)) {
                             failingAlts.push_back(*a);
+			    passes.push_back(false);
                         } else {
                             passingAlts.push_back(*a);
+			    passes.push_back(true);
                         }
                     }
                     if (tag.empty()) { // if there is no specified tag, just remove the failing alts
@@ -255,9 +277,20 @@ int main(int argc, char** argv) {
                             cout << var << endl;
                         }
                     } else { // otherwise, apply the tag
-                        if (!passingAlts.empty()) {
-                            var.addFilter(tag);
-                        }
+			if (alleleTag.empty()) {
+			    if (!passingAlts.empty()) {
+				var.addFilter(tag);
+			    }
+			} else {
+			    var.info[alleleTag].clear();
+			    for (vector<bool>::iterator p = passes.begin(); p != passes.end(); ++p) {
+				if (*p) {
+				    var.info[alleleTag].push_back(tag);
+				} else {
+				    var.info[alleleTag].push_back(".");
+				}
+			    }
+			}
                         cout << var << endl;
                     }
                 }

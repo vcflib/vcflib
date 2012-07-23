@@ -24,6 +24,7 @@ void printSummary(char** argv) {
 	 << "    -e, --gap-extend-penalty N   gap extension penalty for SW algorithm" << endl
 	 << "    -z, --entropy-gap-open       use entropy scaling for the gap open penalty" << endl
 	 << "    -R, --repeat-gap-extend N    penalize non-repeat-unit gaps in repeat sequence" << endl
+	 << "    -a, --adjust-vcf TAG         supply a new cigar as TAG in the output VCF" << endl
          << endl
 	 << "For each alternate allele, attempt to realign against the reference with lowered gap open penalty." << endl
 	 << "If realignment is possible, adjust the cigar and reference/alternate alleles." << endl;
@@ -49,6 +50,9 @@ int main(int argc, char** argv) {
     bool useRepeatGapExtendPenalty = false;
     float repeatGapExtendPenalty = 1;
 
+    bool adjustVcf = false;
+    string adjustedTag = "remappedCIGAR";
+
     if (argc == 1)
         printSummary(argv);
 
@@ -68,12 +72,13 @@ int main(int argc, char** argv) {
 	    {"alt-window-size", required_argument, 0, 's'},
 	    {"entropy-gap-open", no_argument, 0, 'z'},
 	    {"repeat-gap-extend", no_argument, 0, 'R'},
+	    {"adjust-vcf", required_argument, 0, 'a'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hzw:r:m:x:o:e:s:R:",
+        c = getopt_long (argc, argv, "hza:w:r:m:x:o:e:s:R:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -83,6 +88,11 @@ int main(int argc, char** argv) {
 
 	    case 'w':
 		windowsize = atoi(optarg);
+		break;
+
+	    case 'a':
+	        adjustVcf = true;
+		adjustedTag = optarg;
 		break;
 
 	    case 'r':
@@ -153,19 +163,28 @@ int main(int argc, char** argv) {
     } else {
 	freference.open(fastaFileName);
     }
+    
+    if (adjustVcf) {
+	vector<string> commandline;
+	for (int i = 0; i < argc; ++i)
+	    commandline.push_back(argv[i]);
+	variantFile.addHeaderLine("##INFO=<ID=" + adjustedTag + ",Number=A,Type=String,Description=\"CIGAR when remapped using"+ join(commandline, " ") +"\">");
+    }
 
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-	cout << endl;
-	cout << var << endl;
-	map<string, vector<VariantAllele> > variantAlleles;
-	for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+	//if (!adjustVcf) {
 	    cout << endl;
-	    //for (int i = 10; i < 100; ++i) {
-
-	    //altwindowsize = i;
+	    cout << var << endl;
+	    //}
+	map<string, vector<VariantAllele> > variantAlleles;
+	vector<vector<pair<int, char> > > cigars;
+	vector<int> positionDiffs;
+	for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+	    //if (!adjustVcf) cout << endl;
+	    cout << endl;
 
 	    // try to remap locally
 
@@ -189,8 +208,6 @@ int main(int argc, char** argv) {
 	    if (useRepeatGapExtendPenalty) sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
 	    sw.Align(referencePos, cigar, reference, alternateQuery);
 
-	    // left-realign the alignment...
-
 	    int altpos = 0;
 	    int refpos = 0;
 	    int len;
@@ -198,17 +215,23 @@ int main(int argc, char** argv) {
 	    vector<pair<int, char> > cigarData;
 
 	    string ref = reference.substr(referencePos);
+	    positionDiffs.push_back(referencePos); // TODO this... is borked
 
 	    stringstream refss;
 	    stringstream altss;
 
+	    if (!adjustVcf) cout << cigar << endl;
 	    cout << cigar << endl;
 	    for (string::iterator c = cigar.begin(); c != cigar.end(); ++c) {
 		switch (*c) {
                 case 'I':
                     len = atoi(slen.c_str());
                     slen.clear();
-                    cigarData.push_back(make_pair(len, *c));
+		    if (altpos < altwindowsize) {
+			cigarData.push_back(make_pair(len, 'M'));
+		    } else {
+			cigarData.push_back(make_pair(len, *c));
+		    }
 		    altss << alternateQuery.substr(altpos, len);
 		    refss << string(len, '-');
                     altpos += len;
@@ -216,7 +239,10 @@ int main(int argc, char** argv) {
 		case 'D':
                     len = atoi(slen.c_str());
                     slen.clear();
-                    cigarData.push_back(make_pair(len, *c));
+		    if (altpos < altwindowsize) {
+		    } else {
+			cigarData.push_back(make_pair(len, *c));
+		    }
 		    refss << ref.substr(refpos, len);
 		    altss << string(len, '-');
                     refpos += len;
@@ -224,7 +250,23 @@ int main(int argc, char** argv) {
 		case 'M':
 		    len = atoi(slen.c_str());
 		    slen.clear();
-		    cigarData.push_back(make_pair(len, *c));
+		    {
+			for (int i = 0; i < len; ++i) {
+			    if (ref.at(refpos + i) == alternateQuery.at(altpos + i)) {
+				if (!cigarData.empty() && cigarData.back().second == 'M') {
+				    cigarData.back().first++;
+				} else {
+				    cigarData.push_back(make_pair(1, 'M'));
+				}
+			    } else {
+				if (!cigarData.empty() && cigarData.back().second == 'X') {
+				    cigarData.back().first++;
+				} else {
+				    cigarData.push_back(make_pair(1, 'X'));
+				}
+			    }
+			}
+		    }
 		    refss << ref.substr(refpos, len);
 		    altss << alternateQuery.substr(altpos, len);
 		    refpos += len;
@@ -246,13 +288,60 @@ int main(int argc, char** argv) {
 		}
 	    }
 
-	    cout << "ref:\t" << refss.str() << endl;
-	    cout << "alt:\t" << altss.str() << endl;
+	    if (!adjustVcf) {
+		cout << "ref:\t" << refss.str() << endl;
+		cout << "alt:\t" << altss.str() << endl;
+	    } else {
+		cout << "ref:\t" << refss.str() << endl;
+		cout << "alt:\t" << altss.str() << endl;
+		cigars.push_back(cigarData);
+	    }
 
-//	    }
 	}
 
-	
+	if (adjustVcf) {
+	    int substart = cigars.front().front().first;
+	    int subend = cigars.front().back().first;
+
+	    // find the min and max match
+	    for (vector<vector<pair<int, char> > >::iterator c = cigars.begin(); c != cigars.end(); ++c) {
+		if (c->front().second == 'M' && c->front().first <= substart) {
+		    substart = c->front().first;
+		    if (c->size() > 1 && c->at(1).second != 'X') {
+			--substart;
+		    }
+		}
+		if (c->back().second == 'M' && c->back().first <= subend) {
+		    subend = c->back().first;
+		}
+	    }
+	    
+	    // adjust the cigars and get the new reference length
+	    int reflen = 0;
+	    for (vector<vector<pair<int, char> > >::iterator c = cigars.begin(); c != cigars.end(); ++c) {
+		c->front().first -= substart;
+		c->back().first -= subend;
+		int crf = cigarRefLen(*c);
+		if (crf > reflen)
+		    reflen = crf;
+		var.info[adjustedTag].push_back(joinCigar(*c));
+	    }
+
+	    // find the lowest positional difference
+	    int pdiff = 0;
+	    for (vector<int>::iterator d = positionDiffs.begin(); d != positionDiffs.end(); ++d) {
+		if (*d + altwindowsize < pdiff)
+		    pdiff = *d + altwindowsize;
+	    }
+
+	    // adjust the reference string
+	    var.position += pdiff;
+
+	    // adjust the variant position
+	    var.ref = freference.getSubSequence(var.sequenceName, var.position - 1, reflen);
+
+	    cout << var << endl;
+	}
     }
 
     return 0;

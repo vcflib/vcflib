@@ -71,6 +71,11 @@ all: $(OBJECTS) $(BINS)
 
 CXX = g++
 CXXFLAGS = -O3
+#CXXFLAGS = -O2
+#CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
+
+profiling:
+	$(MAKE) CXXFLAGS="$(CXXFLAGS) -g" all
 
 gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
