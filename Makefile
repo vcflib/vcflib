@@ -45,6 +45,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcflength.cpp \
 			  vcfdistance.cpp \
 			  vcfrandomsample.cpp \
+			  vcfentropy.cpp \
 			  vcfremap.cpp \
 			  vcfsitesummarize.cpp \
 			  vcfgeno2haplo.cpp
