@@ -746,7 +746,7 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = f;
                     //cerr << "number: " << token.number << endl;
-                } else if (isalpha(token.value.at(0))) {
+                } else if (convert(token.value, s)) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = s;
                     //cerr << "string: " << token.str << endl;
