@@ -263,7 +263,9 @@ private:
 // from BamTools
 // RuleToken implementation
 
-struct RuleToken {
+class RuleToken {
+
+public:
 
     // enums
     enum RuleTokenType { OPERAND = 0

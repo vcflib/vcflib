@@ -45,7 +45,7 @@ void Variant::parse(string& line, bool parseSamples) {
 	    }
 	    vector<string> kv = split(*f, '=');
 	    if (kv.size() == 2) {
-		info[kv.at(0)] = split(kv.at(1), ',');
+		split(kv.at(1), ',', info[kv.at(0)]);
 	    } else if (kv.size() == 1) {
 		infoFlags[kv.at(0)] = true;
 	    }
@@ -701,7 +701,7 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
     }
 
     while (!rulesCopy.empty()) {
-        RuleToken& token = rulesCopy.front();
+        RuleToken token = rulesCopy.front();
         rulesCopy.pop();
         // pop operands from the front of the queue and push them onto the stack
         if (isOperand(token)) {
@@ -746,7 +746,7 @@ bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = f;
                     //cerr << "number: " << token.number << endl;
-                } else if (convert(token.value, s)) {
+                } else if (isalpha(token.value.at(0))) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = s;
                     //cerr << "string: " << token.str << endl;

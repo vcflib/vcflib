@@ -14,9 +14,9 @@ bool convert(const std::string& s, T& r) {
 
 template<typename T>
 std::string convert(const T& r) {
-    std::ostringstream iss;
-    iss << r;
-    return s;
+    std::ostringstream oss;
+    oss << r;
+    return oss.str();
 }
 
 #endif
