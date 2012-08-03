@@ -21,4 +21,16 @@ std::string join(std::vector<T>& elems, S& delim) {
     return ss.str();
 }
 
+// same for lists
+template<class S, class T>
+std::string join(std::list<T>& elems, S& delim) {
+    std::stringstream ss;
+    typename std::list<T>::iterator e = elems.begin();
+    ss << *e++;
+    for (; e != elems.end(); ++e) {
+        ss << delim << *e;
+    }
+    return ss.str();
+}
+
 #endif

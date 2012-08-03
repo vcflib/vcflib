@@ -24,6 +24,9 @@ void printSummary(char** argv) {
 	 << "    -r, --reference FILE      FASTA reference file, required with -i and -u" << endl
 	 << "    -l, --loci                output whole loci when one alternate allele matches" << endl
 	 << "    -m, --ref-match           intersect on the basis of record REF string" << endl
+	 << "    -t, --tag TAG             attach TAG to each record's info field if it would intersect" << endl
+	 << "    -V, --tag-value VAL       use this value to indicate that the allele is passing" << endl
+	 << "                              '.' will be used otherwise.  default: 'PASS'" << endl
          << endl
 	 << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
 	 << endl
@@ -49,6 +52,8 @@ int main(int argc, char** argv) {
     int windowsize = 30;
     bool loci = false;
     bool refmatch = false;
+    string tag;
+    string tagValue = "PASS";
 
     if (argc == 1)
         printSummary(argv);
@@ -70,12 +75,14 @@ int main(int argc, char** argv) {
 	    {"reference", required_argument, 0, 'r'},
 	    {"loci", no_argument, 0, 'l'},
 	    {"ref-match", no_argument, 0, 'm'},
+	    {"tag", required_argument, 0, 't'},
+	    {"tag-value", required_argument, 0, 'V'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:",
+        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:t:V:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -124,6 +131,14 @@ int main(int argc, char** argv) {
 	    case 'm':
 	        refmatch = true;
 	        break;
+
+	    case 't':
+	        tag = optarg;
+		break;
+
+	    case 'V':
+		tagValue = optarg;
+		break;
 
             case 'h':
                 printSummary(argv);
@@ -233,6 +248,10 @@ int main(int argc, char** argv) {
 
     long unsigned int lastOutputPosition = 0;
     string lastSequenceName;
+
+    if (!tag.empty()) {
+	variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
+    }
 
     cout << variantFile.header << endl;
 
@@ -356,6 +375,7 @@ int main(int argc, char** argv) {
 
 		// determine the non-intersecting alts
 		vector<string> altsToRemove;
+		vector<int> altIndexesToRemove;
 		for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
 		    string haplotype = referenceHaplotype;
 		    int relativeStart = var.position - haplotypeStart;
@@ -364,7 +384,15 @@ int main(int argc, char** argv) {
 		    if ((intersecting && !invert && h == haplotypes.end())
 			|| (intersecting && invert && h != haplotypes.end())
 			|| (unioning && h != haplotypes.end())) {
-			altsToRemove.push_back(*a);
+			if (tag.empty()) {
+			    altsToRemove.push_back(*a);
+			} else {
+			    var.info[tag].push_back(".");
+			}
+		    } else {
+			if (!tag.empty()) {
+			    var.info[tag].push_back(tagValue);
+			}
 		    }
 		}
 

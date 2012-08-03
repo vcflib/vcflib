@@ -447,6 +447,14 @@ int ploidy(map<int, int>& genotype);
 
 string unionInfoHeaderLines(string& s1, string& s2);
 
+
+// genotype likelihood ordering
+
+list<list<int> > glorder(int ploidy, int alleles);
+list<list<int> > _glorder(int ploidy, int alleles);
+list<int> glsWithAlt(int alt, int ploidy, int numalts);
+map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMapping, vector<int>& altsToRemove);
+
 vector<string>& unique(vector<string>& strings);
 
 string mergeCigar(const string& c1, const string& c2);

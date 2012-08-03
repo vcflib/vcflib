@@ -270,12 +270,12 @@ int main(int argc, char** argv) {
                         }
                     }
                     if (tag.empty()) { // if there is no specified tag, just remove the failing alts
-                        for (vector<string>::iterator a = failingAlts.begin(); a != failingAlts.end(); ++a) {
-                            var.removeAlt(*a);
-                        }
-                        if (!var.alt.empty()) {
-                            cout << var << endl;
-                        }
+			if (failingAlts.size() < var.alt.size()) {
+			    for (vector<string>::iterator a = failingAlts.begin(); a != failingAlts.end(); ++a) {
+				var.removeAlt(*a);
+			    }
+			    cout << var << endl;
+			}
                     } else { // otherwise, apply the tag
 			if (alleleTag.empty()) {
 			    if (!passingAlts.empty()) {

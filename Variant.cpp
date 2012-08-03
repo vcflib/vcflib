@@ -1626,15 +1626,60 @@ void Variant::removeAlt(string& altAllele) {
     }
 
     // fix the sample genotypes, removing reference to the old allele
+    map<string, int> samplePloidy;
     for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
         map<string, vector<string> >& sample = s->second;
-        map<int, int> genotype = decomposeGenotype(sample["GT"].front());
-        map<int, int> newGenotype;
-        for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-            newGenotype[alleleIndexMapping[g->first]] += g->second;
-        }
-        sample["GT"].clear();
-        sample["GT"].push_back(genotypeToString(newGenotype));
+	if (sample.find("GT") != sample.end()) {
+	    string& gt = sample["GT"].front();
+	    string splitter = "/";
+	    if (gt.find("|") != string::npos) {
+		splitter = "|";
+	    }
+	    samplePloidy[s->first] = split(gt, splitter).size();
+	    map<int, int> genotype = decomposeGenotype(sample["GT"].front());
+	    map<int, int> newGenotype;
+	    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+		newGenotype[alleleIndexMapping[g->first]] += g->second;
+	    }
+	    sample["GT"].clear();
+	    sample["GT"].push_back(genotypeToString(newGenotype));
+	}
+    }
+
+    set<int> ploidies;
+    for (map<string, int>::iterator p = samplePloidy.begin(); p != samplePloidy.end(); ++p) {
+	ploidies.insert(p->second);
+    }
+
+    // fix the sample genotype likelihoods, removing reference to the old allele
+    // which GL fields should we remove?
+    vector<int> toRemove;
+    toRemove.push_back(altSpecIndex);
+    map<int, map<int, int> > glMappingByPloidy;
+    for (set<int>::iterator p = ploidies.begin(); p != ploidies.end(); ++p) {
+	glMappingByPloidy[*p] = glReorder(*p, alt.size() + 1, alleleIndexMapping, toRemove);
+    }
+
+    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
+        map<string, vector<string> >& sample = s->second;
+	map<string, vector<string> >::iterator glsit = sample.find("GL");
+	if (glsit != sample.end()) {
+	    vector<string>& gls = glsit->second; // should be split already
+	    map<int, string> newgls;
+	    map<int, int>& newOrder = glMappingByPloidy[samplePloidy[s->first]];
+	    int i = 0;
+	    for (vector<string>::iterator g = gls.begin(); g != gls.end(); ++g, ++i) {
+		int j = newOrder[i];
+		if (j != -1) {
+		    newgls[i] = *g;
+		}
+	    }
+	    // update the gls
+	    gls.clear();
+	    for (map<int, string>::iterator g = newgls.begin(); g != newgls.end(); ++g) {
+		gls.push_back(g->second);
+	    }
+	}
     }
 
     // reset the alt
@@ -1800,6 +1845,88 @@ int cigarRefLen(const vector<pair<int, string> >& cigar) {
 
 bool isEmptyCigarElement(const pair<int, string>& elem) {
     return elem.first == 0;
+}
+
+list<list<int> > _glorder(int ploidy, int alts) {
+    if (ploidy == 1) {
+	list<list<int> > results;
+	for (int n = 0; n < alts; ++n) {
+	    list<int> v;
+	    v.push_back(n);
+	    results.push_back(v);
+	}
+	return results;
+    } else {
+	list<list<int> > results;
+	for (int n = 0; n < alts; ++n) {
+	    list<list<int> > x = _glorder(ploidy - 1, alts);
+	    for (list<list<int> >::iterator v = x.begin(); v != x.end(); ++v) {
+		if (v->front() <= n) {
+		    v->push_front(n);
+		    results.push_back(*v);
+		}
+	    }
+	}
+	return results;
+    }
+}
+
+// genotype likelihood-ordering of genotypes, where each genotype is a
+// list of integers (as written in the GT field)
+list<list<int> > glorder(int ploidy, int alts) {
+    list<list<int> > results = _glorder(ploidy, alts);
+    for (list<list<int> >::iterator v = results.begin(); v != results.end(); ++v) {
+	v->reverse();
+    }
+    return results;
+}
+
+// which genotype likelihoods would include this alternate allele
+list<int> glsWithAlt(int alt, int ploidy, int numalts) {
+    list<int> gls;
+    list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
+    int i = 0;
+    for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v, ++i) {
+	for (list<int>::iterator q = v->begin(); q != v->end(); ++q) {
+	    if (*q == alt) {
+		gls.push_back(i);
+		break;
+	    }
+	}
+    }
+    return gls;
+}
+
+// describes the mapping between the old gl ordering and and a new
+// one in which the GLs including the old alt have been removed
+// a map to -1 means "remove"
+map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMapping, vector<int>& altsToRemove) {
+    map<int, int> mapping;
+    list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
+    for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v) {
+	for (list<int>::iterator n = v->begin(); n != v->end(); ++n) {
+	    *n = alleleIndexMapping[*n];
+	}
+    }
+    list<list<int> > newOrderedGenotypes = glorder(ploidy, numalts - altsToRemove.size());
+    map<list<int>, int> newOrderedGenotypesMapping;
+    int i = 0;
+    // mapping is wrong...
+    for (list<list<int> >::iterator v = newOrderedGenotypes.begin(); v != newOrderedGenotypes.end(); ++v, ++i) {
+	newOrderedGenotypesMapping[*v] = i;
+    }
+    i = 0;
+    for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v, ++i) {
+	map<list<int>, int>::iterator m = newOrderedGenotypesMapping.find(*v);
+	if (m != newOrderedGenotypesMapping.end()) {
+	    //cout << "new gl order of " << i << " is " << m->second << endl;
+	    mapping[i] = m->second;
+	} else {
+	    //cout << i << " will be removed" << endl;
+	    mapping[i] = -1;
+	}
+    }
+    return mapping;
 }
 
 
