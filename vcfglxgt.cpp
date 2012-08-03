@@ -22,9 +22,6 @@ int main(int argc, char** argv) {
     bool fixNull = false;
     int c;
 
-    if (argc == 1)
-        printSummary(argv);
-
     while (true) {
         static struct option long_options[] =
         {
@@ -90,6 +87,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    cout << variantFile.header << endl;
+
     map<pair<int, int>, list<list<int> > > glOrderCache;
 
     Variant var(variantFile);
@@ -121,24 +120,37 @@ int main(int argc, char** argv) {
 		vector<string>& gls = l->second;
 		vector<string>::iterator p = gls.begin();
 		double maxGl;
-		convert(*p, maxGl);
-		int i = 0, maxindex = 0;
+		convert(*p, maxGl); ++p;
+		int i = 1, maxindex = 0;
 		for (; p != gls.end(); ++p, ++i) {
 		    double cgl;
 		    convert(*p, cgl);
-		    if (cgl > maxGl)
+		    if (cgl > maxGl) {
+			maxGl = cgl;
 			maxindex = i; // prefers == gls in order of listing
+		    }
 		}
 		
 		// determine which genotype it represents
 		// modify, if the GT is part-null
 		vector<string>& gtv = g->second;
-		gtv.clear();
 	        list<list<int> >::iterator b = glOrdering.begin();
 		advance(b, maxindex);
+		/*
+		cout << "changing sample " << s->first << " gt from " << gt << " to " << join(*b, "/")
+		     << " gls are ";
+		int q = 0;
+		for (list<list<int> >::iterator i = glOrdering.begin(); i != glOrdering.end(); ++i, ++q) {
+		    cout << join(*i, "/") << ":" << sample["GL"].at(q) << ", ";
+		}
+		cout << endl;
+		*/
+
+		gtv.clear();
 		gtv.push_back(join(*b, "/"));
 	    }
 	}
+	cout << var << endl;
     }
 
     return 0;
