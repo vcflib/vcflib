@@ -219,6 +219,8 @@ int main(int argc, char** argv) {
     bool useMNPs = true;
     bool useEntropy = false;
 
+    // todo, add biallelic snp dialog to output and ts/tv for snps and mnps
+
     do {
 
         if (!inputFilename.empty() && !regions.empty()) {

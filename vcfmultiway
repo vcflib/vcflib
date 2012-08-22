@@ -1,0 +1,20 @@
+#!/bin/bash
+
+reference=$1
+shift
+
+echo comparing $@
+
+for fileA in $@;
+do
+    for fileB in $@;
+    do
+	if [ "$fileA" = "$fileB" ]
+	then
+	    vcfstats $fileA >$(basename $fileA).stats.txt
+	else
+	    vcfintersect -r $reference -i $fileA $fileB | vcfstats >$(basename $fileA).common.$(basename $fileB).stats.txt
+	    vcfintersect -r $reference -v -i $fileB $fileA | vcfstats >$(basename $fileA).unique.$(basename $fileB).stats.txt
+	fi
+    done
+done

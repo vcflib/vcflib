@@ -1,0 +1,30 @@
+#!/bin/bash
+
+reference=$1
+outdir=$2
+scriptsdir=$3
+shift
+shift
+shift
+
+mkdir -p $outdir
+mkdir -p $scriptsdir
+
+echo comparing $@
+
+for fileA in $@;
+do
+    fileA=$(pwd)/$fileA
+    for fileB in $@;
+    do
+	fileB=$(pwd)/$fileB
+	echo $fileA vs $fileB
+	if [ "$fileA" = "$fileB" ]
+	then
+	    echo "vcfstats $fileA >$outdir/$(basename $fileA).stats" >$scriptsdir/$(basename $fileA).sh
+	else
+	    echo "vcfintersect -r $reference -i $fileA $fileB | vcfstats >$outdir/$(basename $fileA).common.$(basename $fileB).stats" >$scriptsdir/$(basename $fileA).common.$(basename $fileB).sh
+	    echo "vcfintersect -r $reference -v -i $fileB $fileA | vcfstats >$outdir/$(basename $fileA).unique.$(basename $fileB).stats" >$scriptsdir/$(basename $fileA).unique.$(basename $fileB).sh
+	fi
+    done
+done
