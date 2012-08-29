@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
 		    Variant* v = r->value;
 		    if (outputVariants.find(v) == outputVariants.end()) {
 			outputVariants.insert(v);
-			cout << *v << endl;  // does this output everything in correct order?
+			cout << *v << endl; // Q: does this output everything in correct order?.... A: No.
 		    }
 		}
 		lastSequenceName = var.sequenceName;
@@ -373,6 +373,8 @@ int main(int argc, char** argv) {
 		    }
 		}
 
+		Variant originalVar = var;
+
 		// determine the non-intersecting alts
 		vector<string> altsToRemove;
 		vector<int> altIndexesToRemove;
@@ -407,8 +409,6 @@ int main(int argc, char** argv) {
 
 		if (unioning) {
 
-		    // TODO if we have AC, add the AC's
-
 		    // somehow sort the records and combine them?
 		    map<long int, vector<Variant*> > variants;
 		    for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {
@@ -420,7 +420,17 @@ int main(int argc, char** argv) {
 		    }
 		    // add in the current variant, if it has alts left
 		    if (!var.alt.empty()) {
-			variants[var.position].push_back(&var);
+			vector<Variant*>& vars = variants[var.position];
+			int numalts = 0;
+			for (vector<Variant*>::iterator v = vars.begin(); v != vars.end(); ++v) {
+			    numalts += (*v)->alt.size();
+			}
+			if (numalts + var.alt.size() == originalVar.alt.size()) {
+			    variants[var.position].clear();
+			    variants[var.position].push_back(&originalVar);
+			} else {
+			    variants[var.position].push_back(&var);
+			}
 		    }
 
 		    for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
