@@ -342,6 +342,11 @@ int main(int argc, char** argv) {
 		if (unioning || (intersecting && invert)) {
 		    cout << var << endl;
 		    lastOutputPosition = max(lastOutputPosition, var.position);
+		} else if (intersecting && !tag.empty()) {
+		    for (int i = 0; i < var.alt.size(); ++i)
+			var.info[tag].push_back(".");
+		    cout << var << endl;
+		    lastOutputPosition = max(lastOutputPosition, var.position);
 		}
 
 	    } else {
