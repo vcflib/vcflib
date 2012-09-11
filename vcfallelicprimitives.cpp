@@ -18,7 +18,8 @@ void printSummary(char** argv) {
 	 << endl
 	 << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
 	 << "a single VCF record, split the record into multiple lines, but drop all" << endl
-	 << "INFO fields.  Does not handle genotypes (yet).  MNPs are split into multiple SNPs." << endl;
+	 << "INFO fields.  Does not handle genotypes (yet).  MNPs are split into" << endl
+	 << "multiple SNPs unless the -m flag is provided." << endl;
     exit(0);
 }
 

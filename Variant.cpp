@@ -1444,7 +1444,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                     break;
                 case 'D':
                     if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(ref.substr(refpos - 1, len + 1), alternate.substr(altpos - 1, 1), altpos + position - 1));
+                        variants.push_back(VariantAllele(ref.substr(refpos - 1, len + 1), alternate.substr(altpos - 1, 1), refpos + position - 1));
                     } else {
                         variants.push_back(VariantAllele(ref.substr(refpos, len), "", refpos + position));
                     }
