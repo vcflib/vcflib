@@ -1357,7 +1357,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     // single SNP case, no ambiguity possible, no need to spend a lot of
     // compute aligning ref and alt fields
-    if (alt.size() == 1 && alt.front().size() == 1) {
+    if (alt.size() == 1 && ref.size() == 1 && alt.front().size() == 1) {
         variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
         return variantAlleles;
     }
