@@ -1493,6 +1493,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 	    // if the last two variants have the same alt position,
 	    // take the one which covers more ref or alt sequence
 	    // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
+	    /*
 	    if (variants.size() > 1) {
 		VariantAllele& varA = variants.at(variants.size() - 2);
 		VariantAllele& varB = variants.back();
@@ -1514,6 +1515,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 		    }
 		}
 	    }
+	    */
         }
     }
 
