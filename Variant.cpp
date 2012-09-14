@@ -1364,10 +1364,10 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
-    int paddingLen = max(10, (int) (2 * ref.size()));  // dynamically determine optimum padding length
+    int paddingLen = max(10, (int) (ref.size()));  // dynamically determine optimum padding length
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
         string& alternate = *a;
-	paddingLen = max(paddingLen, (int) (2 * alternate.size()));
+	paddingLen = max(paddingLen, (int) (alternate.size()));
     }
     char padChar = 'Z';
     char anchorChar = 'Q';
