@@ -156,8 +156,8 @@ public:
     string ref;
     string alt;
     string repr;
-    unsigned long position;
-    VariantAllele(string r, string a, unsigned long p)
+    long position;
+    VariantAllele(string r, string a, long p)
         : ref(r), alt(a), position(p)
     {
         stringstream s;
@@ -173,7 +173,7 @@ class Variant {
 public:
 
     string sequenceName;
-    unsigned long position;
+    long position;
     string id;
     string ref;
     vector<string> alt;      // a list of all the alternate alleles present at this locus

@@ -27,6 +27,9 @@ void printSummary(char** argv) {
 	 << "    -t, --tag TAG             attach TAG to each record's info field if it would intersect" << endl
 	 << "    -V, --tag-value VAL       use this value to indicate that the allele is passing" << endl
 	 << "                              '.' will be used otherwise.  default: 'PASS'" << endl
+	 << "    -M, --merge-from FROM-TAG" << endl
+	 << "    -T, --merge-to   TO-TAG   merge from FROM-TAG used in the -i file, setting TO-TAG" << endl
+	 << "                              in the current file." << endl
          << endl
 	 << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
 	 << endl
@@ -54,6 +57,8 @@ int main(int argc, char** argv) {
     bool refmatch = false;
     string tag;
     string tagValue = "PASS";
+    string mergeFromTag;
+    string mergeToTag;
 
     if (argc == 1)
         printSummary(argv);
@@ -77,12 +82,14 @@ int main(int argc, char** argv) {
 	    {"ref-match", no_argument, 0, 'm'},
 	    {"tag", required_argument, 0, 't'},
 	    {"tag-value", required_argument, 0, 'V'},
+	    {"merge-from", required_argument, 0, 'M'},
+	    {"merge-to", required_argument, 0, 'T'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:t:V:",
+        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:t:V:M:T:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -138,6 +145,14 @@ int main(int argc, char** argv) {
 
 	    case 'V':
 		tagValue = optarg;
+		break;
+
+	    case 'M':
+		mergeFromTag = optarg;
+		break;
+
+	    case 'T':
+		mergeToTag = optarg;
 		break;
 
             case 'h':
@@ -246,11 +261,19 @@ int main(int argc, char** argv) {
 
     set<Variant*> outputVariants;
 
-    long unsigned int lastOutputPosition = 0;
+    long int lastOutputPosition = 0;
     string lastSequenceName;
 
     if (!tag.empty()) {
 	variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
+    }
+
+    if (!mergeToTag.empty()) {
+	if (mergeFromTag.empty()) {
+	    cerr << "must specify a tag to merge from" << endl;
+	    exit(1);
+	}
+	variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
     }
 
     cout << variantFile.header << endl;
@@ -342,9 +365,15 @@ int main(int argc, char** argv) {
 		if (unioning || (intersecting && invert)) {
 		    cout << var << endl;
 		    lastOutputPosition = max(lastOutputPosition, var.position);
-		} else if (intersecting && !tag.empty()) {
-		    for (int i = 0; i < var.alt.size(); ++i)
-			var.info[tag].push_back(".");
+		} else if (intersecting && (!tag.empty() || !mergeToTag.empty())) {
+		    for (int i = 0; i < var.alt.size(); ++i) {
+			if (!tag.empty()) {
+			    var.info[tag].push_back(".");
+			}
+			if (!mergeToTag.empty()) {
+			    var.info[mergeToTag].push_back(".");
+			}
+		    }
 		    cout << var << endl;
 		    lastOutputPosition = max(lastOutputPosition, var.position);
 		}
@@ -357,7 +386,7 @@ int main(int argc, char** argv) {
 		int haplotypeEnd = var.position + var.ref.size();
 
 		for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
-		    haplotypeStart = min((*v)->position, (long unsigned int) haplotypeStart);
+		    haplotypeStart = min((*v)->position, (long int) haplotypeStart);
 		    haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
      		}
 
@@ -365,16 +394,17 @@ int main(int argc, char** argv) {
 		// if there is an exact match, the allele in the current VCF does intersect
 
 		string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
-		map<string, vector<Variant*> > haplotypes;
+		map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
 
 		for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
 		    Variant& variant = **v;
-		    for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a) {
+		    int altindex = 0;
+		    for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
 			string haplotype = referenceHaplotype;
 			// get the relative start and end coordinates for the variant alternate allele
 			int relativeStart = variant.position - haplotypeStart;
 			haplotype.replace(relativeStart, variant.ref.size(), *a);
-			haplotypes[haplotype].push_back(*v);
+			haplotypes[haplotype].push_back(make_pair(*v, altindex));
 		    }
 		}
 
@@ -387,18 +417,35 @@ int main(int argc, char** argv) {
 		    string haplotype = referenceHaplotype;
 		    int relativeStart = var.position - haplotypeStart;
 		    haplotype.replace(relativeStart, var.ref.size(), *a);
-		    map<string, vector<Variant*> >::iterator h = haplotypes.find(haplotype);
+		    map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
 		    if ((intersecting && !invert && h == haplotypes.end())
 			|| (intersecting && invert && h != haplotypes.end())
 			|| (unioning && h != haplotypes.end())) {
-			if (tag.empty()) {
+			if (tag.empty() && mergeToTag.empty()) {
 			    altsToRemove.push_back(*a);
 			} else {
-			    var.info[tag].push_back(".");
+			    if (!tag.empty()) {
+				var.info[tag].push_back(".");
+			    }
+			    if (!mergeToTag.empty()) {
+				var.info[mergeToTag].push_back(".");
+			    }
 			}
 		    } else {
 			if (!tag.empty()) {
 			    var.info[tag].push_back(tagValue);
+			}
+			// NB: just take the first value for the mergeFromTag
+			if (!mergeToTag.empty()) {
+			    Variant* v = h->second.front().first;
+			    int index = h->second.front().second;
+			    if (v->info.find(mergeFromTag) != v->info.end()) {
+				// now you have to find the exact allele...
+				string& otherValue = v->info[mergeFromTag].at(index);
+				var.info[mergeToTag].push_back(otherValue);
+			    } else {
+				var.info[mergeToTag].push_back(".");
+			    }
 			}
 		    }
 		}
