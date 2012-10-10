@@ -49,6 +49,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfglxgt.cpp \
 			  vcfremap.cpp \
 			  vcfsitesummarize.cpp \
+			  vcfbreakmulti.cpp \
 			  vcfgeno2haplo.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)
@@ -72,7 +73,7 @@ INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
-CXXFLAGS = -O3
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 

@@ -14,7 +14,7 @@ double convertStrDbl(const string& s) {
 }
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [file]" << endl
+    cerr << "usage: " << argv[0] << " [options] [file]" << endl
 	 << endl
 	 << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
 	 << "a single VCF record, split the record into multiple lines, but drop all" << endl
