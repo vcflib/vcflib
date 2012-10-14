@@ -16,3 +16,8 @@ See included applications for example usage.
 note: vcflib includes submodules, so to obtain vcflib you have to use:
 
   % git clone --recursive git://github.com/ekg/vcflib.git
+
+To build, simply use Make:
+
+  % cd vcflib
+  % make
