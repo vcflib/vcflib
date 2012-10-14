@@ -17,7 +17,13 @@ note: vcflib includes submodules, so to obtain vcflib you have to use:
 
   % git clone --recursive git://github.com/ekg/vcflib.git
 
-To build, simply use Make:
+or
+
+  % git clone --recursive https://github.com/ekg/vcflib.git
+
+To build, use Make:
 
   % cd vcflib
   % make
+
+Executables are built into the root directory of the repository.
