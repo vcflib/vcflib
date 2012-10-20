@@ -14,6 +14,7 @@ void printSummary(char** argv) {
          << "    -g, --genotype-filter specifies a filter to apply to the genotype fields of records" << endl
          << "    -s, --filter-sites    filter entire records, not just alleles" << endl
          << "    -t, --tag             tag vcf records as filtered with this tag instead of suppressing them" << endl
+	 << "    -R, --replace-filter  replace the existing filter tag, don't just append to it" << endl
 	 << "    -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag" << endl
          << "    -v, --invert          inverts the filter, e.g. grep -v" << endl
          << "    -o, --or              use logical OR instead of AND to combine filters" << endl
@@ -77,6 +78,7 @@ int main(int argc, char** argv) {
     string filterSpec;
     string alleleTag;
     vector<string> regions;
+    bool replaceFilter = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -91,6 +93,7 @@ int main(int argc, char** argv) {
             {"info-filter",  required_argument, 0, 'f'},
             {"genotype-filter",  required_argument, 0, 'g'},
             {"tag", required_argument, 0, 't'},
+	    {"replace-filter", no_argument, 0, 'R'},
 	    {"allele-tag", required_argument, 0, 'a'},
             {"invert", no_argument, 0, 'v'},
             {"or", no_argument, 0, 'o'},
@@ -101,7 +104,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvsof:g:t:r:a:",
+        c = getopt_long (argc, argv, "hvRsof:g:t:r:a:",
                          long_options, &option_index);
 
       /* Detect the end of the options. */
@@ -142,6 +145,10 @@ int main(int argc, char** argv) {
             tag = optarg;
             break;
  
+	  case 'R':
+	    replaceFilter = true;
+	    break;
+
           case 'h':
             printSummary(argv);
             exit(0);
@@ -210,7 +217,7 @@ int main(int argc, char** argv) {
     cout << variantFile.header << endl;
 
     /*
-    if (genofilters.empty() && tag.empty()) {
+    if (genofilters.empty()) {
         variantFile.parseSamples = false;
     }
     */
@@ -241,7 +248,12 @@ int main(int argc, char** argv) {
                     if (passes) {
                         if (!tag.empty()) {
 			    if (alleleTag.empty()) {
-				var.addFilter(tag);
+				if (replaceFilter) {
+				    var.filter.clear();
+				    var.addFilter(tag);
+				} else {
+				    var.addFilter(tag);
+				}
 			    } else {
 				var.info[alleleTag].clear();
 				for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
@@ -279,7 +291,12 @@ int main(int argc, char** argv) {
                     } else { // otherwise, apply the tag
 			if (alleleTag.empty()) {
 			    if (!passingAlts.empty()) {
-				var.addFilter(tag);
+				if (replaceFilter) {
+				    var.filter.clear();
+				    var.addFilter(tag);
+				} else {
+				    var.addFilter(tag);
+				}
 			    }
 			} else {
 			    var.info[alleleTag].clear();
