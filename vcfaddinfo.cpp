@@ -98,6 +98,13 @@ int main(int argc, char** argv) {
         
     } while (!variantFileA.done() && !variantFileB.done());
 
+    if (!variantFileA.done()) {
+	cout << varA << endl;
+	while (variantFileA.getNextVariant(varA)) {
+	    cout << varA << endl;
+	}
+    }
+
     return 0;
 
 }
