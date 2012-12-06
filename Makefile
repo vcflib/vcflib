@@ -47,6 +47,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfrandomsample.cpp \
 			  vcfentropy.cpp \
 			  vcfglxgt.cpp \
+			  vcfstreamsort.cpp \
 			  vcfremap.cpp \
 			  vcfsitesummarize.cpp \
 			  vcfbreakmulti.cpp \

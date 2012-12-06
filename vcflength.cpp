@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    variantFile.addHeaderLine("##INFO=<ID=length,Number=A,Type=String,Description=\"length(ALT) - length(REF) for each ALT\">");
+    variantFile.addHeaderLine("##INFO=<ID=length,Number=A,Type=Integer,Description=\"length(ALT) - length(REF) for each ALT\">");
     cout << variantFile.header << endl;
 
     Variant var(variantFile);

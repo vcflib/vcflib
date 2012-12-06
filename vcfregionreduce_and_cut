@@ -18,8 +18,10 @@ mergename=$(basename $mergedir)
 vcfgenotypes=$mergename.vcf.gz
 vcfsites=$mergename.sites.vcf.gz
 
-firstfile=$mergedir/$(head -1 $regionfile).vcf.gz
-files=$(for region in $(cat $regionfile); do echo $mergedir/$region.vcf.gz; done)
+regions=$(cat $regionfile)
+
+firstfile=$mergedir/$(echo $regions | cut -f 1 -d\  ).vcf.gz
+files=$(for region in $regions; do echo $mergedir/$region.vcf.gz; done)
 
 ( zcat $firstfile | head -1000 | grep ^#
 for file in $files
