@@ -17,8 +17,6 @@ target_link_libraries(vcflib
 	tabixpp
 )
 
-find_package( ZLIB REQUIRED )
-
 add_executable(vcf2tsv
 	vcf2tsv.cpp
 )
@@ -65,12 +63,7 @@ add_executable(vcfannotate
 	BedReader.h
 )
 
-#add_custom_library(bedreader
-#	BedReader.h
-#)
-
 target_link_libraries(vcfannotate
-	bedreader
 	vcflib
 )
 
