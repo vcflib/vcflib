@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+import sys
+
+for line in sys.stdin:
+    if line.startswith("#"):
+        print line.strip()
+        continue
+    fields = line.strip().split("\t")
+    for i in range(9, len(fields)):
+        if fields[i] == ".":
+            fields[i] = "./."
+    print "\t".join(fields)
+    
