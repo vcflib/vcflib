@@ -24,6 +24,7 @@ or
 To build, use Make:
 
   % cd vcflib
+  % cmake .
   % make
 
 Executables are built into the root directory of the repository.
