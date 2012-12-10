@@ -1,5 +1,7 @@
 #include "Variant.h"
 #include "convert.h"
+#include "join.h"
+#include "split.h"
 #include <set>
 #include <getopt.h>
 
@@ -93,13 +95,25 @@ int main(int argc, char** argv) {
         // build a new vcf record for that position
         // unless we are already at the position !
         // take everything which is unique to that allele (records) and append it to the new record
+	// then handle genotypes; determine the mapping between alleleic primitives and convert to phased haplotypes
+	// this means taking all the parsedAlternates and, for each one, generating a pattern of allele indecies corresponding to it
 
         map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels, useMNPs);
         set<VariantAllele> alleles;
 
+	// collect unique alleles
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
             for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
                 alleles.insert(*va);
+            }
+        }
+
+	// collect variant allele indexed membership
+	map<string, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
+        for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
+	    int index = var.altAlleleIndexes[a->first] + 1; // make non-relative
+            for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
+		variantAlleleIndexes[va->repr].push_back(index);
             }
         }
 
@@ -132,8 +146,11 @@ int main(int argc, char** argv) {
 	    }
 	}
 
-        //map<long unsigned int, Variant> variants;
-        vector<Variant> variants;
+	// from old allele index to a new series across the unpacked positions
+	map<int, map<long unsigned int, int> > unpackedAlleleIndexes;
+
+        map<long unsigned int, Variant> variants;
+        //vector<Variant> variants;
         for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
             if (a->ref == a->alt) {
                 // ref allele
@@ -162,33 +179,32 @@ int main(int argc, char** argv) {
 		    type = "complex";
 		}
 	    }
-            //cout << a->ref << "/" << a->alt << endl;
-            /*
+
             if (variants.find(a->position) == variants.end()) {
-                Variant newvar(variantFile);
-                newvar.quality = var.quality;
-                newvar.filter = ".";
-                variants.insert(make_pair(a->position, newvar));
-            }
-            Variant& v = variants[a->position];
-            */
-            Variant newvar(variantFile);
-            newvar.quality = var.quality;
-            newvar.filter = ".";
-            newvar.id = ".";
-	    newvar.format = var.format;
-	    newvar.info["TYPE"].push_back(type);
-	    newvar.info["LEN"].push_back(convert(len));
+		Variant newvar(variantFile);
+		variants[a->position] = newvar;
+	    }
+
+	    Variant& v = variants[a->position]; // guaranteed to exist
+
+            v.quality = var.quality;
+            v.filter = ".";
+            v.id = ".";
+	    //v.format = var.format;
+	    vector<string> gtonlyformat;
+	    gtonlyformat.push_back("GT");
+	    v.format = gtonlyformat;
+	    v.info["TYPE"].push_back(type);
+	    v.info["LEN"].push_back(convert(len));
 	    if (hasAf) {
-		newvar.info["AF"].push_back(convert(alleleFrequencies[*a]));
+		v.info["AF"].push_back(convert(alleleFrequencies[*a]));
 	    }
 	    if (hasAc) {
-		newvar.info["AC"].push_back(convert(alleleCounts[*a]));
+		v.info["AC"].push_back(convert(alleleCounts[*a]));
 	    }
-            variants.push_back(newvar);
-            Variant& v = variants.back();
+
             v.sequenceName = var.sequenceName;
-            v.position = a->position;
+            v.position = a->position; // ... by definition, this should be == if the variant was found
             if (v.ref.size() < a->ref.size()) {
                 for (vector<string>::iterator va = v.alt.begin(); va != v.alt.end(); ++va) {
                     *va += a->ref.substr(v.ref.size());
@@ -196,13 +212,60 @@ int main(int argc, char** argv) {
                 v.ref = a->ref;
             }
             v.alt.push_back(a->alt);
+
+	    int alleleIndex = v.alt.size();
+	    vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
+	    for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
+		unpackedAlleleIndexes[*i][v.position] = alleleIndex;
+	    }
+
         }
 
 	// TODO genotypes!
+	for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
+	    string& sampleName = *s;
+	    if (var.samples.find(sampleName) == var.samples.end()) {
+		continue;
+	    }
+	    map<string, vector<string> >& sample = var.samples[sampleName];
+	    if (sample.find("GT") == sample.end()) {
+		continue;
+	    }
+	    string& genotype = sample["GT"].front();
+	    vector<string> genotypeStrs = split(genotype, "|/");
+	    vector<int> genotypeIndexes;
+	    for (vector<string>::iterator s = genotypeStrs.begin(); s != genotypeStrs.end(); ++s) {
+		int i;
+		convert(*s, i);
+		genotypeIndexes.push_back(i);
+	    }
+	    map<long unsigned int, vector<int> > positionIndexes;
+	    for (vector<int>::iterator g = genotypeIndexes.begin(); g != genotypeIndexes.end(); ++g) {
+		int oldIndex = *g;
+		for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
+		    const long unsigned int& p = v->first;
+		    if (oldIndex == 0) { // reference
+			positionIndexes[p].push_back(0);
+		    } else {
+			positionIndexes[p].push_back(unpackedAlleleIndexes[oldIndex][p]);
+		    }
+		}
+	    }
+	    for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
+		Variant& variant = v->second;
+		vector<int>& gtints = positionIndexes[v->first];
+		vector<string> gtstrs;
+		for (vector<int>::iterator i = gtints.begin(); i != gtints.end(); ++i) {
+		    gtstrs.push_back(convert(*i));
+		}
+		string genotype = join(gtstrs, "|");
+		variant.samples[sampleName]["GT"].push_back(genotype);
+	    }
+	}
 
-        //for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-        for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-            cout << *v << endl;
+        //for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
+        for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
+            cout << v->second << endl;
         }
     }
 
