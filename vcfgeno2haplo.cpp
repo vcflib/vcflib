@@ -111,17 +111,20 @@ int main(int argc, char** argv) {
     // get the first distances
     vector<Variant> cluster;
 
-    // TODO the last haplotype allele will get dropped!
-
     while (variantFile.getNextVariant(var) || !cluster.empty()) {
-
-	//cerr << "cluster size: " << cluster.size() << " " <<  var << endl;
-	//cerr << cluster.size() << endl;
 
 	bool haplotypeCluster = false;
 
-	if (!variantFile.done() && (cluster.empty() || cluster.back().sequenceName == var.sequenceName
-				    && var.position - cluster.back().position + cluster.back().ref.size() - 1 <= windowsize)) {
+	if (variantFile.done()) {
+	    if (cluster.size() >= 1) {
+		haplotypeCluster = true;
+	    } else {
+		cout << cluster.front() << endl;
+		cluster.clear();
+	    }
+	} else if (cluster.empty()
+	    || cluster.back().sequenceName == var.sequenceName
+	    && var.position - cluster.back().position + cluster.back().ref.size() - 1 <= windowsize) {
 	    cluster.push_back(var);
 	} else {
 	    if (cluster.size() == 1) {
@@ -138,6 +141,13 @@ int main(int argc, char** argv) {
 	// we need to deal with the current cluster, as our next var is outside of bounds
 	// process the last cluster if it's more than 1 var
 	if (haplotypeCluster) {
+	    /*
+	    cout << "cluster: ";
+	    for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {
+		cout << " " << v->position;
+	    }
+	    cout << endl;
+	    */
 	    // generate haplotype alleles and genotypes!
 	    // get the reference sequence across the haplotype in question
 	    string referenceHaplotype = reference.getSubSequence(cluster.front().sequenceName,
@@ -311,7 +321,7 @@ int main(int argc, char** argv) {
 		}
 	    }
 	    cluster.clear();
-	    cluster.push_back(var);
+	    if (!variantFile.done()) cluster.push_back(var);
 	}
     }
 

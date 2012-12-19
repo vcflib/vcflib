@@ -50,16 +50,27 @@ int main(int argc, char** argv) {
     }
 
     vector<string> specs;
+
     specs.push_back("AA_AA");
     specs.push_back("AA_AR");
     specs.push_back("AA_RR");
+    specs.push_back("AA_NN");
+
+    specs.push_back("AR_AA");
     specs.push_back("AR_AR");
     specs.push_back("AR_RR");
-    specs.push_back("RR_RR");
-    specs.push_back("AA_NN");
     specs.push_back("AR_NN");
+
+    specs.push_back("RR_AA");
+    specs.push_back("RR_AR");
+    specs.push_back("RR_RR");
     specs.push_back("RR_NN");
+
+    specs.push_back("NN_AA");
+    specs.push_back("NN_AR");
+    specs.push_back("NN_RR");
     specs.push_back("NN_NN");
+
 
     for (vector<string>::iterator spec = specs.begin(); spec != specs.end(); ++spec) {
         string line = "##INFO=<ID=" + otherGenoTag + ".genotypes." + *spec
@@ -179,6 +190,7 @@ int main(int argc, char** argv) {
 	    } else {
 		gtB = sample[otherGenoTag].front();
 	    }
+
 
             map<int, int> genotypeA = decomposeGenotype(gtA);
             map<int, int> genotypeB = decomposeGenotype(gtB);
