@@ -1,17 +1,71 @@
 #include "Variant.h"
+#include <getopt.h>
 
 using namespace std;
 using namespace vcf;
 
+void printSummary(char** argv) {
+    cerr << "usage: " << argv[0] << " [-n null_string]" << " [vcf file]" << endl
+	 << "Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table." << endl;
+    exit(1);
+}
+
+
 int main(int argc, char** argv) {
 
-    VariantCallFile variantFile;
+    string nullval;
 
-    if (argc > 1) {
-        string filename = argv[1];
-        variantFile.open(filename);
+    if (argc == 1)
+        printSummary(argv);
+
+    int c;
+    while (true) {
+        static struct option long_options[] =
+        {
+            /* These options set a flag. */
+            //{"verbose", no_argument,       &verbose_flag, 1},
+            {"help", no_argument, 0, 'h'},
+	    {"null-value", required_argument, 0, 'n'},
+            {0, 0, 0, 0}
+        };
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+
+        c = getopt_long (argc, argv, "hn:",
+                         long_options, &option_index);
+
+        if (c == -1)
+            break;
+
+        switch (c) {
+
+	    case 'n':
+	        nullval = optarg;
+		break;
+
+            case 'h':
+                printSummary(argv);
+                break;
+
+            case '?':
+                printSummary(argv);
+                exit(1);
+                break;
+
+            default:
+                abort ();
+        }
+    }
+
+    VariantCallFile variantFile;
+    bool usingstdin = false;
+    string inputFilename;
+    if (optind == argc - 1) {
+        inputFilename = argv[optind];
+        variantFile.open(inputFilename);
     } else {
         variantFile.open(std::cin);
+	usingstdin = true;
     }
 
     if (!variantFile.is_open()) {
@@ -70,10 +124,10 @@ int main(int argc, char** argv) {
                     } else if (value.size() == var.alt.size()) {
                         cout << "\t" << value.at(altindex);
                     } else {
-                        cout << "\t"; // null
+                        cout << "\t" << nullval; // null
                     }
                 } else {
-                    cout << "\t"; // null
+                    cout << "\t" << nullval; // null
                 }
             }
 

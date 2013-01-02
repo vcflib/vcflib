@@ -62,7 +62,7 @@ void printSummary(char** argv) {
          << "                          regions may be specified." << endl
          << "    -a, --add-info        add the statistics intermediate information to the VCF file," << endl
          << "                          writing out VCF records instead of summary statistics" << endl
-	 << "    -l, --no-length-frequency   don't out the indel and mnp length-frequency spectra" << endl
+	 << "    -l, --no-length-frequency    don't out the indel and mnp length-frequency spectra" << endl
 	 << "    -m, --match-score N          match score for SW algorithm" << endl
 	 << "    -x, --mismatch-score N       mismatch score for SW algorithm" << endl
 	 << "    -o, --gap-open-penalty N     gap open penalty for SW algorithm" << endl
