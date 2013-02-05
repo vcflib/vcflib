@@ -80,6 +80,11 @@ CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
+SSW = ssw.o ssw_cpp.o
+
+ssw.o: ssw.h
+ssw_cpp.o:ssw_cpp.h
+
 profiling:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -g" all
 
@@ -87,7 +92,7 @@ gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
 $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX)
-	$(CXX) -c -o $@ $(*F).cpp  $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) -c -o $@ $(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 $(TABIX):
 	cd tabixpp && $(MAKE)
@@ -106,11 +111,12 @@ $(INDELALLELE): $(SMITHWATERMAN)
 $(FASTAHACK):
 	cd fastahack && $(MAKE)
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(FASTAHACK) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
+	rm -f ssw_cpp.o ssw.o
 	cd tabixpp && make clean
 	cd smithwaterman && make clean
 	cd fastahack && make clean

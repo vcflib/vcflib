@@ -18,6 +18,7 @@
 #include "tabixpp/tabix.hpp"
 #include "smithwaterman/SmithWatermanGotoh.h"
 #include "smithwaterman/disorder.h"
+#include "ssw_cpp.h"
 #include "convert.h"
 #include "multichoose/multichoose.h"
 
@@ -78,12 +79,10 @@ public:
 
     bool open(string& filename) {
         vector<string> filenameParts = split(filename, ".");
-        if (filenameParts.back() == "vcf") {
-            return openFile(filename);
-        } else if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
+        if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
             return openTabix(filename);
         } else {
-	    return false;
+            return openFile(filename);
 	}
     }
 
@@ -169,7 +168,7 @@ public:
 class Variant {
 
     friend ostream& operator<<(ostream& out, Variant& var);
-
+    
 public:
 
     string sequenceName;
@@ -256,6 +255,7 @@ public:
     //void setInfoField(string& key, string& val);
 
 private:
+
     string lastFormat;
 
 };

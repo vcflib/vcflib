@@ -15,9 +15,6 @@ int main(int argc, char** argv) {
 
     string nullval;
 
-    if (argc == 1)
-        printSummary(argv);
-
     int c;
     while (true) {
         static struct option long_options[] =
@@ -64,7 +61,14 @@ int main(int argc, char** argv) {
         inputFilename = argv[optind];
         variantFile.open(inputFilename);
     } else {
-        variantFile.open(std::cin);
+        if (!variantFile.open(std::cin)) {
+	    if (argc == 1) {
+		printSummary(argv);
+	    } else {
+		cerr << "could not open stdin for reading as VCF" << endl;
+		exit(1);
+	    }
+	}
 	usingstdin = true;
     }
 

@@ -1404,10 +1404,18 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 	}
         //const unsigned int alternateLen = alternate.size();
 
-        CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
-	if (useEntropy) sw.EnableEntropyGapPenalty(1);
-	if (repeatGapExtendPenalty != 0) sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
-        sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+	if (true) {
+	    CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
+	    if (useEntropy) sw.EnableEntropyGapPenalty(1);
+	    if (repeatGapExtendPenalty != 0) sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
+	    sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+	} else {  // disabled for now
+	    StripedSmithWaterman::Aligner aligner;
+	    StripedSmithWaterman::Filter sswFilter;
+	    StripedSmithWaterman::Alignment alignment;
+	    aligner.Align(alternateQuery_M.c_str(), reference_M.c_str(), reference_M.size(), sswFilter, &alignment);
+	    cigar = alignment.cigar_string;
+	}
 
         // left-realign the alignment...
 
