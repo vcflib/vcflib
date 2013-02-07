@@ -48,6 +48,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfentropy.cpp \
 			  vcfglxgt.cpp \
 			  vcfroc.cpp \
+			  vcfsom.cpp \
 			  vcfcheck.cpp \
 			  vcfstreamsort.cpp \
 			  vcfremap.cpp \
@@ -70,6 +71,8 @@ INDELALLELE = smithwaterman/IndelAllele.o
 DISORDER = smithwaterman/disorder.c
 
 LEFTALIGN = smithwaterman/LeftAlign.o
+
+FSOM = fsom/fsom.o
 
 INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
 
@@ -111,8 +114,11 @@ $(INDELALLELE): $(SMITHWATERMAN)
 $(FASTAHACK):
 	cd fastahack && $(MAKE)
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(FSOM):
+	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
+
+$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
