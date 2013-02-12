@@ -55,6 +55,12 @@ static void print_timing( const char *msg ){
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [vcf file]" << endl
          << endl
+	 << "training: " << endl
+	 << "    " << argv[0] << " -s output.som -f \"AF DP ABP\" training.vcf" << endl
+	 << endl
+	 << "application: " << endl
+	 << "    " << argv[0] << " -a output.som -f \"AF DP ABP\" test.vcf >results.vcf" << endl
+	 << endl
          << "Trains and applies a self-organizing map to the input tab-separated data on" << endl
 	 << "stdin, adding two columns for the x and y coordinates of the winning neuron" << endl
 	 << "in the network." << endl
