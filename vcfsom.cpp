@@ -64,12 +64,16 @@ void printSummary(char** argv) {
 	 << endl
          << "options:" << endl
          << "    -h, --help             this dialog" << endl
-	 << "    -f, --f \"FIELD ...\"  INFO fields to provide to the SOM" << endl
+	 << "    -f, --fields \"FIELD ...\"  INFO fields to provide to the SOM" << endl
 	 << "    -a, --apply FILE       apply the saved map to input data to FILE" << endl
 	 << "    -s, --save  FILE       train on input data and save the map to FILE" << endl
+	 << "    -t, --print-training-results" << endl
+	 << "                           print results of SOM on training input" << endl
+	 << "                           (you can also just use --apply on the same input)" << endl
          << "    -x, --width X          width in columns of the output array" << endl
          << "    -y, --height Y         height in columns of the output array" << endl
-         << "    -i, --iterations N     number of training iterations or epochs" << endl;
+	 << "    -i, --iterations N     number of training iterations or epochs" << endl
+         << "    -d, --debug            print timing information" << endl;
 }
 
 
@@ -82,6 +86,8 @@ int main(int argc, char** argv) {
     string som_file;
     bool apply = false;
     bool train = false;
+    bool apply_to_training_data = false; // print results against training data
+    bool debug = false;
     vector<string> fields;
 
     int c;
@@ -103,12 +109,14 @@ int main(int argc, char** argv) {
 	    {"apply", required_argument, 0, 'a'},
 	    {"save", required_argument, 0, 's'},
 	    {"fields", required_argument, 0, 'f'},
+	    {"print-training-results", no_argument, 0, 't'},
+	    {"debug", no_argument, 0, 'd'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hi:x:y:a:s:f:",
+        c = getopt_long (argc, argv, "htdi:x:y:a:s:f:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -138,6 +146,14 @@ int main(int argc, char** argv) {
                     cerr << "could not parse --iterations, -i" << endl;
                     exit(1);
                 }
+                break;
+
+            case 't':
+		apply_to_training_data = true;
+                break;
+
+            case 'd':
+		debug = true;
                 break;
 
             case 'a':
@@ -193,22 +209,24 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=SOMX,Number=A,Type=Integer,Description=\"X position of best neuron for variant in self-ordering map defined in " + som_file + "\">");
     variantFile.addHeaderLine("##INFO=<ID=SOMY,Number=A,Type=Integer,Description=\"Y position of best neuron for variant in self-ordering map defined in " + som_file + "\">");
 
-    start_timer();
+    if (debug) start_timer();
     
     vector<Variant> variants;
-    while (variantFile.getNextVariant(var)) {
-	variants.push_back(var);
-	int ai = 0;
-	vector<string>::iterator a = var.alt.begin();
-	 for ( ; a != var.alt.end(); ++a, ++ai) {
-	     vector<double> record;
-	     double td;
-	     vector<string>::iterator j = fields.begin();
-	     for (; j != fields.end(); ++j) {
-		 convert(var.info[*j][ai], td);
-		record.push_back(td);
+    if (train) {
+	while (variantFile.getNextVariant(var)) {
+	    variants.push_back(var);
+	    int ai = 0;
+	    vector<string>::iterator a = var.alt.begin();
+	    for ( ; a != var.alt.end(); ++a, ++ai) {
+		vector<double> record;
+		double td;
+		vector<string>::iterator j = fields.begin();
+		for (; j != fields.end(); ++j) {
+		    convert(var.info[*j][ai], td);
+		    record.push_back(td);
+		}
+		data.push_back(record);
 	    }
-	    data.push_back(record);
 	}
     }
 
@@ -217,10 +235,9 @@ int main(int argc, char** argv) {
 	dataptrs[i] = &(data[i][0]); // assuming !thing[i].empty()
     }
 
-    print_timing( "Input Processing" );
+    if (debug) print_timing( "Input Processing" );
 
     if (apply) {
-	cerr << "Loading ... "  << endl;
 	if (! (net = som_deserialize(som_file.c_str()))) {
 	    cerr << "could not load SOM from " << som_file << endl;
 	    return 1;
@@ -235,31 +252,53 @@ int main(int argc, char** argv) {
 	}
     }
 
-    print_timing( "Network Creation" );
+    if (debug) print_timing( "Network Creation" );
 
     if (train) {
-	cerr << "Training using " << data.size() << " input vectors" << endl;
+	if (debug) cerr << "Training using " << data.size() << " input vectors" << endl;
 	som_init_weights ( net, &dataptrs[0], data.size() );
 	som_train ( net, &dataptrs[0], data.size(), iterations );
     }
 
-    print_timing( "Network Training" );
+    if (debug) print_timing( "Network Training" );
 
-    cout << variantFile.header << endl;
-
-    vector<Variant>::iterator v = variants.begin(); int di = 0;
-    for ( ; v != variants.end() && di < data.size(); ++v) {
-	for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a, ++di) {
-	    som_set_inputs ( net, dataptrs[di] );
-	    size_t x=0, y=0;
-	    som_get_best_neuron_coordinates ( net, &x, &y );
-	    var.info["SOMX"].push_back(convert(x));
-	    var.info["SOMY"].push_back(convert(y));
+    if (train && apply_to_training_data) {
+	cout << variantFile.header << endl;
+	vector<Variant>::iterator v = variants.begin(); int di = 0;
+	for ( ; v != variants.end() && di < data.size(); ++v) {
+	    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a, ++di) {
+		som_set_inputs ( net, dataptrs[di] );
+		size_t x=0, y=0;
+		som_get_best_neuron_coordinates ( net, &x, &y );
+		v->info["SOMX"].push_back(convert(x));
+		v->info["SOMY"].push_back(convert(y));
+	    }
+	    cout << *v << endl;
 	}
-	cout << var << endl;
+    } else if (apply) {
+	cout << variantFile.header << endl;
+	while (variantFile.getNextVariant(var)) {
+	    int ai = 0;
+	    vector<string>::iterator a = var.alt.begin();
+	    for ( ; a != var.alt.end(); ++a, ++ai) {
+		vector<double> record;
+		double td;
+		vector<string>::iterator j = fields.begin();
+		for (; j != fields.end(); ++j) {
+		    convert(var.info[*j][ai], td);
+		    record.push_back(td);
+		}
+		som_set_inputs ( net, &record[0] );
+		size_t x=0, y=0;
+		som_get_best_neuron_coordinates ( net, &x, &y );
+		var.info["SOMX"].push_back(convert(x));
+		var.info["SOMY"].push_back(convert(y));
+	    }
+	    cout << var << endl;
+	}
     }
 
-    print_timing( "Input Recognition" );
+    if (debug) print_timing( "Input Recognition" );
 
     if (train) {
 	som_serialize(net, som_file.c_str());
@@ -267,7 +306,7 @@ int main(int argc, char** argv) {
 
     som_network_destroy ( net );
 
-    print_timing( "Network Destruction" );
+    if (debug) print_timing( "Network Destruction" );
 
     return 0;
 
