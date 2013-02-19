@@ -27,3 +27,11 @@ To build, use Make:
   % make
 
 Executables are built into the root directory of the repository.
+
+To build the vcflib Python extension (requires Cython):
+
+  % python setup.py build_ext --inplace
+
+...or to build and install:
+
+  % python setup.py install

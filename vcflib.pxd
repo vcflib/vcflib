@@ -104,11 +104,11 @@ cdef extern from "Variant.h" namespace "vcf":
         string filter
         double quality
         VariantFieldType infoType(string& key)
-        map[string, vector[string] ] info
+        map[string, vector[string]] info
         map[string, bool] infoFlags
         VariantFieldType formatType(string& key)
         vector[string] format
-        map[string, map[string, vector[string] ] ] samples
+        map[string, map[string, vector[string]]] samples
         vector[string] sampleNames
         vector[string] outputSampleNames
         VariantCallFile* vcf

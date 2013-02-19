@@ -8,6 +8,7 @@ vcflib_dir = os.getcwd()
 smithwaterman_dir = os.path.join(vcflib_dir, 'smithwaterman')
 tabixpp_dir = os.path.join(vcflib_dir, 'tabixpp')
 
+
 vcflib_sources = ('Variant.cpp', 'ssw.c', 'ssw_cpp.cpp', 'split.cpp')
 smithwaterman_sources = ('BandedSmithWaterman.cpp', 
                          'SmithWatermanGotoh.cpp', 
@@ -33,14 +34,10 @@ vcflib_extension = Extension('vcflib',
                              libraries=['m', 'z'],)
     
     
-vcfarray_extension = Extension('vcfarray',
-                               sources=['vcfarray.pyx'],
-                               language='c++',
-                               include_dirs=[vcflib_dir]
-                               )
-    
 setup(
     name = 'vcflib',
     cmdclass = {'build_ext': build_ext},
     ext_modules = [vcflib_extension]
 )
+
+
