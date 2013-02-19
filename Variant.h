@@ -17,7 +17,9 @@
 #include "join.h"
 #include "tabixpp/tabix.hpp"
 #include "smithwaterman/SmithWatermanGotoh.h"
+extern "C" {
 #include "smithwaterman/disorder.h"
+}
 #include "ssw_cpp.h"
 #include "convert.h"
 #include "multichoose/multichoose.h"
