@@ -78,6 +78,7 @@ public:
     void removeGenoHeaderLine(string line);
     vector<string> infoIds(void);
     vector<string> formatIds(void);
+    vector<string> filterIds(void);
 
     bool open(string& filename) {
         vector<string> filenameParts = split(filename, ".");

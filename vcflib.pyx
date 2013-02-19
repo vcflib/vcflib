@@ -1,32 +1,65 @@
-#from libcpp cimport bool
-#from libcpp.string cimport string
-#
-#
-#cdef extern from "Variant.h" namespace "vcf":
-#
-#    cdef cppclass VariantCallFile:
-#        bool open(string& filename)
-#        bool is_open()
-#        bool getNextVariant(Variant& var)
-#        string header
-#
-#    cdef cppclass Variant:
-#        Variant()
-#        Variant(VariantCallFile& v)
-#        void setVariantCallFile(VariantCallFile& v)
+
+from cython.operator cimport dereference as deref
 
 
-def count_variants(filename):
-    cdef VariantCallFile variantFile
-    cdef string fn = filename
-    cdef Variant var
-    variantFile.open(fn);
-    if not variantFile.is_open():
-        raise Exception('variant call file is not open')
-    var.setVariantCallFile(variantFile)
-    n = 0
-    while variantFile.getNextVariant(var):
-        n += 1
-    return n
+cdef class PyVariantCallFile:
+
+    cdef VariantCallFile *thisptr
+
+    def __cinit__(self, filename):
+        self.thisptr = new VariantCallFile()
+        self.thisptr.open(filename)
+
+    def __dealloc__(self):
+        del self.thisptr        
+        
+    def __len__(self):
+        cdef Variant var
+        var.setVariantCallFile(self.thisptr)
+        n = 0
+        while self.thisptr.getNextVariant(var):
+            n += 1
+        return n
+
+    def __iter__(self):
+        cdef Variant *var
+        var = new Variant(deref(self.thisptr))
+        while self.thisptr.getNextVariant(deref(var)):
+            yield (var.sequenceName, var.position, var.id, var.ref, var.alt, var.quality, var.filter)
+        del var
+
+    property infoIds:
+        def __get__(self):
+            return self.thisptr.infoIds()
+
+    property formatIds:
+        def __get__(self):
+            return self.thisptr.formatIds()
+
+    property filterIds:
+        def __get__(self):
+            return self.thisptr.filterIds()
+
+    property infoTypes:
+        def __get__(self):
+            return self.thisptr.infoTypes
+
+    property formatTypes:
+        def __get__(self):
+            return self.thisptr.formatTypes
+
+    property infoCounts:
+        def __get__(self):
+            return self.thisptr.infoTypes
+
+    property formatCounts:
+        def __get__(self):
+            return self.thisptr.formatTypes
+        
+    property parseSamples:
+        def __get__(self):
+            return self.thisptr.parseSamples
+        def __set__(self, v):
+            self.thisptr.parseSamples = v
 
 
