@@ -3,7 +3,7 @@
 	url = git://github.com/ekg/tabixpp.git
 [submodule "smithwaterman"]
 	path = smithwaterman
-	url = git://github.com/ekg/smithwaterman.git
+	url = git://github.com/alimanfoo/smithwaterman.git
 [submodule "multichoose"]
 	path = multichoose
 	url = git://github.com/ekg/multichoose.git

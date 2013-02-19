@@ -1,0 +1,7 @@
+*~
+build
+*.o
+*.so
+*.pyc
+# don't commit the Cython generated source for now
+vcflib.cpp

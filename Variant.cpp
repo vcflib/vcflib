@@ -295,8 +295,8 @@ int Variant::getNumValidGenotypes(void) {
 
 bool Variant::getSampleValueBool(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
+    if (s == vcf->formatTypes.end()) {
+        cerr << "no format field " << key << endl;
         exit(1);
     } else {
         int count = vcf->formatCounts[key];
@@ -328,8 +328,8 @@ bool Variant::getSampleValueBool(string& key, string& sample, int index) {
 
 string Variant::getSampleValueString(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
+    if (s == vcf->formatTypes.end()) {
+        cerr << "no format field " << key << endl;
         exit(1);
     } else {
         int count = vcf->formatCounts[key];
@@ -362,8 +362,8 @@ string Variant::getSampleValueString(string& key, string& sample, int index) {
 
 double Variant::getSampleValueFloat(string& key, string& sample, int index) {
     map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
+    if (s == vcf->formatTypes.end()) {
+        cerr << "no format field " << key << endl;
         exit(1);
     } else {
         // XXX TODO wrap this with a function call
@@ -1013,6 +1013,25 @@ vector<string> VariantCallFile::formatIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##FORMAT") == 0) {
+	    size_t pos = line.find("ID=");
+	    if (pos != string::npos) {
+		pos += 3;
+		size_t tagend = line.find(",", pos);
+		if (tagend != string::npos) {
+		    tags.push_back(line.substr(pos, tagend - pos));
+		}
+	    }
+	}
+    }
+    return tags;
+}
+
+vector<string> VariantCallFile::filterIds(void) {
+    vector<string> tags;
+    vector<string> headerLines = split(header, '\n');
+    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
+        string& line = *s;
+        if (line.find("##FILTER") == 0) {
 	    size_t pos = line.find("ID=");
 	    if (pos != string::npos) {
 		pos += 3;
