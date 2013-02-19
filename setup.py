@@ -30,14 +30,14 @@ def get_vcflib_sources():
 vcflib_extension = Extension('vcflib',
                              sources=get_vcflib_sources(),
                              language='c++',
-                             include_dirs=[vcflib_dir, smithwaterman_dir, tabixpp_dir],
+                             include_dirs=[vcflib_dir, smithwaterman_dir, tabixpp_dir, '.'],
                              libraries=['m', 'z'],)
     
-    
+
 setup(
     name = 'vcflib',
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [vcflib_extension]
-)
+    ext_modules = [vcflib_extension],
+    )
 
 

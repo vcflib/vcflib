@@ -8,6 +8,8 @@ Try to keep it simple and stay close to the C++ API.
 
 from cython.operator cimport dereference as deref
 from collections import namedtuple
+import numpy as np
+cimport numpy as np
 
 
 VariantTuple = namedtuple('Variant', ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'samples'])
@@ -22,8 +24,6 @@ TYPE_UNKNOWN = FIELD_UNKNOWN
 
 
 cdef class PyVariantCallFile:
-
-    cdef VariantCallFile *thisptr
 
     def __cinit__(self, filename):
         self.thisptr = new VariantCallFile()
@@ -42,15 +42,19 @@ cdef class PyVariantCallFile:
 
     def __iter__(self):
         cdef Variant *var
+        cdef vector[string] filters
+        cdef char semicolon = ';'
         var = new Variant(deref(self.thisptr))
         while self.thisptr.getNextVariant(deref(var)):
+            # split the filter field here in C++ to avoid having to do it in Python later
+            filters = split(var.filter, semicolon)
             yield VariantTuple(var.sequenceName, 
                                var.position, 
                                var.id, 
                                var.ref, 
                                var.alt, 
                                var.quality, 
-                               var.filter,
+                               filters,
                                var.info,
                                var.samples)
         del var
@@ -117,3 +121,21 @@ cdef class PyVariantCallFile:
         def __get__(self):
             return self.thisptr.sampleNames
         
+        
+def itervcf(filename):
+    cdef VariantCallFile *variantFile = new VariantCallFile()
+    cdef Variant *var
+    variantFile.open(filename)
+    var = new Variant(deref(variantFile))
+    while variantFile.getNextVariant(deref(var)):
+        yield (var.sequenceName, var.position)
+    del variantFile
+    del var
+    
+    
+def fromvcf(filename):
+    it = itervcf(filename)
+    dtype = [('CHROM', 'a12'), ('POS', 'u4')]
+    a = np.fromiter(it, dtype=dtype)
+    return a
+

@@ -139,3 +139,7 @@ cdef extern from "Variant.h" namespace "vcf":
         int getNumValidGenotypes()
         
 
+cdef class PyVariantCallFile:
+
+    cdef VariantCallFile *thisptr
+        

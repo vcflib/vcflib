@@ -38,7 +38,7 @@ def test_fixed_fields():
     eq_('A', v.REF)
     eq_(['C'], v.ALT)
     eq_(9.6, v.QUAL)
-    eq_('.', v.FILTER)
+    eq_(['.'], v.FILTER) # split in C++
     
     
 def test_info():
