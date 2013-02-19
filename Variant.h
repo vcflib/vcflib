@@ -17,7 +17,9 @@
 #include "join.h"
 #include "tabixpp/tabix.hpp"
 #include "smithwaterman/SmithWatermanGotoh.h"
+extern "C" {
 #include "smithwaterman/disorder.h"
+}
 #include "ssw_cpp.h"
 #include "convert.h"
 #include "multichoose/multichoose.h"
@@ -76,6 +78,7 @@ public:
     void removeGenoHeaderLine(string line);
     vector<string> infoIds(void);
     vector<string> formatIds(void);
+    vector<string> filterIds(void);
 
     bool open(string& filename) {
         vector<string> filenameParts = split(filename, ".");
