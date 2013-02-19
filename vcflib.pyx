@@ -126,6 +126,7 @@ def itervcf(filename):
     cdef VariantCallFile *variantFile = new VariantCallFile()
     cdef Variant *var
     variantFile.open(filename)
+    variantFile.parseSamples = False
     var = new Variant(deref(variantFile))
     while variantFile.getNextVariant(deref(var)):
         yield (var.sequenceName, var.position)
