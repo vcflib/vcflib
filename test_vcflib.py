@@ -4,7 +4,7 @@ Some simple unit tests for the Cython vcflib wrapper.
 """
 
 
-from vcflib import *
+from vcflib import PyVariantCallFile, TYPE_INTEGER, TYPE_FLOAT, TYPE_STRING, TYPE_BOOL
 from nose.tools import eq_
 
 
