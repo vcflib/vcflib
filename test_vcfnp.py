@@ -38,3 +38,9 @@ def test_variants_region():
     eq_(6, len(a))
     
     
+def test_variants_count():
+    a = variants('sample.vcf', count=3)
+    eq_(3, len(a))
+
+    
+    

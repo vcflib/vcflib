@@ -40,7 +40,7 @@ DEFAULT_DTYPE = {'CHROM': 'a12',
                  'is_snp': 'b1'}
 
 
-DEFAULT_COUNT = {'CHROM': 1,
+DEFAULT_ARITY = {'CHROM': 1,
                  'POS': 1,
                  'ID': 1,
                  'REF': 1,
@@ -77,8 +77,9 @@ def variants(filename,                  # name of VCF file
              region=None,               # region to extract
              fields=None,               # fields to extract
              dtypes=None,               # override default dtypes
-             counts=None,               # override how many values to expect
+             arities=None,              # override how many values to expect
              fills=None,                # override default fill values
+             count=None,                # attempt to extract exactly this many records
              progress=0,                # if >0 log progress
              logstream=sys.stderr       # stream for logging progress
              ):
@@ -103,13 +104,13 @@ def variants(filename,                  # name of VCF file
             dtypes[f] = DEFAULT_DTYPE[f]
             
     # determine expected number of values for each field
-    if counts is None:
-        counts = dict()
+    if arities is None:
+        arities = dict()
     for f in fields:
         if f == 'FILTER':
-            counts[f] = 1 # one structured value
-        elif f not in counts:
-            counts[f] = DEFAULT_COUNT[f]
+            arities[f] = 1 # one structured value
+        elif f not in arities:
+            arities[f] = DEFAULT_ARITY[f]
     
     # determine fill values to use where number of values is less than expectation
     if fills is None:
@@ -124,24 +125,27 @@ def variants(filename,                  # name of VCF file
     dtype = list()
     for f in fields:
         t = dtypes[f]
-        n = counts[f]
+        n = arities[f]
         if n == 1:
             dtype.append((f, t))
         else:
             dtype.append((f, t, (n,)))
             
     # set up iterator
-    it = itervariants(filename, region, fields, counts, fills, progress, logstream)
+    it = itervariants(filename, region, fields, arities, fills, progress, logstream)
     
     # build an array from the iterator
-    a = np.fromiter(it, dtype=dtype)
+    if count is not None:
+        a = np.fromiter(it, dtype=dtype, count=count)
+    else:
+        a = np.fromiter(it, dtype=dtype)
     return a
 
 
 def itervariants(filename, 
                  region,
                  fields, 
-                 counts,
+                 arities,
                  fills,
                  progress, 
                  logstream):
@@ -164,7 +168,7 @@ def itervariants(filename,
         
     while variantFile.getNextVariant(deref(var)):
         
-        out = [_mkvval(var, f, counts[f], fills[f], filterIds) for f in fields]
+        out = [_mkvval(var, f, arities[f], fills[f], filterIds) for f in fields]
         yield tuple(out)
         i += 1
         
@@ -181,7 +185,7 @@ def itervariants(filename,
     del var
 
    
-cdef object _mkvval(Variant *var, string field, int count, object fill, filterIds):
+cdef object _mkvval(Variant *var, string field, int arity, object fill, filterIds):
     if field == FIELD_CHROM:
         out = var.sequenceName
     elif field == FIELD_POS:
@@ -191,7 +195,7 @@ cdef object _mkvval(Variant *var, string field, int count, object fill, filterId
     elif field == FIELD_REF:
         out = var.ref
     elif field == FIELD_ALT:
-        out = _mkaltval(var, count, fill)
+        out = _mkaltval(var, arity, fill)
     elif field == FIELD_QUAL:
         out = var.quality
     elif field == FIELD_FILTER:
@@ -205,21 +209,21 @@ cdef object _mkvval(Variant *var, string field, int count, object fill, filterId
     return out
  
  
-cdef object _mkaltval(Variant *var, int count, object fill):
-    if count == 1:
+cdef object _mkaltval(Variant *var, int arity, object fill):
+    if arity == 1:
         if var.alt.size() == 0:
             out = fill
         else:
             out = var.alt[0]
-    elif var.alt.size() == count:
+    elif var.alt.size() == arity:
         out = var.alt
         out = tuple(out)
-    elif var.alt.size() > count:
+    elif var.alt.size() > arity:
         out = var.alt
-        out = tuple(out[:count])
+        out = tuple(out[:arity])
     else:
         out = var.alt
-        out += [fill] * (count-var.alt.size())
+        out += [fill] * (arity-var.alt.size())
         out = tuple(out)
     return out
  
