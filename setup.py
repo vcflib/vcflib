@@ -20,7 +20,7 @@ tabixpp_sources = ('bedidx.c', 'bgzf.c', 'index.c', 'knetfile.c', 'kstring.c', '
 
 
 def get_vcflib_sources():
-    sources = ['vcflib.pyx']
+    sources = list()
     sources += [os.path.join(vcflib_dir, s) for s in vcflib_sources]
     sources += [os.path.join(smithwaterman_dir, s) for s in smithwaterman_sources]    
     sources += [os.path.join(tabixpp_dir, s) for s in tabixpp_sources]
@@ -28,16 +28,23 @@ def get_vcflib_sources():
 
 
 vcflib_extension = Extension('vcflib',
-                             sources=get_vcflib_sources(),
+                             sources=['vcflib.pyx'] + get_vcflib_sources(),
                              language='c++',
                              include_dirs=[vcflib_dir, smithwaterman_dir, tabixpp_dir, '.'],
                              libraries=['m', 'z'],)
     
 
+vcfnp_extension = Extension('vcfnp',
+                            sources=['vcfnp.pyx'] + get_vcflib_sources(),
+                            language='c++',
+                            include_dirs=[vcflib_dir, smithwaterman_dir, tabixpp_dir, '.'],
+                            libraries=['m', 'z'],)
+    
+
 setup(
     name = 'vcflib',
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [vcflib_extension],
+    ext_modules = [vcflib_extension, vcfnp_extension],
     )
 
 

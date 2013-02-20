@@ -5,3 +5,8 @@ build
 *.pyc
 # don't commit the Cython generated source for now
 vcflib.cpp
+vcfnp.cpp
+fixture
+*.prof
+vcfnp.html
+spike

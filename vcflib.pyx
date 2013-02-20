@@ -124,31 +124,3 @@ cdef class PyVariantCallFile:
             return self.thisptr.sampleNames
         
         
-def itervariants(filename, int progress=0, logstream=sys.stderr):
-    cdef VariantCallFile *variantFile = new VariantCallFile()
-    cdef Variant *var
-    cdef int i = 0
-    cdef vector[string] filters
-    cdef char semicolon = ';'
-    variantFile.open(filename)
-    variantFile.parseSamples = False
-    var = new Variant(deref(variantFile))
-    if progress > 0:
-        before_all = time.time()
-        before = before_all
-    while variantFile.getNextVariant(deref(var)):
-        # split the filter field here in C++ to avoid having to do it in Python later
-        filters = split(var.filter, semicolon)
-        yield (var.sequenceName, var.position, var.id, var.ref, tuple(var.alt), var.quality, tuple(filters))
-        if progress > 0 and i > 0 and i % progress == 0:
-            after = time.time()
-            print >>logstream, '%s rows in %.3fs; batch in %.3fs (%d rows/s)' % (i, after-before_all, after-before, progress/(after-before))
-            before = after
-        i += 1
-    del variantFile
-    del var
-    if progress > 0:
-        after_all = time.time()
-        print >>logstream, '%s rows in %.3fs (%d rows/s)' % (i, after_all-before_all, i/(after_all-before_all))
-    
-    
