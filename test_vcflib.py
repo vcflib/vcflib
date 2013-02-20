@@ -48,9 +48,20 @@ def test_info():
     eq_(expect, v.INFO)
 
 
-def test_format():
+def test_samples():
     vcf = PyVariantCallFile('sample.vcf')
     v = list(iter(vcf))[2] # third variant
     expect = {'GT': ['0|0'], 'HQ': ['51', '51'], 'GQ': ['48'], 'DP': ['1']}
     eq_(expect, v.samples['NA00001'])
 
+
+def test_region():
+    vcf = PyVariantCallFile('sample.vcf.gz')
+    vcf.setRegion('20')
+    eq_(6, len(vcf))
+    vcf.setRegion('20:1000000-2000000')
+    eq_(4, len(vcf))
+    vcf.setRegion('20', 1000000, 2000000)
+    eq_(4, len(vcf))
+    
+    

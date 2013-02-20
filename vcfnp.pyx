@@ -74,6 +74,7 @@ cdef string FIELD_IS_SNP = 'is_snp'
 
 
 def variants(filename,                  # name of VCF file
+             region=None,               # region to extract
              fields=None,               # fields to extract
              dtypes=None,               # override default dtypes
              counts=None,               # override how many values to expect
@@ -130,7 +131,7 @@ def variants(filename,                  # name of VCF file
             dtype.append((f, t, (n,)))
             
     # set up iterator
-    it = itervariants(filename, fields, counts, fills, progress, logstream)
+    it = itervariants(filename, region, fields, counts, fills, progress, logstream)
     
     # build an array from the iterator
     a = np.fromiter(it, dtype=dtype)
@@ -138,6 +139,7 @@ def variants(filename,                  # name of VCF file
 
 
 def itervariants(filename, 
+                 region,
                  fields, 
                  counts,
                  fills,
@@ -149,6 +151,8 @@ def itervariants(filename,
     variantFile = new VariantCallFile()
     variantFile.open(filename)
     variantFile.parseSamples = False
+    if region is not None:
+        variantFile.setRegion(region)
     var = new Variant(deref(variantFile))
     i = 0
     filterIds = <list>variantFile.filterIds()

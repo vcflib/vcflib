@@ -60,6 +60,14 @@ cdef class PyVariantCallFile:
                                var.info,
                                var.samples)
         del var
+        
+    def setRegion(self, *args):
+        if len(args) == 1:
+            self.thisptr.setRegion(args[0])
+        elif len(args) == 3:
+            self.thisptr.setRegion(args[0], args[1], args[2])
+        else:
+            raise Exception('either provide a single region string or provide seq, start, end')
 
     property infoIds:
         def __get__(self):

@@ -10,6 +10,7 @@ from nose.tools import eq_
 
 def test_variants():
     a = variants('sample.vcf')
+    eq_(9, len(a))
     eq_('19', a[0]['CHROM'])
     eq_(111, a[0]['POS'])
     eq_('rs6054257', a[2]['ID'])
@@ -19,7 +20,6 @@ def test_variants():
     eq_(True, a[2]['FILTER']['PASS'])
     eq_(2, a[0]['num_alleles'])
     eq_(False, a[5]['is_snp'])
-    
     
 #array([ ('19', 111, '.', 'A', ['C', ''], 9.600000381469727, (False, False, False), 2, True),
 #       ('19', 112, '.', 'A', ['G', ''], 10.0, (False, False, False), 2, True),
@@ -32,3 +32,9 @@ def test_variants():
 #       ('X', 10, 'rsTest', 'AC', ['A', 'ATG'], 10.0, (True, False, False), 3, False)], 
 #      dtype=[('CHROM', '|S12'), ('POS', '<i4'), ('ID', '|S12'), ('REF', '|S12'), ('ALT', '|S12', (2,)), ('QUAL', '<f4'), ('FILTER', [('PASS', '|b1'), ('q10', '|b1'), ('s50', '|b1')]), ('num_alleles', '|u1'), ('is_snp', '|b1')])
 
+
+def test_variants_region():
+    a = variants('sample.vcf.gz', region='20')
+    eq_(6, len(a))
+    
+    
