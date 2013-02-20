@@ -4,7 +4,7 @@ Some simple unit tests for the vcfnp extension.
 """
 
 
-from vcfnp import variants
+from vcfnp import variants, info
 from nose.tools import eq_
 
 
@@ -41,6 +41,13 @@ def test_variants_region():
 def test_variants_count():
     a = variants('sample.vcf', count=3)
     eq_(3, len(a))
-
+    
+    
+def test_info():
+    a = info('sample.vcf')
+    eq_(3, a[2]['NS'])
+    eq_(.5, a[2]['AF'])
+    eq_(True, a[2]['DB'])
+    eq_((3, 1), tuple(a[6]['AC']))
     
     

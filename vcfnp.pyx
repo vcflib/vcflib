@@ -7,6 +7,7 @@ Utility functions to load data from a VCF file into a numpy array.
 
 import numpy as np
 cimport numpy as np
+from vcflib import TYPE_FLOAT, TYPE_INTEGER, TYPE_STRING, TYPE_BOOL, TYPE_UNKNOWN
 from vcflib cimport PyVariantCallFile, VariantCallFile, Variant
 from libcpp cimport bool
 from libcpp.string cimport string
@@ -38,6 +39,22 @@ DEFAULT_DTYPE = {'CHROM': 'a12',
                  'QUAL': 'f4',
                  'num_alleles': 'u1',
                  'is_snp': 'b1'}
+
+
+DEFAULT_TYPE_MAP = {TYPE_FLOAT: 'f4',
+                    TYPE_INTEGER: 'i4',
+                    TYPE_STRING: 'a12',
+                    TYPE_BOOL: 'b1',
+                    TYPE_UNKNOWN: 'a12' # leave as string
+                    }
+
+
+DEFAULT_FILL_MAP = {TYPE_FLOAT: 0.,
+                    TYPE_INTEGER: 0,
+                    TYPE_STRING: '',
+                    TYPE_BOOL: False,
+                    TYPE_UNKNOWN: '' 
+                    }
 
 
 DEFAULT_ARITY = {'CHROM': 1,
@@ -247,5 +264,84 @@ cdef object _is_snp(Variant *var):
     return True
     
 
+def info(filename,                  # name of VCF file
+         region=None,               # region to extract
+         fields=None,               # INFO fields to extract
+         dtypes=None,               # override default dtypes
+         arities=None,              # override how many values to expect
+         fills=None,                # override default fill values
+         count=None,                # attempt to extract exactly this many records
+         progress=0,                # if >0 log progress
+         logstream=sys.stderr       # stream for logging progress
+         ):
+    
+    vcf = PyVariantCallFile(filename)
+    infoIds = vcf.infoIds
+    infoTypes = vcf.infoTypes
+    infoCounts = vcf.infoCounts
 
- 
+    # determine INFO fields to extract
+    if fields is None:
+        fields = infoIds # extract all INFO fields
+    else:
+        for f in fields:
+            assert f in infoIds, 'unknown field: %s' % f
+    
+    # determine a numpy dtype for each field
+    if dtypes is None:
+        dtypes = dict()
+    for f in fields:
+        if f not in dtypes:
+            vcf_type = infoTypes[f]
+            dtypes[f] = DEFAULT_TYPE_MAP[vcf_type]
+            
+    # determine expected number of values for each field
+    if arities is None:
+        arities = dict()
+    for f in fields:
+        if f not in arities:
+            arities[f] = infoCounts[f]
+    
+    # determine fill values to use where number of values is less than expectation
+    if fills is None:
+        fills = dict()
+    for f in fields:
+        if f not in fills:
+            vcf_type = infoTypes[f]
+            fills[f] = DEFAULT_FILL_MAP[vcf_type]
+
+    # construct a numpy dtype for structured array
+    dtype = list()
+    for f in fields:
+        t = dtypes[f]
+        n = arities[f]
+        if n == 1:
+            dtype.append((f, t))
+        else:
+            dtype.append((f, t, (n,)))
+            
+    # set up iterator
+    it = iterinfo(filename, region, fields, arities, fills, progress, logstream)
+    
+    # build an array from the iterator
+    if count is not None:
+        a = np.fromiter(it, dtype=dtype, count=count)
+    else:
+        a = np.fromiter(it, dtype=dtype)
+    return a
+
+
+def iterinfo(filename, 
+             region,
+             fields, 
+             arities,
+             fills,
+             progress, 
+             logstream):
+    cdef VariantCallFile *variantFile
+    cdef Variant *var
+
+    # TODO
+    
+
+
