@@ -9,7 +9,7 @@ from nose.tools import eq_
 
 
 def test_variants():
-    a = variants('sample.vcf')
+    a = variants('sample.vcf', arities={'ALT': 2})
     eq_(9, len(a))
     eq_('19', a[0]['CHROM'])
     eq_(111, a[0]['POS'])
