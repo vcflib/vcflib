@@ -91,8 +91,17 @@ DEFAULT_INFO_DTYPE = {
                      'RPA': 'u2',
                      }
 
-# set some lower precision defaults for known FORMAT fields
-DEFAULT_FORMAT_DTYPE = {
+SAMPLE_FIELDS = ('is_called', 'is_phased', 'gt_alleles', 'gt_type',
+                 'is_het', 'is_variant')
+
+DEFAULT_SAMPLE_DTYPE = {
+                        'is_called': 'b1',
+                        'is_phased': 'b1',
+                        'gt_alleles': 'i1',
+                        'gt_type': 'i1',
+                        'is_het': 'b1',
+                        'is_variant': 'b1',
+                        # set some lower precision defaults for known FORMAT fields
                         'AD': 'u2',
                         'DP': 'u2',
                         'GQ': 'u1',
