@@ -5,6 +5,7 @@ Utility functions to load data from a VCF file into a numpy array.
 
 """
 
+
 import numpy as np
 cimport numpy as np
 #from vcflib import TYPE_FLOAT, TYPE_INTEGER, TYPE_STRING, TYPE_BOOL, TYPE_UNKNOWN
@@ -18,6 +19,8 @@ import sys
 import time
 from math import factorial
 
+
+cdef size_t npos = -1
 
 cdef extern from "split.h":
     # split a string on a single delimiter character (delim)
@@ -92,16 +95,12 @@ DEFAULT_INFO_DTYPE = {
                      'RPA': 'u2',
                      }
 
-SAMPLE_FIELDS = ('is_called', 'is_phased', 'gt_alleles', 'gt_type',
-                 'is_het', 'is_variant')
+SAMPLE_FIELDS = ('is_called', 'is_phased', 'genotype')
 
 DEFAULT_SAMPLE_DTYPE = {
                         'is_called': 'b1',
                         'is_phased': 'b1',
-                        'gt_alleles': 'i1',
-                        'gt_type': 'i1',
-                        'is_het': 'b1',
-                        'is_variant': 'b1',
+                        'genotype': 'i1',
                         # set some lower precision defaults for known FORMAT fields
                         'AD': 'u2',
                         'DP': 'u2',
@@ -116,23 +115,19 @@ DEFAULT_SAMPLE_DTYPE = {
 DEFAULT_SAMPLE_FILL = {
                        'is_called': False,
                        'is_phased': False,
-                       'gt_alleles': -1,
-                       'gt_type': -1,
-                       'is_het': False,
-                       'is_variant': False,
+                       'genotype': -1,
                        }
 
 DEFAULT_SAMPLE_ARITY = {
                        'is_called': 1,
                        'is_phased': 1,
-                       'gt_alleles': 1,
-                       'gt_type': 1,
-                       'is_het': 1,
-                       'is_variant': 1,
+                       # N.B., set genotype arity to ploidy
                        }
 
 
 cdef char SEMICOLON = ';'
+cdef char DOT = '.'
+cdef string GT_DELIMS = '/|'
 cdef string FIELD_NAME_CHROM = 'CHROM'
 cdef string FIELD_NAME_POS = 'POS'
 cdef string FIELD_NAME_ID = 'ID'
@@ -145,10 +140,8 @@ cdef string FIELD_NAME_NUM_ALLELES = 'num_alleles'
 cdef string FIELD_NAME_IS_SNP = 'is_snp'
 cdef string FIELD_NAME_IS_CALLED = 'is_called'
 cdef string FIELD_NAME_IS_PHASED = 'is_phased'
-cdef string FIELD_NAME_GT_ALLELES = 'gt_alleles'
-cdef string FIELD_NAME_GT_TYPE = 'gt_type'
-cdef string FIELD_NAME_IS_HET = 'is_het'
-cdef string FIELD_NAME_IS_VARIANT = 'is_variant'
+cdef string FIELD_NAME_GENOTYPE = 'genotype'
+cdef string FIELD_NAME_GT = 'GT'
 
 
 
@@ -609,7 +602,9 @@ def samples(filename,                  # name of VCF file
         arities = dict()
     for f in fields:
         if f not in arities:
-            if f in DEFAULT_SAMPLE_ARITY:
+            if f == 'genotype':
+                arities[f] = ploidy
+            elif f in DEFAULT_SAMPLE_ARITY:
                 arities[f] = DEFAULT_SAMPLE_ARITY[f]
             else:
                 vcf_count = formatCounts[f]
@@ -700,28 +695,76 @@ cdef inline object _mksval(map[string, vector[string]]& sample_data,
                            object fill, 
                            map[string, VariantFieldType]& formatTypes):
     if field == FIELD_NAME_IS_CALLED:
-        # TODO
-        return 0
+        return _is_called(sample_data)
     elif field == FIELD_NAME_IS_PHASED:
-        # TODO
-        return 0
-    elif field == FIELD_NAME_GT_ALLELES:
-        # TODO
-        return 0
-    elif field == FIELD_NAME_GT_TYPE:
-        # TODO
-        return 0
-    elif field == FIELD_NAME_IS_HET:
-        # TODO
-        return 0
-    elif field == FIELD_NAME_IS_VARIANT:
-        # TODO
-        return 0
+        return _is_phased(sample_data)
+    elif field == FIELD_NAME_GENOTYPE:
+        return _genotype(sample_data, ploidy)
     else:
         return _mkval(sample_data[field], arity, fill, formatTypes[field])
     
 
+
+cdef inline bool _is_called(map[string, vector[string]]& sample_data):
+    cdef vector[string] *gts
+    gts = &sample_data[FIELD_NAME_GT]
+    if gts.size() == 0:
+        return False
+    else:
+        return (gts.at(0).find('.') == npos)
+        
+        
+cdef inline bool _is_phased(map[string, vector[string]]& sample_data):
+    cdef vector[string] *gts
+    gts = &sample_data[FIELD_NAME_GT]
+    if gts.size() == 0:
+        return False
+    else:
+        return (gts.at(0).find('|') != npos)
+
+
+cdef inline object _genotype(map[string, vector[string]]& sample_data, int ploidy):
+    cdef vector[string] *gts
+    cdef vector[int] alleles
+    cdef vector[string] allele_strings
+    cdef int i
+    cdef int allele
+    gts = &sample_data[FIELD_NAME_GT]
+    if gts.size() == 0:
+        if ploidy == 1:
+            return -1
+        else:
+            return (-1,) * ploidy
+    else:
+        split(gts.at(0), GT_DELIMS, allele_strings)
+        if ploidy == 1:
+            allele = -1
+            if allele_strings.size() > 0:
+                convert(allele_strings.at(0), allele)
+            return allele
+        else:
+            for i in range(ploidy):
+                allele = -1
+                if i < allele_strings.size():
+                    convert(allele_strings.at(i), allele)
+                alleles.push_back(allele)
+            return tuple(alleles)
+        
+        
+def view2d(a):
+    """
+    Utility function to view a structured 1D array where all fields have a uniform dtype 
+    (e.g., an array constructed by :func:samples) as a 2D array.
     
+    """
+    
+    rows = a.size
+    cols = len(a.dtype)
+    dtype = a.dtype[0]
+    b = a.view(dtype).reshape(rows, cols)
+    return b
+    
+
 
 
 

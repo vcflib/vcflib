@@ -10,6 +10,7 @@ from nose.tools import eq_
 
 def test_variants():
     a = variants('sample.vcf', arities={'ALT': 2})
+    print repr(a)
     eq_(9, len(a))
     eq_('19', a[0]['CHROM'])
     eq_(111, a[0]['POS'])
@@ -45,6 +46,7 @@ def test_variants_count():
     
 def test_info():
     a = info('sample.vcf', arities={'AC': 2})
+    print repr(a)
     eq_(3, a[2]['NS'])
     eq_(.5, a[2]['AF'])
     eq_(True, a[2]['DB'])
@@ -64,12 +66,22 @@ def test_info():
 
 def test_samples():
     a = samples('sample.vcf')
+    print repr(a)
     eq_('0|0', a[0]['NA00001']['GT'])
     eq_(True, a[0]['NA00001']['is_called'])
     eq_(True, a[0]['NA00001']['is_phased'])
-    eq_((0, 0), tuple(a[0]['NA00001']['gt_alleles']))
-    eq_(0, a[0]['NA00001']['gt_type']) # hom_ref = 0, het = 1, hom_alt, = 2, uncalled = -1 
-    eq_(False, a[0]['NA00001']['is_het'])
-    eq_(False, a[0]['NA00001']['is_variant'])
+    eq_((0, 0), tuple(a[0]['NA00001']['genotype']))
     eq_((10, 10), tuple(a[0]['NA00001']['HQ']))
+
+#>>> a['NA00001']
+#array([(True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+#       (True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+#       (True, True, [0, 0], '0|0', 48, 1, [51, 51]),
+#       (True, True, [0, 0], '0|0', 49, 3, [58, 50]),
+#       (True, True, [1, 2], '1|2', 21, 6, [23, 27]),
+#       (True, True, [0, 0], '0|0', 54, 0, [56, 60]),
+#       (True, False, [0, 1], '0/1', 0, 4, [0, 0]),
+#       (True, False, [0, 0], '0/0', 0, 0, [0, 0]),
+#       (True, False, [0, -1], '0', 0, 0, [0, 0])], 
+#      dtype=[('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])
     
