@@ -44,7 +44,7 @@ def test_variants_count():
     
     
 def test_info():
-    a = info('sample.vcf')
+    a = info('sample.vcf', arities={'AC': 2})
     eq_(3, a[2]['NS'])
     eq_(.5, a[2]['AF'])
     eq_(True, a[2]['DB'])

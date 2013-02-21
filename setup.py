@@ -31,14 +31,18 @@ vcflib_extension = Extension('vcflib',
                              sources=['vcflib.pyx'] + get_vcflib_sources(),
                              language='c++',
                              include_dirs=[vcflib_dir, smithwaterman_dir, tabixpp_dir, '.'],
-                             libraries=['m', 'z'],)
+                             libraries=['m', 'z'],
+                             extra_compile_args=['-O3'],
+                             )
     
 
 vcfnp_extension = Extension('vcfnp',
                             sources=['vcfnp.pyx'] + get_vcflib_sources(),
                             language='c++',
                             include_dirs=[vcflib_dir, smithwaterman_dir, tabixpp_dir, '.'],
-                            libraries=['m', 'z'],)
+                            libraries=['m', 'z'],
+                            extra_compile_args=['-O3'],
+                            )
     
 
 setup(

@@ -7,8 +7,8 @@ Utility functions to load data from a VCF file into a numpy array.
 
 import numpy as np
 cimport numpy as np
-from vcflib import TYPE_FLOAT, TYPE_INTEGER, TYPE_STRING, TYPE_BOOL, TYPE_UNKNOWN
-from vcflib cimport PyVariantCallFile, VariantCallFile, Variant
+#from vcflib import TYPE_FLOAT, TYPE_INTEGER, TYPE_STRING, TYPE_BOOL, TYPE_UNKNOWN
+from vcflib cimport PyVariantCallFile, VariantCallFile, Variant, VariantFieldType, FIELD_FLOAT, FIELD_INTEGER, FIELD_STRING, FIELD_BOOL, FIELD_UNKNOWN, ALLELE_NUMBER, GENOTYPE_NUMBER
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
@@ -25,6 +25,11 @@ cdef extern from "split.h":
     # split a string on any character found in the string of delimiters (delims)
     vector[string]& split(const string &s, const string& delims, vector[string] &elems)
     vector[string]  split(const string &s, const string& delims)
+    
+
+cdef extern from "convert.h":
+    bool convert(const string& s, int& r)
+    bool convert(const string& s, float& r)
 
 
 VARIANT_FIELDS = ('CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 
@@ -41,19 +46,19 @@ DEFAULT_DTYPE = {'CHROM': 'a12',
                  'is_snp': 'b1'}
 
 
-DEFAULT_TYPE_MAP = {TYPE_FLOAT: 'f4',
-                    TYPE_INTEGER: 'i4',
-                    TYPE_STRING: 'a12',
-                    TYPE_BOOL: 'b1',
-                    TYPE_UNKNOWN: 'a12' # leave as string
+DEFAULT_TYPE_MAP = {FIELD_FLOAT: 'f4',
+                    FIELD_INTEGER: 'i4',
+                    FIELD_STRING: 'a12',
+                    FIELD_BOOL: 'b1',
+                    FIELD_UNKNOWN: 'a12' # leave as string
                     }
 
 
-DEFAULT_FILL_MAP = {TYPE_FLOAT: 0.,
-                    TYPE_INTEGER: 0,
-                    TYPE_STRING: '',
-                    TYPE_BOOL: False,
-                    TYPE_UNKNOWN: '' 
+DEFAULT_FILL_MAP = {FIELD_FLOAT: 0.,
+                    FIELD_INTEGER: 0,
+                    FIELD_STRING: '',
+                    FIELD_BOOL: False,
+                    FIELD_UNKNOWN: '' 
                     }
 
 
@@ -78,16 +83,16 @@ DEFAULT_FILL = {'CHROM': '',
 
 
 cdef char SEMICOLON = ';'
-cdef string FIELD_CHROM = 'CHROM'
-cdef string FIELD_POS = 'POS'
-cdef string FIELD_ID = 'ID'
-cdef string FIELD_REF = 'REF'
-cdef string FIELD_ALT = 'ALT'
-cdef string FIELD_QUAL = 'QUAL'
-cdef string FIELD_FILTER = 'FILTER'
-cdef string FIELD_INFO = 'INFO'
-cdef string FIELD_NUM_ALLELES = 'num_alleles'
-cdef string FIELD_IS_SNP = 'is_snp'
+cdef string ATTR_CHROM = 'CHROM'
+cdef string ATTR_POS = 'POS'
+cdef string ATTR_ID = 'ID'
+cdef string ATTR_REF = 'REF'
+cdef string ATTR_ALT = 'ALT'
+cdef string ATTR_QUAL = 'QUAL'
+cdef string ATTR_FILTER = 'FILTER'
+cdef string ATTR_INFO = 'INFO'
+cdef string ATTR_NUM_ALLELES = 'num_alleles'
+cdef string ATTR_IS_SNP = 'is_snp'
 
 
 def variants(filename,                  # name of VCF file
@@ -149,9 +154,15 @@ def variants(filename,                  # name of VCF file
             dtype.append((f, t, (n,)))
             
     # set up iterator
-    it = itervariants(filename, region, fields, arities, fills, progress, logstream)
+    it = _itervariants(filename, region, fields, arities, fills)
     
     # build an array from the iterator
+    return _fromiter(it, dtype, count, progress, logstream)
+
+
+def _fromiter(it, dtype, count, int progress=0, logstream=sys.stderr):
+    if progress > 0:
+        it = _iter_withprogress(it, progress, logstream)
     if count is not None:
         a = np.fromiter(it, dtype=dtype, count=count)
     else:
@@ -159,15 +170,28 @@ def variants(filename,                  # name of VCF file
     return a
 
 
-def itervariants(filename, 
+def _iter_withprogress(iterable, int progress, logstream):
+    cdef int i
+    before_all = time.time()
+    before = before_all
+    for i, o in enumerate(iterable):
+        yield o
+        if i > 0 and i % progress == 0:
+            after = time.time()
+            print >>logstream, '%s rows in %.2fs; batch in %.2fs (%d rows/s)' % (i, after-before_all, after-before, progress/(after-before))
+            before = after
+    after_all = time.time()
+    print >>logstream, '%s rows in %.2fs (%d rows/s)' % (i, after_all-before_all, i/(after_all-before_all))
+
+
+def _itervariants(filename, 
                  region,
-                 fields, 
-                 arities,
-                 fills,
-                 progress, 
-                 logstream):
+                 vector[string] fields, 
+                 map[string, int] arities,
+                 dict fills):
     cdef VariantCallFile *variantFile
     cdef Variant *var
+    cdef vector[string] filterIds
     
     variantFile = new VariantCallFile()
     variantFile.open(filename)
@@ -175,58 +199,50 @@ def itervariants(filename,
     if region is not None:
         variantFile.setRegion(region)
     var = new Variant(deref(variantFile))
-    i = 0
     filterIds = <list>variantFile.filterIds()
     filterIds = ['PASS'] + filterIds
 
-    if progress > 0:
-        before_all = time.time()
-        before = before_all
-        
     while variantFile.getNextVariant(deref(var)):
-        
-        out = [_mkvval(var, f, arities[f], fills[f], filterIds) for f in fields]
-        yield tuple(out)
-        i += 1
-        
-        if progress > 0 and i > 0 and i % progress == 0:
-            after = time.time()
-            print >>logstream, '%s rows in %.2fs; batch in %.2fs (%d rows/s)' % (i, after-before_all, after-before, progress/(after-before))
-            before = after
-
-    if progress > 0:
-        after_all = time.time()
-        print >>logstream, '%s rows in %.2fs (%d rows/s)' % (i, after_all-before_all, i/(after_all-before_all))
+        yield _mkvvals(var, fields, arities, fills, filterIds)
         
     del variantFile
     del var
 
+
+cdef inline object _mkvvals(Variant *var, 
+                            vector[string] fields, 
+                            map[string, int] arities, 
+                            dict fills, 
+                            list filterIds):
+    out = [_mkvval(var, f, arities[f], fills[f], filterIds) for f in fields]
+    return tuple(out)
+
    
-cdef object _mkvval(Variant *var, string field, int arity, object fill, filterIds):
-    if field == FIELD_CHROM:
+cdef inline object _mkvval(Variant *var, string field, int arity, object fill, list filterIds):
+    if field == ATTR_CHROM:
         out = var.sequenceName
-    elif field == FIELD_POS:
+    elif field == ATTR_POS:
         out = var.position
-    elif field == FIELD_ID:
+    elif field == ATTR_ID:
         out = var.id
-    elif field == FIELD_REF:
+    elif field == ATTR_REF:
         out = var.ref
-    elif field == FIELD_ALT:
+    elif field == ATTR_ALT:
         out = _mkaltval(var, arity, fill)
-    elif field == FIELD_QUAL:
+    elif field == ATTR_QUAL:
         out = var.quality
-    elif field == FIELD_FILTER:
+    elif field == ATTR_FILTER:
         out = _mkfilterval(var, filterIds)
-    elif field == FIELD_NUM_ALLELES:
+    elif field == ATTR_NUM_ALLELES:
         out = var.alt.size() + 1
-    elif field == FIELD_IS_SNP:
+    elif field == ATTR_IS_SNP:
         out = _is_snp(var)
     else:
         out = 0 # TODO review this
     return out
  
  
-cdef object _mkaltval(Variant *var, int arity, object fill):
+cdef inline object _mkaltval(Variant *var, int arity, object fill):
     if arity == 1:
         if var.alt.size() == 0:
             out = fill
@@ -245,14 +261,14 @@ cdef object _mkaltval(Variant *var, int arity, object fill):
     return out
  
  
-cdef object _mkfilterval(Variant *var, filterIds):
+cdef inline object _mkfilterval(Variant *var, list filterIds):
     filters = <list>split(var.filter, SEMICOLON)
     out = [(id in filters) for id in filterIds]
     out = tuple(out)
     return out
 
 
-cdef object _is_snp(Variant *var):
+cdef inline object _is_snp(Variant *var):
     cdef int i
     cdef bytes alt
     if var.ref.size() > 1:
@@ -300,7 +316,15 @@ def info(filename,                  # name of VCF file
         arities = dict()
     for f in fields:
         if f not in arities:
-            arities[f] = infoCounts[f]
+            vcf_count = infoCounts[f]
+            if vcf_count == ALLELE_NUMBER:
+                # can't deal with variable arity, default to 2 (biallelic)
+                arities[f] = 2
+            elif vcf_count <= 0:
+                # catch any other cases of non-specific arity
+                arities[f] = 1
+            else:
+                arities[f] = vcf_count
     
     # determine fill values to use where number of values is less than expectation
     if fills is None:
@@ -321,27 +345,138 @@ def info(filename,                  # name of VCF file
             dtype.append((f, t, (n,)))
             
     # set up iterator
-    it = iterinfo(filename, region, fields, arities, fills, progress, logstream)
+    it = _iterinfo(filename, region, fields, arities, fills)
     
     # build an array from the iterator
-    if count is not None:
-        a = np.fromiter(it, dtype=dtype, count=count)
-    else:
-        a = np.fromiter(it, dtype=dtype)
-    return a
+    return _fromiter(it, dtype, count, progress, logstream)
 
 
-def iterinfo(filename, 
+def _iterinfo(filename, 
              region,
-             fields, 
-             arities,
-             fills,
-             progress, 
-             logstream):
+             vector[string] fields, 
+             map[string, int] arities,
+             dict fills):
     cdef VariantCallFile *variantFile
     cdef Variant *var
 
-    # TODO
+    variantFile = new VariantCallFile()
+    variantFile.open(filename)
+    variantFile.parseSamples = False
+    if region is not None:
+        variantFile.setRegion(region)
+    var = new Variant(deref(variantFile))
+
+    while variantFile.getNextVariant(deref(var)):
+        yield _mkivals(var, fields, arities, fills, variantFile.infoTypes)
+        
+    del variantFile
+    del var
     
+    
+cdef inline object _mkivals(Variant *var, 
+                            vector[string] fields, 
+                            map[string, int] arities,
+                            dict fills,
+                            map[string, VariantFieldType] infoTypes):
+    out = [_mkival(var, f, arities[f], fills[f], infoTypes[f]) for f in fields]
+    return tuple(out)
+    
+    
+cdef inline object _mkival(Variant *var, string field, int arity, object fill, VariantFieldType vcf_type):
+    if vcf_type == FIELD_BOOL:
+        # ignore arity, this is a flag
+        out = (var.infoFlags.count(field) > 0)
+    elif vcf_type == FIELD_STRING:
+        out = _mkival_string(var, field, arity, fill)
+    elif vcf_type == FIELD_FLOAT:
+        out = _mkival_float(var, field, arity, fill)
+    elif vcf_type == FIELD_INTEGER:
+        out = _mkival_int(var, field, arity, fill)
+    else:
+        # fall back to strings
+        out = _mkival_string(var, field, arity, fill)
+    return out
+ 
+ 
+cdef inline object _mkival_string(Variant *var, string field, int arity, string fill):
+    if arity == 1:
+        out = _mkival_string_single(&var.info[field], fill)
+    else:
+        out = _mkival_string_multi(&var.info[field], arity, fill)
+    return out
+
+
+cdef inline string _mkival_string_single(vector[string] *string_vals, string fill):
+    if string_vals.size() > 0:
+        return string_vals.at(0)
+    else:
+        return fill
+
+
+cdef inline vector[string] _mkival_string_multi(vector[string] *string_vals, int arity, string fill):
+    cdef int i
+    cdef vector[string] v
+    for i in range(arity):
+        if i < string_vals.size():
+            v.push_back(string_vals.at(i))
+        else:
+            v.push_back(fill)
+    return v
+
+
+cdef inline object _mkival_float(Variant *var, string field, int arity, float fill):
+    if arity == 1:
+        out = _mkival_float_single(&var.info[field], fill)
+    else:
+        out = _mkival_float_multi(&var.info[field], arity, fill)
+    return out
+
+
+cdef inline float _mkival_float_single(vector[string] *string_vals, float fill):
+    cdef float v = fill
+    if string_vals.size() > 0:
+        convert(string_vals.at(0), v)
+    return v
+
+
+cdef inline object _mkival_float_multi(vector[string] *string_vals, int arity, float fill) except +:
+    cdef int i
+    cdef float v
+    cdef vector[float] out
+    for i in range(arity):
+        v = fill
+        if i < string_vals.size():
+            convert(string_vals.at(i), v)
+        out.push_back(v)
+    return out
+
+        
+cdef inline object _mkival_int(Variant *var, string field, int arity, int fill):
+    if arity == 1:
+        out = _mkival_int_single(&var.info[field], fill)
+    else:
+        out = _mkival_int_multi(&var.info[field], arity, fill)
+    return out
+
+
+cdef inline int _mkival_int_single(vector[string] *string_vals, int fill):
+    cdef int v = fill
+    if string_vals.size() > 0:
+        convert(string_vals.at(0), v)
+    return v
+
+
+cdef inline object _mkival_int_multi(vector[string] *string_vals, int arity, int fill) except +:
+    cdef int i
+    cdef int v
+    cdef vector[int] out
+    for i in range(arity):
+        v = fill
+        if i < string_vals.size():
+            convert(string_vals.at(i), v)
+        out.push_back(v)
+    return out
+
+        
 
 
