@@ -1,7 +1,7 @@
 # cython: profile = True
 
 """
-Utility functions to load data from a VCF file into a numpy array.
+Utility functions to extract data from a VCF file and load into a numpy array.
 
 """
 
@@ -14,11 +14,11 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.map cimport map
+from libc.stdlib cimport atoi, atof
 from cython.operator cimport dereference as deref
 import sys
 import time
-from math import factorial
-
+#from cython.view cimport array as cvarray
 
 cdef size_t npos = -1
 
@@ -79,7 +79,7 @@ DEFAULT_TYPE_MAP = {FIELD_FLOAT: 'f4',
 
 DEFAULT_FILL_MAP = {FIELD_FLOAT: 0.,
                     FIELD_INTEGER: 0,
-                    FIELD_STRING: '',
+                    FIELD_STRING: '.',
                     FIELD_BOOL: False,
                     FIELD_UNKNOWN: '' 
                     }
@@ -105,7 +105,6 @@ DEFAULT_SAMPLE_DTYPE = {
                         'AD': 'u2',
                         'DP': 'u2',
                         'GQ': 'u1',
-                        'GT': 'a3', # diploid genotypes, e.g. '0/1'! 
                         'MLPSAC': 'u1',
                         'MLPSAF': 'f2',
                         'MQ0': 'u2',
@@ -155,6 +154,30 @@ def variants(filename,                  # name of VCF file
              progress=0,                # if >0 log progress
              logstream=sys.stderr       # stream for logging progress
              ):
+    """
+    Load an numpy structured array with data from the fixed fields of a VCF file 
+    (excluding INFO). E.g.::
+    
+        >>> from vcfnp import variants
+        >>> a = variants('sample.vcf')
+        >>> a
+        array([ ('19', 111, '.', 'A', 'C', 9.600000381469727, (False, False, False), 2, True),
+               ('19', 112, '.', 'A', 'G', 10.0, (False, False, False), 2, True),
+               ('20', 14370, 'rs6054257', 'G', 'A', 29.0, (True, False, False), 2, True),
+               ('20', 17330, '.', 'T', 'A', 3.0, (False, True, False), 2, True),
+               ('20', 1110696, 'rs6040355', 'A', 'G', 67.0, (True, False, False), 3, True),
+               ('20', 1230237, '.', 'T', '.', 47.0, (True, False, False), 2, False),
+               ('20', 1234567, 'microsat1', 'G', 'GA', 50.0, (True, False, False), 3, False),
+               ('20', 1235237, '.', 'T', '.', 0.0, (False, False, False), 2, False),
+               ('X', 10, 'rsTest', 'AC', 'A', 10.0, (True, False, False), 3, False)], 
+              dtype=[('CHROM', '|S12'), ('POS', '<i4'), ('ID', '|S12'), ('REF', '|S12'), ('ALT', '|S12'), ('QUAL', '<f4'), ('FILTER', [('PASS', '|b1'), ('q10', '|b1'), ('s50', '|b1')]), ('num_alleles', '|u1'), ('is_snp', '|b1')])
+        >>> a['QUAL']
+        array([  9.60000038,  10.        ,  29.        ,   3.        ,
+                67.        ,  47.        ,  50.        ,   0.        ,  10.        ], dtype=float32)
+        >>> a['FILTER']['PASS']
+        array([False, False,  True, False,  True,  True,  True, False,  True], dtype=bool)
+
+    """
     
     # determine fields to extract
     if fields is None:
@@ -349,6 +372,25 @@ def info(filename,                  # name of VCF file
          progress=0,                # if >0 log progress
          logstream=sys.stderr       # stream for logging progress
          ):
+    """
+    Load a numpy structured array with data from the INFO field of a VCF file. 
+    E.g.::
+    
+        >>> from vcfnp import info
+        >>> a = info('sample.vcf')
+        >>> a
+        array([(0, 0, 0, 0, 0.0, '.', False, False),
+               (0, 0, 0, 0, 0.0, '.', False, False),
+               (3, 0, 0, 14, 0.5, '.', True, True),
+               (3, 0, 0, 11, 0.017000000923871994, '.', False, False),
+               (2, 0, 0, 10, 0.3330000042915344, 'T', True, False),
+               (3, 0, 0, 13, 0.0, 'T', False, False),
+               (3, 6, 3, 9, 0.0, 'G', False, False),
+               (0, 0, 0, 0, 0.0, '.', False, False),
+               (0, 0, 0, 0, 0.0, '.', False, False)], 
+              dtype=[('NS', '<i4'), ('AN', '<u2'), ('AC', '<u2'), ('DP', '<i4'), ('AF', '<f4'), ('AA', '|S12'), ('DB', '|b1'), ('H2', '|b1')])
+    
+    """
     
     vcf = PyVariantCallFile(filename)
     infoIds = vcf.infoIds
@@ -503,23 +545,36 @@ cdef inline object _mkval_float(vector[string]& string_vals, int arity, float fi
 
 
 cdef inline float _mkval_float_single(vector[string]& string_vals, float fill):
-    cdef float v = fill
+    cdef float v
     if string_vals.size() > 0:
-        convert(string_vals.at(0), v)
-    return v
+        return atof(string_vals.at(0).c_str())
+    return fill
+#    cdef float v = fill
+#    if string_vals.size() > 0:
+#        convert(string_vals.at(0), v)
+#    return v
 
 
 
 cdef inline vector[float] _mkval_float_multi(vector[string]& string_vals, int arity, float fill):
     cdef int i
-    cdef float v
     cdef vector[float] out
     for i in range(arity):
-        v = fill
         if i < string_vals.size():
-            convert(string_vals.at(i), v)
-        out.push_back(v)
+            out.push_back(atof(string_vals.at(i).c_str()))
+        else:
+            out.push_back(fill)
     return out
+#cdef inline vector[float] _mkval_float_multi(vector[string]& string_vals, int arity, float fill):
+#    cdef int i
+#    cdef float v
+#    cdef vector[float] out
+#    for i in range(arity):
+#        v = fill
+#        if i < string_vals.size():
+#            convert(string_vals.at(i), v)
+#        out.push_back(v)
+#    return out
 
 
         
@@ -533,23 +588,36 @@ cdef inline object _mkval_int(vector[string]& string_vals, int arity, int fill):
 
 
 cdef inline int _mkval_int_single(vector[string]& string_vals, int fill):
-    cdef int v = fill
+    cdef int v
     if string_vals.size() > 0:
-        convert(string_vals.at(0), v)
-    return v
+        return atoi(string_vals.at(0).c_str())
+    return fill
+#    cdef int v = fill
+#    if string_vals.size() > 0:
+#        convert(string_vals.at(0), v)
+#    return v
 
 
 
 cdef inline vector[int] _mkval_int_multi(vector[string]& string_vals, int arity, int fill):
     cdef int i
-    cdef int v
     cdef vector[int] out
     for i in range(arity):
-        v = fill
         if i < string_vals.size():
-            convert(string_vals.at(i), v)
-        out.push_back(v)
+            out.push_back(atoi(string_vals.at(i).c_str()))
+        else:
+            out.push_back(fill)
     return out
+#cdef inline vector[int] _mkval_int_multi(vector[string]& string_vals, int arity, int fill):
+#    cdef int i
+#    cdef int v
+#    cdef vector[int] out
+#    for i in range(arity):
+#        v = fill
+#        if i < string_vals.size():
+#            convert(string_vals.at(i), v)
+#        out.push_back(v)
+#    return out
 
 
       
@@ -565,6 +633,36 @@ def samples(filename,                  # name of VCF file
             progress=0,                # if >0 log progress
             logstream=sys.stderr       # stream for logging progress
             ):
+    """
+    Load a numpy structured array with data from the sample columns of a VCF
+    file. E.g.::
+    
+        >>> from vcfnp import samples
+        >>> a = samples('sample.vcf')
+        >>> a
+        array([ ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
+               ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
+               ((True, True, [0, 0], '0|0', 48, 1, [51, 51]), (True, True, [1, 0], '1|0', 48, 8, [51, 51]), (True, False, [1, 1], '1/1', 43, 5, [0, 0])),
+               ((True, True, [0, 0], '0|0', 49, 3, [58, 50]), (True, True, [0, 1], '0|1', 3, 5, [65, 3]), (True, False, [0, 0], '0/0', 41, 3, [0, 0])),
+               ((True, True, [1, 2], '1|2', 21, 6, [23, 27]), (True, True, [2, 1], '2|1', 2, 0, [18, 2]), (True, False, [2, 2], '2/2', 35, 4, [0, 0])),
+               ((True, True, [0, 0], '0|0', 54, 0, [56, 60]), (True, True, [0, 0], '0|0', 48, 4, [51, 51]), (True, False, [0, 0], '0/0', 61, 2, [0, 0])),
+               ((True, False, [0, 1], '0/1', 0, 4, [0, 0]), (True, False, [0, 2], '0/2', 17, 2, [0, 0]), (True, False, [1, 1], '1/1', 40, 3, [0, 0])),
+               ((True, False, [0, 0], '0/0', 0, 0, [0, 0]), (True, True, [0, 0], '0|0', 0, 0, [0, 0]), (False, False, [-1, -1], './.', 0, 0, [0, 0])),
+               ((True, False, [0, -1], '0', 0, 0, [0, 0]), (True, False, [0, 1], '0/1', 0, 0, [0, 0]), (True, True, [0, 2], '0|2', 0, 0, [0, 0]))], 
+              dtype=[('NA00001', [('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))]), ('NA00002', [('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))]), ('NA00003', [('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])])
+        >>> a['NA00001']
+        array([(True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+               (True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+               (True, True, [0, 0], '0|0', 48, 1, [51, 51]),
+               (True, True, [0, 0], '0|0', 49, 3, [58, 50]),
+               (True, True, [1, 2], '1|2', 21, 6, [23, 27]),
+               (True, True, [0, 0], '0|0', 54, 0, [56, 60]),
+               (True, False, [0, 1], '0/1', 0, 4, [0, 0]),
+               (True, False, [0, 0], '0/0', 0, 0, [0, 0]),
+               (True, False, [0, -1], '0', 0, 0, [0, 0])], 
+              dtype=[('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])
+    
+    """
     
     vcf = PyVariantCallFile(filename)
     formatIds = vcf.formatIds
@@ -590,7 +688,9 @@ def samples(filename,                  # name of VCF file
         dtypes = dict()
     for f in fields:
         if f not in dtypes:
-            if f in DEFAULT_SAMPLE_DTYPE:
+            if f == 'GT':
+                dtypes[f] = 'a%d' % ((ploidy*2)-1)
+            elif f in DEFAULT_SAMPLE_DTYPE:
                 # known field
                 dtypes[f] = DEFAULT_SAMPLE_DTYPE[f]
             else:
@@ -626,7 +726,9 @@ def samples(filename,                  # name of VCF file
         fills = dict()
     for f in fields:
         if f not in fills:
-            if f in DEFAULT_SAMPLE_FILL:
+            if f == 'GT':
+                fills[f] = '/'.join(['.'] * ploidy)
+            elif f in DEFAULT_SAMPLE_FILL:
                 fills[f] = DEFAULT_SAMPLE_FILL[f]
             else:
                 vcf_type = formatTypes[f]
@@ -738,24 +840,106 @@ cdef inline object _genotype(map[string, vector[string]]& sample_data, int ploid
     else:
         split(gts.at(0), GT_DELIMS, allele_strings)
         if ploidy == 1:
-            allele = -1
             if allele_strings.size() > 0:
-                convert(allele_strings.at(0), allele)
-            return allele
+                return atoi(allele_strings.at(0).c_str())
+            else:
+                return -1
         else:
             for i in range(ploidy):
-                allele = -1
                 if i < allele_strings.size():
-                    convert(allele_strings.at(i), allele)
-                alleles.push_back(allele)
+                    alleles.push_back(atoi(allele_strings.at(i).c_str()))
+                else:
+                    alleles.push_back(-1)
             return tuple(alleles)
+#cdef inline object _genotype(map[string, vector[string]]& sample_data, int ploidy):
+#    cdef vector[string] *gts
+#    cdef vector[int] alleles
+#    cdef vector[string] allele_strings
+#    cdef int i
+#    cdef int allele
+#    gts = &sample_data[FIELD_NAME_GT]
+#    if gts.size() == 0:
+#        if ploidy == 1:
+#            return -1
+#        else:
+#            return (-1,) * ploidy
+#    else:
+#        split(gts.at(0), GT_DELIMS, allele_strings)
+#        if ploidy == 1:
+#            allele = -1
+#            if allele_strings.size() > 0:
+#                convert(allele_strings.at(0), allele)
+#            return allele
+#        else:
+#            for i in range(ploidy):
+#                allele = -1
+#                if i < allele_strings.size():
+#                    convert(allele_strings.at(i), allele)
+#                alleles.push_back(allele)
+#            return tuple(alleles)
         
         
 def view2d(a):
     """
     Utility function to view a structured 1D array where all fields have a uniform dtype 
-    (e.g., an array constructed by :func:samples) as a 2D array.
+    (e.g., an array constructed by :func:samples) as a 2D array. E.g.::
     
+        >>> from vcfnp import samples
+        >>> a = samples('sample.vcf')
+        >>> a
+        array([ ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
+               ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
+               ((True, True, [0, 0], '0|0', 48, 1, [51, 51]), (True, True, [1, 0], '1|0', 48, 8, [51, 51]), (True, False, [1, 1], '1/1', 43, 5, [0, 0])),
+               ((True, True, [0, 0], '0|0', 49, 3, [58, 50]), (True, True, [0, 1], '0|1', 3, 5, [65, 3]), (True, False, [0, 0], '0/0', 41, 3, [0, 0])),
+               ((True, True, [1, 2], '1|2', 21, 6, [23, 27]), (True, True, [2, 1], '2|1', 2, 0, [18, 2]), (True, False, [2, 2], '2/2', 35, 4, [0, 0])),
+               ((True, True, [0, 0], '0|0', 54, 0, [56, 60]), (True, True, [0, 0], '0|0', 48, 4, [51, 51]), (True, False, [0, 0], '0/0', 61, 2, [0, 0])),
+               ((True, False, [0, 1], '0/1', 0, 4, [0, 0]), (True, False, [0, 2], '0/2', 17, 2, [0, 0]), (True, False, [1, 1], '1/1', 40, 3, [0, 0])),
+               ((True, False, [0, 0], '0/0', 0, 0, [0, 0]), (True, True, [0, 0], '0|0', 0, 0, [0, 0]), (False, False, [-1, -1], './.', 0, 0, [0, 0])),
+               ((True, False, [0, -1], '0', 0, 0, [0, 0]), (True, False, [0, 1], '0/1', 0, 0, [0, 0]), (True, True, [0, 2], '0|2', 0, 0, [0, 0]))], 
+              dtype=[('NA00001', [('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))]), ('NA00002', [('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))]), ('NA00003', [('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])])
+        >>> from vcfnp import view2d
+        >>> b = view2d(a)
+        >>> b
+        array([[(True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+                (True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+                (True, False, [0, 1], '0/1', 0, 0, [3, 3])],
+               [(True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+                (True, True, [0, 0], '0|0', 0, 0, [10, 10]),
+                (True, False, [0, 1], '0/1', 0, 0, [3, 3])],
+               [(True, True, [0, 0], '0|0', 48, 1, [51, 51]),
+                (True, True, [1, 0], '1|0', 48, 8, [51, 51]),
+                (True, False, [1, 1], '1/1', 43, 5, [0, 0])],
+               [(True, True, [0, 0], '0|0', 49, 3, [58, 50]),
+                (True, True, [0, 1], '0|1', 3, 5, [65, 3]),
+                (True, False, [0, 0], '0/0', 41, 3, [0, 0])],
+               [(True, True, [1, 2], '1|2', 21, 6, [23, 27]),
+                (True, True, [2, 1], '2|1', 2, 0, [18, 2]),
+                (True, False, [2, 2], '2/2', 35, 4, [0, 0])],
+               [(True, True, [0, 0], '0|0', 54, 0, [56, 60]),
+                (True, True, [0, 0], '0|0', 48, 4, [51, 51]),
+                (True, False, [0, 0], '0/0', 61, 2, [0, 0])],
+               [(True, False, [0, 1], '0/1', 0, 4, [0, 0]),
+                (True, False, [0, 2], '0/2', 17, 2, [0, 0]),
+                (True, False, [1, 1], '1/1', 40, 3, [0, 0])],
+               [(True, False, [0, 0], '0/0', 0, 0, [0, 0]),
+                (True, True, [0, 0], '0|0', 0, 0, [0, 0]),
+                (False, False, [-1, -1], './.', 0, 0, [0, 0])],
+               [(True, False, [0, -1], '0', 0, 0, [0, 0]),
+                (True, False, [0, 1], '0/1', 0, 0, [0, 0]),
+                (True, True, [0, 2], '0|2', 0, 0, [0, 0])]], 
+              dtype=[('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])
+        >>> b['GT']
+        array([['0|0', '0|0', '0/1'],
+               ['0|0', '0|0', '0/1'],
+               ['0|0', '1|0', '1/1'],
+               ['0|0', '0|1', '0/0'],
+               ['1|2', '2|1', '2/2'],
+               ['0|0', '0|0', '0/0'],
+               ['0/1', '0/2', '1/1'],
+               ['0/0', '0|0', './.'],
+               ['0', '0/1', '0|2']], 
+              dtype='|S3')
+
     """
     
     rows = a.size
