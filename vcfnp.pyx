@@ -35,16 +35,36 @@ cdef extern from "convert.h":
 VARIANT_FIELDS = ('CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 
                   'num_alleles', 'is_snp')
 
+DEFAULT_VARIANT_DTYPE = {
+                         'CHROM': 'a12',
+                         'POS': 'i4',
+                         'ID': 'a12',
+                         'REF': 'a12',
+                         'ALT': 'a12',
+                         'QUAL': 'f4',
+                         'num_alleles': 'u1',
+                         'is_snp': 'b1',
+                         }
 
-DEFAULT_DTYPE = {'CHROM': 'a12',
-                 'POS': 'i4',
-                 'ID': 'a12',
-                 'REF': 'a12',
-                 'ALT': 'a12',
-                 'QUAL': 'f4',
-                 'num_alleles': 'u1',
-                 'is_snp': 'b1'}
+DEFAULT_VARIANT_ARITY = {
+                         'CHROM': 1,
+                         'POS': 1,
+                         'ID': 1,
+                         'REF': 1,
+                         'ALT': 2,
+                         'QUAL': 1,
+                         'num_alleles': 1,
+                         'is_snp': 1
+                         }
 
+DEFAULT_VARIANT_FILL = {'CHROM': '',
+                        'POS': 0,
+                        'ID': '',
+                        'REF': '',
+                        'ALT': '',
+                        'QUAL': 0,
+                        'num_alleles': 0,
+                        'is_snp': False}
 
 DEFAULT_TYPE_MAP = {FIELD_FLOAT: 'f4',
                     FIELD_INTEGER: 'i4',
@@ -53,7 +73,6 @@ DEFAULT_TYPE_MAP = {FIELD_FLOAT: 'f4',
                     FIELD_UNKNOWN: 'a12' # leave as string
                     }
 
-
 DEFAULT_FILL_MAP = {FIELD_FLOAT: 0.,
                     FIELD_INTEGER: 0,
                     FIELD_STRING: '',
@@ -61,38 +80,41 @@ DEFAULT_FILL_MAP = {FIELD_FLOAT: 0.,
                     FIELD_UNKNOWN: '' 
                     }
 
+# set some lower precision defaults for known INFO fields
+DEFAULT_INFO_DTYPE = {
+                     'AC': 'u2',
+                     'AN': 'u2',
+                     'HRun': 'u2',
+                     'MLEAC': 'u2',
+                     'MQ': 'f2',
+                     'QD': 'f2',
+                     'RPA': 'u2',
+                     }
 
-DEFAULT_ARITY = {'CHROM': 1,
-                 'POS': 1,
-                 'ID': 1,
-                 'REF': 1,
-                 'ALT': 2,
-                 'QUAL': 1,
-                 'num_alleles': 1,
-                 'is_snp': 1}
-
-
-DEFAULT_FILL = {'CHROM': '',
-                'POS': 0,
-                'ID': '',
-                'REF': '',
-                'ALT': '',
-                'QUAL': 0,
-                'num_alleles': 0,
-                'is_snp': False}
+# set some lower precision defaults for known FORMAT fields
+DEFAULT_FORMAT_DTYPE = {
+                        'AD': 'u2',
+                        'DP': 'u2',
+                        'GQ': 'u1',
+                        'GT': 'a3', # diploid genotypes, e.g. '0/1'! 
+                        'MLPSAC': 'u1',
+                        'MLPSAF': 'f2',
+                        'MQ0': 'u2',
+                        'PL': 'u2',
+                        }
 
 
 cdef char SEMICOLON = ';'
-cdef string ATTR_CHROM = 'CHROM'
-cdef string ATTR_POS = 'POS'
-cdef string ATTR_ID = 'ID'
-cdef string ATTR_REF = 'REF'
-cdef string ATTR_ALT = 'ALT'
-cdef string ATTR_QUAL = 'QUAL'
-cdef string ATTR_FILTER = 'FILTER'
-cdef string ATTR_INFO = 'INFO'
-cdef string ATTR_NUM_ALLELES = 'num_alleles'
-cdef string ATTR_IS_SNP = 'is_snp'
+cdef string FIELD_NAME_CHROM = 'CHROM'
+cdef string FIELD_NAME_POS = 'POS'
+cdef string FIELD_NAME_ID = 'ID'
+cdef string FIELD_NAME_REF = 'REF'
+cdef string FIELD_NAME_ALT = 'ALT'
+cdef string FIELD_NAME_QUAL = 'QUAL'
+cdef string FIELD_NAME_FILTER = 'FILTER'
+cdef string FIELD_NAME_INFO = 'INFO'
+cdef string FIELD_NAME_NUM_ALLELES = 'num_alleles'
+cdef string FIELD_NAME_IS_SNP = 'is_snp'
 
 
 def variants(filename,                  # name of VCF file
@@ -123,7 +145,7 @@ def variants(filename,                  # name of VCF file
             t += [(flt, 'b1') for flt in sorted(filterIds)]
             dtypes[f] = t
         elif f not in dtypes:
-            dtypes[f] = DEFAULT_DTYPE[f]
+            dtypes[f] = DEFAULT_VARIANT_DTYPE[f]
             
     # determine expected number of values for each field
     if arities is None:
@@ -132,7 +154,7 @@ def variants(filename,                  # name of VCF file
         if f == 'FILTER':
             arities[f] = 1 # one structured value
         elif f not in arities:
-            arities[f] = DEFAULT_ARITY[f]
+            arities[f] = DEFAULT_VARIANT_ARITY[f]
     
     # determine fill values to use where number of values is less than expectation
     if fills is None:
@@ -141,7 +163,7 @@ def variants(filename,                  # name of VCF file
         if f == 'FILTER':
             fills[f] = False
         elif f not in fills:
-            fills[f] = DEFAULT_FILL[f]
+            fills[f] = DEFAULT_VARIANT_FILL[f]
 
     # construct a numpy dtype for structured array
     dtype = list()
@@ -214,28 +236,28 @@ cdef inline object _mkvvals(Variant *var,
                             map[string, int] arities, 
                             dict fills, 
                             list filterIds):
-    out = [_mkvval(var, f, arities[f], fills[f], filterIds) for f in fields]
-    return tuple(out)
+    out = tuple([_mkvval(var, f, arities[f], fills[f], filterIds) for f in fields])
+    return out
 
    
 cdef inline object _mkvval(Variant *var, string field, int arity, object fill, list filterIds):
-    if field == ATTR_CHROM:
+    if field == FIELD_NAME_CHROM:
         out = var.sequenceName
-    elif field == ATTR_POS:
+    elif field == FIELD_NAME_POS:
         out = var.position
-    elif field == ATTR_ID:
+    elif field == FIELD_NAME_ID:
         out = var.id
-    elif field == ATTR_REF:
+    elif field == FIELD_NAME_REF:
         out = var.ref
-    elif field == ATTR_ALT:
+    elif field == FIELD_NAME_ALT:
         out = _mkaltval(var, arity, fill)
-    elif field == ATTR_QUAL:
+    elif field == FIELD_NAME_QUAL:
         out = var.quality
-    elif field == ATTR_FILTER:
+    elif field == FIELD_NAME_FILTER:
         out = _mkfilterval(var, filterIds)
-    elif field == ATTR_NUM_ALLELES:
+    elif field == FIELD_NAME_NUM_ALLELES:
         out = var.alt.size() + 1
-    elif field == ATTR_IS_SNP:
+    elif field == FIELD_NAME_IS_SNP:
         out = _is_snp(var)
     else:
         out = 0 # TODO review this
@@ -247,7 +269,7 @@ cdef inline object _mkaltval(Variant *var, int arity, object fill):
         if var.alt.size() == 0:
             out = fill
         else:
-            out = var.alt[0]
+            out = var.alt.at(0)
     elif var.alt.size() == arity:
         out = var.alt
         out = tuple(out)
@@ -274,7 +296,7 @@ cdef inline object _is_snp(Variant *var):
     if var.ref.size() > 1:
         return False
     for i in range(var.alt.size()):
-        alt = var.alt[i]
+        alt = var.alt.at(i)
         if alt not in {'A', 'C', 'G', 'T'}:
             return False
     return True
@@ -308,8 +330,12 @@ def info(filename,                  # name of VCF file
         dtypes = dict()
     for f in fields:
         if f not in dtypes:
-            vcf_type = infoTypes[f]
-            dtypes[f] = DEFAULT_TYPE_MAP[vcf_type]
+            if f in DEFAULT_INFO_DTYPE:
+                # known INFO field
+                dtypes[f] = DEFAULT_INFO_DTYPE[f]
+            else:
+                vcf_type = infoTypes[f]
+                dtypes[f] = DEFAULT_TYPE_MAP[vcf_type]
             
     # determine expected number of values for each field
     if arities is None:
