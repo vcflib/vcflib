@@ -293,13 +293,6 @@ cdef inline object _mkvvals(Variant *var,
                             list filterIds):
     out = tuple([_mkvval(var, f, arities[f], fills[f], filterIds) for f in fields])
     return out
-#    cdef np.ndarray[dtype=object, ndim=1] out = np.empty((fields.size(),), dtype=np.object_)
-#    cdef int i
-#    cdef string f
-#    for i in range(fields.size()):
-#        f = fields[i]
-#        out[i] = _mkvval(var, f, arities[f], fills[f], filterIds)
-#    return out
 
 
    
@@ -492,15 +485,8 @@ cdef inline object _mkivals(Variant *var,
                             map[string, int] arities,
                             dict fills,
                             map[string, VariantFieldType] infoTypes):
-#    out = [_mkival(var, f, arities[f], fills[f], infoTypes[f]) for f in fields]
-#    return tuple(out)
-    cdef np.ndarray[dtype=object, ndim=1] out = np.empty((fields.size(),), dtype=np.object_)
-    cdef int i
-    cdef string f
-    for i in range(fields.size()):
-        f = fields[i]
-        out[i] = _mkival(var, f, arities[f], fills[f], infoTypes[f])
-    return out
+    out = [_mkival(var, f, arities[f], fills[f], infoTypes[f]) for f in fields]
+    return tuple(out)
     
 
     
@@ -794,20 +780,16 @@ def _itersamples(filename,
     del var
     
     
-cdef object _mkssvals(Variant *var,
-                      vector[string] samples,
-                      int ploidy,
-                      vector[string] fields, 
-                      map[string, int] arities,
-                      dict fills,
-                      map[string, VariantFieldType]& formatTypes):
-#    out = [_mksvals(var, s, ploidy, fields, arities, fills, formatTypes) for s in samples]
-#    return tuple(out)
-    cdef np.ndarray[dtype=object, ndim=1] out = np.empty((samples.size(),), dtype=np.object_)
-    cdef int i
-    for i in range(samples.size()):
-        out[i] = _mksvals(var, samples[i], ploidy, fields, arities, fills, formatTypes)
-    return out
+cdef inline object _mkssvals(Variant *var,
+                             vector[string] samples,
+                             int ploidy,
+                             vector[string] fields, 
+                             map[string, int] arities,
+                             dict fills,
+                             map[string, VariantFieldType]& formatTypes):
+    out = [_mksvals(var, s, ploidy, fields, arities, fills, formatTypes) for s in samples]
+    return tuple(out)
+
     
     
 cdef inline object _mksvals(Variant *var, 
@@ -819,13 +801,6 @@ cdef inline object _mksvals(Variant *var,
                             map[string, VariantFieldType]& formatTypes):
     out = [_mksval(var.samples[sample], ploidy, f, arities[f], fills[f], formatTypes) for f in fields]
     return tuple(out)
-#    cdef np.ndarray[dtype=object, ndim=1] out = np.empty((fields.size(),), dtype=np.object_)
-#    cdef int i
-#    cdef string f
-#    for i in range(fields.size()):
-#        f = fields[i]
-#        out[i] = _mksval(var.samples[sample], ploidy, f, arities[f], fills[f], formatTypes)
-#    return out
     
 
 
