@@ -18,6 +18,11 @@ except:
 
 
 if __name__ == '__main__':
+    
+    if len(sys.argv) < 2:
+        print 'usage: python vcfnp_example.py [VCFFILE]'
+        sys.exit(1)
+        
     filename = sys.argv[1]
     
     print 'loading variants from %s ...' % filename
@@ -37,11 +42,10 @@ if __name__ == '__main__':
     print 'loading samples ...'
     s = samples(filename).view(np.recarray)
     c = view2d(s)
-    missing = np.count_nonzero(~c.is_called)
-    hom_ref = np.count_nonzero(np.all(c.genotype == 0, axis=2))
-    hom_alt = np.count_nonzero(np.all(c.genotype == 1, axis=2))
-    het = np.count_nonzero(np.any(c.genotype == 0, axis=2) & np.any(c.genotype > 0, axis=2))
-    print 'calls (missing, hom ref, hom alt, het): %s (%s, %s, %s, %s)' % (c.flatten().size, missing, hom_ref, hom_alt, het)
+    count_phased = np.count_nonzero(c.is_phased)
+    count_variant = np.count_nonzero(np.any(c.genotype > 0, axis=2)) 
+    count_missing = np.count_nonzero(~c.is_called)
+    print 'calls (phased, variant, missing): %s (%s, %s, %s)' % (c.flatten().size, count_phased, count_variant, count_missing)
     fig = plt.figure(2)
     ax = fig.add_subplot(111)
     ax.hist(c.GQ.flatten())

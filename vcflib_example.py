@@ -7,6 +7,11 @@ from vcflib import PyVariantCallFile
 
 
 if __name__ == '__main__':
+    
+    if len(sys.argv) < 2:
+        print 'usage: python vcflib_example.py [VCFFILE]'
+        sys.exit(1)
+
     filename = sys.argv[1]
     print 'parsing %s ...' % filename
 
