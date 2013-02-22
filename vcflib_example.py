@@ -3,7 +3,12 @@
 import sys
 import time
 from itertools import islice
-from vcflib import PyVariantCallFile
+
+try:
+    from vcflib import PyVariantCallFile
+except:
+    print 'please build the vcflib Cython extension: python setup.py build_ext --inplace'
+    raise
 
 
 if __name__ == '__main__':

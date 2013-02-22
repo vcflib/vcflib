@@ -6,15 +6,24 @@ file.
 """
 
 import sys
-from vcfnp import variants, info, samples, view2d
+
+try:
+    from vcfnp import variants, info, samples, view2d
+except:
+    print 'please build the vcflib Cython extension: python setup.py build_ext --inplace'
+    raise
+
 try:
     import numpy as np
 except:
     print 'please install numpy'
+    raise
+
 try:
     import matplotlib.pyplot as plt
 except:
     print 'please install matplotlib'
+    raise
 
 
 if __name__ == '__main__':
