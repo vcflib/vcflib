@@ -278,11 +278,16 @@ def _itervariants(filename,
     filterIds = <list>variantFile.filterIds()
     filterIds = ['PASS'] + filterIds
 
-    while variantFile.getNextVariant(deref(var)):
+    while _get_next_variant(variantFile, var):
         yield _mkvvals(var, fields, arities, fills, filterIds)
         
     del variantFile
     del var
+    
+    
+cdef inline bool _get_next_variant(VariantCallFile *variantFile, Variant *var):
+    # break this out into a separate function so we can profile it
+    return variantFile.getNextVariant(deref(var))
 
 
 
@@ -472,7 +477,7 @@ def _iterinfo(filename,
         variantFile.setRegion(region)
     var = new Variant(deref(variantFile))
 
-    while variantFile.getNextVariant(deref(var)):
+    while _get_next_variant(variantFile, var):
         yield _mkivals(var, fields, arities, fills, variantFile.infoTypes)
         
     del variantFile
@@ -771,7 +776,7 @@ def _itersamples(filename,
         variantFile.setRegion(region)
     var = new Variant(deref(variantFile))
 
-    while variantFile.getNextVariant(deref(var)):
+    while _get_next_variant(variantFile, var):
         yield _mkssvals(var, samples, ploidy, fields, arities, fills, variantFile.formatTypes)
 #        out = [_mksvals(var, s, ploidy, fields, arities, fills, variantFile.formatTypes) for s in samples]
 #        yield tuple(out)
