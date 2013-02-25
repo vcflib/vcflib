@@ -626,24 +626,24 @@ cdef inline vector[int] _mkval_int_multi(vector[string]& string_vals, int arity,
 
 
       
-def samples(filename,                  # name of VCF file
-            region=None,               # region to extract
-            samples=None,              # specify which samples to extract (default all)
-            ploidy=2,                  # ploidy to assume
-            fields=None,               # fields to extract
-            dtypes=None,               # override default dtypes
-            arities=None,              # override how many values to expect
-            fills=None,                # override default fill values
-            count=None,                # attempt to extract exactly this many records
-            progress=0,                # if >0 log progress
-            logstream=sys.stderr       # stream for logging progress
-            ):
+def calldata(filename,                  # name of VCF file
+             region=None,               # region to extract
+             samples=None,              # specify which samples to extract (default all)
+             ploidy=2,                  # ploidy to assume
+             fields=None,               # fields to extract
+             dtypes=None,               # override default dtypes
+             arities=None,              # override how many values to expect
+             fills=None,                # override default fill values
+             count=None,                # attempt to extract exactly this many records
+             progress=0,                # if >0 log progress
+             logstream=sys.stderr       # stream for logging progress
+             ):
     """
     Load a numpy structured array with data from the sample columns of a VCF
     file. E.g.::
     
         >>> from vcfnp import samples
-        >>> a = samples('sample.vcf')
+        >>> a = calldata('sample.vcf')
         >>> a
         array([ ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
                ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
@@ -752,20 +752,20 @@ def samples(filename,                  # name of VCF file
     dtype = [(s, cell_dtype) for s in samples]
             
     # set up iterator
-    it = _itersamples(filename, region, samples, ploidy, fields, arities, fills)
+    it = _itercalldata(filename, region, samples, ploidy, fields, arities, fills)
     
     # build an array from the iterator
     return _fromiter(it, dtype, count, progress, logstream)
 
 
 
-def _itersamples(filename, 
-                 region,
-                 vector[string] samples,
-                 int ploidy,
-                 vector[string] fields, 
-                 map[string, int] arities,
-                 dict fills):
+def _itercalldata(filename, 
+                  region,
+                  vector[string] samples,
+                  int ploidy,
+                  vector[string] fields, 
+                  map[string, int] arities,
+                  dict fills):
     cdef VariantCallFile *variantFile
     cdef Variant *var
 
@@ -904,7 +904,7 @@ def view2d(a):
     (e.g., an array constructed by :func:samples) as a 2D array. E.g.::
     
         >>> from vcfnp import samples
-        >>> a = samples('sample.vcf')
+        >>> a = calldata('sample.vcf')
         >>> a
         array([ ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),
                ((True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, True, [0, 0], '0|0', 0, 0, [10, 10]), (True, False, [0, 1], '0/1', 0, 0, [3, 3])),

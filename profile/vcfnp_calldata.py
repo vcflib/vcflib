@@ -12,7 +12,7 @@ import vcfnp
 
 
 def profile():
-    a = vcfnp.samples(sys.argv[1], count=int(sys.argv[2]))
+    a = vcfnp.calldata(sys.argv[1], count=int(sys.argv[2]))
 
 
 prof_fn = 'profile/tmp.prof'

@@ -8,7 +8,7 @@ file.
 import sys
 
 try:
-    from vcfnp import variants, info, samples, view2d
+    from vcfnp import variants, info, calldata, view2d
 except:
     print 'please build the vcflib Cython extension: python setup.py build_ext --inplace'
     raise
@@ -49,8 +49,8 @@ if __name__ == '__main__':
     plt.show()
     
     print 'loading samples ...'
-    s = samples(filename).view(np.recarray)
-    c = view2d(s)
+    c = calldata(filename).view(np.recarray)
+    c = view2d(c)
     count_phased = np.count_nonzero(c.is_phased)
     count_variant = np.count_nonzero(np.any(c.genotype > 0, axis=2)) 
     count_missing = np.count_nonzero(~c.is_called)

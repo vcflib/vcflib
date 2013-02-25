@@ -4,7 +4,7 @@ Some simple unit tests for the vcfnp extension.
 """
 
 
-from vcfnp import variants, info, samples
+from vcfnp import variants, info, calldata
 from nose.tools import eq_
 
 
@@ -64,8 +64,8 @@ def test_info():
 #      dtype=[('NS', '<i4'), ('AN', '<i4'), ('AC', '<i4', (2,)), ('DP', '<i4'), ('AF', '<f4'), ('AA', '|S12'), ('DB', '|b1'), ('H2', '|b1')])
 
 
-def test_samples():
-    a = samples('sample.vcf')
+def test_calldata():
+    a = calldata('sample.vcf')
     print repr(a)
     eq_('0|0', a[0]['NA00001']['GT'])
     eq_(True, a[0]['NA00001']['is_called'])
