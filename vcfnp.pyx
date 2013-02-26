@@ -276,7 +276,7 @@ def _itervariants(filename,
         variantFile.setRegion(region)
     var = new Variant(deref(variantFile))
     filterIds = <list>variantFile.filterIds()
-    filterIds = ['PASS'] + filterIds
+    filterIds = ['PASS'] + sorted(filterIds)
 
     while _get_next_variant(variantFile, var):
         yield _mkvvals(var, fields, arities, fills, filterIds)
