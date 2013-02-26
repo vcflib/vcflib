@@ -68,7 +68,7 @@ REPEATS = smithwaterman/Repeats.o
 
 INDELALLELE = smithwaterman/IndelAllele.o
 
-DISORDER = smithwaterman/disorder.c
+DISORDER = smithwaterman/disorder.o
 
 LEFTALIGN = smithwaterman/LeftAlign.o
 
@@ -123,6 +123,7 @@ $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(L
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
+	rm -f fsom/fsom.o
 	cd tabixpp && make clean
 	cd smithwaterman && make clean
 	cd fastahack && make clean
