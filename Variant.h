@@ -181,7 +181,7 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
-    string varCigar(vector<VariantAllele>& vav);
+    string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
                                                          bool useMNPs = false,
                                                          bool useEntropy = false,

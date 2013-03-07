@@ -1340,7 +1340,7 @@ int ploidy(map<int, int>& genotype) {
 }
 
 // generates cigar from allele parsed by parsedAlternates
-string varCigar(vector<VariantAllele>& vav) {
+string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
     string cigar;
     pair<int, string> element;
     for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
@@ -1351,7 +1351,7 @@ string varCigar(vector<VariantAllele>& vav) {
                 element.second = ""; element.first = 0;
             }
             if (va.ref.size() == va.alt.size()) {
-                cigar += convert(va.ref.size()) + "X";
+                cigar += convert(va.ref.size()) + (xForMismatch ? "X" : "M");
             } else if (va.ref.size() > va.alt.size()) {
                 cigar += convert(va.ref.size() - va.alt.size()) + "D";
             } else {
