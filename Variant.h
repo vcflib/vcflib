@@ -447,8 +447,6 @@ int ploidy(map<int, int>& genotype);
 
 string unionInfoHeaderLines(string& s1, string& s2);
 
-string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
-
 // genotype likelihood ordering
 
 list<list<int> > glorder(int ploidy, int alleles);
@@ -458,6 +456,7 @@ map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMappi
 
 vector<string>& unique(vector<string>& strings);
 
+string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
 string mergeCigar(const string& c1, const string& c2);
 vector<pair<int, string> > splitCigar(const string& cigarStr);
 list<pair<int, string> > splitCigarList(const string& cigarStr);
