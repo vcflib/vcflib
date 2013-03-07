@@ -38,18 +38,18 @@ void Variant::parse(string& line, bool parseSamples) {
     convert(fields.at(5), quality);
     filter = fields.at(6);
     if (fields.size() > 7) {
-	vector<string> infofields = split(fields.at(7), ';');
-	for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
-	    if (*f == ".") {
-		continue;
-	    }
-	    vector<string> kv = split(*f, '=');
-	    if (kv.size() == 2) {
-		split(kv.at(1), ',', info[kv.at(0)]);
-	    } else if (kv.size() == 1) {
-		infoFlags[kv.at(0)] = true;
-	    }
-	}
+        vector<string> infofields = split(fields.at(7), ';');
+        for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
+            if (*f == ".") {
+                continue;
+            }
+            vector<string> kv = split(*f, '=');
+            if (kv.size() == 2) {
+                split(kv.at(1), ',', info[kv.at(0)]);
+            } else if (kv.size() == 1) {
+                infoFlags[kv.at(0)] = true;
+            }
+        }
     }
     // check if we have samples specified
     // and that we are supposed to parse them
@@ -162,491 +162,491 @@ VariantFieldType Variant::infoType(string& key) {
     }
 }
 
-VariantFieldType Variant::formatType(string& key) {
-    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->formatTypes.end()) {
-        cerr << "no format field " << key << endl;
-        exit(1);
-    } else {
-        return s->second;
-    }
-}
-
-bool Variant::getInfoValueBool(string& key, int index) {
-    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
-        exit(1);
-    } else {
-        int count = vcf->infoCounts[key];
-        // XXX TODO, fix for Genotype variants...
-        if (count != ALLELE_NUMBER) {
-            index = 0;
-        }
-        if (index == INDEX_NONE) {
-            if (count != 1) {
-                cerr << "no field index supplied and field count != 1" << endl;
-                exit(1);
-            } else {
-                index = 0;
-            }
-        }
-        VariantFieldType type = s->second;
-        if (type == FIELD_BOOL) {
-            map<string, bool>::iterator b = infoFlags.find(key);
-            if (b == infoFlags.end())
-                return false;
-            else
-                return true;
+    VariantFieldType Variant::formatType(string& key) {
+        map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+        if (s == vcf->formatTypes.end()) {
+            cerr << "no format field " << key << endl;
+            exit(1);
         } else {
-            cerr << "not flag type " << key << endl;
+            return s->second;
         }
     }
-}
 
-string Variant::getInfoValueString(string& key, int index) {
-    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
-        exit(1);
-    } else {
-        int count = vcf->infoCounts[key];
-        // XXX TODO, fix for Genotype variants...
-        if (count != ALLELE_NUMBER) {
-            index = 0;
-        }
-        if (index == INDEX_NONE) {
-            if (count != 1) {
-                cerr << "no field index supplied and field count != 1" << endl;
-                exit(1);
-            } else {
-                index = 0;
-            }
-        }
-        VariantFieldType type = s->second;
-        if (type == FIELD_STRING) {
-            map<string, vector<string> >::iterator b = info.find(key);
-            if (b == info.end())
-                return "";
-            return b->second.at(index);
+    bool Variant::getInfoValueBool(string& key, int index) {
+        map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+        if (s == vcf->infoTypes.end()) {
+            cerr << "no info field " << key << endl;
+            exit(1);
         } else {
-            cerr << "not string type " << key << endl;
-            return "";
-        }
-    }
-}
-
-double Variant::getInfoValueFloat(string& key, int index) {
-    map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        if (key == "QUAL") {
-            return quality;
-        }
-        cerr << "no info field " << key << endl;
-        exit(1);
-    } else {
-        int count = vcf->infoCounts[key];
-        // XXX TODO, fix for Genotype variants...
-        if (count != ALLELE_NUMBER) {
-            index = 0;
-        }
-        if (index == INDEX_NONE) {
-            if (count != 1) {
-                cerr << "no field index supplied and field count != 1" << endl;
-                exit(1);
-            } else {
+            int count = vcf->infoCounts[key];
+            // XXX TODO, fix for Genotype variants...
+            if (count != ALLELE_NUMBER) {
                 index = 0;
             }
-        }
-        VariantFieldType type = s->second;
-        if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
-            map<string, vector<string> >::iterator b = info.find(key);
-            if (b == info.end())
-                return false;
-            double r;
-            if (!convert(b->second.at(index), r)) {
-                cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
-                exit(1);
+            if (index == INDEX_NONE) {
+                if (count != 1) {
+                    cerr << "no field index supplied and field count != 1" << endl;
+                    exit(1);
+                } else {
+                    index = 0;
+                }
             }
-            return r;
+            VariantFieldType type = s->second;
+            if (type == FIELD_BOOL) {
+                map<string, bool>::iterator b = infoFlags.find(key);
+                if (b == infoFlags.end())
+                    return false;
+                else
+                    return true;
+            } else {
+                cerr << "not flag type " << key << endl;
+            }
+        }
+    }
+
+    string Variant::getInfoValueString(string& key, int index) {
+        map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+        if (s == vcf->infoTypes.end()) {
+            cerr << "no info field " << key << endl;
+            exit(1);
         } else {
-            cerr << "unsupported type for variant record " << type << endl;
-	    exit(1);
-        }
-    }
-}
-
-int Variant::getNumSamples(void) {
-    return sampleNames.size();
-}
-
-int Variant::getNumValidGenotypes(void) {
-    int valid_genotypes = 0;
-    map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
-    map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();
-    for (; s != sEnd; ++s) {
-        map<string, vector<string> > sample_info = s->second;
-        if (sample_info["GT"].front() != "./.") {
-            valid_genotypes++;
-        }
-    }
-    return valid_genotypes;
-}
-
-bool Variant::getSampleValueBool(string& key, string& sample, int index) {
-    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
-        exit(1);
-    } else {
-        int count = vcf->formatCounts[key];
-        // XXX TODO, fix for Genotype variants...
-        if (count != ALLELE_NUMBER) {
-            index = 0;
-        }
-        if (index == INDEX_NONE) {
-            if (count != 1) {
-                cerr << "no field index supplied and field count != 1" << endl;
-                exit(1);
-            } else {
+            int count = vcf->infoCounts[key];
+            // XXX TODO, fix for Genotype variants...
+            if (count != ALLELE_NUMBER) {
                 index = 0;
             }
-        }
-        VariantFieldType type = s->second;
-        map<string, vector<string> >& sampleData = samples[sample];
-        if (type == FIELD_BOOL) {
-            map<string, vector<string> >::iterator b = sampleData.find(key);
-            if (b == sampleData.end())
-                return false;
-            else
-                return true;
-        } else {
-            cerr << "not bool type " << key << endl;
-        }
-    }
-}
-
-string Variant::getSampleValueString(string& key, string& sample, int index) {
-    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
-        exit(1);
-    } else {
-        int count = vcf->formatCounts[key];
-        // XXX TODO, fix for Genotype variants...
-        if (count != ALLELE_NUMBER) {
-            index = 0;
-        }
-        if (index == INDEX_NONE) {
-            if (count != 1) {
-                cerr << "no field index supplied and field count != 1" << endl;
-                exit(1);
-            } else {
-                index = 0;
+            if (index == INDEX_NONE) {
+                if (count != 1) {
+                    cerr << "no field index supplied and field count != 1" << endl;
+                    exit(1);
+                } else {
+                    index = 0;
+                }
             }
-        }
-        VariantFieldType type = s->second;
-        map<string, vector<string> >& sampleData = samples[sample];
-        if (type == FIELD_STRING) {
-            map<string, vector<string> >::iterator b = sampleData.find(key);
-            if (b == sampleData.end()) {
-                return "";
-            } else {
+            VariantFieldType type = s->second;
+            if (type == FIELD_STRING) {
+                map<string, vector<string> >::iterator b = info.find(key);
+                if (b == info.end())
+                    return "";
                 return b->second.at(index);
+            } else {
+                cerr << "not string type " << key << endl;
+                return "";
             }
-        } else {
-            cerr << "not string type " << key << endl;
         }
     }
-}
 
-double Variant::getSampleValueFloat(string& key, string& sample, int index) {
-    map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-    if (s == vcf->infoTypes.end()) {
-        cerr << "no info field " << key << endl;
-        exit(1);
-    } else {
-        // XXX TODO wrap this with a function call
-        int count = vcf->formatCounts[key];
-        // XXX TODO, fix for Genotype variants...
-        if (count != ALLELE_NUMBER) {
-            index = 0;
-        }
-        if (index == INDEX_NONE) {
-            if (count != 1) {
-                cerr << "no field index supplied and field count != 1" << endl;
-                exit(1);
-            } else {
+    double Variant::getInfoValueFloat(string& key, int index) {
+        map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+        if (s == vcf->infoTypes.end()) {
+            if (key == "QUAL") {
+                return quality;
+            }
+            cerr << "no info field " << key << endl;
+            exit(1);
+        } else {
+            int count = vcf->infoCounts[key];
+            // XXX TODO, fix for Genotype variants...
+            if (count != ALLELE_NUMBER) {
                 index = 0;
             }
-        }
-        VariantFieldType type = s->second;
-        map<string, vector<string> >& sampleData = samples[sample];
-        if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
-            map<string, vector<string> >::iterator b = sampleData.find(key);
-            if (b == sampleData.end())
-                return false;
-            double r;
-            if (!convert(b->second.at(index), r)) {
-                cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
+            if (index == INDEX_NONE) {
+                if (count != 1) {
+                    cerr << "no field index supplied and field count != 1" << endl;
+                    exit(1);
+                } else {
+                    index = 0;
+                }
+            }
+            VariantFieldType type = s->second;
+            if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
+                map<string, vector<string> >::iterator b = info.find(key);
+                if (b == info.end())
+                    return false;
+                double r;
+                if (!convert(b->second.at(index), r)) {
+                    cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
+                    exit(1);
+                }
+                return r;
+            } else {
+                cerr << "unsupported type for variant record " << type << endl;
                 exit(1);
             }
-            return r;
+        }
+    }
+
+    int Variant::getNumSamples(void) {
+        return sampleNames.size();
+    }
+
+    int Variant::getNumValidGenotypes(void) {
+        int valid_genotypes = 0;
+        map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
+        map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();
+        for (; s != sEnd; ++s) {
+            map<string, vector<string> > sample_info = s->second;
+            if (sample_info["GT"].front() != "./.") {
+                valid_genotypes++;
+            }
+        }
+        return valid_genotypes;
+    }
+
+    bool Variant::getSampleValueBool(string& key, string& sample, int index) {
+        map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+        if (s == vcf->infoTypes.end()) {
+            cerr << "no info field " << key << endl;
+            exit(1);
         } else {
-            cerr << "unsupported type for sample " << type << endl;
-        }
-    }
-}
-
-bool Variant::getValueBool(string& key, string& sample, int index) {
-    if (sample.empty()) { // an empty sample name means
-        return getInfoValueBool(key, index);
-    } else {
-        return getSampleValueBool(key, sample, index);
-    }
-}
-
-double Variant::getValueFloat(string& key, string& sample, int index) {
-    if (sample.empty()) { // an empty sample name means
-        return getInfoValueFloat(key, index);
-    } else {
-        return getSampleValueFloat(key, sample, index);
-    }
-}
-
-string Variant::getValueString(string& key, string& sample, int index) {
-    if (sample.empty()) { // an empty sample name means
-        return getInfoValueString(key, index);
-    } else {
-        return getSampleValueString(key, sample, index);
-    }
-}
-
-int Variant::getAltAlleleIndex(string& allele) {
-    map<string, int>::iterator f = altAlleleIndexes.find(allele);
-    if (f == altAlleleIndexes.end()) {
-        cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
-        exit(1);
-    } else {
-        return f->second;
-    }
-}
-
-void Variant::addFilter(string& tag) {
-    if (filter == "" || filter == ".")
-        filter = tag;
-    else
-        filter += "," + tag;
-}
-
-void Variant::addFormatField(string& key) {
-    bool hasTag = false;
-    for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
-        if (*t == key) {
-            hasTag = true;
-            break;
-        }
-    }
-    if (!hasTag) {
-        format.push_back(key);
-    }
-}
-
-void Variant::printAlt(ostream& out) {
-    for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
-        out << *i;
-        // add a comma for all but the last alternate allele
-        if (i != (alt.end() - 1)) out << ",";
-    }
-}
-
-void Variant::printAlleles(ostream& out) {
-    for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
-        out << *i;
-        // add a comma for all but the last alternate allele
-        if (i != (alleles.end() - 1)) out << ",";
-    }
-}
-
-ostream& operator<<(ostream& out, Variant& var) {
-    out << var.sequenceName << "\t"
-        << var.position << "\t"
-        << var.id << "\t"
-        << var.ref << "\t";
-    // report the list of alternate alleles.
-    var.printAlt(out);
-    out << "\t"
-        << var.quality << "\t"
-        << var.filter << "\t";
-    for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-	if (!i->second.empty()) {
-	    out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
-	}
-    }
-    for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
-        if (i == var.infoFlags.end()) {
-            out << "";
-        } else if (i == var.infoFlags.begin() && var.info.empty()) {
-            out << "";
-        } else {
-            out << ";";
-        }
-        out << i->first;
-    }
-    if (!var.format.empty()) {
-        out << "\t";
-        for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-            out << ((f == var.format.begin()) ? "" : ":") << *f;
-        }
-        for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
-            out << "\t";
-            map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(*s);
-            if (sampleItr == var.samples.end()) {
-                out << ".";
+            int count = vcf->formatCounts[key];
+            // XXX TODO, fix for Genotype variants...
+            if (count != ALLELE_NUMBER) {
+                index = 0;
+            }
+            if (index == INDEX_NONE) {
+                if (count != 1) {
+                    cerr << "no field index supplied and field count != 1" << endl;
+                    exit(1);
+                } else {
+                    index = 0;
+                }
+            }
+            VariantFieldType type = s->second;
+            map<string, vector<string> >& sampleData = samples[sample];
+            if (type == FIELD_BOOL) {
+                map<string, vector<string> >::iterator b = sampleData.find(key);
+                if (b == sampleData.end())
+                    return false;
+                else
+                    return true;
             } else {
-                map<string, vector<string> >& sample = sampleItr->second;
-                if (sample.size() == 0) {
+                cerr << "not bool type " << key << endl;
+            }
+        }
+    }
+
+    string Variant::getSampleValueString(string& key, string& sample, int index) {
+        map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+        if (s == vcf->infoTypes.end()) {
+            cerr << "no info field " << key << endl;
+            exit(1);
+        } else {
+            int count = vcf->formatCounts[key];
+            // XXX TODO, fix for Genotype variants...
+            if (count != ALLELE_NUMBER) {
+                index = 0;
+            }
+            if (index == INDEX_NONE) {
+                if (count != 1) {
+                    cerr << "no field index supplied and field count != 1" << endl;
+                    exit(1);
+                } else {
+                    index = 0;
+                }
+            }
+            VariantFieldType type = s->second;
+            map<string, vector<string> >& sampleData = samples[sample];
+            if (type == FIELD_STRING) {
+                map<string, vector<string> >::iterator b = sampleData.find(key);
+                if (b == sampleData.end()) {
+                    return "";
+                } else {
+                    return b->second.at(index);
+                }
+            } else {
+                cerr << "not string type " << key << endl;
+            }
+        }
+    }
+
+    double Variant::getSampleValueFloat(string& key, string& sample, int index) {
+        map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+        if (s == vcf->infoTypes.end()) {
+            cerr << "no info field " << key << endl;
+            exit(1);
+        } else {
+            // XXX TODO wrap this with a function call
+            int count = vcf->formatCounts[key];
+            // XXX TODO, fix for Genotype variants...
+            if (count != ALLELE_NUMBER) {
+                index = 0;
+            }
+            if (index == INDEX_NONE) {
+                if (count != 1) {
+                    cerr << "no field index supplied and field count != 1" << endl;
+                    exit(1);
+                } else {
+                    index = 0;
+                }
+            }
+            VariantFieldType type = s->second;
+            map<string, vector<string> >& sampleData = samples[sample];
+            if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
+                map<string, vector<string> >::iterator b = sampleData.find(key);
+                if (b == sampleData.end())
+                    return false;
+                double r;
+                if (!convert(b->second.at(index), r)) {
+                    cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
+                    exit(1);
+                }
+                return r;
+            } else {
+                cerr << "unsupported type for sample " << type << endl;
+            }
+        }
+    }
+
+    bool Variant::getValueBool(string& key, string& sample, int index) {
+        if (sample.empty()) { // an empty sample name means
+            return getInfoValueBool(key, index);
+        } else {
+            return getSampleValueBool(key, sample, index);
+        }
+    }
+
+    double Variant::getValueFloat(string& key, string& sample, int index) {
+        if (sample.empty()) { // an empty sample name means
+            return getInfoValueFloat(key, index);
+        } else {
+            return getSampleValueFloat(key, sample, index);
+        }
+    }
+
+    string Variant::getValueString(string& key, string& sample, int index) {
+        if (sample.empty()) { // an empty sample name means
+            return getInfoValueString(key, index);
+        } else {
+            return getSampleValueString(key, sample, index);
+        }
+    }
+
+    int Variant::getAltAlleleIndex(string& allele) {
+        map<string, int>::iterator f = altAlleleIndexes.find(allele);
+        if (f == altAlleleIndexes.end()) {
+            cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
+            exit(1);
+        } else {
+            return f->second;
+        }
+    }
+
+    void Variant::addFilter(string& tag) {
+        if (filter == "" || filter == ".")
+            filter = tag;
+        else
+            filter += "," + tag;
+    }
+
+    void Variant::addFormatField(string& key) {
+        bool hasTag = false;
+        for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
+            if (*t == key) {
+                hasTag = true;
+                break;
+            }
+        }
+        if (!hasTag) {
+            format.push_back(key);
+        }
+    }
+
+    void Variant::printAlt(ostream& out) {
+        for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
+            out << *i;
+            // add a comma for all but the last alternate allele
+            if (i != (alt.end() - 1)) out << ",";
+        }
+    }
+
+    void Variant::printAlleles(ostream& out) {
+        for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
+            out << *i;
+            // add a comma for all but the last alternate allele
+            if (i != (alleles.end() - 1)) out << ",";
+        }
+    }
+
+    ostream& operator<<(ostream& out, Variant& var) {
+        out << var.sequenceName << "\t"
+            << var.position << "\t"
+            << var.id << "\t"
+            << var.ref << "\t";
+        // report the list of alternate alleles.
+        var.printAlt(out);
+        out << "\t"
+            << var.quality << "\t"
+            << var.filter << "\t";
+        for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
+            if (!i->second.empty()) {
+                out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+            }
+        }
+        for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
+            if (i == var.infoFlags.end()) {
+                out << "";
+            } else if (i == var.infoFlags.begin() && var.info.empty()) {
+                out << "";
+            } else {
+                out << ";";
+            }
+            out << i->first;
+        }
+        if (!var.format.empty()) {
+            out << "\t";
+            for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
+                out << ((f == var.format.begin()) ? "" : ":") << *f;
+            }
+            for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
+                out << "\t";
+                map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(*s);
+                if (sampleItr == var.samples.end()) {
                     out << ".";
                 } else {
-                    for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                        map<string, vector<string> >::iterator g = sample.find(*f);
-                        out << ((f == var.format.begin()) ? "" : ":");
-                        if (g != sample.end()) {
-                            out << join(g->second, ",");
-                        } else {
-                            out << ".";
+                    map<string, vector<string> >& sample = sampleItr->second;
+                    if (sample.size() == 0) {
+                        out << ".";
+                    } else {
+                        for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
+                            map<string, vector<string> >::iterator g = sample.find(*f);
+                            out << ((f == var.format.begin()) ? "" : ":");
+                            if (g != sample.end()) {
+                                out << join(g->second, ",");
+                            } else {
+                                out << ".";
+                            }
                         }
                     }
                 }
             }
         }
+        return out;
     }
-    return out;
-}
 
-void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
-    outputSampleNames = samplesToOutput;
-}
+    void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
+        outputSampleNames = samplesToOutput;
+    }
 
 
 // shunting yard algorithm
-void infixToPrefix(queue<RuleToken> tokens, queue<RuleToken>& prefixtokens) {
-    stack<RuleToken> ops;
-    while (!tokens.empty()) {
-        RuleToken& token = tokens.front();
-        if (isOperator(token)) {
-            //cerr << "found operator " << token.value << endl;
-            while (ops.size() > 0 && isOperator(ops.top())
-                    && (   (isLeftAssociative(token)  && priority(token) <= priority(ops.top()))
-                        || (isRightAssociative(token) && priority(token) <  priority(ops.top())))) {
-                prefixtokens.push(ops.top());
-                ops.pop();
+    void infixToPrefix(queue<RuleToken> tokens, queue<RuleToken>& prefixtokens) {
+        stack<RuleToken> ops;
+        while (!tokens.empty()) {
+            RuleToken& token = tokens.front();
+            if (isOperator(token)) {
+                //cerr << "found operator " << token.value << endl;
+                while (ops.size() > 0 && isOperator(ops.top())
+                       && (   (isLeftAssociative(token)  && priority(token) <= priority(ops.top()))
+                              || (isRightAssociative(token) && priority(token) <  priority(ops.top())))) {
+                    prefixtokens.push(ops.top());
+                    ops.pop();
+                }
+                ops.push(token);
+            } else if (isLeftParenthesis(token)) {
+                //cerr << "found paran " << token.value << endl;
+                ops.push(token);
+            } else if (isRightParenthesis(token)) {
+                //cerr << "found paran " << token.value << endl;
+                while (ops.size() > 0 && !isLeftParenthesis(ops.top())) {
+                    prefixtokens.push(ops.top());
+                    ops.pop();
+                }
+                if (ops.size() == 0) {
+                    cerr << "error: mismatched parentheses" << endl;
+                    exit(1);
+                }
+                if (isLeftParenthesis(ops.top())) {
+                    ops.pop();
+                }
+            } else {
+                //cerr << "found operand " << token.value << endl;
+                prefixtokens.push(token);
             }
-            ops.push(token);
-        } else if (isLeftParenthesis(token)) {
-            //cerr << "found paran " << token.value << endl;
-            ops.push(token);
-        } else if (isRightParenthesis(token)) {
-            //cerr << "found paran " << token.value << endl;
-            while (ops.size() > 0 && !isLeftParenthesis(ops.top())) {
-                prefixtokens.push(ops.top());
-                ops.pop();
-            }
-            if (ops.size() == 0) {
+            tokens.pop();
+        }
+        while (ops.size() > 0) {
+            if (isRightParenthesis(ops.top()) || isLeftParenthesis(ops.top())) {
                 cerr << "error: mismatched parentheses" << endl;
                 exit(1);
             }
-            if (isLeftParenthesis(ops.top())) {
-                ops.pop();
-            }
-        } else {
-            //cerr << "found operand " << token.value << endl;
-            prefixtokens.push(token);
+            prefixtokens.push(ops.top());
+            ops.pop();
         }
-        tokens.pop();
     }
-    while (ops.size() > 0) {
-        if (isRightParenthesis(ops.top()) || isLeftParenthesis(ops.top())) {
-            cerr << "error: mismatched parentheses" << endl;
-            exit(1);
-        }
-        prefixtokens.push(ops.top());
-        ops.pop();
-    }
-}
 
-RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) {
-    isVariable = false;
-    if (tokenstr == "!") {
-        type = RuleToken::NOT_OPERATOR;
-    } else if (tokenstr == "&") {
-        type = RuleToken::AND_OPERATOR;
-    } else if (tokenstr == "|") {
-        type = RuleToken::OR_OPERATOR;
-    } else if (tokenstr == "+") {
-        type = RuleToken::ADD_OPERATOR;
-    } else if (tokenstr == "-") {
-        type = RuleToken::SUBTRACT_OPERATOR;
-    } else if (tokenstr == "*") {
-        type = RuleToken::MULTIPLY_OPERATOR;
-    } else if (tokenstr == "/") {
-        type = RuleToken::DIVIDE_OPERATOR;
-    } else if (tokenstr == "=") {
-        type = RuleToken::EQUAL_OPERATOR;
-    } else if (tokenstr == ">") {
-        type = RuleToken::GREATER_THAN_OPERATOR;
-    } else if (tokenstr == "<") {
-        type = RuleToken::LESS_THAN_OPERATOR;
-    } else if (tokenstr == "(") {
-        type = RuleToken::LEFT_PARENTHESIS;
-    } else if (tokenstr == ")") {
-        type = RuleToken::RIGHT_PARENTHESIS;
-    } else { // operand
-        type = RuleToken::OPERAND;
-        if (variables.find(tokenstr) == variables.end()) {
-            if (convert(tokenstr, number)) {
-                type = RuleToken::NUMBER;
-            } else if (tokenstr == "QUAL") {
-                isVariable = true;
+    RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) {
+        isVariable = false;
+        if (tokenstr == "!") {
+            type = RuleToken::NOT_OPERATOR;
+        } else if (tokenstr == "&") {
+            type = RuleToken::AND_OPERATOR;
+        } else if (tokenstr == "|") {
+            type = RuleToken::OR_OPERATOR;
+        } else if (tokenstr == "+") {
+            type = RuleToken::ADD_OPERATOR;
+        } else if (tokenstr == "-") {
+            type = RuleToken::SUBTRACT_OPERATOR;
+        } else if (tokenstr == "*") {
+            type = RuleToken::MULTIPLY_OPERATOR;
+        } else if (tokenstr == "/") {
+            type = RuleToken::DIVIDE_OPERATOR;
+        } else if (tokenstr == "=") {
+            type = RuleToken::EQUAL_OPERATOR;
+        } else if (tokenstr == ">") {
+            type = RuleToken::GREATER_THAN_OPERATOR;
+        } else if (tokenstr == "<") {
+            type = RuleToken::LESS_THAN_OPERATOR;
+        } else if (tokenstr == "(") {
+            type = RuleToken::LEFT_PARENTHESIS;
+        } else if (tokenstr == ")") {
+            type = RuleToken::RIGHT_PARENTHESIS;
+        } else { // operand
+            type = RuleToken::OPERAND;
+            if (variables.find(tokenstr) == variables.end()) {
+                if (convert(tokenstr, number)) {
+                    type = RuleToken::NUMBER;
+                } else if (tokenstr == "QUAL") {
+                    isVariable = true;
+                } else {
+                    type = RuleToken::STRING_VARIABLE;
+                }
             } else {
-                type = RuleToken::STRING_VARIABLE;
+                isVariable = true;
             }
-        } else {
-            isVariable = true;
         }
+        value = tokenstr;
     }
-    value = tokenstr;
-}
 
 
-void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens, map<string, VariantFieldType>& variables) {
-    string lastToken = "";
-    bool inToken = false;
-    for (unsigned int i = 0; i <  filterspec.size(); ++i) {
-        char c = filterspec.at(i);
-        if (c == ' ' || c == '\n') {
-            inToken = false;
-            if (!inToken && lastToken.size() > 0) {
-                tokens.push(RuleToken(lastToken, variables));
-                lastToken = "";
+    void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens, map<string, VariantFieldType>& variables) {
+        string lastToken = "";
+        bool inToken = false;
+        for (unsigned int i = 0; i <  filterspec.size(); ++i) {
+            char c = filterspec.at(i);
+            if (c == ' ' || c == '\n') {
+                inToken = false;
+                if (!inToken && lastToken.size() > 0) {
+                    tokens.push(RuleToken(lastToken, variables));
+                    lastToken = "";
+                }
+            } else if (!inToken && (isOperatorChar(c) || isParanChar(c))) {
+                inToken = false;
+                if (lastToken.size() > 0) {
+                    tokens.push(RuleToken(lastToken, variables));
+                    lastToken = "";
+                }
+                tokens.push(RuleToken(filterspec.substr(i,1), variables));
+            } else {
+                inToken = true;
+                lastToken += c;
             }
-        } else if (!inToken && (isOperatorChar(c) || isParanChar(c))) {
-            inToken = false;
-            if (lastToken.size() > 0) {
-                tokens.push(RuleToken(lastToken, variables));
-                lastToken = "";
-            }
-            tokens.push(RuleToken(filterspec.substr(i,1), variables));
-        } else {
-            inToken = true;
-            lastToken += c;
+        }
+        // get the last token
+        if (inToken) {
+            tokens.push(RuleToken(lastToken, variables));
         }
     }
-    // get the last token
-    if (inToken) {
-        tokens.push(RuleToken(lastToken, variables));
-    }
-}
 
 // class which evaluates filter expressions
 // allow filters to be defined using boolean infix expressions e.g.:
@@ -660,49 +660,49 @@ void tokenizeFilterSpec(string& filterspec, queue<RuleToken>& tokens, map<string
 //
 
 
-VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables) {
-    type = filtertype;
-    spec = filterspec;
-    tokenizeFilterSpec(filterspec, tokens, variables);
-    infixToPrefix(tokens, rules);
-    /*while (!rules.empty()) {
-        cerr << " " << rules.front().value << ((isNumeric(rules.front())) ? "f" : "");
-        rules.pop();
+    VariantFilter::VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables) {
+        type = filtertype;
+        spec = filterspec;
+        tokenizeFilterSpec(filterspec, tokens, variables);
+        infixToPrefix(tokens, rules);
+        /*while (!rules.empty()) {
+          cerr << " " << rules.front().value << ((isNumeric(rules.front())) ? "f" : "");
+          rules.pop();
+          }
+        */
+        //cerr << endl;
+        //cerr << join(" ", tokens) << endl;
     }
-    */
-    //cerr << endl;
-    //cerr << join(" ", tokens) << endl;
-}
 
 // all alts pass
-bool VariantFilter::passes(Variant& var, string& sample) {
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& allele = *a;
-        if (!passes(var, sample, allele)) {
-            return false;
+    bool VariantFilter::passes(Variant& var, string& sample) {
+        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+            string& allele = *a;
+            if (!passes(var, sample, allele)) {
+                return false;
+            }
         }
-    }
-    return true;
-}
-
-bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
-    // to evaluate a rpn boolean queue with embedded numbers and variables
-    // make a result stack, use float to allow comparison of floating point
-    // numbers, booleans, and integers
-    stack<RuleToken> results;
-    queue<RuleToken> rulesCopy = rules; // copy
-
-    int index;
-    if (allele.empty()) {
-        index = 0; // apply to the whole record
-    } else {
-        // apply to a specific allele
-        index = var.getAltAlleleIndex(allele);
+        return true;
     }
 
-    while (!rulesCopy.empty()) {
-        RuleToken token = rulesCopy.front();
-        rulesCopy.pop();
+    bool VariantFilter::passes(Variant& var, string& sample, string& allele) {
+        // to evaluate a rpn boolean queue with embedded numbers and variables
+        // make a result stack, use float to allow comparison of floating point
+        // numbers, booleans, and integers
+        stack<RuleToken> results;
+        queue<RuleToken> rulesCopy = rules; // copy
+
+        int index;
+        if (allele.empty()) {
+            index = 0; // apply to the whole record
+        } else {
+            // apply to a specific allele
+            index = var.getAltAlleleIndex(allele);
+        }
+
+        while (!rulesCopy.empty()) {
+            RuleToken token = rulesCopy.front();
+            rulesCopy.pop();
         // pop operands from the front of the queue and push them onto the stack
         if (isOperand(token)) {
             //cout << "is operand: " << token.value << endl;
@@ -979,10 +979,10 @@ vector<string>& unique(vector<string>& strings) {
     set<string> uniq;
     vector<string> res;
     for (vector<string>::const_iterator s = strings.begin(); s != strings.end(); ++s) {
-	if (uniq.find(*s) == uniq.end()) {
-	    res.push_back(*s);
-	    uniq.insert(*s);
-	}
+        if (uniq.find(*s) == uniq.end()) {
+            res.push_back(*s);
+            uniq.insert(*s);
+        }
     }
     strings = res;
     return strings;
@@ -994,15 +994,15 @@ vector<string> VariantCallFile::infoIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##INFO") == 0) {
-	    size_t pos = line.find("ID=");
-	    if (pos != string::npos) {
-		pos += 3;
-		size_t tagend = line.find(",", pos);
-		if (tagend != string::npos) {
-		    tags.push_back(line.substr(pos, tagend - pos));
-		}
-	    }
-	}
+            size_t pos = line.find("ID=");
+            if (pos != string::npos) {
+                pos += 3;
+                size_t tagend = line.find(",", pos);
+                if (tagend != string::npos) {
+                    tags.push_back(line.substr(pos, tagend - pos));
+                }
+            }
+        }
     }
     return tags;
 }
@@ -1013,15 +1013,15 @@ vector<string> VariantCallFile::formatIds(void) {
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##FORMAT") == 0) {
-	    size_t pos = line.find("ID=");
-	    if (pos != string::npos) {
-		pos += 3;
-		size_t tagend = line.find(",", pos);
-		if (tagend != string::npos) {
-		    tags.push_back(line.substr(pos, tagend - pos));
-		}
-	    }
-	}
+            size_t pos = line.find("ID=");
+            if (pos != string::npos) {
+                pos += 3;
+                size_t tagend = line.find(",", pos);
+                if (tagend != string::npos) {
+                    tags.push_back(line.substr(pos, tagend - pos));
+                }
+            }
+        }
     }
     return tags;
 }
@@ -1176,45 +1176,45 @@ bool VariantCallFile::parseHeader(string& hs) {
     return true;
 }
 
-bool VariantCallFile::getNextVariant(Variant& var) {
-    if (firstRecord && !justSetRegion) {
-	if (!line.empty()) {
-	    var.parse(line, parseSamples);
-	    firstRecord = false;
-	    _done = false;
-	    return true;
-	} else {
-	    return false;
-	}
-    }
-    if (usingTabix) {
-	if (justSetRegion && !line.empty()) {
-	    if (firstRecord) {
-		firstRecord = false;
-	    }
-	    var.parse(line, parseSamples);
-	    line.clear();
-	    justSetRegion = false;
-            _done = false;
-            return true;
-	} else if (tabixFile->getNextLine(line)) {
-            var.parse(line, parseSamples);
-            _done = false;
-            return true;
-        } else {
-            _done = true;
-            return false;
+    bool VariantCallFile::getNextVariant(Variant& var) {
+        if (firstRecord && !justSetRegion) {
+            if (!line.empty()) {
+                var.parse(line, parseSamples);
+                firstRecord = false;
+                _done = false;
+                return true;
+            } else {
+                return false;
+            }
         }
-    } else {
-        if (std::getline(*file, line)) {
-            var.parse(line, parseSamples);
-            _done = false;
-            return true;
+        if (usingTabix) {
+            if (justSetRegion && !line.empty()) {
+                if (firstRecord) {
+                    firstRecord = false;
+                }
+                var.parse(line, parseSamples);
+                line.clear();
+                justSetRegion = false;
+                _done = false;
+                return true;
+            } else if (tabixFile->getNextLine(line)) {
+                var.parse(line, parseSamples);
+                _done = false;
+                return true;
+            } else {
+                _done = true;
+                return false;
+            }
         } else {
-            _done = true;
-            return false;
+            if (std::getline(*file, line)) {
+                var.parse(line, parseSamples);
+                _done = false;
+                return true;
+            } else {
+                _done = true;
+                return false;
+            }
         }
-    }
 }
 
 bool VariantCallFile::setRegion(string seq, long int start, long int end) {
@@ -1339,16 +1339,49 @@ int ploidy(map<int, int>& genotype) {
     return i;
 }
 
+// generates cigar from allele parsed by parsedAlternates
+string varCigar(vector<VariantAllele>& vav) {
+    string cigar;
+    pair<int, string> element;
+    for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
+        VariantAllele& va = *v;
+        if (va.ref != va.alt) {
+            if (element.second == "M") {
+                cigar += convert(element.first) + element.second;
+                element.second = ""; element.first = 0;
+            }
+            if (va.ref.size() == va.alt.size()) {
+                cigar += convert(va.ref.size()) + "X";
+            } else if (va.ref.size() > va.alt.size()) {
+                cigar += convert(va.ref.size() - va.alt.size()) + "D";
+            } else {
+                cigar += convert(va.alt.size() - va.ref.size()) + "I";
+            }
+        } else {
+            if (element.second == "M") {
+                element.first += va.ref.size();
+            } else {
+                element = make_pair(va.ref.size(), "M");
+            }
+        }
+    }
+    if (element.second == "M") {
+        cigar += convert(element.first) + element.second;
+    }
+    element.second = ""; element.first = 0;
+    return cigar;
+}
+
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
-							      bool useMNPs,
-							      bool useEntropy,
-							      float matchScore,
-							      float mismatchScore,
-							      float gapOpenPenalty,
-							      float gapExtendPenalty,
-							      float repeatGapExtendPenalty,
-							      string flankingRefLeft,
-							      string flankingRefRight) {
+                                                              bool useMNPs,
+                                                              bool useEntropy,
+                                                              float matchScore,
+                                                              float mismatchScore,
+                                                              float gapOpenPenalty,
+                                                              float gapExtendPenalty,
+                                                              float repeatGapExtendPenalty,
+                                                              string flankingRefLeft,
+                                                              string flankingRefRight) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 
@@ -1367,7 +1400,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     int paddingLen = max(10, (int) (ref.size()));  // dynamically determine optimum padding length
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
         string& alternate = *a;
-	paddingLen = max(paddingLen, (int) (alternate.size()));
+        paddingLen = max(paddingLen, (int) (alternate.size()));
     }
     char padChar = 'Z';
     char anchorChar = 'Q';
@@ -1379,11 +1412,11 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     // using the anchor char ensures this without other kinds of realignment
     string reference_M;
     if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-	reference_M = padding + ref + padding;
-	reference_M[paddingLen] = anchorChar;
+        reference_M = padding + ref + padding;
+        reference_M[paddingLen] = anchorChar;
     } else {
-	reference_M = flankingRefLeft + ref + flankingRefRight;
-	paddingLen = flankingRefLeft.size();
+        reference_M = flankingRefLeft + ref + flankingRefRight;
+        paddingLen = flankingRefLeft.size();
     }
 
     // passed to sw.Align
@@ -1395,135 +1428,112 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
         string& alternate = *a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
-	string alternateQuery_M;
-	if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-	    alternateQuery_M = padding + alternate + padding;
-	    alternateQuery_M[paddingLen] = anchorChar;
-	} else {
-	    alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
-	}
+        string alternateQuery_M;
+        if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+            alternateQuery_M = padding + alternate + padding;
+            alternateQuery_M[paddingLen] = anchorChar;
+        } else {
+            alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
+        }
         //const unsigned int alternateLen = alternate.size();
 
-	if (true) {
-	    CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
-	    if (useEntropy) sw.EnableEntropyGapPenalty(1);
-	    if (repeatGapExtendPenalty != 0) sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
-	    sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
-	} else {  // disabled for now
-	    StripedSmithWaterman::Aligner aligner;
-	    StripedSmithWaterman::Filter sswFilter;
-	    StripedSmithWaterman::Alignment alignment;
-	    aligner.Align(alternateQuery_M.c_str(), reference_M.c_str(), reference_M.size(), sswFilter, &alignment);
-	    cigar = alignment.cigar_string;
-	}
+        if (true) {
+            CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
+            if (useEntropy) sw.EnableEntropyGapPenalty(1);
+            if (repeatGapExtendPenalty != 0) sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
+            sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+        } else {  // disabled for now
+            StripedSmithWaterman::Aligner aligner;
+            StripedSmithWaterman::Filter sswFilter;
+            StripedSmithWaterman::Alignment alignment;
+            aligner.Align(alternateQuery_M.c_str(), reference_M.c_str(), reference_M.size(), sswFilter, &alignment);
+            cigar = alignment.cigar_string;
+        }
 
         // left-realign the alignment...
 
         vector<pair<int, string> > cigarData = splitCigar(cigar);
-	if (cigarData.front().second != "M" || cigarData.back().second != "M"
-	    || cigarData.front().first < paddingLen || cigarData.back().first < paddingLen) {
-	    cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
-	    cerr << cigar << endl;
-	    cerr << reference_M << endl;
-	    cerr << alternateQuery_M << endl;
-	    exit(1);
-	} else {
-	    cigarData.front().first -= paddingLen;
-	    cigarData.back().first -= paddingLen;;
-	}
-	cigar = joinCigar(cigarData);
+        if (cigarData.front().second != "M" || cigarData.back().second != "M"
+            || cigarData.front().first < paddingLen || cigarData.back().first < paddingLen) {
+            cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
+            cerr << cigar << endl;
+            cerr << reference_M << endl;
+            cerr << alternateQuery_M << endl;
+            exit(1);
+        } else {
+            cigarData.front().first -= paddingLen;
+            cigarData.back().first -= paddingLen;;
+        }
+        cigar = joinCigar(cigarData);
 
         int altpos = 0;
         int refpos = 0;
 
         for (vector<pair<int, string> >::iterator e = cigarData.begin(); e != cigarData.end(); ++e) {
 
-	    int len = e->first;
-	    string type = e->second;
+            int len = e->first;
+            string type = e->second;
 
             switch (type.at(0)) {
-                case 'I':
-                    if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(ref.substr(refpos - 1, 1), alternate.substr(altpos - 1, len + 1), refpos + position - 1));
-                    } else {
-                        variants.push_back(VariantAllele("", alternate.substr(altpos, len), refpos + position));
+            case 'I':
+                if (includePreviousBaseForIndels) {
+                    variants.push_back(VariantAllele(ref.substr(refpos - 1, 1),
+                                                     alternate.substr(altpos - 1, len + 1),
+                                                     refpos + position - 1));
+                } else {
+                    variants.push_back(VariantAllele("", alternate.substr(altpos, len), refpos + position));
+                }
+                altpos += len;
+                break;
+            case 'D':
+                if (includePreviousBaseForIndels) {
+                    variants.push_back(VariantAllele(ref.substr(refpos - 1, len + 1),
+                                                     alternate.substr(altpos - 1, 1),
+                                                     refpos + position - 1));
+                } else {
+                    variants.push_back(VariantAllele(ref.substr(refpos, len), "", refpos + position));
+                }
+                refpos += len;
+                break;
+            case 'M':
+                {
+                    for (int i = 0; i < len; ++i) {
+                        variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
+                                                         alternate.substr(altpos + i, 1),
+                                                         refpos + i + position));
                     }
-                    altpos += len;
-                    break;
-                case 'D':
-                    if (includePreviousBaseForIndels) {
-                        variants.push_back(VariantAllele(ref.substr(refpos - 1, len + 1), alternate.substr(altpos - 1, 1), refpos + position - 1));
-                    } else {
-                        variants.push_back(VariantAllele(ref.substr(refpos, len), "", refpos + position));
-                    }
-                    refpos += len;
-                    break;
-                case 'M':
-                    {
-			for (int i = 0; i < len; ++i) {
-			    variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
-							     alternate.substr(altpos + i, 1),
-							     refpos + i + position));
-			}
-		    }
-		    refpos += len;
-		    altpos += len;
-                    break;
-                case 'S':
-                    refpos += len;
-                    altpos += len;
-                    break;
-                default:
-                    break;
+                }
+                refpos += len;
+                altpos += len;
+                break;
+            case 'S':
+                refpos += len;
+                altpos += len;
+                break;
+            default:
+                break;
             }
 
-	    // deal with MNP representation
-	    if (useMNPs) {
-		vector<VariantAllele> adjustedVariants;
-		for (vector<VariantAllele>::iterator v = variants.begin(); v != variants.end(); ++v) {
-		    if (adjustedVariants.empty()) {
-			adjustedVariants.push_back(*v);
-		    } else {
-			if (adjustedVariants.back().ref.size() == adjustedVariants.back().alt.size()
-			    && adjustedVariants.back().ref != adjustedVariants.back().alt
-			    && v->ref.size() == v->alt.size()
-			    && v->ref != v->alt) {
-			    adjustedVariants.back().ref += v->ref;
-			    adjustedVariants.back().alt += v->alt;
-			} else {
-			    adjustedVariants.push_back(*v);
-			}
-		    }
-		}
-		variants = adjustedVariants;
-	    }
-
-	    // if the last two variants have the same alt position,
-	    // take the one which covers more ref or alt sequence
-	    // this deals with things like ACG/TTCG, which decomposes to A/T, A/TT
-	    /*
-	    if (variants.size() > 1) {
-		VariantAllele& varA = variants.at(variants.size() - 2);
-		VariantAllele& varB = variants.back();
-		if (varA.position == varB.position) {
-		    if (varA.ref.size() == varB.ref.size()) {
-			if (varA.alt.size() >= varB.alt.size()) {
-			    variants.pop_back();
-			} else {
-			    VariantAllele varB_copy = variants.back();
-			    variants.pop_back(); variants.pop_back();
-			    variants.push_back(varB_copy);
-			}
-		    } else if (varA.ref.size() > varB.ref.size()) {
-			variants.pop_back();
-		    } else {
-			VariantAllele varB_copy = variants.back();
-			variants.pop_back(); variants.pop_back();
-			variants.push_back(varB_copy);
-		    }
-		}
-	    }
-	    */
+            // deal with MNP representation
+            if (useMNPs) {
+                vector<VariantAllele> adjustedVariants;
+                for (vector<VariantAllele>::iterator v = variants.begin(); v != variants.end(); ++v) {
+                    if (adjustedVariants.empty()) {
+                        adjustedVariants.push_back(*v);
+                    } else {
+                        if (adjustedVariants.back().ref.size() == adjustedVariants.back().alt.size()
+                            && adjustedVariants.back().ref != adjustedVariants.back().alt
+                            && v->ref.size() == v->alt.size()
+                            && v->ref != v->alt) {
+                            adjustedVariants.back().ref += v->ref;
+                            adjustedVariants.back().alt += v->alt;
+                        } else {
+                            adjustedVariants.push_back(*v);
+                        }
+                    }
+                }
+                variants = adjustedVariants;
+            }
         }
     }
 
@@ -1598,21 +1608,22 @@ void Variant::removeAlt(string& altAllele) {
         int count = c->second;
         if (count == ALLELE_NUMBER) {
             string key = c->first;
-	    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
-		map<string, vector<string> >& sample = s->second;
-		map<string, vector<string> >::iterator v = sample.find(key);
-		if (v != sample.end()) {
-		    vector<string>& vals = v->second;
-		    vector<string> tokeep;
-		    int i = 0;
-		    for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
-			if (i != altIndex) {
-			    tokeep.push_back(*a);
-			}
-		    }
-		    vals = tokeep;
-		}
-	    }
+            for (map<string, map<string, vector<string> > >::iterator s = samples.begin();
+                 s != samples.end(); ++s) {
+                map<string, vector<string> >& sample = s->second;
+                map<string, vector<string> >::iterator v = sample.find(key);
+                if (v != sample.end()) {
+                    vector<string>& vals = v->second;
+                    vector<string> tokeep;
+                    int i = 0;
+                    for (vector<string>::iterator a = vals.begin(); a != vals.end(); ++a, ++i) {
+                        if (i != altIndex) {
+                            tokeep.push_back(*a);
+                        }
+                    }
+                    vals = tokeep;
+                }
+            }
         }
     }
 
@@ -1639,26 +1650,26 @@ void Variant::removeAlt(string& altAllele) {
     map<string, int> samplePloidy;
     for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
         map<string, vector<string> >& sample = s->second;
-	if (sample.find("GT") != sample.end()) {
-	    string& gt = sample["GT"].front();
-	    string splitter = "/";
-	    if (gt.find("|") != string::npos) {
-		splitter = "|";
-	    }
-	    samplePloidy[s->first] = split(gt, splitter).size();
-	    map<int, int> genotype = decomposeGenotype(sample["GT"].front());
-	    map<int, int> newGenotype;
-	    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-		newGenotype[alleleIndexMapping[g->first]] += g->second;
-	    }
-	    sample["GT"].clear();
-	    sample["GT"].push_back(genotypeToString(newGenotype));
-	}
+        if (sample.find("GT") != sample.end()) {
+            string& gt = sample["GT"].front();
+            string splitter = "/";
+            if (gt.find("|") != string::npos) {
+                splitter = "|";
+            }
+            samplePloidy[s->first] = split(gt, splitter).size();
+            map<int, int> genotype = decomposeGenotype(sample["GT"].front());
+            map<int, int> newGenotype;
+            for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+                newGenotype[alleleIndexMapping[g->first]] += g->second;
+            }
+            sample["GT"].clear();
+            sample["GT"].push_back(genotypeToString(newGenotype));
+        }
     }
 
     set<int> ploidies;
     for (map<string, int>::iterator p = samplePloidy.begin(); p != samplePloidy.end(); ++p) {
-	ploidies.insert(p->second);
+        ploidies.insert(p->second);
     }
 
     // fix the sample genotype likelihoods, removing reference to the old allele
@@ -1667,29 +1678,29 @@ void Variant::removeAlt(string& altAllele) {
     toRemove.push_back(altSpecIndex);
     map<int, map<int, int> > glMappingByPloidy;
     for (set<int>::iterator p = ploidies.begin(); p != ploidies.end(); ++p) {
-	glMappingByPloidy[*p] = glReorder(*p, alt.size() + 1, alleleIndexMapping, toRemove);
+        glMappingByPloidy[*p] = glReorder(*p, alt.size() + 1, alleleIndexMapping, toRemove);
     }
 
     for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
         map<string, vector<string> >& sample = s->second;
-	map<string, vector<string> >::iterator glsit = sample.find("GL");
-	if (glsit != sample.end()) {
-	    vector<string>& gls = glsit->second; // should be split already
-	    map<int, string> newgls;
-	    map<int, int>& newOrder = glMappingByPloidy[samplePloidy[s->first]];
-	    int i = 0;
-	    for (vector<string>::iterator g = gls.begin(); g != gls.end(); ++g, ++i) {
-		int j = newOrder[i];
-		if (j != -1) {
-		    newgls[i] = *g;
-		}
-	    }
-	    // update the gls
-	    gls.clear();
-	    for (map<int, string>::iterator g = newgls.begin(); g != newgls.end(); ++g) {
-		gls.push_back(g->second);
-	    }
-	}
+        map<string, vector<string> >::iterator glsit = sample.find("GL");
+        if (glsit != sample.end()) {
+            vector<string>& gls = glsit->second; // should be split already
+            map<int, string> newgls;
+            map<int, int>& newOrder = glMappingByPloidy[samplePloidy[s->first]];
+            int i = 0;
+            for (vector<string>::iterator g = gls.begin(); g != gls.end(); ++g, ++i) {
+                int j = newOrder[i];
+                if (j != -1) {
+                    newgls[i] = *g;
+                }
+            }
+            // update the gls
+            gls.clear();
+            for (map<int, string>::iterator g = newgls.begin(); g != newgls.end(); ++g) {
+                gls.push_back(g->second);
+            }
+        }
     }
 
     // reset the alt
@@ -1712,26 +1723,26 @@ string unionInfoHeaderLines(string& s1, string& s2) {
     set<string> l2;
     string lastHeaderLine; // this one needs to be at the end
     for (vector<string>::iterator s = lines2.begin(); s != lines2.end(); ++s) {
-	if (s->substr(0,6) == "##INFO") {
-	    l2.insert(*s);
-	}
+        if (s->substr(0,6) == "##INFO") {
+            l2.insert(*s);
+        }
     }
     for (vector<string>::iterator s = lines1.begin(); s != lines1.end(); ++s) {
-	if (l2.count(*s)) {
-	    l2.erase(*s);
-	}
-	if (s->substr(0,6) == "#CHROM") {
-	    lastHeaderLine = *s;
-	} else {
-	    result.push_back(*s);
-	}
+        if (l2.count(*s)) {
+            l2.erase(*s);
+        }
+        if (s->substr(0,6) == "#CHROM") {
+            lastHeaderLine = *s;
+        } else {
+            result.push_back(*s);
+        }
     }
     for (set<string>::iterator s = l2.begin(); s != l2.end(); ++s) {
-	result.push_back(*s);
+        result.push_back(*s);
     }
     if (lastHeaderLine.empty()) {
-	cerr << "could not find CHROM POS ... header line" << endl;
-	exit(1);
+        cerr << "could not find CHROM POS ... header line" << endl;
+        exit(1);
     }
     result.push_back(lastHeaderLine);
     return join(result, "\n");
@@ -1836,9 +1847,9 @@ string joinCigarList(const list<pair<int, string> >& cigar) {
 int cigarRefLen(const vector<pair<int, char> >& cigar) {
     int len = 0;
     for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-	if (c->second == 'M' || c->second == 'D' || c->second == 'X') {
-	    len += c->first;
-	}
+        if (c->second == 'M' || c->second == 'D' || c->second == 'X') {
+            len += c->first;
+        }
     }
     return len;
 }
@@ -1846,9 +1857,9 @@ int cigarRefLen(const vector<pair<int, char> >& cigar) {
 int cigarRefLen(const vector<pair<int, string> >& cigar) {
     int len = 0;
     for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-	if (c->second == "M" || c->second == "D" || c->second == "X") {
-	    len += c->first;
-	}
+        if (c->second == "M" || c->second == "D" || c->second == "X") {
+            len += c->first;
+        }
     }
     return len;
 }
@@ -1859,25 +1870,25 @@ bool isEmptyCigarElement(const pair<int, string>& elem) {
 
 list<list<int> > _glorder(int ploidy, int alts) {
     if (ploidy == 1) {
-	list<list<int> > results;
-	for (int n = 0; n < alts; ++n) {
-	    list<int> v;
-	    v.push_back(n);
-	    results.push_back(v);
-	}
-	return results;
+        list<list<int> > results;
+        for (int n = 0; n < alts; ++n) {
+            list<int> v;
+            v.push_back(n);
+            results.push_back(v);
+        }
+        return results;
     } else {
-	list<list<int> > results;
-	for (int n = 0; n < alts; ++n) {
-	    list<list<int> > x = _glorder(ploidy - 1, alts);
-	    for (list<list<int> >::iterator v = x.begin(); v != x.end(); ++v) {
-		if (v->front() <= n) {
-		    v->push_front(n);
-		    results.push_back(*v);
-		}
-	    }
-	}
-	return results;
+        list<list<int> > results;
+        for (int n = 0; n < alts; ++n) {
+            list<list<int> > x = _glorder(ploidy - 1, alts);
+            for (list<list<int> >::iterator v = x.begin(); v != x.end(); ++v) {
+                if (v->front() <= n) {
+                    v->push_front(n);
+                    results.push_back(*v);
+                }
+            }
+        }
+        return results;
     }
 }
 
@@ -1886,7 +1897,7 @@ list<list<int> > _glorder(int ploidy, int alts) {
 list<list<int> > glorder(int ploidy, int alts) {
     list<list<int> > results = _glorder(ploidy, alts);
     for (list<list<int> >::iterator v = results.begin(); v != results.end(); ++v) {
-	v->reverse();
+        v->reverse();
     }
     return results;
 }
@@ -1897,12 +1908,12 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts) {
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
     int i = 0;
     for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v, ++i) {
-	for (list<int>::iterator q = v->begin(); q != v->end(); ++q) {
-	    if (*q == alt) {
-		gls.push_back(i);
-		break;
-	    }
-	}
+        for (list<int>::iterator q = v->begin(); q != v->end(); ++q) {
+            if (*q == alt) {
+                gls.push_back(i);
+                break;
+            }
+        }
     }
     return gls;
 }
@@ -1914,27 +1925,27 @@ map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMappi
     map<int, int> mapping;
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
     for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v) {
-	for (list<int>::iterator n = v->begin(); n != v->end(); ++n) {
-	    *n = alleleIndexMapping[*n];
-	}
+        for (list<int>::iterator n = v->begin(); n != v->end(); ++n) {
+            *n = alleleIndexMapping[*n];
+        }
     }
     list<list<int> > newOrderedGenotypes = glorder(ploidy, numalts - altsToRemove.size());
     map<list<int>, int> newOrderedGenotypesMapping;
     int i = 0;
     // mapping is wrong...
     for (list<list<int> >::iterator v = newOrderedGenotypes.begin(); v != newOrderedGenotypes.end(); ++v, ++i) {
-	newOrderedGenotypesMapping[*v] = i;
+        newOrderedGenotypesMapping[*v] = i;
     }
     i = 0;
     for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v, ++i) {
-	map<list<int>, int>::iterator m = newOrderedGenotypesMapping.find(*v);
-	if (m != newOrderedGenotypesMapping.end()) {
-	    //cout << "new gl order of " << i << " is " << m->second << endl;
-	    mapping[i] = m->second;
-	} else {
-	    //cout << i << " will be removed" << endl;
-	    mapping[i] = -1;
-	}
+        map<list<int>, int>::iterator m = newOrderedGenotypesMapping.find(*v);
+        if (m != newOrderedGenotypesMapping.end()) {
+            //cout << "new gl order of " << i << " is " << m->second << endl;
+            mapping[i] = m->second;
+        } else {
+            //cout << i << " will be removed" << endl;
+            mapping[i] = -1;
+        }
     }
     return mapping;
 }

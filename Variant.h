@@ -181,16 +181,17 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
+    string varCigar(vector<VariantAllele>& vav);
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
-							 bool useMNPs = false,
-							 bool useEntropy = false,
-							 float matchScore = 10.0f,
-							 float mismatchScore = -9.0f,
-							 float gapOpenPenalty = 15.0f,
-							 float gapExtendPenalty = 6.66f,
-							 float repeatGapExtendPenalty = 0.0f,
-							 string flankingRefLeft = "",
-							 string flankingRefRight = "");
+                                                         bool useMNPs = false,
+                                                         bool useEntropy = false,
+                                                         float matchScore = 10.0f,
+                                                         float mismatchScore = -9.0f,
+                                                         float gapOpenPenalty = 15.0f,
+                                                         float gapExtendPenalty = 6.66f,
+                                                         float repeatGapExtendPenalty = 0.0f,
+                                                         string flankingRefLeft = "",
+                                                         string flankingRefRight = "");
 
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
@@ -447,6 +448,7 @@ int ploidy(map<int, int>& genotype);
 
 string unionInfoHeaderLines(string& s1, string& s2);
 
+string varCigar(vector<VariantAllele>& vav);
 
 // genotype likelihood ordering
 
