@@ -57,10 +57,10 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [vcf file]" << endl
          << endl
          << "training: " << endl
-         << "    " << argv[0] << " -s output.som -f \"AF DP ABP\" training.vcf" << endl
+         << "    " << argv[0] << " -s output.som -x 20 -y 20 -f \"AF DP ABP\" training.vcf" << endl
          << endl
          << "application: " << endl
-         << "    " << argv[0] << " -a output.som -f \"AF DP ABP\" test.vcf >results.vcf" << endl
+         << "    " << argv[0] << " -a output.som -x 20 -y 20 -f \"AF DP ABP\" test.vcf >results.vcf" << endl
          << endl
          << argv[0] << "trains and/or applies a self-organizing map to the input VCF data" << endl
          << "on stdin, adding two columns for the x and y coordinates of the winning" << endl
