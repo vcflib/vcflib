@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-	uniqueAlleles += var.alleles.size();
+        uniqueAlleles += var.alleles.size();
     }
 
     cout << uniqueAlleles << endl;

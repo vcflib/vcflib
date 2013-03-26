@@ -54,6 +54,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfremap.cpp \
 			  vcfsitesummarize.cpp \
 			  vcfbreakmulti.cpp \
+			  vcfcreatemulti.cpp \
 			  vcfgeno2haplo.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)

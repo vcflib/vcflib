@@ -19,7 +19,7 @@ while (<STDIN>) {
                 $snp = 0;
             }
         }
-        if ($snp) {
+        if (!$snp) {
             print;
         }
     }

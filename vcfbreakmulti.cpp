@@ -78,30 +78,30 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-	int numalt = var.alt.size();
+        int numalt = var.alt.size();
 
-	if (numalt == 1) {
-	    cout << var << endl;
-	    continue;
-	}
+        if (numalt == 1) {
+            cout << var << endl;
+            continue;
+        }
 
-	vector<Variant> variants;
-	for (int i = 0; i < numalt; ++i) {
-	    variants.push_back(var);
-	}
+        vector<Variant> variants;
+        for (int i = 0; i < numalt; ++i) {
+            variants.push_back(var);
+        }
 
-	for (int i = 0; i < numalt; ++i) {
-	    Variant& v = variants.at(i);
-	    vector<string> altsToRemove;
-	    for (int j = 0; j < numalt; ++j) {
-		if (j != i) {
-		    altsToRemove.push_back(var.alt.at(j));
-		}
-	    }
-	    for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
-		v.removeAlt(*a);
-	    }
-	}
+        for (int i = 0; i < numalt; ++i) {
+            Variant& v = variants.at(i);
+            vector<string> altsToRemove;
+            for (int j = 0; j < numalt; ++j) {
+                if (j != i) {
+                    altsToRemove.push_back(var.alt.at(j));
+                }
+            }
+            for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
+                v.removeAlt(*a);
+            }
+        }
 
         for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
             cout << *v << endl;

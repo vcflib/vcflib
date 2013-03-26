@@ -62,11 +62,11 @@ void printSummary(char** argv) {
          << "                          regions may be specified." << endl
          << "    -a, --add-info        add the statistics intermediate information to the VCF file," << endl
          << "                          writing out VCF records instead of summary statistics" << endl
-	 << "    -l, --no-length-frequency    don't out the indel and mnp length-frequency spectra" << endl
-	 << "    -m, --match-score N          match score for SW algorithm" << endl
-	 << "    -x, --mismatch-score N       mismatch score for SW algorithm" << endl
-	 << "    -o, --gap-open-penalty N     gap open penalty for SW algorithm" << endl
-	 << "    -e, --gap-extend-penalty N   gap extension penalty for SW algorithm" << endl
+         << "    -l, --no-length-frequency    don't out the indel and mnp length-frequency spectra" << endl
+         << "    -m, --match-score N          match score for SW algorithm" << endl
+         << "    -x, --mismatch-score N       mismatch score for SW algorithm" << endl
+         << "    -o, --gap-open-penalty N     gap open penalty for SW algorithm" << endl
+         << "    -e, --gap-extend-penalty N   gap extension penalty for SW algorithm" << endl
          << endl
          << "Prints statistics about variants in the input VCF file." << endl;
 }
@@ -89,79 +89,79 @@ int main(int argc, char** argv) {
     int c;
     while (true) {
         static struct option long_options[] =
-        {
-            /* These options set a flag. */
-            //{"verbose", no_argument,       &verbose_flag, 1},
-            {"help", no_argument, 0, 'h'},
-            {"region", required_argument, 0, 'r'},
-            {"add", no_argument, 0, 'a'},
-            {"no-length-frequency", no_argument, 0, 'l'},
-	    {"match-score", required_argument, 0, 'm'},
-	    {"mismatch-score", required_argument, 0, 'x'},
-	    {"gap-open-penalty", required_argument, 0, 'o'},
-	    {"gap-extend-penalty", required_argument, 0, 'e'},
-            //{"length",  no_argument, &printLength, true},
-            {0, 0, 0, 0}
-        };
+            {
+                /* These options set a flag. */
+                //{"verbose", no_argument,       &verbose_flag, 1},
+                {"help", no_argument, 0, 'h'},
+                {"region", required_argument, 0, 'r'},
+                {"add", no_argument, 0, 'a'},
+                {"no-length-frequency", no_argument, 0, 'l'},
+                {"match-score", required_argument, 0, 'm'},
+                {"mismatch-score", required_argument, 0, 'x'},
+                {"gap-open-penalty", required_argument, 0, 'o'},
+                {"gap-extend-penalty", required_argument, 0, 'e'},
+                //{"length",  no_argument, &printLength, true},
+                {0, 0, 0, 0}
+            };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
         c = getopt_long (argc, argv, "hlar:m:x:o:e:",
                          long_options, &option_index);
 
-	/* Detect the end of the options. */
-          if (c == -1)
+        /* Detect the end of the options. */
+        if (c == -1)
             break;
  
-          switch (c)
-	  {
-            case 0:
-		/* If this option set a flag, do nothing else now. */
-		if (long_options[option_index].flag != 0)
-		    break;
-		printf ("option %s", long_options[option_index].name);
-		if (optarg)
-		    printf (" with arg %s", optarg);
-		printf ("\n");
-		break;
+        switch (c)
+        {
+        case 0:
+            /* If this option set a flag, do nothing else now. */
+            if (long_options[option_index].flag != 0)
+                break;
+            printf ("option %s", long_options[option_index].name);
+            if (optarg)
+                printf (" with arg %s", optarg);
+            printf ("\n");
+            break;
 
 	    case 'h':
-		printSummary(argv);
-		exit(0);
-		break;
+            printSummary(argv);
+            exit(0);
+            break;
 		
 	    case 'r':
-		regions.push_back(optarg);
-		break;
+            regions.push_back(optarg);
+            break;
 		
 	    case 'l':
-		lengthFrequency = false;
-		break;
+            lengthFrequency = false;
+            break;
 		
 	    case 'a':
-		addTags = true;
-		break;
+            addTags = true;
+            break;
 
 	    case 'm':
-		matchScore = atof(optarg);
+            matchScore = atof(optarg);
 	        break;
 
 	    case 'x':
-		mismatchScore = atof(optarg);
+            mismatchScore = atof(optarg);
 	        break;
 
 	    case 'o':
-		gapOpenPenalty = atof(optarg);
+            gapOpenPenalty = atof(optarg);
 	        break;
 
 	    case 'e':
-		gapExtendPenalty = atof(optarg);
+            gapExtendPenalty = atof(optarg);
 	        break;
 		
 	    default:
-		abort ();
-          }
-      }
+            abort ();
+        }
+    }
 
     VariantCallFile variantFile;
     string inputFilename;
