@@ -1496,16 +1496,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                 refpos += len;
                 break;
             case 'M':
-                {
-                    for (int i = 0; i < len; ++i) {
-                        variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
-                                                         alternate.substr(altpos + i, 1),
-                                                         refpos + i + position));
-                    }
+            {
+                for (int i = 0; i < len; ++i) {
+                    variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
+                                                     alternate.substr(altpos + i, 1),
+                                                     refpos + i + position));
                 }
-                refpos += len;
-                altpos += len;
-                break;
+            }
+            refpos += len;
+            altpos += len;
+            break;
             case 'S':
                 refpos += len;
                 altpos += len;
@@ -1537,6 +1537,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         }
     }
 
+    return variantAlleles;
+}
+
+map<string, vector<VariantAllele> > Variant::flatAlternates(void) {
+    map<string, vector<VariantAllele> > variantAlleles;
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+        string& alternate = *a;
+        vector<VariantAllele>& variants = variantAlleles[alternate];
+        variants.push_back(VariantAllele(ref, alternate, position));
+    }
     return variantAlleles;
 }
 

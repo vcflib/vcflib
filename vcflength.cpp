@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 	vector<string>& lengths = var.info["length"];
 	lengths.clear();
 	for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-	    lengths.push_back(convert((int) a->size() - (int) var.ref.size()));
+	    lengths.push_back(convert(abs((int) a->size() - (int) var.ref.size())));
 	}
         cout << var << endl;
     }

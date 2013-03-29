@@ -15,40 +15,41 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
          << "options:" << endl 
-	 << "    -t, --truth-vcf FILE      use this VCF as ground truth for ROC generation" << endl
-	 << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
-	 << "    -r, --reference FILE      FASTA reference file" << endl
-	 << endl
-	 << "Generates a pseudo-ROC curve using sensitivity and specificity estimated against" << endl
-	 << "a putative truth set.  Thresholding is provided by successive QUAL cutoffs." << endl;
+         << "    -t, --truth-vcf FILE      use this VCF as ground truth for ROC generation" << endl
+         << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
+         << "    -c, --complex             directly compare complex alleles, don't parse into primitives" << endl
+         << "    -r, --reference FILE      FASTA reference file" << endl
+         << endl
+         << "Generates a pseudo-ROC curve using sensitivity and specificity estimated against" << endl
+         << "a putative truth set.  Thresholding is provided by successive QUAL cutoffs." << endl;
     exit(0);
 }
 
 void buildVariantIntervalTree(VariantCallFile& variantFile,
-			      map<string, IntervalTree<Variant*> >& variantIntervals,
-			      list<Variant>& variants) {
-    
+                              map<string, IntervalTree<Variant*> >& variantIntervals,
+                              list<Variant>& variants) {
+
     map<string, vector<Interval<Variant*> > > rawVariantIntervals;
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-	long int left = var.position;
-	long int right = left + var.ref.size(); // this should be 1-past the end
-	variants.push_back(var);
-	Variant* v = &variants.back();
-	rawVariantIntervals[var.sequenceName].push_back(Interval<Variant*>(left, right, v));
+        long int left = var.position;
+        long int right = left + var.ref.size(); // this should be 1-past the end
+        variants.push_back(var);
+        Variant* v = &variants.back();
+        rawVariantIntervals[var.sequenceName].push_back(Interval<Variant*>(left, right, v));
     }
 	
     for (map<string, vector<Interval<Variant*> > >::iterator j = rawVariantIntervals.begin(); j != rawVariantIntervals.end(); ++j) {
-	variantIntervals[j->first] = IntervalTree<Variant*>(j->second);
+        variantIntervals[j->first] = IntervalTree<Variant*>(j->second);
     }
 }
 
 
 void intersectVariant(Variant& var,
-		      map<string, IntervalTree<Variant*> >& variantIntervals,
-		      vector<string*>& commonAlleles,
-		      vector<string*>& uniqueAlleles,
-		      FastaReference& reference,
+                      map<string, IntervalTree<Variant*> >& variantIntervals,
+                      vector<string*>& commonAlleles,
+                      vector<string*>& uniqueAlleles,
+                      FastaReference& reference,
                       int windowsize = 50) {
 
     vector<Interval<Variant*> > results;
@@ -58,57 +59,57 @@ void intersectVariant(Variant& var,
     vector<Variant*> overlapping;
 
     for (vector<Interval<Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
-	overlapping.push_back(r->value);
+        overlapping.push_back(r->value);
     }
 
 
     if (overlapping.empty()) {
-	for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-	    uniqueAlleles.push_back(&*a);
-	}
+        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+            uniqueAlleles.push_back(&*a);
+        }
     } else {
 
-	// get the min and max of the overlaps
+        // get the min and max of the overlaps
 
-	int haplotypeStart = var.position;
-	int haplotypeEnd = var.position + var.ref.size();
+        int haplotypeStart = var.position;
+        int haplotypeEnd = var.position + var.ref.size();
 
-	for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
-	    haplotypeStart = min((*v)->position, (long int) haplotypeStart);
-	    haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
-	}
+        for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+            haplotypeStart = min((*v)->position, (long int) haplotypeStart);
+            haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
+        }
 
-	// for everything overlapping and the current variant, construct the local haplotype within the bounds
-	// if there is an exact match, the allele in the current VCF does intersect
+        // for everything overlapping and the current variant, construct the local haplotype within the bounds
+        // if there is an exact match, the allele in the current VCF does intersect
 
-	string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
-	map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
+        string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
+        map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
 
-	for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
-	    Variant& variant = **v;
-	    int altindex = 0;
-	    for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
-		string haplotype = referenceHaplotype;
-		// get the relative start and end coordinates for the variant alternate allele
-		int relativeStart = variant.position - haplotypeStart;
-		haplotype.replace(relativeStart, variant.ref.size(), *a);
-		haplotypes[haplotype].push_back(make_pair(*v, altindex));
-	    }
-	}
+        for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+            Variant& variant = **v;
+            int altindex = 0;
+            for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
+                string haplotype = referenceHaplotype;
+                // get the relative start and end coordinates for the variant alternate allele
+                int relativeStart = variant.position - haplotypeStart;
+                haplotype.replace(relativeStart, variant.ref.size(), *a);
+                haplotypes[haplotype].push_back(make_pair(*v, altindex));
+            }
+        }
 
 
-	// determine the non-intersecting alts
-	for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-	    string haplotype = referenceHaplotype;
-	    int relativeStart = var.position - haplotypeStart;
-	    haplotype.replace(relativeStart, var.ref.size(), *a);
-	    map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
-	    if (h == haplotypes.end()) {
-		uniqueAlleles.push_back(&*a);
-	    } else {
-		commonAlleles.push_back(&*a);
-	    }
-	}
+        // determine the non-intersecting alts
+        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+            string haplotype = referenceHaplotype;
+            int relativeStart = var.position - haplotypeStart;
+            haplotype.replace(relativeStart, var.ref.size(), *a);
+            map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
+            if (h == haplotypes.end()) {
+                uniqueAlleles.push_back(&*a);
+            } else {
+                commonAlleles.push_back(&*a);
+            }
+        }
 
     }
 }
@@ -118,6 +119,7 @@ int main(int argc, char** argv) {
 
     string truthVcfFileName;
     string fastaFileName;
+    bool complex = false;
     int windowsize = 30;
 
     if (argc == 1)
@@ -126,19 +128,20 @@ int main(int argc, char** argv) {
     int c;
     while (true) {
         static struct option long_options[] =
-        {
-            /* These options set a flag. */
-            //{"verbose", no_argument,       &verbose_flag, 1},
-            {"help", no_argument, 0, 'h'},
-	    {"window-size", required_argument, 0, 'w'},
-	    {"reference", required_argument, 0, 'r'},
-	    {"truth-vcf", required_argument, 0, 't'},
-            {0, 0, 0, 0}
-        };
+            {
+                /* These options set a flag. */
+                //{"verbose", no_argument,       &verbose_flag, 1},
+                {"help", no_argument, 0, 'h'},
+                {"window-size", required_argument, 0, 'w'},
+                {"reference", required_argument, 0, 'r'},
+                {"complex", required_argument, 0, 'c'},
+                {"truth-vcf", required_argument, 0, 't'},
+                {0, 0, 0, 0}
+            };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hw:r:t:",
+        c = getopt_long (argc, argv, "hcw:r:t:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -147,28 +150,32 @@ int main(int argc, char** argv) {
         switch (c) {
 
 	    case 'w':
-		windowsize = atoi(optarg);
-		break;
+            windowsize = atoi(optarg);
+            break;
 
 	    case 'r':
-		fastaFileName = string(optarg);
-		break;
+            fastaFileName = string(optarg);
+            break;
 
 	    case 't':
 	        truthVcfFileName = optarg;
-		break;
+            break;
 
-            case 'h':
-                printSummary(argv);
-                break;
+        case 'c':
+            complex = true;
+            break;
 
-            case '?':
-                printSummary(argv);
-                exit(1);
-                break;
+        case 'h':
+            printSummary(argv);
+            break;
 
-            default:
-                abort ();
+        case '?':
+            printSummary(argv);
+            exit(1);
+            break;
+
+        default:
+            abort ();
         }
     }
 
@@ -180,7 +187,7 @@ int main(int argc, char** argv) {
         variantFile.open(inputFilename);
     } else {
         variantFile.open(std::cin);
-	usingstdin = true;
+        usingstdin = true;
     }
 
     if (!variantFile.is_open()) {
@@ -190,26 +197,26 @@ int main(int argc, char** argv) {
 
     VariantCallFile truthVariantFile;
     if (!truthVcfFileName.empty()) {
-	if (truthVcfFileName == "-") {
-	    if (usingstdin) {
-		cerr << "cannot open both VCF file streams from stdin" << endl;
-		exit(1);
-	    } else {
-		truthVariantFile.open(std::cin);
-	    }
-	} else {
-	    truthVariantFile.open(truthVcfFileName);
-	}
-	if (!truthVariantFile.is_open()) {
-	    cerr << "could not open VCF file " << truthVcfFileName << endl;
-	    exit(1);
-	}
+        if (truthVcfFileName == "-") {
+            if (usingstdin) {
+                cerr << "cannot open both VCF file streams from stdin" << endl;
+                exit(1);
+            } else {
+                truthVariantFile.open(std::cin);
+            }
+        } else {
+            truthVariantFile.open(truthVcfFileName);
+        }
+        if (!truthVariantFile.is_open()) {
+            cerr << "could not open VCF file " << truthVcfFileName << endl;
+            exit(1);
+        }
     }
 
     FastaReference reference;
     if (fastaFileName.empty()) {
-	cerr << "a reference is required for the haplotype-based intersection used by vcfroc" << endl;
-	exit(1);
+        cerr << "a reference is required for the haplotype-based intersection used by vcfroc" << endl;
+        exit(1);
     }
     reference.open(fastaFileName);
 
@@ -237,62 +244,71 @@ int main(int argc, char** argv) {
     //vcfintersect -r $reference -v -i $answers_primitives $results.$Q.vcf | vcfstats >false_positives.$Q.stats
 
     for (list<Variant>::iterator v = testVariants.begin(); v != testVariants.end(); ++v) {
-	// TODO allow different cutoffs
-	callsByCutoff[v->quality].push_back(&*v);
+        // TODO allow different cutoffs
+        callsByCutoff[v->quality].push_back(&*v);
     }
 
     // add false negatives at any cutoff
     for (list<Variant>::iterator v = truthVariants.begin(); v != truthVariants.end(); ++v) {
-	Variant& variant = *v;
-	vector<string*> commonAlleles;
-	vector<string*> uniqueAlleles;
-	intersectVariant(variant, testVariantIntervals,
-			 commonAlleles, uniqueAlleles, reference);
-	parsedAlleles[&*v] = variant.parsedAlternates();
-	// unique alleles are false negatives regardless of cutoff
-	for (vector<string*>::iterator a = uniqueAlleles.begin(); a != uniqueAlleles.end(); ++a) {
-	    vector<VariantAllele>& alleles = parsedAlleles[&*v][**a];
-	    for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
-		if (va->ref != va->alt) { 		// use only non-reference alleles
-		     // false negatives at threshold 0 XXX --- may not apply if threshold is generalized
-		    falseNegativeAllelesAtCutoff[0].push_back(&*va);
-		}
-	    }
-	}
+        Variant& variant = *v;
+        vector<string*> commonAlleles;
+        vector<string*> uniqueAlleles;
+        intersectVariant(variant, testVariantIntervals,
+                         commonAlleles, uniqueAlleles, reference);
+        if (complex) {
+            parsedAlleles[&*v] = variant.flatAlternates();
+        } else {
+            parsedAlleles[&*v] = variant.parsedAlternates();
+        }
+        // unique alleles are false negatives regardless of cutoff
+        for (vector<string*>::iterator a = uniqueAlleles.begin(); a != uniqueAlleles.end(); ++a) {
+            vector<VariantAllele>& alleles = parsedAlleles[&*v][**a];
+            for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
+                if (va->ref != va->alt) { 		// use only non-reference alleles
+                    // false negatives at threshold 0 XXX --- may not apply if threshold is generalized
+                    falseNegativeAllelesAtCutoff[0].push_back(&*va);
+                }
+            }
+        }
     }
 
     for (map<long double, vector<Variant*> >::iterator q = callsByCutoff.begin(); q != callsByCutoff.end(); ++q) {
-	long double threshold = q->first;
-	vector<Variant*>& variants = q->second;
-	for (vector<Variant*>::iterator v = variants.begin(); v != variants.end(); ++v) {
-	    Variant& variant = **v;
-	    vector<string*> commonAlleles;
-	    vector<string*> uniqueAlleles;
-	    intersectVariant(variant, truthVariantIntervals,
-			     commonAlleles, uniqueAlleles, reference);
-	    parsedAlleles[*v] = variant.parsedAlternates();
-	    map<string, vector<VariantAllele> >& parsedAlts = parsedAlleles[*v];
-	    // push VariantAllele*'s into the FN and FP alleles at cutoff vectors
-	    for (vector<string*>::iterator a = commonAlleles.begin(); a != commonAlleles.end(); ++a) {
-		vector<VariantAllele>& alleles = parsedAlleles[*v][**a];
-		for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
-		    if (va->ref != va->alt) { 		// use only non-reference alleles
-			allelesAtCutoff[threshold].push_back(&*va);
-			falseNegativeAllelesAtCutoff[threshold].push_back(&*va);
-		    }
-		}
-	    }
-	    for (vector<string*>::iterator a = uniqueAlleles.begin(); a != uniqueAlleles.end(); ++a) {
-		vector<VariantAllele>& alleles = parsedAlts[**a];
-		for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
-		    if (va->ref != va->alt) { 		// use only non-reference alleles
-			allelesAtCutoff[threshold].push_back(&*va);
-			allFalsePositiveAlleles.push_back(&*va);
-			falsePositiveAllelesAtCutoff[threshold].push_back(&*va);
-		    }
-		}
-	    }
-	}
+        long double threshold = q->first;
+        vector<Variant*>& variants = q->second;
+        for (vector<Variant*>::iterator v = variants.begin(); v != variants.end(); ++v) {
+            Variant& variant = **v;
+            vector<string*> commonAlleles;
+            vector<string*> uniqueAlleles;
+            intersectVariant(variant, truthVariantIntervals,
+                             commonAlleles, uniqueAlleles, reference);
+            if (complex) {
+                parsedAlleles[*v] = variant.flatAlternates();
+            } else {
+                parsedAlleles[*v] = variant.parsedAlternates();
+            }
+
+            map<string, vector<VariantAllele> >& parsedAlts = parsedAlleles[*v];
+            // push VariantAllele*'s into the FN and FP alleles at cutoff vectors
+            for (vector<string*>::iterator a = commonAlleles.begin(); a != commonAlleles.end(); ++a) {
+                vector<VariantAllele>& alleles = parsedAlleles[*v][**a];
+                for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
+                    if (va->ref != va->alt) { 		// use only non-reference alleles
+                        allelesAtCutoff[threshold].push_back(&*va);
+                        falseNegativeAllelesAtCutoff[threshold].push_back(&*va);
+                    }
+                }
+            }
+            for (vector<string*>::iterator a = uniqueAlleles.begin(); a != uniqueAlleles.end(); ++a) {
+                vector<VariantAllele>& alleles = parsedAlts[**a];
+                for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
+                    if (va->ref != va->alt) { 		// use only non-reference alleles
+                        allelesAtCutoff[threshold].push_back(&*va);
+                        allFalsePositiveAlleles.push_back(&*va);
+                        falsePositiveAllelesAtCutoff[threshold].push_back(&*va);
+                    }
+                }
+            }
+        }
     }
 
 
@@ -303,109 +319,148 @@ int main(int argc, char** argv) {
     int totalIndels = 0;
     int falsePositiveIndels = 0;
     int falseNegativeIndels = 0;
-    // TODO add MNPs, complex alleles
+    int totalComplex = 0;
+    int falsePositiveComplex = 0;
+    int falseNegativeComplex = 0;
 
     // write header
     
     cout << "threshold" << "\t"
-	 << "num_snps" << "\t"
-	 << "false_positive_snps" << "\t"
-	 << "false_negative_snps" << "\t"
-	 << "num_indels" << "\t"
-	 << "false_positive_indels" << "\t"
-	 << "false_negative_indels" << endl;
-
-    // TODO
-	 //<< "num_sites" << "\t"
-	 //<< "false_positive_sites" << "\t"
-	 //<< "false_negative_sites" << "\t"
-	 //<< "num_mnps" << "\t"
-	 //<< "false_positive_mnps" << "\t"
-	 //<< "false_negative_mnps" << "\t"
+         << "num_snps" << "\t"
+         << "false_positive_snps" << "\t"
+         << "false_negative_snps" << "\t"
+         << "num_indels" << "\t"
+         << "false_positive_indels" << "\t"
+         << "false_negative_indels" << "\t"
+         << "num_complex" << "\t"
+         << "false_positive_complex" << "\t"
+         << "false_negative_complex" << endl;
 
     // count total alleles in set
     for (map<long double, vector<VariantAllele*> >::iterator a = allelesAtCutoff.begin(); a != allelesAtCutoff.end(); ++a) {
-	vector<VariantAllele*>& alleles = a->second;
-	for (vector<VariantAllele*>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
-	    VariantAllele& allele = **va;
-	    if (allele.ref.size() == allele.alt.size()) {
-		assert(allele.ref.size() == 1);
-		++totalSNPs;
-	    } else if (allele.ref.size() != allele.alt.size()) {
-		++totalIndels;
-	    }   
-	}
+        vector<VariantAllele*>& alleles = a->second;
+        for (vector<VariantAllele*>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
+            VariantAllele& allele = **va;
+            if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
+                assert(allele.ref.size() == 1);
+                ++totalSNPs;
+            } else if (allele.ref.size() != allele.alt.size()) {
+                if (allele.ref.size() == 1 || allele.alt.size() == 1) {
+                    ++totalIndels;
+                } else {
+                    ++totalComplex;
+                }
+            } else {
+                ++totalComplex;
+            }
+        }
     }
 
     // tally total false positives
     for (list<VariantAllele*>::iterator va = allFalsePositiveAlleles.begin(); va != allFalsePositiveAlleles.end(); ++va) {
-	VariantAllele& allele = **va;
-	if (allele.ref.size() == allele.alt.size()) {
-	    assert(allele.ref.size() == 1);
-	    ++falsePositiveSNPs;
-	} else if (allele.ref.size() != allele.alt.size()) {
-	    ++falsePositiveIndels;
-	}
+        VariantAllele& allele = **va;
+        if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
+            assert(allele.ref.size() == 1);
+            ++falsePositiveSNPs;
+        } else if (allele.ref.size() != allele.alt.size()) {
+            if (allele.ref.size() == 1 || allele.alt.size() == 1) {
+                ++falsePositiveIndels;
+            } else {
+                ++falsePositiveComplex;
+            }
+        } else {
+            ++falsePositiveComplex;
+        }
     }
 
     // get categorical false negatives
     vector<VariantAllele*>& categoricalFalseNegatives = falseNegativeAllelesAtCutoff[0];
     for (vector<VariantAllele*>::iterator va = categoricalFalseNegatives.begin(); va != categoricalFalseNegatives.end(); ++va) {
-	VariantAllele& allele = **va;
-	if (allele.ref.size() == allele.alt.size()) {
-	    assert(allele.ref.size() == 1);
-	    ++falseNegativeSNPs;
-	} else if (allele.ref.size() != allele.alt.size()) {
-	    ++falseNegativeIndels;
-	}
+        VariantAllele& allele = **va;
+        if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
+            assert(allele.ref.size() == 1);
+            ++falseNegativeSNPs;
+        } else if (allele.ref.size() != allele.alt.size()) {
+            if (allele.ref.size() == 1 || allele.alt.size() == 1) {
+                ++falseNegativeIndels;
+            } else {
+                ++falseNegativeComplex;
+            }
+        } else {
+            ++falseNegativeComplex;
+        }
     }
     cout << 0 << "\t"
-	 << totalSNPs << "\t"
-	 << falsePositiveSNPs << "\t"
-	 << falseNegativeSNPs << "\t"
-	 << totalIndels << "\t"
-	 << falsePositiveIndels << "\t"
-	 << falseNegativeIndels << endl;
+         << totalSNPs << "\t"
+         << falsePositiveSNPs << "\t"
+         << falseNegativeSNPs << "\t"
+         << totalIndels << "\t"
+         << falsePositiveIndels << "\t"
+         << falseNegativeIndels << "\t"
+         << totalComplex << "\t"
+         << falsePositiveComplex << "\t"
+         << falseNegativeComplex << endl;
 
     for (map<long double, vector<VariantAllele*> >::iterator a = allelesAtCutoff.begin(); a != allelesAtCutoff.end(); ++a) {
-	vector<VariantAllele*>& alleles = a->second;
-	long double threshold = a->first;
-	for (vector<VariantAllele*>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
-	    VariantAllele& allele = **va;
-	    if (allele.ref.size() == allele.alt.size()) {
-		assert(allele.ref.size() == 1);
-		--totalSNPs;
-	    } else if (allele.ref.size() != allele.alt.size()) {
-		--totalIndels;
-	    }   
-	}
-	vector<VariantAllele*>& falseNegatives = falseNegativeAllelesAtCutoff[threshold];
-	for (vector<VariantAllele*>::iterator va = falseNegatives.begin(); va != falseNegatives.end(); ++va) {
-	    VariantAllele& allele = **va;
-	    if (allele.ref.size() == allele.alt.size()) {
-		assert(allele.ref.size() == 1);
-		++falseNegativeSNPs;
-	    } else if (allele.ref.size() != allele.alt.size()) {
-		++falseNegativeIndels;
-	    }
-	}
-	vector<VariantAllele*>& falsePositives = falsePositiveAllelesAtCutoff[threshold];
-	for (vector<VariantAllele*>::iterator va = falsePositives.begin(); va != falsePositives.end(); ++va) {
-	    VariantAllele& allele = **va;
-	    if (allele.ref.size() == allele.alt.size()) {
-		assert(allele.ref.size() == 1);
-		--falsePositiveSNPs;
-	    } else if (allele.ref.size() != allele.alt.size()) {
-		--falsePositiveIndels;
-	    }
-	}
-	cout << threshold << "\t"
-	     << totalSNPs << "\t"
-	     << falsePositiveSNPs << "\t"
-	     << falseNegativeSNPs << "\t"
-	     << totalIndels << "\t"
-	     << falsePositiveIndels << "\t"
-	     << falseNegativeIndels << endl;
+        vector<VariantAllele*>& alleles = a->second;
+        long double threshold = a->first;
+        for (vector<VariantAllele*>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
+            VariantAllele& allele = **va;
+            if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
+                assert(allele.ref.size() == 1);
+                --totalSNPs;
+            } else if (allele.ref.size() != allele.alt.size()) {
+                if (allele.ref.size() == 1 || allele.alt.size() == 1) {
+                    --totalIndels;
+                } else {
+                    --totalComplex;
+                }
+            } else {
+                --totalComplex;
+            }   
+        }
+        vector<VariantAllele*>& falseNegatives = falseNegativeAllelesAtCutoff[threshold];
+        for (vector<VariantAllele*>::iterator va = falseNegatives.begin(); va != falseNegatives.end(); ++va) {
+            VariantAllele& allele = **va;
+            if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
+                assert(allele.ref.size() == 1);
+                ++falseNegativeSNPs;
+            } else if (allele.ref.size() != allele.alt.size()) {
+                if (allele.ref.size() == 1 || allele.alt.size() == 1) {
+                    ++falseNegativeIndels;
+                } else {
+                    ++falseNegativeComplex;
+                }
+            } else {
+                ++falseNegativeComplex;
+            }
+        }
+        vector<VariantAllele*>& falsePositives = falsePositiveAllelesAtCutoff[threshold];
+        for (vector<VariantAllele*>::iterator va = falsePositives.begin(); va != falsePositives.end(); ++va) {
+            VariantAllele& allele = **va;
+            if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
+                assert(allele.ref.size() == 1);
+                --falsePositiveSNPs;
+            } else if (allele.ref.size() != allele.alt.size()) {
+                if (allele.ref.size() == 1 || allele.alt.size() == 1) {
+                    --falsePositiveIndels;
+                } else {
+                    --falsePositiveComplex;
+                }
+            } else {
+                --falsePositiveComplex;
+            }
+        }
+        cout << threshold << "\t"
+             << totalSNPs << "\t"
+             << falsePositiveSNPs << "\t"
+             << falseNegativeSNPs << "\t"
+             << totalIndels << "\t"
+             << falsePositiveIndels << "\t"
+             << falseNegativeIndels << "\t"
+             << totalComplex << "\t"
+             << falsePositiveComplex << "\t"
+             << falseNegativeComplex << endl;
 
     }
     

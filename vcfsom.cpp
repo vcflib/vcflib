@@ -12,6 +12,11 @@
 using namespace std;
 using namespace vcf;
 
+struct SomPaint {
+    int true_count;
+    int false_count;
+    double prob_true;
+};
 
 static unsigned long prev_uticks = 0;
 
@@ -79,7 +84,7 @@ void printSummary(char** argv) {
          << "    -f, --fields \"FIELD ...\"  INFO fields to provide to the SOM" << endl
          << "    -a, --apply FILE       apply the saved map to input data to FILE" << endl
          << "    -s, --save  FILE       train on input data and save the map to FILE" << endl
-         << "    -t, --print-training-results" << endl
+         << "    -p, --print-training-results" << endl
          << "                           print results of SOM on training input" << endl
          << "                           (you can also just use --apply on the same input)" << endl
          << "    -x, --width X          width in columns of the output array" << endl
@@ -90,8 +95,8 @@ void printSummary(char** argv) {
          << "recalibration:" << endl
          << endl
          << "    -c, --center X,Y       annotate with euclidean distance from center" << endl
-         << "    -p, --paint-true VCF   use VCF file to annotate true variants (multiple)" << endl
-         << "    -f, --paint-false VCF  use VCF file to annotate false variants (multiple)" << endl
+         << "    -T, --paint-true VCF   use VCF file to annotate true variants (multiple)" << endl
+         << "    -F, --paint-false VCF  use VCF file to annotate false variants (multiple)" << endl
          << "    -R, --paint-tag TAG    provide estimated FDR% in TAG in variant INFO" << endl
          << "    -N, --false-negative   replace FDR% (false detection) with FNR% (false negative)" << endl;
 
@@ -113,6 +118,8 @@ int main(int argc, char** argv) {
     vector<string> centerv;
     int centerx;
     int centery;
+    string trueVCF;
+    string falseVCF;
 
     int c;
 
@@ -133,15 +140,17 @@ int main(int argc, char** argv) {
             {"apply", required_argument, 0, 'a'},
             {"save", required_argument, 0, 's'},
             {"fields", required_argument, 0, 'f'},
-            {"print-training-results", no_argument, 0, 't'},
+            {"print-training-results", no_argument, 0, 'p'},
             {"center", required_argument, 0, 'c'},
+            {"paint-true", required_argument, 0, 'T'},
+            {"paint-false", required_argument, 0, 'F'},
             {"debug", no_argument, 0, 'd'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "htdi:x:y:a:s:f:c:",
+        c = getopt_long (argc, argv, "hpdi:x:y:a:s:f:c:T:F:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -173,8 +182,16 @@ int main(int argc, char** argv) {
                 }
                 break;
 
-            case 't':
+            case 'p':
                 apply_to_training_data = true;
+                break;
+
+            case 'T':
+                trueVCF = optarg;
+                break;
+
+            case 'F':
+                falseVCF = optarg;
                 break;
 
             case 'd':
@@ -240,7 +257,12 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=SOMX,Number=A,Type=Integer,Description=\"X position of best neuron for variant in self-ordering map defined in " + som_file + "\">");
     variantFile.addHeaderLine("##INFO=<ID=SOMY,Number=A,Type=Integer,Description=\"Y position of best neuron for variant in self-ordering map defined in " + som_file + "\">");
     if (!centerv.empty()) {
-        variantFile.addHeaderLine("##INFO=<ID=SOMD,Number=A,Type=Float,Description=\"Euclidean distance from " + convert(centerx) + "," + convert(centery) + " as defined by " + som_file + "\">");
+        variantFile.addHeaderLine("##INFO=<ID=SOMD,Number=A,Type=Float,Description=\"Euclidean distance from "
+                                  + convert(centerx) + "," + convert(centery) + " as defined by " + som_file + "\">");
+    }
+    if (!trueVCF.empty() && !falseVCF.empty()) {
+        variantFile.addHeaderLine("##INFO=<ID=SOMP,Number=A,Type=Float,Description=\"Estimated probability the variant is true using som "
+                                  + som_file + ", true variants from " + trueVCF + ", and false variants from " + falseVCF + "\">");
     }
 
     if (debug) start_timer();
@@ -296,6 +318,8 @@ int main(int argc, char** argv) {
 
     if (debug) print_timing( "Network Training" );
 
+    // open and calibrate using the true and false datasets
+
     if (train && apply_to_training_data) {
         cout << variantFile.header << endl;
         vector<Variant>::iterator v = variants.begin(); int di = 0;
@@ -315,6 +339,79 @@ int main(int argc, char** argv) {
             cout << *v << endl;
         }
     } else if (apply) {
+
+        // if we have true and false sets, use them to "paint" the map
+        vector<vector<SomPaint> > paintedSOM;
+        paintedSOM.resize(width);
+        for (vector<vector<SomPaint> >::iterator t = paintedSOM.begin();
+             t != paintedSOM.end(); ++t) {
+            t->resize(height);
+        }
+
+        // handle trues
+        if (!trueVCF.empty()) {
+            VariantCallFile trueVariantFile;
+            trueVariantFile.open(trueVCF);
+            Variant v(trueVariantFile);
+            while (trueVariantFile.getNextVariant(v)) {
+                int ai = 0;
+                vector<string>::iterator a = v.alt.begin();
+                for ( ; a != v.alt.end(); ++a, ++ai) {
+                    vector<double> record;
+                    double td;
+                    vector<string>::iterator j = fields.begin();
+                    for (; j != fields.end(); ++j) {
+                        convert(v.info[*j][ai], td);
+                        record.push_back(td);
+                    }
+                    som_set_inputs ( net, &record[0] );
+                    size_t x=0, y=0;
+                    som_get_best_neuron_coordinates ( net, &x, &y );
+                    paintedSOM[x][y].true_count += 1;
+                }
+            }
+        }
+
+        // get falses
+        if (!falseVCF.empty()) {
+            VariantCallFile falseVariantFile;
+            falseVariantFile.open(falseVCF);
+            Variant v(falseVariantFile);
+            while (falseVariantFile.getNextVariant(v)) {
+                int ai = 0;
+                vector<string>::iterator a = v.alt.begin();
+                for ( ; a != v.alt.end(); ++a, ++ai) {
+                    vector<double> record;
+                    double td;
+                    vector<string>::iterator j = fields.begin();
+                    for (; j != fields.end(); ++j) {
+                        convert(v.info[*j][ai], td);
+                        record.push_back(td);
+                    }
+                    som_set_inputs ( net, &record[0] );
+                    size_t x=0, y=0;
+                    som_get_best_neuron_coordinates ( net, &x, &y );
+                    paintedSOM[x][y].false_count += 1;
+                }
+            }
+        }
+
+        // estimate probability of each node using true and false set
+        for (vector<vector<SomPaint> >::iterator t = paintedSOM.begin();
+             t != paintedSOM.end(); ++t) {
+            for (vector<SomPaint>::iterator p = t->begin(); p != t->end(); ++p) {
+                //cout << "count at node " << t - paintedSOM.begin() << "," << p - t->begin()
+                //     << " is " << p->true_count << " true, " << p->false_count << " false" << endl;
+                if (p->true_count + p->false_count > 0) {
+                    p->prob_true = (double) p->true_count / (double) (p->true_count + p->false_count);
+                } else {
+                    // for nodes without training data, could we estimate from surrounding nodes?
+                    // yes, TODO, but for now we can be conservative and say "0"
+                    p->prob_true = 0;
+                }
+            }
+        }
+
         cout << variantFile.header << endl;
         while (variantFile.getNextVariant(var)) {
             int ai = 0;
@@ -330,6 +427,10 @@ int main(int argc, char** argv) {
                 som_set_inputs ( net, &record[0] );
                 size_t x=0, y=0;
                 som_get_best_neuron_coordinates ( net, &x, &y );
+                if (!trueVCF.empty() && !falseVCF.empty()) {
+                    SomPaint& paint = paintedSOM[x][y];
+                    var.info["SOMP"].push_back(convert(paint.prob_true));
+                }
                 var.info["SOMX"].push_back(convert(x));
                 var.info["SOMY"].push_back(convert(y));
                 if (!centerv.empty()) {
