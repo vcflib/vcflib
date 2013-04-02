@@ -51,6 +51,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfsom.cpp \
 			  vcfcheck.cpp \
 			  vcfstreamsort.cpp \
+			  vcfuniq.cpp \
 			  vcfremap.cpp \
 			  vcfsitesummarize.cpp \
 			  vcfbreakmulti.cpp \

@@ -489,6 +489,10 @@ Prints the names of the samples in the VCF file.
 ### vcfstreamsort
     
 Reads VCF on stdin and guarantees that the positional order is correct provided out-of-order
-variants are no more than 100bp apart.
-    
-    
+variants are no more than 100 positions in the VCF file apart.
+
+
+### vcfuniq
+
+Like GNU uniq, but for VCF records.  Remove records which have the same positon, ref, and alt
+as the previous record.
