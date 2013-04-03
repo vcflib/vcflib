@@ -496,3 +496,9 @@ variants are no more than 100 positions in the VCF file apart.
 
 Like GNU uniq, but for VCF records.  Remove records which have the same positon, ref, and alt
 as the previous record.
+
+
+### vcfuniqalleles
+
+For each record, remove any duplicate alternate alleles that may have resulted from merging
+separate VCF files.
