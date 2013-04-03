@@ -81,25 +81,45 @@ int main(int argc, char** argv) {
     line += " have different genotypes\">";
     variantFile.addHeaderLine(line);
 
+    variantFile.addHeaderLine("##INFO=<ID=SSC,Number=1,Type=Float,Description=\"Somatic variant score (phred-scaled probability that the somatic variant call is correct).\">");
+
     // write the new header
     cout << variantFile.header << endl;
  
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
-	if (var.samples.find(samples.front()) != var.samples.end()
-	    && var.samples.find(samples.back()) != var.samples.end()) {
-	    map<int, int> gtGermline = decomposeGenotype(var.samples[samples.front()]["GT"].front());
-	    map<int, int> gtSomatic  = decomposeGenotype(var.samples[samples.back()]["GT"].front());
-	    if (gtGermline == gtSomatic) {
-		var.info[tag].push_back("germline");
-	    } else {
-		if (isHet(gtGermline) && isHom(gtSomatic)) {
-		    var.info[tag].push_back("loh");
-		} else if (isHom(gtGermline) && isHet(gtSomatic)) {
-		    var.info[tag].push_back("somatic");
-		}
-	    }
-	}
+        if (var.samples.find(samples.front()) != var.samples.end()
+            && var.samples.find(samples.back()) != var.samples.end()) {
+            map<string, vector<string> >& germline = var.samples[samples.front()];
+            map<string, vector<string> >& somatic = var.samples[samples.back()];
+            map<int, int> gtGermline = decomposeGenotype(germline["GT"].front());
+            map<int, int> gtSomatic  = decomposeGenotype(somatic["GT"].front());
+            var.info[tag].clear(); // remove previous
+            if (gtGermline == gtSomatic) {
+                var.info[tag].push_back("germline");
+            } else {
+                if (isHet(gtGermline) && isHom(gtSomatic)) {
+                    var.info[tag].push_back("loh");
+                } else if (isHomRef(gtGermline) && isHet(gtSomatic)) {
+                    var.info[tag].push_back("somatic");
+                } else if (isHom(gtGermline) && isHet(gtSomatic)) {
+                    if (var.alt.size() == 1) {
+                        var.info[tag].push_back("reversion");
+                    } else {
+                        var.info[tag].push_back("somatic");
+                    }
+                }
+            }
+            if (germline.find("GQ") != germline.end() && somatic.find("GQ") != somatic.end()) {
+                double germlineGQ;
+                convert(germline["GQ"].front(), germlineGQ);
+                double somaticGQ;
+                convert(somatic["GQ"].front(), somaticGQ);
+                double somaticScore = min(var.quality, min(germlineGQ, somaticGQ));
+                var.info["SSC"].clear();
+                var.info["SSC"].push_back(convert(somaticScore));
+            }
+        }
         cout << var << endl;
     }
 
