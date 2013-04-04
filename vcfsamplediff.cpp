@@ -41,9 +41,9 @@ int main(int argc, char** argv) {
     if (argc < 5) {
         cerr << "usage: " << argv[0] << " <tag> <sample> <sample> [ <sample> ... ] <vcf file>" << endl
              << "tags each record where the listed sample genotypes differ with <tag>" << endl
-	     << "The first sample is assumed to be germline, the second somatic." << endl
-	     << "Each record is tagged with <tag>={germline,somatic,loh} to specify the type of" << endl
-	     << "variant given the genotype difference between the two samples." << endl;
+             << "The first sample is assumed to be germline, the second somatic." << endl
+             << "Each record is tagged with <tag>={germline,somatic,loh} to specify the type of" << endl
+             << "variant given the genotype difference between the two samples." << endl;
         return 1;
     }
 

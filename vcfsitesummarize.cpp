@@ -23,13 +23,13 @@ int main(int argc, char** argv) {
     vector<string> infoflags;
 
     for (map<string, VariantFieldType>::iterator i = variantFile.infoTypes.begin(); i != variantFile.infoTypes.end(); ++i) {
-	if (variantFile.infoCounts[i->first] != ALLELE_NUMBER) {
-	    if (i->second == FIELD_BOOL) {
-		infoflags.push_back(i->first);
-	    } else {
-		infofields.push_back(i->first);
-	    }
-	}
+        if (variantFile.infoCounts[i->first] != ALLELE_NUMBER) {
+            if (i->second == FIELD_BOOL) {
+                infoflags.push_back(i->first);
+            } else {
+                infofields.push_back(i->first);
+            }
+        }
     }
 
     // write header
@@ -61,14 +61,14 @@ int main(int argc, char** argv) {
 	    string& name = *i;
 	    map<string, vector<string> >::iterator f = var.info.find(name);
 	    if (f != var.info.end()) {
-		value = f->second;
-		if (value.size() == 1) {
-		    cout << "\t" << value.front();
-		} else {
-		    cout << "\t"; // null
-		}
+            value = f->second;
+            if (value.size() == 1) {
+                cout << "\t" << value.front();
+            } else {
+                cout << "\t"; // null
+            }
 	    } else {
-		cout << "\t"; // null
+            cout << "\t"; // null
 	    }
 	}
 
@@ -78,9 +78,9 @@ int main(int argc, char** argv) {
 	    map<string, bool>::iterator f = var.infoFlags.find(name);
 	    cout << "\t";
 	    if (f != var.infoFlags.end()) {
-		cout << 1;
+            cout << 1;
 	    } else {
-		cout << 0;
+            cout << 0;
 	    }
 	}
 	
