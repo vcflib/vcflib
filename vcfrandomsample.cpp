@@ -14,9 +14,10 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
          << "options:" << endl 
-         << "    -r, --rate RATE      base sampling probability per locus" << endl
-         << "    -s, --scale-by KEY   scale sampling likelihood by this Float info field" << endl
-         << "    -p, --random-seed N  use this random seed" << endl
+         << "    -r, --rate RATE          base sampling probability per locus" << endl
+         << "    -s, --scale-by KEY       scale sampling likelihood by this Float info field" << endl
+         << "    -p, --random-seed N      use this random seed (by default read from /dev/random)" << endl
+         << "    -q, --pseudorandom-seed  use a pseudorandom seed (by default read from /dev/random)" << endl
          << endl
          << "Randomly sample sites from an input VCF file, which may be provided as stdin." << endl
          << "Scale the sampling probability by the field specified in KEY.  This may be" << endl
@@ -28,6 +29,7 @@ int main(int argc, char** argv) {
 
     double rate = 1.0;
     int seed = 0;
+    bool useprng = false;
     string scaleByKey;
 
     if (argc == 1)
@@ -41,11 +43,12 @@ int main(int argc, char** argv) {
                 {"rate",  required_argument, 0, 'r'},
                 {"scale-by",  required_argument, 0, 's'},
                 {"random-seed",  required_argument, 0, 'p'},
+                {"pseudorandom-seed",  required_argument, 0, 'q'},
                 {0, 0, 0, 0}
             };
 
         int option_index = 0;
-        c = getopt_long (argc, argv, "hr:s:p:",
+        c = getopt_long (argc, argv, "hqr:s:p:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -62,6 +65,10 @@ int main(int argc, char** argv) {
 
         case 'p':
             seed = atoi(optarg);
+            break;
+
+        case 'q':
+            useprng = true;
             break;
 
         case 'h':
@@ -95,7 +102,11 @@ int main(int argc, char** argv) {
     // seed prng with random bits from /dev/random
     if (!seed) {
         fstream random;
-        random.open("/dev/random", fstream::in);
+        if (useprng) {
+            random.open("/dev/urandom", fstream::in);
+        } else {
+            random.open("/dev/random", fstream::in);
+        }
         random.get((char*) &seed, sizeof(int));
         random.close();
     }

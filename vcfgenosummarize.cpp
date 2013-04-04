@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
 
     variantFile.removeInfoHeaderLine("AQR");
-    variantFile.addHeaderLine("##INFO=<ID=MQR,Number=1,Type=Float,Description=\"Mean reference observation quality calculated by RO and QR in called samples.\">");
+    variantFile.addHeaderLine("##INFO=<ID=AQR,Number=1,Type=Float,Description=\"Mean reference observation quality calculated by RO and QR in called samples.\">");
     variantFile.removeInfoHeaderLine("AQA");
-    variantFile.addHeaderLine("##INFO=<ID=MQA,Number=A,Type=Float,Description=\"Mean alternate observation quality calculated by AO and QA in called samples.\">");
+    variantFile.addHeaderLine("##INFO=<ID=AQA,Number=A,Type=Float,Description=\"Mean alternate observation quality calculated by AO and QA in called samples.\">");
     variantFile.removeInfoHeaderLine("QR");
     variantFile.addHeaderLine("##INFO=<ID=QR,Number=1,Type=Float,Description=\"Quality sum of reference observations calculated by QR in called samples.\">");
     variantFile.removeInfoHeaderLine("QA");
@@ -82,7 +82,12 @@ int main(int argc, char** argv) {
             }
         }
         var.info["QR"].push_back(convert(refqual));
-        var.info["AQR"].push_back(convert((double)refqual/(double)refobs));
+        if (refobs == 0 || refqual == 0) {
+            var.info["AQR"].push_back(convert(0));
+        } else {
+            var.info["AQR"].push_back(convert((double)refqual/(double)refobs));
+        }
+
         for (int i = 0; i != var.alt.size(); ++i) {
             var.info["QA"].push_back(convert(altqual[i]));
             var.info["AQA"].push_back(convert((double)altqual[i]/(double)altobs[i]));
