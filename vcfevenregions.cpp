@@ -2,6 +2,7 @@
 #include "split.h"
 #include "fastahack/Fasta.h"
 #include <getopt.h>
+#include <cmath>
 
 using namespace std;
 using namespace vcf;
@@ -10,12 +11,15 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
          << "options:" << endl 
-         << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
-         << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
-         << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
+         << "    -f, --fasta-reference    FASTA reference file to use to obtain primer sequences." << endl
+         << "    -n, --number-of-regions  The number of desired regions." << endl
+         << "    -o, --offset             Add an offset to region positioning, to avoid boundary" << endl
+         << "                             related artifacts in downstream processing." << endl
          << endl
-         << "Verifies that the VCF REF field matches the reference as described." << endl
-         << endl;
+         << "Generates a list of regions in 'bamtools' format, e.g. chr20:10..30 using the variant" << endl
+         << "density information provided in the VCF file to ensure that the regions have roughly" << endl
+         << "even numbers of variants.  This can be use to reduce the variance in runtime when" << endl
+         << "dividing variant detection or genotyping by genomic coordinates." << endl;
     exit(0);
 }
 
@@ -26,6 +30,8 @@ int main(int argc, char** argv) {
     string fastaRef;
     bool keepFailures = false;
     bool excludeFailures = false;
+    int number_of_regions = 1;
+    int offset = 0;
 
     if (argc == 1)
         printSummary(argv);
@@ -37,15 +43,15 @@ int main(int argc, char** argv) {
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
                 {"fasta-reference",  required_argument, 0, 'f'},
-                {"exclude-failures",  no_argument, 0, 'x'},
-                {"keep-failures",  no_argument, 0, 'k'},
+                {"number-of-regions",  required_argument, 0, 'n'},
+                {"offset",  required_argument, 0, 'o'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hxkf:",
+        c = getopt_long (argc, argv, "hf:n:o:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -68,12 +74,12 @@ int main(int argc, char** argv) {
             fastaRef = optarg;
             break;
 
-        case 'x':
-            excludeFailures = true;
+        case 'n':
+            number_of_regions = atoi(optarg);
             break;
 
-        case 'k':
-            keepFailures = true;
+        case 'o':
+            offset = atoi(optarg);
             break;
  
         case 'h':
@@ -113,24 +119,36 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    if (keepFailures || excludeFailures) {
-        cout << variantFile.header << endl;
-    }
+    map<string, vector<pair<long int, int > > > positions_by_chrom;
+    int total_positions = 0;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         int refstart = var.position - 1; // convert to 0-based
-        string matchedRef = ref.getSubSequence(var.sequenceName, refstart, var.ref.size());
-        if (var.ref != matchedRef) {
-            if (keepFailures) {
-                cout << var << endl;
-            } else if (!excludeFailures) {
-                cout << "mismatched reference " << var.ref << " should be " << matchedRef << " at "
-                     << var.sequenceName << ":" << var.position << endl;
+        positions_by_chrom[var.sequenceName].push_back(make_pair(refstart + offset, var.ref.size()));
+        ++total_positions;
+    }
+
+    int positions_per_region = ceil((double) total_positions / (double) number_of_regions);
+
+    for (map<string, vector<pair<long int, int> > >::iterator s = positions_by_chrom.begin();
+         s != positions_by_chrom.end(); ++s) {
+        int positions_in_current_region = 0;
+        pair<long int, long int> current_region;
+        for (vector<pair<long int, int> >::iterator p = s->second.begin(); p != s->second.end(); ++p) {
+            if (positions_in_current_region < positions_per_region) {
+                current_region.second = p->first + p->second;  // to ref end of var
+                ++positions_in_current_region;
+            } else {
+                cout << s->first << ":" << current_region.first << ".." << current_region.second << endl;
+                positions_in_current_region = 1;
+                current_region.first = current_region.second;
+                current_region.second = p->first + p->second;
             }
-        } else if (excludeFailures) {
-            cout << var << endl;
         }
+        // get refseq size, use as end coordinate for last region in target
+        current_region.second = ref.sequenceLength(s->first);
+        cout << s->first << ":" << current_region.first << ".." << current_region.second << endl;
     }
 
     return 0;

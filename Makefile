@@ -57,6 +57,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfsitesummarize.cpp \
 			  vcfbreakmulti.cpp \
 			  vcfcreatemulti.cpp \
+			  vcfevenregions.cpp \
 			  vcfgenosummarize.cpp \
 			  vcfgeno2haplo.cpp
 

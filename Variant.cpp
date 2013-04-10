@@ -1029,7 +1029,7 @@ vector<string> VariantCallFile::formatIds(void) {
 void VariantCallFile::removeInfoHeaderLine(string tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
-    string id = "ID=" + tag;
+    string id = "ID=" + tag + ",";
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& line = *s;
         if (line.find("##INFO") == 0) {
@@ -1046,7 +1046,7 @@ void VariantCallFile::removeInfoHeaderLine(string tag) {
 void VariantCallFile::removeGenoHeaderLine(string tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
-    string id = "ID=" + tag;
+    string id = "ID=" + tag + ",";
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
         string& headerLine = *s;
         if (headerLine.find("##FORMAT") == 0) {

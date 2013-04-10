@@ -83,7 +83,7 @@ public:
             return openTabix(filename);
         } else {
             return openFile(filename);
-	}
+        }
     }
 
     bool openFile(string& filename) {
@@ -117,7 +117,7 @@ public:
         return parsedHeader;
     }
 
-    VariantCallFile(void) : usingTabix(false), parseSamples(true), justSetRegion(false) { }
+VariantCallFile(void) : usingTabix(false), parseSamples(true), justSetRegion(false) { }
     ~VariantCallFile(void) {
         if (usingTabix) {
             delete tabixFile;
