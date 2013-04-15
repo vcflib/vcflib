@@ -1140,8 +1140,8 @@ bool VariantCallFile::parseHeader(string& hs) {
                         number = ALLELE_NUMBER;
                     } else if (numberstr == "G") {
                         number = GENOTYPE_NUMBER;
-		    } else if (numberstr == ".") {
-			number = 1;
+                    } else if (numberstr == ".") {
+                        number = 1;
                     } else {
                         convert(numberstr, number);
                     }

@@ -278,7 +278,11 @@ int main(int argc, char** argv) {
                 double td;
                 vector<string>::iterator j = fields.begin();
                 for (; j != fields.end(); ++j) {
-                    convert(var.info[*j][ai], td);
+                    if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
+                        convert(var.info[*j][0], td);
+                    } else {
+                        convert(var.info[*j][ai], td);
+                    }
                     record.push_back(td);
                 }
                 data.push_back(record);
@@ -361,7 +365,11 @@ int main(int argc, char** argv) {
                     double td;
                     vector<string>::iterator j = fields.begin();
                     for (; j != fields.end(); ++j) {
-                        convert(v.info[*j][ai], td);
+                        if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
+                            convert(v.info[*j][0], td);
+                        } else {
+                            convert(v.info[*j][ai], td);
+                        }
                         record.push_back(td);
                     }
                     som_set_inputs ( net, &record[0] );
@@ -385,7 +393,11 @@ int main(int argc, char** argv) {
                     double td;
                     vector<string>::iterator j = fields.begin();
                     for (; j != fields.end(); ++j) {
-                        convert(v.info[*j][ai], td);
+                        if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
+                            convert(v.info[*j][0], td);
+                        } else {
+                            convert(v.info[*j][ai], td);
+                        }
                         record.push_back(td);
                     }
                     som_set_inputs ( net, &record[0] );
@@ -421,7 +433,11 @@ int main(int argc, char** argv) {
                 double td;
                 vector<string>::iterator j = fields.begin();
                 for (; j != fields.end(); ++j) {
-                    convert(var.info[*j][ai], td);
+                    if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
+                        convert(var.info[*j][0], td);
+                    } else {
+                        convert(var.info[*j][ai], td);
+                    }
                     record.push_back(td);
                 }
                 som_set_inputs ( net, &record[0] );

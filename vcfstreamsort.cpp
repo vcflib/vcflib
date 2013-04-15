@@ -1,5 +1,7 @@
 #include "Variant.h"
 #include <algorithm>
+#include <getopt.h>
+#include "convert.h"
 
 using namespace std;
 using namespace vcf;
@@ -11,13 +13,74 @@ bool listContains(list<string>& l, string& v) {
     return false;
 }
 
+void printSummary(char** argv) {
+    cerr << "usage: " << argv[0] << " [options] [vcf file]" << endl
+         << endl
+         << "Sorts the input (either stdin or file) using a streaming sort algorithm."
+         << endl
+         << "options:" << endl
+         << endl
+         << "    -h, --help             this dialog" << endl
+         << "    -w, --window N         number of sites to sort (default 100)" << endl
+         << "    -a, --all              load all sites and then sort in memory" << endl;
+}
+
 int main(int argc, char** argv) {
 
     VariantCallFile variantFile;
+    int sortSitesWindow = 100;
+    bool sortAll = false;
 
-    if (argc > 1) {
-        string filename = argv[1];
-        variantFile.open(filename);
+    int c;
+
+    while (true) {
+        static struct option long_options[] =
+        {  
+            /* These options set a flag. */
+            //{"verbose", no_argument,       &verbose_flag, 1},
+            {"help", no_argument, 0, 'h'},
+            {"window", required_argument, 0, 'w'},
+            {"all", required_argument, 0, 'a'},
+            {0, 0, 0, 0}
+        };
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+
+        c = getopt_long (argc, argv, "haw:",
+                         long_options, &option_index);
+
+        if (c == -1)
+            break;
+
+        string field;
+
+        switch (c)
+        {
+
+        case 'w':
+            if (!convert(optarg, sortSitesWindow)) {
+                cerr << "could not parse --window, -w" << endl;
+                exit(1);
+            }
+            break;
+                
+        case 'a':
+            sortAll = true;
+            break;
+
+        case 'h':
+            printSummary(argv);
+            exit(0);
+            break;
+            
+        default:
+            break;
+        }
+    }
+
+    if (optind == argc - 1) {
+        string inputFilename = argv[optind];
+        variantFile.open(inputFilename);
     } else {
         variantFile.open(std::cin);
     }
@@ -30,7 +93,6 @@ int main(int argc, char** argv) {
 
     map<string, map<long int, vector<Variant> > > records;
     long int back = 0;
-    int sortSitesWindow = 100;
     int numrecords = 0;
     list<string> sequenceNames;
 
@@ -43,7 +105,7 @@ int main(int argc, char** argv) {
         }
         records[var.sequenceName][var.position].push_back(var);
         if (records[var.sequenceName][var.position].size() == 1) ++numrecords;
-        if (numrecords > sortSitesWindow) {
+        if (!sortAll && numrecords > sortSitesWindow) {
             //cerr << "outputting a position" << endl;
             if (records[sequenceNames.front()].empty()) {
                 //cerr << "end of reference sequence " << sequenceNames.front() << endl;
