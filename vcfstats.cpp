@@ -219,6 +219,8 @@ int main(int argc, char** argv) {
     bool useMNPs = true;
     bool useEntropy = false;
 
+    AlleleStats biallelicSNPs;
+
     // todo, add biallelic snp dialog to output and ts/tv for snps and mnps
 
     do {
@@ -231,72 +233,72 @@ int main(int argc, char** argv) {
         while (variantFile.getNextVariant(var)) {
             ++variantSites;
             map<string, vector<VariantAllele> > alternates = var.parsedAlternates(includePreviousBaseForIndels,
-										  useMNPs,
-										  useEntropy,
-										  matchScore,
-										  mismatchScore,
-										  gapOpenPenalty,
-										  gapExtendPenalty);
+                                                                                  useMNPs,
+                                                                                  useEntropy,
+                                                                                  matchScore,
+                                                                                  mismatchScore,
+                                                                                  gapOpenPenalty,
+                                                                                  gapExtendPenalty);
             map<VariantAllele, vector<string> > uniqueVariants;
 	    
-	    vector<string> cigars;
+            vector<string> cigars;
 	    
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                 string& alternate = *a;
-		if (addTags)
-		    var.info["altlen"].push_back(convert(alternate.size()));
+                if (addTags)
+                    var.info["altlen"].push_back(convert(alternate.size()));
                 vector<VariantAllele>& vav = alternates[alternate];
                 if (vav.size() > 1) {
-		    // check that there are actually multiple non-reference alleles
-		    int nonRefAlleles = 0;
-		    for (vector<VariantAllele>::iterator z = vav.begin(); z != vav.end(); ++z) {
-			if (z->ref != z->alt)
-			    ++nonRefAlleles;
-		    }
-		    if (nonRefAlleles > 1)
-			++totalcomplex;
+                    // check that there are actually multiple non-reference alleles
+                    int nonRefAlleles = 0;
+                    for (vector<VariantAllele>::iterator z = vav.begin(); z != vav.end(); ++z) {
+                        if (z->ref != z->alt)
+                            ++nonRefAlleles;
+                    }
+                    if (nonRefAlleles > 1)
+                        ++totalcomplex;
                 }
                 for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
                     uniqueVariants[*v].push_back(alternate);
                 }
 
-		if (addTags) {
-		    string cigar;
-		    pair<int, string> element;
-		    for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
-			VariantAllele& va = *v;
-			if (va.ref != va.alt) {
-			    if (element.second == "M") {
-				cigar += convert(element.first) + element.second;
-				element.second = ""; element.first = 0;
-			    }
-			    if (va.ref.size() == va.alt.size()) {
-				cigar += convert(va.ref.size()) + "X";
-			    } else if (va.ref.size() > va.alt.size()) {
-				cigar += convert(va.ref.size() - va.alt.size()) + "D";
-			    } else {
-				cigar += convert(va.alt.size() - va.ref.size()) + "I";
-			    }
-			} else {
-			    if (element.second == "M") {
-				element.first += va.ref.size();
-			    } else {
-				element = make_pair(va.ref.size(), "M");
-			    }
-			}
-		    }
-		    if (element.second == "M") {
-			cigar += convert(element.first) + element.second;
-		    }
-		    element.second = ""; element.first = 0;
-		    cigars.push_back(cigar);
-		}
+                if (addTags) {
+                    string cigar;
+                    pair<int, string> element;
+                    for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
+                        VariantAllele& va = *v;
+                        if (va.ref != va.alt) {
+                            if (element.second == "M") {
+                                cigar += convert(element.first) + element.second;
+                                element.second = ""; element.first = 0;
+                            }
+                            if (va.ref.size() == va.alt.size()) {
+                                cigar += convert(va.ref.size()) + "X";
+                            } else if (va.ref.size() > va.alt.size()) {
+                                cigar += convert(va.ref.size() - va.alt.size()) + "D";
+                            } else {
+                                cigar += convert(va.alt.size() - va.ref.size()) + "I";
+                            }
+                        } else {
+                            if (element.second == "M") {
+                                element.first += va.ref.size();
+                            } else {
+                                element = make_pair(va.ref.size(), "M");
+                            }
+                        }
+                    }
+                    if (element.second == "M") {
+                        cigar += convert(element.first) + element.second;
+                    }
+                    element.second = ""; element.first = 0;
+                    cigars.push_back(cigar);
+                }
             }
 
-	    if (addTags) {
-		var.info["cigar"] = cigars;
-		var.info["reflen"].push_back(convert(var.ref.size()));
-	    }
+            if (addTags) {
+                var.info["cigar"] = cigars;
+                var.info["reflen"].push_back(convert(var.ref.size()));
+            }
 
             variantAlleles += var.alt.size();
             map<string, AlleleStats> alleleStats;
@@ -309,97 +311,97 @@ int main(int argc, char** argv) {
                     alternates.clear();
                 }
 
-		if (va.ref != va.alt) {
-		    ++uniqueVariantAlleles;
-		    if (va.ref.size() == va.alt.size()) {
-			if (va.ref.size() == 1) {
-			    ++snps;
-			    ++mismatchbases;
-			    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-				++alleleStats[*a].mismatches;
-			    }
-			    if (isTransition(va.ref, va.alt)) {
-				++transitions;
-				for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-				    ++alleleStats[*a].transitions;
-				}
-			    } else {
-				++transversions;
-				for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-				    ++alleleStats[*a].transversions;
-				}
-			    }
-			    if (isAmination(va.ref, va.alt)) {
-				++aminations;
-				for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-				    ++alleleStats[*a].aminations;
-				}
-			    }
-			    if (isDeamination(va.ref, va.alt)) {
-				++deaminations;
-				for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-				    ++alleleStats[*a].deaminations;
-				}
-			    }
-			} else {
-			    ++totalmnps;
-			    ++mnps[va.alt.size()]; // not entirely correct
-			    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-				alleleStats[*a].mismatches += va.alt.size();
-			    }
-			    string::const_iterator r = va.ref.begin();
-			    for (string::const_iterator a = va.alt.begin(); a != va.alt.end(); ++a, ++r) {
-				string rstr = string(1, *r);
-				string astr = string(1, *a);
-				if (rstr == astr) {
-				    continue;
-				}
-				if (isTransition(rstr, astr)) {
-				    ++transitions;
-				    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-					++alleleStats[*a].transitions;
-				    }
-				} else {
-				    ++transversions;
-				    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-					++alleleStats[*a].transversions;
-				    }
-				}
-				if (isAmination(rstr, astr)) {
-				    ++aminations;
-				    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-					++alleleStats[*a].aminations;
-				    }
-				}
-				if (isDeamination(rstr, astr)) {
-				    ++deaminations;
-				    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-					++alleleStats[*a].deaminations;
-				    }
-				}
-				++mismatchbases;
-				++mnpbases;
-			    }
-			}
-		    } else if (va.ref.size() > va.alt.size()) {
-			int diff = va.ref.size() - va.alt.size();
-			deletedbases += diff;
-			++totaldeletions;
-			++deletions[diff];
-			for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-			    alleleStats[*a].deletions += diff;
-			}
-		    } else {
-			int diff = va.alt.size() - va.ref.size();
-			insertedbases += diff;
-			++totalinsertions;
-			++insertions[diff];
-			for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-			    alleleStats[*a].insertions += diff;
-			}
-		    }
-		}
-	    }
+                if (va.ref != va.alt) {
+                    ++uniqueVariantAlleles;
+                    if (va.ref.size() == va.alt.size()) {
+                        if (va.ref.size() == 1) {
+                            ++snps;
+                            ++mismatchbases;
+                            for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                ++alleleStats[*a].mismatches;
+                            }
+                            if (isTransition(va.ref, va.alt)) {
+                                ++transitions;
+                                for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                    ++alleleStats[*a].transitions;
+                                }
+                            } else {
+                                ++transversions;
+                                for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                    ++alleleStats[*a].transversions;
+                                }
+                            }
+                            if (isAmination(va.ref, va.alt)) {
+                                ++aminations;
+                                for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                    ++alleleStats[*a].aminations;
+                                }
+                            }
+                            if (isDeamination(va.ref, va.alt)) {
+                                ++deaminations;
+                                for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                    ++alleleStats[*a].deaminations;
+                                }
+                            }
+                        } else {
+                            ++totalmnps;
+                            ++mnps[va.alt.size()]; // not entirely correct
+                            for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                alleleStats[*a].mismatches += va.alt.size();
+                            }
+                            string::const_iterator r = va.ref.begin();
+                            for (string::const_iterator a = va.alt.begin(); a != va.alt.end(); ++a, ++r) {
+                                string rstr = string(1, *r);
+                                string astr = string(1, *a);
+                                if (rstr == astr) {
+                                    continue;
+                                }
+                                if (isTransition(rstr, astr)) {
+                                    ++transitions;
+                                    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                        ++alleleStats[*a].transitions;
+                                    }
+                                } else {
+                                    ++transversions;
+                                    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                        ++alleleStats[*a].transversions;
+                                    }
+                                }
+                                if (isAmination(rstr, astr)) {
+                                    ++aminations;
+                                    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                        ++alleleStats[*a].aminations;
+                                    }
+                                }
+                                if (isDeamination(rstr, astr)) {
+                                    ++deaminations;
+                                    for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                                        ++alleleStats[*a].deaminations;
+                                    }
+                                }
+                                ++mismatchbases;
+                                ++mnpbases;
+                            }
+                        }
+                    } else if (va.ref.size() > va.alt.size()) {
+                        int diff = va.ref.size() - va.alt.size();
+                        deletedbases += diff;
+                        ++totaldeletions;
+                        ++deletions[diff];
+                        for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                            alleleStats[*a].deletions += diff;
+                        }
+                    } else {
+                        int diff = va.alt.size() - va.ref.size();
+                        insertedbases += diff;
+                        ++totalinsertions;
+                        ++insertions[diff];
+                        for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
+                            alleleStats[*a].insertions += diff;
+                        }
+                    }
+                }
+            }
             if (addTags) {
                 for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                     var.info["mismatches"].push_back(convert(alleleStats[*a].mismatches));
@@ -411,6 +413,15 @@ int main(int argc, char** argv) {
                     var.info["aminations"].push_back(convert(alleleStats[*a].aminations));
                 }
                 cout << var << endl;
+            }
+            // biallelic SNP case
+            if (var.alt.size() == 1 && var.ref.size() == 1 && var.alt.front().size() == 1) {
+                if (isTransition(var.ref, var.alt.front())) {
+                    biallelicSNPs.transitions++;
+                } else {
+                    biallelicSNPs.transversions++;
+                }
+                biallelicSNPs.mismatches++;
             }
         }
 
@@ -453,43 +464,51 @@ int main(int argc, char** argv) {
              << "mismatches:\t" << mismatchbases << endl
              << endl
              << "ts/tv ratio:\t" << (double) transitions / (double) transversions << endl
-             << "deamination ratio:\t" << (double) deaminations / aminations << endl;
-	if (lengthFrequency) {
-	    cout << endl
-		 << "ins/del length frequency distribution" << endl
-		 << "length\tins\tdel\tins/del" << endl;
-	    for (int i = 1; i <= maxindel; ++i) {
-		int ins = insertions[i];
-		int del = deletions[i];
-		cout << i << "\t"
-		     << (ins > 0 ? convert(ins) : "" ) << "\t"
-		     << (del > 0 ? convert(del) : "") << "\t"
-		     << (ins > 0 && del > 0 ? convert((double) ins / (double) del) : "")
-		     << endl;
-	    }
-	}
+             << "deamination ratio:\t" << (double) deaminations / aminations << endl
+             << "biallelic snps:\t" << biallelicSNPs.mismatches << " @ "
+             << (double) biallelicSNPs.transitions / (double) biallelicSNPs.transversions << endl;
+
+        if (lengthFrequency) {
+            cout << endl
+                 << "ins/del length frequency distribution" << endl
+                 << "length\tins\tdel\tins/del" << endl;
+            for (int i = 1; i <= maxindel; ++i) {
+                int ins = insertions[i];
+                int del = deletions[i];
+                cout << i << "\t"
+                     << (ins > 0 ? convert(ins) : "" ) << "\t"
+                     << (del > 0 ? convert(del) : "") << "\t"
+                     << (ins > 0 && del > 0 ? convert((double) ins / (double) del) : "")
+                     << endl;
+            }
+        }
+
         cout << endl
-             << "insertion alleles / deletion alleles:\t" << (double) totalinsertions / (double) totaldeletions << endl
-             << "inserted bases / deleted bases:\t" << (double) insertedbases / (double) deletedbases << endl
+             << "insertion alleles / deletion alleles:\t"
+             << (double) totalinsertions / (double) totaldeletions << endl
+             << "inserted bases / deleted bases:\t"
+             << (double) insertedbases / (double) deletedbases << endl
              << endl;
-	if (lengthFrequency) {
-	    cout << "mnp length frequency distribution" << endl
-		 << "length\tcount" << endl;
-	    for (int i = 2; i <= maxmnp; ++i) {
-		int mnp = mnps[i];
-		cout << i << "\t"
-		     << (mnp > 0 ? convert(mnp) : "")
-		     << endl;
-	    }
-	}
+
+        if (lengthFrequency) {
+            cout << "mnp length frequency distribution" << endl
+                 << "length\tcount" << endl;
+            for (int i = 2; i <= maxmnp; ++i) {
+                int mnp = mnps[i];
+                cout << i << "\t"
+                     << (mnp > 0 ? convert(mnp) : "")
+                     << endl;
+            }
+        }
+
         cout << "total bases in mnps:\t" << mnpbases << endl;
 
         /*
-        cout << "complex event frequency distribution" << endl
-             << "length\tcount" << endl;
-        for (map<int, int>::iterator i = complexsubs.begin(); i != complexsubs.end(); ++i) {
-            cout << i->first << "\t" << i->second << endl;
-        }
+          cout << "complex event frequency distribution" << endl
+          << "length\tcount" << endl;
+          for (map<int, int>::iterator i = complexsubs.begin(); i != complexsubs.end(); ++i) {
+          cout << i->first << "\t" << i->second << endl;
+          }
         */
     }
 
