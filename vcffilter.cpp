@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 
     if (!alleleTag.empty()) {
         if (tagFail.empty()) {
-            tagFail = ".";
+            tagFail = "";
         }
         if (tagPass.empty()) {
             tagPass = "PASS";
@@ -339,9 +339,13 @@ int main(int argc, char** argv) {
                             } else {
                                 if (replaceFilter) {
                                     var.filter.clear();
-                                    var.addFilter(tagFail);
+                                    if (!tagFail.empty()) {
+                                        var.addFilter(tagFail);
+                                    }
                                 } else {
-                                    var.addFilter(tagFail);
+                                    if (!tagFail.empty()) {
+                                        var.addFilter(tagFail);
+                                    }
                                 }
                             }
                         } else {

@@ -36,21 +36,85 @@ bool samplesDiffer(vector<string>& samples, Variant& var) {
 }
 
 
+void printSummary(char** argv) {
+    cerr << "usage: " << argv[0] << " [options] <tag> <sample> <sample> [ <sample> ... ] <vcf file>" << endl
+         << "Tags each record where the listed sample genotypes differ with <tag>." << endl
+         << "The first sample is assumed to be germline, the second somatic." << endl
+         << "Each record is tagged with <tag>={germline,somatic,loh} to specify the type of" << endl
+         << "variant given the genotype difference between the two samples." << endl
+         << endl
+         << "options:" << endl
+         << "    -s --strict     Require that no observations in the germline support the somatic alternate." << endl
+         << endl;
+}
+
+
 int main(int argc, char** argv) {
 
     if (argc < 5) {
-        cerr << "usage: " << argv[0] << " <tag> <sample> <sample> [ <sample> ... ] <vcf file>" << endl
-             << "tags each record where the listed sample genotypes differ with <tag>" << endl
-             << "The first sample is assumed to be germline, the second somatic." << endl
-             << "Each record is tagged with <tag>={germline,somatic,loh} to specify the type of" << endl
-             << "variant given the genotype difference between the two samples." << endl;
-        return 1;
+        printSummary(argv);
+        exit(0);
     }
 
-    string tag = argv[1];
+    bool strict = false;
+    int c;
+
+    while (true) {
+        static struct option long_options[] =
+            {
+                /* These options set a flag. */
+                //{"verbose", no_argument,       &verbose_flag, 1},
+                {"help", no_argument, 0, 'h'},
+                {"strict",  no_argument, 0, 's'},
+                //{"length",  no_argument, &printLength, true},
+                {0, 0, 0, 0}
+            };
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+
+        c = getopt_long (argc, argv, "hs",
+                         long_options, &option_index);
+
+        /* Detect the end of the options. */
+        if (c == -1)
+            break;
+ 
+        switch (c)
+        {
+        case 0:
+            /* If this option set a flag, do nothing else now. */
+            if (long_options[option_index].flag != 0)
+                break;
+            printf ("option %s", long_options[option_index].name);
+            if (optarg)
+                printf (" with arg %s", optarg);
+            printf ("\n");
+            break;
+
+        case 's':
+            strict = true;
+            break;
+ 
+        case 'h':
+            printSummary(argv);
+            exit(0);
+            break;
+
+        case '?':
+            /* getopt_long already printed an error message. */
+            printSummary(argv);
+            exit(1);
+            break;
+ 
+        default:
+            abort ();
+        }
+    }
+
+    string tag = argv[optind];
 
     vector<string> samples;
-    for (int i = 2; i < argc - 1; ++i) {
+    for (int i = optind+1; i < argc - 1; ++i) {
         samples.push_back(argv[i]);
     }
 
@@ -94,14 +158,19 @@ int main(int argc, char** argv) {
             map<string, vector<string> >& somatic = var.samples[samples.back()];
             map<int, int> gtGermline = decomposeGenotype(germline["GT"].front());
             map<int, int> gtSomatic  = decomposeGenotype(somatic["GT"].front());
+            int germlineAltCount = 0;
+            convert(germline["AO"].front(), germlineAltCount);
             var.info[tag].clear(); // remove previous
             if (gtGermline == gtSomatic) {
                 var.info[tag].push_back("germline");
             } else {
-                if (isHet(gtGermline) && isHom(gtSomatic)) {
-                    var.info[tag].push_back("loh");
-                } else if (isHomRef(gtGermline) && isHet(gtSomatic)) {
-                    var.info[tag].push_back("somatic");
+                //if (isHet(gtGermline) && isHom(gtSomatic)) {
+                //    var.info[tag].push_back("loh");
+                if (isHet(gtGermline) && isHomNonRef(gtSomatic) ||
+                    isHomRef(gtGermline) && (isHet(gtSomatic) || isHomNonRef(gtSomatic))) {
+                    if (!strict || strict && germlineAltCount == 0) {
+                        var.info[tag].push_back("somatic");
+                    }
                 } else if (isHom(gtGermline) && isHet(gtSomatic)) {
                     if (var.alt.size() == 1) {
                         var.info[tag].push_back("reversion");

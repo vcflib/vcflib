@@ -477,7 +477,7 @@ VariantFieldType Variant::infoType(string& key) {
         var.printAlt(out);
         out << "\t"
             << var.quality << "\t"
-            << var.filter << "\t";
+            << (var.filter.empty() ? "." : var.filter) << "\t";
         for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
             if (!i->second.empty()) {
                 out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
