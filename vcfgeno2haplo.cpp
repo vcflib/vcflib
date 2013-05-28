@@ -333,7 +333,9 @@ int main(int argc, char** argv) {
                         gt.push_back(".");
                     }
                 }
-                outputVar.samples[sampleName]["GT"].push_back(join(gt, "|"));
+                if (gt.size() != 0) {
+                    outputVar.samples[sampleName]["GT"].push_back(join(gt, "|"));
+                }
             }
             if (cluster.size() - impossibleHaplotypes < 2) {
                 for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {

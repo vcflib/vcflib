@@ -166,8 +166,15 @@ int main(int argc, char** argv) {
                 vector<VariantAllele>& vars = varAlleles[*a];
                 for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
                     int freq;
-                    convert(var.info["AC"].at(var.altAlleleIndexes[*a]), freq);
-                    alleleCounts[*va] += freq;
+                    try {
+                        convert(var.info["AC"].at(var.altAlleleIndexes[*a]), freq);
+                        alleleCounts[*va] += freq;
+                    } catch (...) {
+                        /*
+                        cerr << "AC does not have the right number of fields for allele "
+                             << *a << " which would be at index " << var.altAlleleIndexes[*a] << endl;
+                        */
+                    }
                 }
             }
         }
