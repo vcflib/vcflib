@@ -325,9 +325,14 @@ int main(int argc, char** argv) {
     // open and calibrate using the true and false datasets
 
     if (train && apply_to_training_data) {
+        /*
         cout << variantFile.header << endl;
         vector<Variant>::iterator v = variants.begin(); int di = 0;
         for ( ; v != variants.end() && di < data.size(); ++v) {
+            var.info["SOMX"].clear();
+            var.info["SOMY"].clear();
+            var.info["SOMP"].clear();
+            var.info["SOMD"].clear();
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a, ++di) {
                 som_set_inputs ( net, dataptrs[di] );
                 size_t x=0, y=0;
@@ -337,11 +342,13 @@ int main(int argc, char** argv) {
                 if (!centerv.empty()) {
                     float distance = sqrt(pow(abs((float)centerx - (float)x), 2)
                                           + pow(abs((float)centery - (float)y), 2));
+                    var.info["SOMD"].clear();
                     var.info["SOMD"].push_back(convert(distance));
                 }
             }
             cout << *v << endl;
         }
+        */
     } else if (apply) {
 
         // if we have true and false sets, use them to "paint" the map
@@ -426,6 +433,10 @@ int main(int argc, char** argv) {
 
         cout << variantFile.header << endl;
         while (variantFile.getNextVariant(var)) {
+            var.info["SOMX"].clear();
+            var.info["SOMY"].clear();
+            var.info["SOMP"].clear();
+            var.info["SOMD"].clear();
             int ai = 0;
             vector<string>::iterator a = var.alt.begin();
             for ( ; a != var.alt.end(); ++a, ++ai) {

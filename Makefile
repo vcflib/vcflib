@@ -60,6 +60,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfevenregions.cpp \
 			  vcfcat.cpp \
 			  vcfgenosummarize.cpp \
+			  vcfgenosamplenames.cpp \
 			  vcfgeno2haplo.cpp
 
 BINS = $(BIN_SOURCES:.cpp=)

@@ -101,3 +101,7 @@ vcfuniqalleles
 .vcfstats.cpp.swo
 a.out
 vcfuniq
+vcfcat
+vcfevenregions
+vcfgenosummarize
+vcfgenosamplenames

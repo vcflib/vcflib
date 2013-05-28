@@ -210,6 +210,8 @@ int main(int argc, char** argv) {
     int totalcomplex = 0;
     int mismatchbases = 0;
     int mnpbases = 0;
+    int biallelics = 0;
+    int multiallelics = 0;
     map<int, int> insertions;
     map<int, int> deletions;
     map<int, int> mnps;
@@ -232,6 +234,11 @@ int main(int argc, char** argv) {
 
         while (variantFile.getNextVariant(var)) {
             ++variantSites;
+            if (var.alt.size() > 1) {
+                ++multiallelics;
+            } else {
+                ++biallelics;
+            }
             map<string, vector<VariantAllele> > alternates = var.parsedAlternates(includePreviousBaseForIndels,
                                                                                   useMNPs,
                                                                                   useEntropy,
@@ -453,6 +460,8 @@ int main(int argc, char** argv) {
 
     if (!addTags) {
         cout << "total variant sites:\t" << variantSites << endl
+             << "of which " << biallelics << " (" << (double) biallelics / variantSites << "%) are biallelic and "
+                            << multiallelics << " (" << (double) multiallelics / variantSites << "%) are multiallelic" << endl
              << "total variant alleles:\t" << variantAlleles << endl
              << "unique variant alleles:\t" << uniqueVariantAlleles << endl
              << endl

@@ -122,6 +122,9 @@ int main(int argc, char** argv) {
     string line = "##INFO=<ID=" + annotag + ".has_variant,Number=0,Type=Flag,Description=\"True if "
         + annotag + " has a called alternate among samples under comparison.\">";
     variantFileA.addHeaderLine(line);
+    line = "##FORMAT=<ID=" + annotag + ",Number=1,Type=String,Description=\"Genotype from "
+        + annotag + ".\">";
+    variantFileA.addHeaderLine(line);
 
     cout << variantFileA.header << endl;
 

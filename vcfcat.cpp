@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
             if (i == 1) {
                 cout << variantFile.header << endl;
             }
-            variantFile.parseSamples = false;
             Variant var(variantFile);
             while (variantFile.getNextVariant(var)) {
                 cout << var << endl;
