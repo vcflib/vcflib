@@ -159,7 +159,9 @@ int main(int argc, char** argv) {
             map<int, int> gtGermline = decomposeGenotype(germline["GT"].front());
             map<int, int> gtSomatic  = decomposeGenotype(somatic["GT"].front());
             int germlineAltCount = 0;
-            convert(germline["AO"].front(), germlineAltCount);
+            if (germline.find("AO") != germline.end()) {
+                convert(germline["AO"].front(), germlineAltCount);
+            }
             var.info[tag].clear(); // remove previous
             if (gtGermline == gtSomatic) {
                 var.info[tag].push_back("germline");

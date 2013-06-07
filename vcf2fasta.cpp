@@ -75,7 +75,9 @@ void printSummary(char** argv) {
 
 map<string, int>& getPloidies(Variant& var, map<string, int>& ploidies, int defaultPloidy=2) {
     for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
-        ploidies[*s] = ploidy(decomposeGenotype(var.getGenotype(*s))) || defaultPloidy;
+        int p = ploidy(decomposeGenotype(var.getGenotype(*s)));
+        if (p == 0) ploidies[*s] = defaultPloidy;
+        else        ploidies[*s] = p;
     }
     return ploidies;
 }
