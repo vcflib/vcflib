@@ -18,23 +18,23 @@ void printSummary(char** argv) {
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl
          << "    -v, --invert              invert the selection, printing only records which would" << endl
          << "                                not have been printed out" << endl
-	 << "    -i, --intersect-vcf FILE  use this VCF for set intersection generation" << endl
-	 << "    -u, --union-vcf FILE      use this VCF for set union generation" << endl
-	 << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
-	 << "    -r, --reference FILE      FASTA reference file, required with -i and -u" << endl
-	 << "    -l, --loci                output whole loci when one alternate allele matches" << endl
-	 << "    -m, --ref-match           intersect on the basis of record REF string" << endl
-	 << "    -t, --tag TAG             attach TAG to each record's info field if it would intersect" << endl
-	 << "    -V, --tag-value VAL       use this value to indicate that the allele is passing" << endl
-	 << "                              '.' will be used otherwise.  default: 'PASS'" << endl
-	 << "    -M, --merge-from FROM-TAG" << endl
-	 << "    -T, --merge-to   TO-TAG   merge from FROM-TAG used in the -i file, setting TO-TAG" << endl
-	 << "                              in the current file." << endl
+         << "    -i, --intersect-vcf FILE  use this VCF for set intersection generation" << endl
+         << "    -u, --union-vcf FILE      use this VCF for set union generation" << endl
+         << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
+         << "    -r, --reference FILE      FASTA reference file, required with -i and -u" << endl
+         << "    -l, --loci                output whole loci when one alternate allele matches" << endl
+         << "    -m, --ref-match           intersect on the basis of record REF string" << endl
+         << "    -t, --tag TAG             attach TAG to each record's info field if it would intersect" << endl
+         << "    -V, --tag-value VAL       use this value to indicate that the allele is passing" << endl
+         << "                              '.' will be used otherwise.  default: 'PASS'" << endl
+         << "    -M, --merge-from FROM-TAG" << endl
+         << "    -T, --merge-to   TO-TAG   merge from FROM-TAG used in the -i file, setting TO-TAG" << endl
+         << "                              in the current file." << endl
          << endl
-	 << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
-	 << endl
-	 << "For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp" << endl
-	 << "as determined by haplotype comparison alleles." << endl;
+         << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
+         << endl
+         << "For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp" << endl
+         << "as determined by haplotype comparison alleles." << endl;
 	//<< "Intersect the records in the VCF file with targets provided in a BED file." << endl
 	//<< "Intersections are done on the reference sequences in the VCF file." << endl
 	//<< "If no VCF filename is specified on the command line (last argument) the VCF" << endl
@@ -66,26 +66,26 @@ int main(int argc, char** argv) {
     int c;
     while (true) {
         static struct option long_options[] =
-        {
-            /* These options set a flag. */
-            //{"verbose", no_argument,       &verbose_flag, 1},
-            {"help", no_argument, 0, 'h'},
-            {"bed",  required_argument, 0, 'b'},
-            {"invert",  no_argument, 0, 'v'},
-	    {"intersect-vcf", required_argument, 0, 'i'},
-	    {"union-vcf", required_argument, 0, 'u'},
-            {"contained",  no_argument, 0, 'c'},
-            {"overlapping", no_argument, 0, 'o'},
-	    {"window-size", required_argument, 0, 'w'},
-	    {"reference", required_argument, 0, 'r'},
-	    {"loci", no_argument, 0, 'l'},
-	    {"ref-match", no_argument, 0, 'm'},
-	    {"tag", required_argument, 0, 't'},
-	    {"tag-value", required_argument, 0, 'V'},
-	    {"merge-from", required_argument, 0, 'M'},
-	    {"merge-to", required_argument, 0, 'T'},
-            {0, 0, 0, 0}
-        };
+            {
+                /* These options set a flag. */
+                //{"verbose", no_argument,       &verbose_flag, 1},
+                {"help", no_argument, 0, 'h'},
+                {"bed",  required_argument, 0, 'b'},
+                {"invert",  no_argument, 0, 'v'},
+                {"intersect-vcf", required_argument, 0, 'i'},
+                {"union-vcf", required_argument, 0, 'u'},
+                {"contained",  no_argument, 0, 'c'},
+                {"overlapping", no_argument, 0, 'o'},
+                {"window-size", required_argument, 0, 'w'},
+                {"reference", required_argument, 0, 'r'},
+                {"loci", no_argument, 0, 'l'},
+                {"ref-match", no_argument, 0, 'm'},
+                {"tag", required_argument, 0, 't'},
+                {"tag-value", required_argument, 0, 'V'},
+                {"merge-from", required_argument, 0, 'M'},
+                {"merge-to", required_argument, 0, 'T'},
+                {0, 0, 0, 0}
+            };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
@@ -98,38 +98,38 @@ int main(int argc, char** argv) {
         switch (c) {
 
 	    case 'w':
-		windowsize = atoi(optarg);
-		break;
+            windowsize = atoi(optarg);
+            break;
 
-            case 'b':
-                bedFileName = string(optarg);
-                break;
+        case 'b':
+            bedFileName = string(optarg);
+            break;
 
-            case 'i':
-		intersecting = true;
-                vcfFileName = string(optarg);
-                break;
+        case 'i':
+            intersecting = true;
+            vcfFileName = string(optarg);
+            break;
 
-            case 'u':
-		unioning = true;
-                vcfFileName = string(optarg);
-                break;
+        case 'u':
+            unioning = true;
+            vcfFileName = string(optarg);
+            break;
 
 	    case 'r':
-		fastaFileName = string(optarg);
-		break;
+            fastaFileName = string(optarg);
+            break;
 
-            case 'v':
-                invert = true;
-                break;
+        case 'v':
+            invert = true;
+            break;
 
-            case 'c':
-                contained = true;
-                break;
+        case 'c':
+            contained = true;
+            break;
 
-            case 'o':
-                overlapping = true;
-                break;
+        case 'o':
+            overlapping = true;
+            break;
 
 	    case 'l':
 	        loci = true;
@@ -141,42 +141,42 @@ int main(int argc, char** argv) {
 
 	    case 't':
 	        tag = optarg;
-		break;
+            break;
 
 	    case 'V':
-		tagValue = optarg;
-		break;
+            tagValue = optarg;
+            break;
 
 	    case 'M':
-		mergeFromTag = optarg;
-		break;
+            mergeFromTag = optarg;
+            break;
 
 	    case 'T':
-		mergeToTag = optarg;
-		break;
+            mergeToTag = optarg;
+            break;
 
-            case 'h':
-                printSummary(argv);
-                break;
+        case 'h':
+            printSummary(argv);
+            break;
 
-            case '?':
-                printSummary(argv);
-                exit(1);
-                break;
+        case '?':
+            printSummary(argv);
+            exit(1);
+            break;
 
-            default:
-                abort ();
+        default:
+            abort ();
         }
     }
 
     bool usingBED = false;
     if (!bedFileName.empty()) {
-	usingBED = true;
+        usingBED = true;
     }
     
     BedReader bed;
     if (usingBED) {
-	bed.open(bedFileName);
+        bed.open(bedFileName);
     }
 
     VariantCallFile variantFile;
@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
         variantFile.open(inputFilename);
     } else {
         variantFile.open(std::cin);
-	usingstdin = true;
+        usingstdin = true;
     }
 
     if (!variantFile.is_open()) {
@@ -196,43 +196,43 @@ int main(int argc, char** argv) {
     }
 
     if (usingBED) {
-	variantFile.parseSamples = false;
+        variantFile.parseSamples = false;
     }
 
     VariantCallFile otherVariantFile;
     if (!vcfFileName.empty()) {
-	if (vcfFileName == "-") {
-	    if (usingstdin) {
-		cerr << "cannot open both VCF file streams from stdin" << endl;
-		exit(1);
-	    } else {
-		otherVariantFile.open(std::cin);
-	    }
-	} else {
-	    otherVariantFile.open(vcfFileName);
-	}
-	if (!otherVariantFile.is_open()) {
-	    cerr << "could not open VCF file " << vcfFileName << endl;
-	    exit(1);
-	}
+        if (vcfFileName == "-") {
+            if (usingstdin) {
+                cerr << "cannot open both VCF file streams from stdin" << endl;
+                exit(1);
+            } else {
+                otherVariantFile.open(std::cin);
+            }
+        } else {
+            otherVariantFile.open(vcfFileName);
+        }
+        if (!otherVariantFile.is_open()) {
+            cerr << "could not open VCF file " << vcfFileName << endl;
+            exit(1);
+        }
     }
 
     FastaReference reference;
     if (unioning || intersecting) {
-	if (fastaFileName.empty()) {
-	    cerr << "a reference is required for haplotype-based intersection and unioniong" << endl;
-	    exit(1);
-	}
-	reference.open(fastaFileName);
+        if (fastaFileName.empty()) {
+            cerr << "a reference is required for haplotype-based intersection and unioniong" << endl;
+            exit(1);
+        }
+        reference.open(fastaFileName);
     }
 
     if (!unioning && !intersecting) {
-	variantFile.parseSamples = false; // faster, as when we are
-					  // only bed-intersecting we
-					  // can do position-only
-					  // output and don't have to
-					  // manipulate specific
-					  // alleles
+        variantFile.parseSamples = false; // faster, as when we are
+        // only bed-intersecting we
+        // can do position-only
+        // output and don't have to
+        // manipulate specific
+        // alleles
     }
 
     // read the VCF file for union or intersection into an interval tree
@@ -244,18 +244,18 @@ int main(int argc, char** argv) {
 
     if (unioning || intersecting) {
 
-	Variant ovar(otherVariantFile);
-	while (otherVariantFile.getNextVariant(ovar)) {
-	    long int left = ovar.position;
-	    long int right = left + ovar.ref.size(); // this should be 1-past the end
-	    otherVariants[ovar.sequenceName].push_back(ovar);
-	    Variant* v = &otherVariants[ovar.sequenceName].back();
-	    otherVariantIntervals[ovar.sequenceName].push_back(Interval<Variant*>(left, right, v));
-	}
+        Variant ovar(otherVariantFile);
+        while (otherVariantFile.getNextVariant(ovar)) {
+            long int left = ovar.position;
+            long int right = left + ovar.ref.size(); // this should be 1-past the end
+            otherVariants[ovar.sequenceName].push_back(ovar);
+            Variant* v = &otherVariants[ovar.sequenceName].back();
+            otherVariantIntervals[ovar.sequenceName].push_back(Interval<Variant*>(left, right, v));
+        }
 	
-	for (map<string, vector<Interval<Variant*> > >::iterator j = otherVariantIntervals.begin(); j != otherVariantIntervals.end(); ++j) {
-	    variantIntervals[j->first] = IntervalTree<Variant*>(j->second);
-	}
+        for (map<string, vector<Interval<Variant*> > >::iterator j = otherVariantIntervals.begin(); j != otherVariantIntervals.end(); ++j) {
+            variantIntervals[j->first] = IntervalTree<Variant*>(j->second);
+        }
 
     }
 
@@ -265,15 +265,15 @@ int main(int argc, char** argv) {
     string lastSequenceName;
 
     if (!tag.empty()) {
-	variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
+        variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
     }
 
     if (!mergeToTag.empty()) {
-	if (mergeFromTag.empty()) {
-	    cerr << "must specify a tag to merge from" << endl;
-	    exit(1);
-	}
-	variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
+        if (mergeFromTag.empty()) {
+            cerr << "must specify a tag to merge from" << endl;
+            exit(1);
+        }
+        variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
     }
 
     cout << variantFile.header << endl;
@@ -281,245 +281,245 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-	if (lastSequenceName.empty()) {
-	    lastSequenceName = var.sequenceName;
-	} else if (lastSequenceName != var.sequenceName) {
-	    if (unioning) {
-		vector<Interval<Variant*> > previousRecords;
-		long int lastSeqLength = reference.sequenceLength(lastSequenceName);
-		variantIntervals[lastSequenceName].findContained(lastOutputPosition, lastSeqLength, previousRecords);
-		for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
-		    Variant* v = r->value;
-		    if (outputVariants.find(v) == outputVariants.end()) {
-			outputVariants.insert(v);
-			cout << *v << endl; // Q: does this output everything in correct order?.... A: No.
-		    }
-		}
-		lastSequenceName = var.sequenceName;
-		lastOutputPosition = 0;
-	    }
-	}
+        if (lastSequenceName.empty()) {
+            lastSequenceName = var.sequenceName;
+        } else if (lastSequenceName != var.sequenceName) {
+            if (unioning) {
+                vector<Interval<Variant*> > previousRecords;
+                long int lastSeqLength = reference.sequenceLength(lastSequenceName);
+                variantIntervals[lastSequenceName].findContained(lastOutputPosition, lastSeqLength, previousRecords);
+                for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
+                    Variant* v = r->value;
+                    if (outputVariants.find(v) == outputVariants.end()) {
+                        outputVariants.insert(v);
+                        cout << *v << endl; // Q: does this output everything in correct order?.... A: No.
+                    }
+                }
+                lastSequenceName = var.sequenceName;
+                lastOutputPosition = 0;
+            }
+        }
 
-	if (usingBED) {
-	    BedTarget record(var.sequenceName, var.position, var.position + var.ref.size(), "");
-	    vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
+        if (usingBED) {
+            BedTarget record(var.sequenceName, var.position, var.position + var.ref.size(), "");
+            vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
 
-	    if (!invert && !overlaps.empty()) {
-		cout << variantFile.line << endl;
-	    } else if (invert && overlaps.empty()) {
-		cout << variantFile.line << endl;
-	    }
+            if (!invert && !overlaps.empty()) {
+                cout << variantFile.line << endl;
+            } else if (invert && overlaps.empty()) {
+                cout << variantFile.line << endl;
+            }
 
-	} else if (unioning || intersecting) {
+        } else if (unioning || intersecting) {
 
-	    // TODO check overlaps with union/intersection
-	    // hmm... for unioning, you might need to step through the original VCF records
-	    // but the idea is to exclude the haplotype-based duplicates
+            // TODO check overlaps with union/intersection
+            // hmm... for unioning, you might need to step through the original VCF records
+            // but the idea is to exclude the haplotype-based duplicates
 
-	    vector<Interval<Variant*> > results;
+            vector<Interval<Variant*> > results;
 
-	    variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize, results);
+            variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize, results);
 
-	    vector<Variant*> overlapping;
+            vector<Variant*> overlapping;
 
-	    for (vector<Interval<Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
-		overlapping.push_back(r->value);
-	    }
-
-
-	    if (unioning) {
-
-		// unioning strategy
-
-		// write out all the records from the last file
-		// between the last one printed out and the first
-		// one we're about to print out
-
-		vector<Interval<Variant*> > previousRecords;
-
-		variantIntervals[var.sequenceName].findOverlapping(lastOutputPosition, var.position - windowsize, previousRecords);
-
-		map<long int, vector<Variant*> > variants;
-
-		for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
-		    Variant* v = r->value;
-		    if (outputVariants.find(v) == outputVariants.end()) {
-			outputVariants.insert(v);
-			variants[v->position].push_back(v);
-		    }
-		}
-
-		for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
-		    for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
-			cout << **o << endl;
-			lastOutputPosition = max(lastOutputPosition, (*o)->position);
-		    }
-		}
-
-		// TODO find the duplicates for the other file
-	    }
+            for (vector<Interval<Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
+                overlapping.push_back(r->value);
+            }
 
 
-	    if (overlapping.empty()) {
+            if (unioning) {
 
-		if (unioning || (intersecting && invert)) {
-		    cout << var << endl;
-		    lastOutputPosition = max(lastOutputPosition, var.position);
-		} else if (intersecting && (!tag.empty() || !mergeToTag.empty())) {
-		    for (int i = 0; i < var.alt.size(); ++i) {
-			if (!tag.empty()) {
-			    var.info[tag].push_back(".");
-			}
-			if (!mergeToTag.empty()) {
-			    var.info[mergeToTag].push_back(".");
-			}
-		    }
-		    cout << var << endl;
-		    lastOutputPosition = max(lastOutputPosition, var.position);
-		}
+                // unioning strategy
 
-	    } else {
+                // write out all the records from the last file
+                // between the last one printed out and the first
+                // one we're about to print out
 
-		// get the min and max of the overlaps
+                vector<Interval<Variant*> > previousRecords;
 
-		int haplotypeStart = var.position;
-		int haplotypeEnd = var.position + var.ref.size();
+                variantIntervals[var.sequenceName].findOverlapping(lastOutputPosition, var.position - windowsize, previousRecords);
 
-		for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
-		    haplotypeStart = min((*v)->position, (long int) haplotypeStart);
-		    haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
-     		}
+                map<long int, vector<Variant*> > variants;
 
-		// for everything overlapping and the current variant, construct the local haplotype within the bounds
-		// if there is an exact match, the allele in the current VCF does intersect
+                for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
+                    Variant* v = r->value;
+                    if (outputVariants.find(v) == outputVariants.end()) {
+                        outputVariants.insert(v);
+                        variants[v->position].push_back(v);
+                    }
+                }
 
-		string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
-		map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
+                for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
+                    for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
+                        cout << **o << endl;
+                        lastOutputPosition = max(lastOutputPosition, (*o)->position);
+                    }
+                }
 
-		for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
-		    Variant& variant = **v;
-		    int altindex = 0;
-		    for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
-			string haplotype = referenceHaplotype;
-			// get the relative start and end coordinates for the variant alternate allele
-			int relativeStart = variant.position - haplotypeStart;
-			haplotype.replace(relativeStart, variant.ref.size(), *a);
-			haplotypes[haplotype].push_back(make_pair(*v, altindex));
-		    }
-		}
+                // TODO find the duplicates for the other file
+            }
 
-		Variant originalVar = var;
 
-		// determine the non-intersecting alts
-		vector<string> altsToRemove;
-		vector<int> altIndexesToRemove;
-		for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-		    string haplotype = referenceHaplotype;
-		    int relativeStart = var.position - haplotypeStart;
-		    haplotype.replace(relativeStart, var.ref.size(), *a);
-		    map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
-		    if ((intersecting && !invert && h == haplotypes.end())
-			|| (intersecting && invert && h != haplotypes.end())
-			|| (unioning && h != haplotypes.end())) {
-			if (tag.empty() && mergeToTag.empty()) {
-			    altsToRemove.push_back(*a);
-			} else {
-			    if (!tag.empty()) {
-				var.info[tag].push_back(".");
-			    }
-			    if (!mergeToTag.empty()) {
-				var.info[mergeToTag].push_back(".");
-			    }
-			}
-		    } else {
-			if (!tag.empty()) {
-			    var.info[tag].push_back(tagValue);
-			}
-			// NB: just take the first value for the mergeFromTag
-			if (!mergeToTag.empty()) {
-			    Variant* v = h->second.front().first;
-			    int index = h->second.front().second;
-			    if (v->info.find(mergeFromTag) != v->info.end()) {
-				// now you have to find the exact allele...
-				string& otherValue = v->info[mergeFromTag].at(index);
-				var.info[mergeToTag].push_back(otherValue);
-			    } else {
-				var.info[mergeToTag].push_back(".");
-			    }
-			}
-		    }
-		}
+            if (overlapping.empty()) {
 
-		// remove the non-overlapping (intersecting) or overlapping (unioning) alts
-		if (intersecting && loci && altsToRemove.size() != var.alt.size()) {
-		    // we have a match in loci mode, so we should output the whole loci, not just the matching sequence
-		} else {
-		    for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
-			var.removeAlt(*a);
-		    }
-		}
+                if (unioning || (intersecting && invert)) {
+                    cout << var << endl;
+                    lastOutputPosition = max(lastOutputPosition, var.position);
+                } else if (intersecting && (!tag.empty() || !mergeToTag.empty())) {
+                    for (int i = 0; i < var.alt.size(); ++i) {
+                        if (!tag.empty()) {
+                            var.info[tag].push_back(".");
+                        }
+                        if (!mergeToTag.empty()) {
+                            var.info[mergeToTag].push_back(".");
+                        }
+                    }
+                    cout << var << endl;
+                    lastOutputPosition = max(lastOutputPosition, var.position);
+                }
 
-		if (unioning) {
+            } else {
 
-		    // somehow sort the records and combine them?
-		    map<long int, vector<Variant*> > variants;
-		    for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {
-			if ((*o)->position <= var.position && // check ensures proper ordering of variants on output
-			    outputVariants.find(*o) == outputVariants.end()) {
-			    outputVariants.insert(*o);
-			    variants[(*o)->position].push_back(*o);
-			}
-		    }
-		    // add in the current variant, if it has alts left
-		    if (!var.alt.empty()) {
-			vector<Variant*>& vars = variants[var.position];
-			int numalts = 0;
-			for (vector<Variant*>::iterator v = vars.begin(); v != vars.end(); ++v) {
-			    numalts += (*v)->alt.size();
-			}
-			if (numalts + var.alt.size() == originalVar.alt.size()) {
-			    variants[var.position].clear();
-			    variants[var.position].push_back(&originalVar);
-			} else {
-			    variants[var.position].push_back(&var);
-			}
-		    }
+                // get the min and max of the overlaps
 
-		    for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
-			for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
-			    cout << **o << endl;
-			    lastOutputPosition = max(lastOutputPosition, (*o)->position);
-			}
-		    }
-		} else {
-		    // if any alts remain, output the variant record
-		    if (!var.alt.empty()) {
-			cout << var << endl;
-			lastOutputPosition = max(lastOutputPosition, var.position);
-		    }
-		}
+                int haplotypeStart = var.position;
+                int haplotypeEnd = var.position + var.ref.size();
 
-	    }
+                for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+                    haplotypeStart = min((*v)->position, (long int) haplotypeStart);
+                    haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
+                }
 
-	}
+                // for everything overlapping and the current variant, construct the local haplotype within the bounds
+                // if there is an exact match, the allele in the current VCF does intersect
+
+                string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
+                map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
+
+                for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+                    Variant& variant = **v;
+                    int altindex = 0;
+                    for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
+                        string haplotype = referenceHaplotype;
+                        // get the relative start and end coordinates for the variant alternate allele
+                        int relativeStart = variant.position - haplotypeStart;
+                        haplotype.replace(relativeStart, variant.ref.size(), *a);
+                        haplotypes[haplotype].push_back(make_pair(*v, altindex));
+                    }
+                }
+
+                Variant originalVar = var;
+
+                // determine the non-intersecting alts
+                vector<string> altsToRemove;
+                vector<int> altIndexesToRemove;
+                for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+                    string haplotype = referenceHaplotype;
+                    int relativeStart = var.position - haplotypeStart;
+                    haplotype.replace(relativeStart, var.ref.size(), *a);
+                    map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
+                    if ((intersecting && !invert && h == haplotypes.end())
+                        || (intersecting && invert && h != haplotypes.end())
+                        || (unioning && h != haplotypes.end())) {
+                        if (tag.empty() && mergeToTag.empty()) {
+                            altsToRemove.push_back(*a);
+                        } else {
+                            if (!tag.empty()) {
+                                var.info[tag].push_back(".");
+                            }
+                            if (!mergeToTag.empty()) {
+                                var.info[mergeToTag].push_back(".");
+                            }
+                        }
+                    } else {
+                        if (!tag.empty()) {
+                            var.info[tag].push_back(tagValue);
+                        }
+                        // NB: just take the first value for the mergeFromTag
+                        if (!mergeToTag.empty()) {
+                            Variant* v = h->second.front().first;
+                            int index = h->second.front().second;
+                            if (v->info.find(mergeFromTag) != v->info.end()) {
+                                // now you have to find the exact allele...
+                                string& otherValue = v->info[mergeFromTag].at(index);
+                                var.info[mergeToTag].push_back(otherValue);
+                            } else {
+                                var.info[mergeToTag].push_back(".");
+                            }
+                        }
+                    }
+                }
+
+                // remove the non-overlapping (intersecting) or overlapping (unioning) alts
+                if (intersecting && loci && altsToRemove.size() != var.alt.size()) {
+                    // we have a match in loci mode, so we should output the whole loci, not just the matching sequence
+                } else {
+                    for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
+                        var.removeAlt(*a);
+                    }
+                }
+
+                if (unioning) {
+
+                    // somehow sort the records and combine them?
+                    map<long int, vector<Variant*> > variants;
+                    for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {
+                        if ((*o)->position <= var.position && // check ensures proper ordering of variants on output
+                            outputVariants.find(*o) == outputVariants.end()) {
+                            outputVariants.insert(*o);
+                            variants[(*o)->position].push_back(*o);
+                        }
+                    }
+                    // add in the current variant, if it has alts left
+                    if (!var.alt.empty()) {
+                        vector<Variant*>& vars = variants[var.position];
+                        int numalts = 0;
+                        for (vector<Variant*>::iterator v = vars.begin(); v != vars.end(); ++v) {
+                            numalts += (*v)->alt.size();
+                        }
+                        if (numalts + var.alt.size() == originalVar.alt.size()) {
+                            variants[var.position].clear();
+                            variants[var.position].push_back(&originalVar);
+                        } else {
+                            variants[var.position].push_back(&var);
+                        }
+                    }
+
+                    for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
+                        for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
+                            cout << **o << endl;
+                            lastOutputPosition = max(lastOutputPosition, (*o)->position);
+                        }
+                    }
+                } else {
+                    // if any alts remain, output the variant record
+                    if (!var.alt.empty()) {
+                        cout << var << endl;
+                        lastOutputPosition = max(lastOutputPosition, var.position);
+                    }
+                }
+
+            }
+
+        }
 
     }
 
 
     // if unioning, and any variants remain, output them
     if (unioning) {
-	for (map<string, list<Variant> >::iterator chrom = otherVariants.find(lastSequenceName);
-	     chrom != otherVariants.end();
-	     ++chrom) {
-	    for (list<Variant>::iterator v = chrom->second.begin(); v != chrom->second.end(); ++v) {
-		Variant* variant = &*v;
-		if (outputVariants.find(variant) == outputVariants.end()) {
-		    outputVariants.insert(variant);
-		    cout << *variant << endl;
-		    // TODO guarantee sorting
-		}
-	    }
-	}
+        for (map<string, list<Variant> >::iterator chrom = otherVariants.find(lastSequenceName);
+             chrom != otherVariants.end();
+             ++chrom) {
+            for (list<Variant>::iterator v = chrom->second.begin(); v != chrom->second.end(); ++v) {
+                Variant* variant = &*v;
+                if (outputVariants.find(variant) == outputVariants.end()) {
+                    outputVariants.insert(variant);
+                    cout << *variant << endl;
+                    // TODO guarantee sorting
+                }
+            }
+        }
     }
 
     exit(0);  // why?

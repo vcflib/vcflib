@@ -54,6 +54,7 @@ BIN_SOURCES = vcfecho.cpp \
 			  vcfuniq.cpp \
 			  vcfuniqalleles.cpp \
 			  vcfremap.cpp \
+			  vcf2fasta.cpp \
 			  vcfsitesummarize.cpp \
 			  vcfbreakmulti.cpp \
 			  vcfcreatemulti.cpp \

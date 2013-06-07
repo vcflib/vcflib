@@ -252,6 +252,8 @@ public:
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
     int getNumSamples(void);
     int getNumValidGenotypes(void);
+    string getGenotype(string& sample);
+    bool isPhased(void);
     // TODO
     //void setInfoField(string& key, string& val);
 
@@ -428,23 +430,24 @@ public:
 // TODO
 //map<string, int> decomposeGenotype(string& genotype);
 
-map<int, int> decomposeGenotype(string& genotype);
+vector<int> decomposePhasedGenotype(const string& genotype);
+map<int, int> decomposeGenotype(const string& genotype);
 
-string genotypeToString(map<int, int>& genotype);
+string genotypeToString(const map<int, int>& genotype);
 
-bool isHet(map<int, int>& genotype);
+bool isHet(const map<int, int>& genotype);
 
-bool isHom(map<int, int>& genotype);
+bool isHom(const map<int, int>& genotype);
 
-bool hasNonRef(map<int, int>& genotype);
+bool hasNonRef(const map<int, int>& genotype);
 
-bool isHomRef(map<int, int>& genotype);
+bool isHomRef(const map<int, int>& genotype);
 
-bool isHomNonRef(map<int, int>& genotype);
+bool isHomNonRef(const map<int, int>& genotype);
 
-bool isNull(map<int, int>& genotype);
+bool isNull(const map<int, int>& genotype);
 
-int ploidy(map<int, int>& genotype);
+int ploidy(const map<int, int>& genotype);
 
 string unionInfoHeaderLines(string& s1, string& s2);
 

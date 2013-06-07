@@ -13,8 +13,7 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
          << "options:" << endl 
-         << "    -w, --window-size N       compare records up to this many bp away (default 30)" << endl
-         << "    -r, --reference FILE      FASTA reference file, required with -i and -u" << endl
+         << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
          << endl
          << "Convert genotype-based phased alleles within --window-size into haplotype alleles." << endl
          << "Will break haplotype construction when encountering non-phased genotypes on input." << endl

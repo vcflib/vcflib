@@ -1267,7 +1267,7 @@ map<string, int> decomposeGenotype(string& genotype) {
 }
 */
 
-map<int, int> decomposeGenotype(string& genotype) {
+map<int, int> decomposeGenotype(const string& genotype) {
     string splitter = "/";
     if (genotype.find("|") != string::npos) {
         splitter = "|";
@@ -1286,9 +1286,32 @@ map<int, int> decomposeGenotype(string& genotype) {
     return decomposed;
 }
 
-string genotypeToString(map<int, int>& genotype) {
+vector<int> decomposePhasedGenotype(const string& genotype) {
+    string splitter = "/";
+    if (genotype.find("|") != string::npos) {
+        splitter = "|";
+    }
+    vector<string> haps = split(genotype, splitter);
+    if (haps.size() > 1 && splitter == "/") {
+        cerr << "could not find '|' in genotype, cannot decomposePhasedGenotype on unphased genotypes" << endl;
+        exit(1);
+    }
+    vector<int> decomposed;
+    for (vector<string>::iterator h = haps.begin(); h != haps.end(); ++h) {
+        int alt;
+        if (*h == ".") {
+            decomposed.push_back(NULL_ALLELE);
+        } else {
+            convert(*h, alt);
+            decomposed.push_back(alt);
+        }
+    }
+    return decomposed;
+}
+
+string genotypeToString(const map<int, int>& genotype) {
     vector<int> s;
-    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+    for (map<int, int>::const_iterator g = genotype.begin(); g != genotype.end(); ++g) {
         int a = g->first;
         int c = g->second;
         for (int i = 0; i < c; ++i) s.push_back(a);
@@ -1302,16 +1325,16 @@ string genotypeToString(map<int, int>& genotype) {
     return join(r, "/"); // TODO adjust for phased/unphased
 }
 
-bool isHet(map<int, int>& genotype) {
+bool isHet(const map<int, int>& genotype) {
     return genotype.size() > 1;
 }
 
-bool isHom(map<int, int>& genotype) {
+bool isHom(const map<int, int>& genotype) {
     return genotype.size() == 1;
 }
 
-bool hasNonRef(map<int, int>& genotype) {
-    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+bool hasNonRef(const map<int, int>& genotype) {
+    for (map<int, int>::const_iterator g = genotype.begin(); g != genotype.end(); ++g) {
         if (g->first != 0) {
             return true;
         }
@@ -1319,21 +1342,21 @@ bool hasNonRef(map<int, int>& genotype) {
     return false;
 }
 
-bool isHomRef(map<int, int>& genotype) {
+bool isHomRef(const map<int, int>& genotype) {
     return isHom(genotype) && !hasNonRef(genotype);
 }
 
-bool isHomNonRef(map<int, int>& genotype) {
+bool isHomNonRef(const map<int, int>& genotype) {
     return isHom(genotype) && hasNonRef(genotype);
 }
 
-bool isNull(map<int, int>& genotype) {
+bool isNull(const map<int, int>& genotype) {
     return genotype.find(NULL_ALLELE) != genotype.end();
 }
 
-int ploidy(map<int, int>& genotype) {
+int ploidy(const map<int, int>& genotype) {
     int i = 0;
-    for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+    for (map<int, int>::const_iterator g = genotype.begin(); g != genotype.end(); ++g) {
         i += g->second;
     }
     return i;
@@ -1959,6 +1982,32 @@ map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMappi
     }
     return mapping;
 }
+
+string Variant::getGenotype(string& sample) {
+    map<string, map<string, vector<string> > >::iterator s = samples.find(sample);
+    if (s != samples.end()) {
+        map<string, vector<string> >::iterator f = s->second.find("GT");
+        if (f != s->second.end()) {
+            return f->second.front();
+        }
+    }
+    return "";
+}
+
+bool Variant::isPhased(void) {
+    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
+        map<string, vector<string> >& sample = s->second;
+        map<string, vector<string> >::iterator g = sample.find("GT");
+        if (g != sample.end()) {
+            string gt = g->second.front();
+            if (gt.size() > 1 && gt.find("|") == string::npos) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 
 
 } // end namespace vcf

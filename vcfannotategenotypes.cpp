@@ -130,82 +130,82 @@ int main(int argc, char** argv) {
 
     do {
 
-	// this is broken.  to do it right, it'll be necessary to get reference ids from the fasta reference used to make the alignments...
+        // this is broken.  to do it right, it'll be necessary to get reference ids from the fasta reference used to make the alignments...
         if (!variantFileB.done()
-	       && (varB.sequenceName != varA.sequenceName
-		   || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
-	    ) {
+            && (varB.sequenceName != varA.sequenceName
+                || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
+            ) {
             variantFileB.getNextVariant(varB);
         }
 
-	if (!variantFileA.done()
-	       && (varA.sequenceName != varB.sequenceName
-		   || (varA.sequenceName == varB.sequenceName && varA.position < varB.position))
-	    ) {
+        if (!variantFileA.done()
+            && (varA.sequenceName != varB.sequenceName
+                || (varA.sequenceName == varB.sequenceName && varA.position < varB.position))
+            ) {
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
 
-	vector<Variant> varsA;
-	vector<Variant> varsB;
+        vector<Variant> varsA;
+        vector<Variant> varsB;
 
-	bool hasMultipleAlts = false;
+        bool hasMultipleAlts = false;
 
-	long int thisPosition = 0;
-	string thisSequenceName;
-	if (varA.position == varB.position
-	    && varA.sequenceName == varB.sequenceName) {
-	    thisPosition = varA.position;
-	    thisSequenceName = varA.sequenceName;
-	}
+        long int thisPosition = 0;
+        string thisSequenceName;
+        if (varA.position == varB.position
+            && varA.sequenceName == varB.sequenceName) {
+            thisPosition = varA.position;
+            thisSequenceName = varA.sequenceName;
+        }
         while (!variantFileA.done()
-	       && !variantFileB.done()
-	       && thisPosition == varA.position
-	       && thisSequenceName == varA.sequenceName
-	       && varA.sequenceName == varB.sequenceName
-	       && varA.position == varB.position) {
-	    // accumulate all the alts at the current position
-	    varsA.push_back(varA);
-	    varsB.push_back(varB);
-	    if (varA.alt.size() > 1 || varB.alt.size() > 1)
-		hasMultipleAlts = true;
-	    variantFileA.getNextVariant(varA);
-	    variantFileB.getNextVariant(varB);
+               && !variantFileB.done()
+               && thisPosition == varA.position
+               && thisSequenceName == varA.sequenceName
+               && varA.sequenceName == varB.sequenceName
+               && varA.position == varB.position) {
+            // accumulate all the alts at the current position
+            varsA.push_back(varA);
+            varsB.push_back(varB);
+            if (varA.alt.size() > 1 || varB.alt.size() > 1)
+                hasMultipleAlts = true;
+            variantFileA.getNextVariant(varA);
+            variantFileB.getNextVariant(varB);
         }
 
-	// multiple lines per position
-	if (!hasMultipleAlts && (varsA.size() > 1 || varsB.size() > 1)) {
+        // multiple lines per position
+        if (!hasMultipleAlts && (varsA.size() > 1 || varsB.size() > 1)) {
 
-	    map<pair<string, string>, Variant> varsAParsed;
-	    map<pair<string, string>, Variant> varsBParsed;	
-	    for (vector<Variant>::iterator v = varsA.begin(); v != varsA.end(); ++v) {
-		varsAParsed[make_pair(v->ref, v->alt.front())] = *v;
-	    }
-	    for (vector<Variant>::iterator v = varsB.begin(); v != varsB.end(); ++v) {
-		varsBParsed[make_pair(v->ref, v->alt.front())] = *v;
-	    }
+            map<pair<string, string>, Variant> varsAParsed;
+            map<pair<string, string>, Variant> varsBParsed;	
+            for (vector<Variant>::iterator v = varsA.begin(); v != varsA.end(); ++v) {
+                varsAParsed[make_pair(v->ref, v->alt.front())] = *v;
+            }
+            for (vector<Variant>::iterator v = varsB.begin(); v != varsB.end(); ++v) {
+                varsBParsed[make_pair(v->ref, v->alt.front())] = *v;
+            }
 	    
-	    for (map<pair<string, string>, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
-		Variant& varA = vs->second;
-		if (varsBParsed.find(make_pair(varA.ref, varA.alt.front())) != varsBParsed.end()) {
-		    Variant& varB = varsBParsed[make_pair(varA.ref, varA.alt.front())]; // TODO cleanup
-		    annotateWithGenotypes(varA, varB, annotag);
-		    varA.infoFlags[annotag + ".has_variant"] = true;
-		} else {
-		    annotateWithBlankGenotypes(varA, annotag);
-		}
-		cout << varA << endl;
-	    }
+            for (map<pair<string, string>, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
+                Variant& varA = vs->second;
+                if (varsBParsed.find(make_pair(varA.ref, varA.alt.front())) != varsBParsed.end()) {
+                    Variant& varB = varsBParsed[make_pair(varA.ref, varA.alt.front())]; // TODO cleanup
+                    annotateWithGenotypes(varA, varB, annotag);
+                    varA.infoFlags[annotag + ".has_variant"] = true;
+                } else {
+                    annotateWithBlankGenotypes(varA, annotag);
+                }
+                cout << varA << endl;
+            }
 
-	} else if (!varsA.empty() && !varsB.empty()) { // one line per multi-allelic
-	    Variant& varA = varsA.front();
-	    Variant& varB = varsB.front();
-	    annotateWithGenotypes(varA, varB, annotag);
-	    // XXX TODO, and also allow for records with multiple alts
-	    // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
-	    varA.infoFlags[annotag + ".has_variant"] = true;
-	    cout << varA << endl;
-	}
+        } else if (!varsA.empty() && !varsB.empty()) { // one line per multi-allelic
+            Variant& varA = varsA.front();
+            Variant& varB = varsB.front();
+            annotateWithGenotypes(varA, varB, annotag);
+            // XXX TODO, and also allow for records with multiple alts
+            // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
+            varA.infoFlags[annotag + ".has_variant"] = true;
+            cout << varA << endl;
+        }
         
     } while (!variantFileA.done() && !variantFileB.done());
 

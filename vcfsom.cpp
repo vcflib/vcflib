@@ -12,6 +12,107 @@
 using namespace std;
 using namespace vcf;
 
+double mean(const vector<double>& data) {
+    double total = 0;
+    for (vector<double>::const_iterator i = data.begin(); i != data.end(); ++i) {
+        total += *i;
+    }
+    return total/data.size();
+}
+
+double median(vector <double>& data) {
+    double median;
+    size_t size = data.size();
+    // ascending order
+    sort(data.begin(), data.end());
+    // get middle value
+    if (size % 2 == 0) {
+        median = (data[size/2-1] + data[size/2]) / 2;
+    } else {
+        median = data[size/2];
+    }
+    return median;
+}
+
+double variance(const vector <double>& data, const double mean) {
+    double total = 0;
+    for (vector <double>::const_iterator i = data.begin(); i != data.end(); ++i) {
+        total += (*i - mean)*(*i - mean);
+    }
+    return total / (data.size());
+}
+
+double standard_deviation(const vector <double>& data, const double mean) {
+    return sqrt(variance(data, mean));
+}
+
+struct Stats {
+    double mean;
+    double stdev;
+    Stats(void) : mean(0), stdev(1) { }
+};
+
+bool load_som_metadata(string& som_metadata_file, int& x, int& y, vector<string>& fields, map<string, Stats>& stats) {
+    ifstream in(som_metadata_file.c_str());
+    if (!in.is_open()) {
+        return false;
+    }
+    string linebuf;
+    getline(in, linebuf);
+    vector<string> xy = split(linebuf, "\t ");
+    convert(xy.front(), x);
+    convert(xy.back(), y);
+    while (getline(in, linebuf)) {
+        // format is: field_name, mean, stdev
+        vector<string> m = split(linebuf, "\t ");
+        fields.push_back(m[0]);
+        Stats& s = stats[m[0]];
+        convert(m[1], s.mean);
+        convert(m[2], s.stdev);
+    }
+    in.close();
+    return true;
+}
+
+bool save_som_metadata(string& som_metadata_file, int x, int y, vector<string>& fields, map<string, Stats>& stats) {
+    ofstream out(som_metadata_file.c_str());
+    if (!out.is_open()) {
+        return false;
+    }
+    out << x << "\t" << y << endl;
+    for (vector<string>::iterator f = fields.begin(); f != fields.end(); ++f) {
+        Stats& s = stats[*f];
+        out << *f << "\t" << s.mean << "\t" << s.stdev << endl;
+    }
+    out.close();
+    return true;
+}
+
+void normalize_inputs(vector<double>& record, vector<string>& fields, map<string, Stats>& stats) {
+    vector<double>::iterator r = record.begin();
+    for (vector<string>::iterator f = fields.begin(); f != fields.end(); ++f, ++r) {
+        Stats& s = stats[*f];
+        *r = (*r - s.mean) / s.stdev;
+    }
+}
+
+void read_fields(Variant& var, int ai, vector<string>& fields, vector<double>& record) {
+    double td;
+    vector<string>::iterator j = fields.begin();
+    for (; j != fields.end(); ++j) {
+        if (*j == "QUAL") { // special handling...
+            td = var.quality;
+        } else {
+            if (var.vcf->infoCounts[*j] == 1) { // for non Allele-variant fields
+                convert(var.info[*j][0], td);
+            } else {
+                convert(var.info[*j][ai], td);
+            }
+        }
+        record.push_back(td);
+    }
+}
+
 struct SomPaint {
     int true_count;
     int false_count;
@@ -110,6 +211,7 @@ int main(int argc, char** argv) {
     int num_dimensions = 2;
     int iterations = 1000;
     string som_file;
+    string som_metadata_file;
     bool apply = false;
     bool train = false;
     bool apply_to_training_data = false; // print results against training data
@@ -120,6 +222,7 @@ int main(int argc, char** argv) {
     int centery;
     string trueVCF;
     string falseVCF;
+    bool normalize = true;
 
     int c;
 
@@ -232,6 +335,7 @@ int main(int argc, char** argv) {
     som_network_t *net = NULL;
     vector<string> inputs;
     vector<vector<double> > data;
+    map<string, Stats> stats;
 
     string line;
     stringstream ss;
@@ -252,6 +356,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    som_metadata_file = som_file + ".meta";
+
     Variant var(variantFile);
 
     variantFile.addHeaderLine("##INFO=<ID=SOMX,Number=A,Type=Integer,Description=\"X position of best neuron for variant in self-ordering map defined in " + som_file + "\">");
@@ -269,6 +375,7 @@ int main(int argc, char** argv) {
     
     vector<Variant> variants;
     if (train) {
+        map<string, pair<double, double> > normalizationLimits;
         while (variantFile.getNextVariant(var)) {
             variants.push_back(var);
             int ai = 0;
@@ -278,14 +385,44 @@ int main(int argc, char** argv) {
                 double td;
                 vector<string>::iterator j = fields.begin();
                 for (; j != fields.end(); ++j) {
-                    if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
-                        convert(var.info[*j][0], td);
+                    if (*j == "QUAL") { // special handling...
+                        td = var.quality;
                     } else {
-                        convert(var.info[*j][ai], td);
+                        if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
+                            convert(var.info[*j][0], td);
+                        } else {
+                            convert(var.info[*j][ai], td);
+                        }
+                    }
+                    if (normalize) {
+                        pair<double, double>& limits = normalizationLimits[*j];
+                        if (td < limits.first) limits.first = td;
+                        if (td > limits.second) limits.second = td;
                     }
                     record.push_back(td);
                 }
                 data.push_back(record);
+            }
+        }
+        // normalize inputs
+        if (normalize) {
+            // get normalization vector
+            // goal is normalization at 0, sd=1
+            int i = 0;
+            for (vector<string>::iterator f = fields.begin(); f != fields.end(); ++f, ++i) {
+                vector<double> fv;
+                for (vector<vector<double> >::iterator d = data.begin(); d != data.end(); ++d) {
+                    fv.push_back(d->at(i));
+                }
+                Stats& s = stats[*f];
+                // get normalization constants
+                s.mean = mean(fv);
+                s.stdev = standard_deviation(fv, s.mean);
+                // normalize
+                for (vector<vector<double> >::iterator d = data.begin(); d != data.end(); ++d) {
+                    double v = d->at(i);
+                    d->at(i) = (v - s.mean) / s.stdev;
+                }
             }
         }
     }
@@ -300,6 +437,14 @@ int main(int argc, char** argv) {
     if (apply) {
         if (! (net = som_deserialize(som_file.c_str()))) {
             cerr << "could not load SOM from " << som_file << endl;
+            return 1;
+        }
+        if (!fields.empty()) {
+            cerr << "fields specified, but a SOM is to be applied, and metadata should be stored at " << som_metadata_file << endl;
+            return 1;
+        }
+        if (!load_som_metadata(som_metadata_file, width, height, fields, stats)) {
+            cerr << "could not load SOM metadata from " << som_metadata_file << endl;
             return 1;
         }
     } else {
@@ -325,6 +470,7 @@ int main(int argc, char** argv) {
     // open and calibrate using the true and false datasets
 
     if (train && apply_to_training_data) {
+        // currently disabled
         /*
         cout << variantFile.header << endl;
         vector<Variant>::iterator v = variants.begin(); int di = 0;
@@ -369,15 +515,9 @@ int main(int argc, char** argv) {
                 vector<string>::iterator a = v.alt.begin();
                 for ( ; a != v.alt.end(); ++a, ++ai) {
                     vector<double> record;
-                    double td;
-                    vector<string>::iterator j = fields.begin();
-                    for (; j != fields.end(); ++j) {
-                        if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
-                            convert(v.info[*j][0], td);
-                        } else {
-                            convert(v.info[*j][ai], td);
-                        }
-                        record.push_back(td);
+                    read_fields(v, ai, fields, record);
+                    if (normalize) {
+                        normalize_inputs(record, fields, stats);
                     }
                     som_set_inputs ( net, &record[0] );
                     size_t x=0, y=0;
@@ -397,15 +537,9 @@ int main(int argc, char** argv) {
                 vector<string>::iterator a = v.alt.begin();
                 for ( ; a != v.alt.end(); ++a, ++ai) {
                     vector<double> record;
-                    double td;
-                    vector<string>::iterator j = fields.begin();
-                    for (; j != fields.end(); ++j) {
-                        if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
-                            convert(v.info[*j][0], td);
-                        } else {
-                            convert(v.info[*j][ai], td);
-                        }
-                        record.push_back(td);
+                    read_fields(v, ai, fields, record);
+                    if (normalize) {
+                        normalize_inputs(record, fields, stats);
                     }
                     som_set_inputs ( net, &record[0] );
                     size_t x=0, y=0;
@@ -441,15 +575,9 @@ int main(int argc, char** argv) {
             vector<string>::iterator a = var.alt.begin();
             for ( ; a != var.alt.end(); ++a, ++ai) {
                 vector<double> record;
-                double td;
-                vector<string>::iterator j = fields.begin();
-                for (; j != fields.end(); ++j) {
-                    if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
-                        convert(var.info[*j][0], td);
-                    } else {
-                        convert(var.info[*j][ai], td);
-                    }
-                    record.push_back(td);
+                read_fields(var, ai, fields, record);
+                if (normalize) {
+                    normalize_inputs(record, fields, stats);
                 }
                 som_set_inputs ( net, &record[0] );
                 size_t x=0, y=0;
@@ -473,6 +601,9 @@ int main(int argc, char** argv) {
     if (debug) print_timing( "Input Recognition" );
 
     if (train) {
+        if (!save_som_metadata(som_metadata_file, width, height, fields, stats)) {
+            cerr << "could not save metadata to " << som_metadata_file << endl;
+        }
         som_serialize(net, som_file.c_str());
     }
 
