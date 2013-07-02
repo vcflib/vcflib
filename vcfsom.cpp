@@ -103,10 +103,14 @@ void read_fields(Variant& var, int ai, vector<string>& fields, vector<double>& r
         if (*j == "QUAL") { // special handling...
             td = var.quality;
         } else {
-            if (var.vcf->infoCounts[*j] == 1) { // for non Allele-variant fields
-                convert(var.info[*j][0], td);
+            if (var.info.find(*j) == var.info.end()) {
+                td = 0;
             } else {
-                convert(var.info[*j][ai], td);
+                if (var.vcf->infoCounts[*j] == 1) { // for non Allele-variant fields
+                    convert(var.info[*j][0], td);
+                } else {
+                    convert(var.info[*j][ai], td);
+                }
             }
         }
         record.push_back(td);
@@ -117,6 +121,7 @@ struct SomPaint {
     int true_count;
     int false_count;
     double prob_true;
+    SomPaint(void) : true_count(0), false_count(0), prob_true(0) { }
 };
 
 static unsigned long prev_uticks = 0;
@@ -388,10 +393,14 @@ int main(int argc, char** argv) {
                     if (*j == "QUAL") { // special handling...
                         td = var.quality;
                     } else {
-                        if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
-                            convert(var.info[*j][0], td);
+                        if (var.info.find(*j) == var.info.end()) {
+                            td = 0;
                         } else {
-                            convert(var.info[*j][ai], td);
+                            if (variantFile.infoCounts[*j] == 1) { // for non Allele-variant fields
+                                convert(var.info[*j][0], td);
+                            } else {
+                                convert(var.info[*j][ai], td);
+                            }
                         }
                     }
                     if (normalize) {

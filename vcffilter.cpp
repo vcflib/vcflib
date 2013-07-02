@@ -15,7 +15,7 @@ void printSummary(char** argv) {
          << "    -s, --filter-sites    filter entire records, not just alleles" << endl
          << "    -t, --tag-pass        tag vcf records as positively filtered with this tag, print all records" << endl
          << "    -F, --tag-fail        tag vcf records as negatively filtered with this tag, print all records" << endl
-         << "    -R, --replace-filter  replace the existing filter tag, don't just append to it" << endl
+         << "    -A, --append-filter   append the existing filter tag, don't just replace it" << endl
          << "    -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag" << endl
          << "    -v, --invert          inverts the filter, e.g. grep -v" << endl
          << "    -o, --or              use logical OR instead of AND to combine filters" << endl
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
     string filterSpec;
     string alleleTag;
     vector<string> regions;
-    bool replaceFilter = false;
+    bool replaceFilter = true;
 
     if (argc == 1)
         printSummary(argv);
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
                 {"genotype-filter",  required_argument, 0, 'g'},
                 {"tag-pass", required_argument, 0, 't'},
                 {"tag-pass", required_argument, 0, 'F'},
-                {"replace-filter", no_argument, 0, 'R'},
+                {"append-filter", no_argument, 0, 'A'},
                 {"allele-tag", required_argument, 0, 'a'},
                 {"invert", no_argument, 0, 'v'},
                 {"or", no_argument, 0, 'o'},
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvRsof:g:t:F:r:a:",
+        c = getopt_long (argc, argv, "hvAsof:g:t:F:r:a:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -152,8 +152,8 @@ int main(int argc, char** argv) {
             tagFail = optarg;
             break;
  
-        case 'R':
-            replaceFilter = true;
+        case 'A':
+            replaceFilter = false;
             break;
 
         case 'h':

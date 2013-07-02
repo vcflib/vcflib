@@ -96,6 +96,9 @@ SSW = ssw.o ssw_cpp.o
 ssw.o: ssw.h
 ssw_cpp.o:ssw_cpp.h
 
+openmp:
+	$(MAKE) CXXFLAGS="$(CXXFLAGS) -fopenmp -D HAS_OPENMP"
+
 profiling:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -g" all
 

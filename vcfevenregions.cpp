@@ -13,7 +13,7 @@ void printSummary(char** argv) {
          << "options:" << endl 
          << "    -f, --fasta-reference REF    FASTA reference file to use to obtain primer sequences." << endl
          << "    -n, --number-of-regions N    The number of desired regions." << endl
-         << "    -n, --number-of-positions N  The number of positions per region." << endl
+         << "    -p, --number-of-positions N  The number of positions per region." << endl
          << "    -o, --offset N               Add an offset to region positioning, to avoid boundary" << endl
          << "                                 related artifacts in downstream processing." << endl
          << "    -l, --overlap N              The number of sites to overlap between regions.  Default 0." << endl
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
                 current_region.positions++;
             } else {
                 cout << s->first << ":" << current_region.start << regionSplitSeq << current_region.end << endl;
-                vector<Region>::iterator l = max(s->second.begin(), p-overlap);
+                vector<Region>::iterator l = max(s->second.begin(), p-overlap-1);
                 current_region.start = l->end;
                 current_region.end = p->end;
                 current_region.positions = overlap + 1;
