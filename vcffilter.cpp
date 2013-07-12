@@ -243,6 +243,10 @@ int main(int argc, char** argv) {
       }
     */
 
+    if (filterSites) {
+        variantFile.parseSamples = false;
+    }
+
     Variant var(variantFile);
 
     vector<string>::iterator regionItr = regions.begin();
@@ -282,7 +286,11 @@ int main(int argc, char** argv) {
                                 }
                             }
                         } else {
-                            cout << var << endl;
+                            if (!var.originalLine.empty()) {
+                                cout << var.originalLine << endl;
+                            } else {
+                                cout << var << endl;
+                            }
                         }
                     } else {
                         if (!tagFail.empty()) {

@@ -40,7 +40,9 @@ public:
     int deaminations;
     int aminations;
     int mismatches;
+    int insertedbases;
     int insertions;
+    int deletedbases;
     int deletions;
     //AlleleStats(int ts, int tv, int da, int am, int mm)
     AlleleStats(void)
@@ -50,7 +52,9 @@ public:
         , aminations(0)
         , mismatches(0)
         , insertions(0)
+        , insertedbases(0)
         , deletions(0)
+        , deletedbases(0)
     { }
 };
 
@@ -185,8 +189,9 @@ int main(int argc, char** argv) {
         variantFile.addHeaderLine("##INFO=<ID=insertions,Number=A,Type=Integer,Description=\"Total number of inserted bases in the alternate allele\">");
         variantFile.addHeaderLine("##INFO=<ID=deletions,Number=A,Type=Integer,Description=\"Total number of deleted bases in the alternate allele\">");
         variantFile.addHeaderLine("##INFO=<ID=cigar,Number=A,Type=String,Description=\"The CIGAR-style representation of the alternate allele as aligned to the reference\">");
-	variantFile.addHeaderLine("##INFO=<ID=reflen,Number=1,Type=Integer,Description=\"The length of the reference allele\">");
-	variantFile.addHeaderLine("##INFO=<ID=altlen,Number=A,Type=Integer,Description=\"The length of the alternate allele\">");
+        variantFile.addHeaderLine("##INFO=<ID=type,Number=A,Type=String,Description=\"The type of the allele, either snp, ins, del, complex, or ref.\">");
+        variantFile.addHeaderLine("##INFO=<ID=reflen,Number=1,Type=Integer,Description=\"The length of the reference allele\">");
+        variantFile.addHeaderLine("##INFO=<ID=altlen,Number=A,Type=Integer,Description=\"The length of the alternate allele\">");
         cout << variantFile.header << endl;
     }
 
@@ -396,7 +401,8 @@ int main(int argc, char** argv) {
                         ++totaldeletions;
                         ++deletions[diff];
                         for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-                            alleleStats[*a].deletions += diff;
+                            alleleStats[*a].deletedbases += diff;
+                            alleleStats[*a].deletions += 1;
                         }
                     } else {
                         int diff = va.alt.size() - va.ref.size();
@@ -404,13 +410,32 @@ int main(int argc, char** argv) {
                         ++totalinsertions;
                         ++insertions[diff];
                         for (vector<string>::iterator a = alternates.begin(); a != alternates.end(); ++a) {
-                            alleleStats[*a].insertions += diff;
+                            alleleStats[*a].insertedbases += diff;
+                            alleleStats[*a].insertions += 1;
                         }
                     }
                 }
             }
             if (addTags) {
                 for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+                    string vartype;
+                    if (alleleStats[*a].insertions + alleleStats[*a].deletions == 0) {
+                        if (alleleStats[*a].mismatches == 1) {
+                            vartype = "snp";
+                        } else if (alleleStats[*a].mismatches > 1) {
+                            vartype = "complex";
+                        } else {
+                            vartype = "ref";
+                        }
+                    } else if (alleleStats[*a].insertions + alleleStats[*a].deletions == 1) {
+                        if (alleleStats[*a].insertions == 1) {
+                            vartype = "ins";
+                        } else {
+                            vartype = "del";
+                        }
+                    } else {
+                        vartype = "complex";
+                    }
                     var.info["mismatches"].push_back(convert(alleleStats[*a].mismatches));
                     var.info["insertions"].push_back(convert(alleleStats[*a].insertions));
                     var.info["deletions"].push_back(convert(alleleStats[*a].deletions));
@@ -418,6 +443,7 @@ int main(int argc, char** argv) {
                     var.info["transversions"].push_back(convert(alleleStats[*a].transversions));
                     var.info["deaminations"].push_back(convert(alleleStats[*a].deaminations));
                     var.info["aminations"].push_back(convert(alleleStats[*a].aminations));
+                    var.info["type"].push_back(vartype);
                 }
                 cout << var << endl;
             }
@@ -460,8 +486,8 @@ int main(int argc, char** argv) {
 
     if (!addTags) {
         cout << "total variant sites:\t" << variantSites << endl
-             << "of which " << biallelics << " (" << (double) biallelics / variantSites << "%) are biallelic and "
-                            << multiallelics << " (" << (double) multiallelics / variantSites << "%) are multiallelic" << endl
+             << "of which " << biallelics << " (" << (double) biallelics / variantSites << ") are biallelic and "
+                            << multiallelics << " (" << (double) multiallelics / variantSites << ") are multiallelic" << endl
              << "total variant alleles:\t" << variantAlleles << endl
              << "unique variant alleles:\t" << uniqueVariantAlleles << endl
              << endl

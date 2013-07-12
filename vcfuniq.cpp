@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     string lastref;
     vector<string> lastalt;
 
+    variantFile.parseSamples = false;
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         if (!lastsn.empty()
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
             lastpos = var.position;
             lastref = var.ref;
             lastalt = var.alt;
-            cout << var << endl;
+            cout << var.originalLine << endl;
         }
     }
 

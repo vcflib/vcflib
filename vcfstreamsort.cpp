@@ -96,6 +96,7 @@ int main(int argc, char** argv) {
     int numrecords = 0;
     list<string> sequenceNames;
 
+    variantFile.parseSamples = false;
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         //cerr << "at position " << var.sequenceName << ":" << var.position << endl;
@@ -114,7 +115,7 @@ int main(int argc, char** argv) {
             map<long int, vector<Variant> >& frecords = records[sequenceNames.front()];
             vector<Variant>& vars = frecords.begin()->second;
             for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
-                cout << *v << endl;
+                cout << v->originalLine << endl;
             }
             frecords.erase(frecords.begin());
             --numrecords;
@@ -125,7 +126,7 @@ int main(int argc, char** argv) {
         map<long int, vector<Variant> >& q = records[*s];
         for (map<long int, vector<Variant> >::iterator r = q.begin(); r != q.end(); ++r) {
             for (vector<Variant>::iterator v = r->second.begin(); v != r->second.end(); ++v) {
-                cout << *v << endl;
+                cout << v->originalLine << endl;
             }
             --numrecords;
         }

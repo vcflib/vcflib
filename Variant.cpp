@@ -13,6 +13,11 @@ void Variant::parse(string& line, bool parseSamples) {
 
     // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
     vector<string> fields = split(line, '\t');
+    if (fields.size() < 7) {
+        cerr << "broken VCF record (less than 7 fields)" << endl
+             << line << endl;
+        exit(1);
+    }
 
     sequenceName = fields.at(0);
     char* end; // dummy variable for strtoll
@@ -97,6 +102,8 @@ void Variant::parse(string& line, bool parseSamples) {
             cerr << "line: " << line << endl;
             exit(1);
         }
+    } else if (!parseSamples) {
+        originalLine = line;
     }
 
     //return true; // we should be catching exceptions...
