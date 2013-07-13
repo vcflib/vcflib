@@ -80,25 +80,27 @@ Counts the number of alternate alleles in the record.
 ### vcfannotate
     
     usage: vcfannotate [options] [<vcf file>]
-    
+
     options:
         -b, --bed   use annotations provided by this BED file
         -k, --key   use this INFO field key for the annotations
         -d, --default  use this INFO field key for records without annotations
-    
+
     Intersect the records in the VCF file with targets provided in a BED file.
     Intersections are done on the reference sequences in the VCF file.
     If no VCF filename is specified on the command line (last argument) the VCF
     read from stdin.
-    
+
     
 ### vcfannotategenotypes
     
     usage: vcfannotategenotypes <annotation-tag> <vcf file> <vcf file>
-    annotates genotypes in the first file with genotypes in the second
-    adding the genotype as another flag to each sample filed in the first file.
-    annotation-tag is the name of the sample flag which is added to store the annotation.
-    also adds a 'has_variant' flag for sites where the second file has a variant.
+
+    annotates genotypes in the first file with genotypes in the second adding the
+    genotype as another flag to each sample filed in the first file.
+    annotation-tag is the name of the sample flag which is added to store the
+    annotation.  also adds a 'has\_variant' flag for sites where the second file has
+    a variant.
     
     
 ### vcfbreakmulti
@@ -113,8 +115,8 @@ Counts the number of alternate alleles in the record.
     
     usage: vcfcheck [options] <vcf file>
     
-    options:
-        -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    options: -f, --fasta-reference  FASTA reference file to use to obtain
+                                    primer sequences
     
     Verifies that the VCF REF field matches the reference as described.
     
@@ -122,13 +124,14 @@ Counts the number of alternate alleles in the record.
     
 ### vcfcleancomplex
     
-Removes reference-matching sequence from complex alleles and adjusts records to reflect positional change.
+Removes reference-matching sequence from complex alleles and adjusts records to
+reflect positional change.
     
     
 ### vcfcommonsamples
     
-    usage: vcfcommonsamples <vcf file> <vcf file>
-    outputs each record in the first file, removing samples not present in the second
+    usage: vcfcommonsamples <vcf file> <vcf file> outputs each record in the
+    first file, removing samples not present in the second
     
     
 ### vcfcountalleles
@@ -138,65 +141,69 @@ Counts the total number of alleles in the input.
     
 ### vcfdistance
     
-Adds a value to each VCF record indicating the distance to the nearest variant in the file.
+Adds a value to each VCF record indicating the distance to the nearest variant
+in the file.
     
     
 ### vcfentropy
     
     usage: vcfentropy [options] <vcf file>
     
-    options:
-        -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
-        -w, --window-size      Size of the window over which to calculate entropy
+    options: -f, --fasta-reference  FASTA reference file to use to obtain
+primer sequences -w, --window-size      Size of the window over which to
+calculate entropy
     
-    Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight,
-    EntropyCenter, which are the entropies of the sequence of the given window size to the
-    left, right, and center  of the record.
+    Anotates the output VCF file with, for each record, EntropyLeft,
+EntropyRight, EntropyCenter, which are the entropies of the sequence of the
+given window size to the left, right, and center  of the record.
     
     
     
 ### vcffilter
     
     usage: vcffilter [options] <vcf file>
-    
+
     options:
         -f, --info-filter     specifies a filter to apply to the info fields of records,
                               removes alleles which do not pass the filter
         -g, --genotype-filter specifies a filter to apply to the genotype fields of records
         -s, --filter-sites    filter entire records, not just alleles
-        -t, --tag             tag vcf records as filtered with this tag instead of suppressing them
-        -R, --replace-filter  replace the existing filter tag, don't just append to it
+        -t, --tag-pass        tag vcf records as positively filtered with this tag, print all records
+        -F, --tag-fail        tag vcf records as negatively filtered with this tag, print all records
+        -A, --append-filter   append the existing filter tag, don't just replace it
         -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag
         -v, --invert          inverts the filter, e.g. grep -v
         -o, --or              use logical OR instead of AND to combine filters
         -r, --region          specify a region on which to target the filtering, requires a BGZF
                               compressed file which has been indexed with tabix.  any number of
                               regions may be specified.
-    
+
     Filter the specified vcf file using the set of filters.
     Filters are specified in the form "<ID> <operator> <value>:
      -f "DP > 10"  # for info fields
      -g "GT = 1|1" # for genotype fields
      -f "CpG"  # for 'flag' fields
-    
+
     Operators can be any of: =, !, <, >, |, &
-    
+
     Any number of filters may be specified.  They are combined via logical AND
     unless --or is specified on the command line.  Obtain logical negation through
     the use of parentheses, e.g. ! "( DP = 10 )"
-    
+
     For convenience, you can specify "QUAL" to refer to the quality of the site, even
     though it does not appear in the INFO fields.
-    
-    
+
     
 ### vcffixup
     
-Uses genotypes from the VCF file to correct AC, AF, NS, in the VCF records.  For example:
+Uses genotypes from the VCF file to correct AC (alternate allele count), AF
+(alternate allele frequency), NS (number of called), in the VCF records.  For
+example:
 
     % vcfkeepsamples file.vcf NA12878 | vcffixup - | vcffilter -f "AC > 0"
 
-Would downsample file.vcf to only NA12878, removing sites for which the sample was not called as polymorphic.
+Would downsample file.vcf to only NA12878, removing sites for which the sample
+was not called as polymorphic.
     
     
 ### vcfflatten
@@ -232,7 +239,8 @@ Would downsample file.vcf to only NA12878, removing sites for which the sample w
     
 ### vcfgenotypes
     
-Converts numerical representation of genotypes (standard in GT field) to the alleles provided in the call's ALT/REF fields.
+Converts numerical representation of genotypes (standard in GT field) to the
+alleles provided in the call's ALT/REF fields.
     
     
 ### vcfglxgt
@@ -325,7 +333,9 @@ Annotates the VCF stream on stdin with the number of alternate alleles at the si
     
 ### vcfparsealts
     
-Demonstration of alternate allele parsing method.  This method uses pairwise alignment of REF and ALTs to determine component allelic primitives for each alternate allele.
+Demonstration of alternate allele parsing method.  This method uses pairwise
+alignment of REF and ALTs to determine component allelic primitives for each
+alternate allele.
 
 Use `vcfallelicprimitives` to decompose records while preserving format.
     
@@ -388,7 +398,9 @@ Use `vcfallelicprimitives` to decompose records while preserving format.
     
 ### vcfremoveaberrantgenotypes
     
-Strips genotypes which are homozygous but have observations implying heterozygosity.  Requires RA (reference allele observation) and AA (alternate allele observation) for each genotype.
+Strips genotypes which are homozygous but have observations implying
+heterozygosity.  Requires RA (reference allele observation) and AA (alternate
+allele observation) for each genotype.
     
     
 ### vcfremovesamples
