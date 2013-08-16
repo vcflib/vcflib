@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        if (altcount == 1) { // if biallelic and only two primitives
+        if (altcount == 1 && var.alt.size() == 1 && var.alt.front().size() == 1) { // if biallelic SNP
             cout << var << endl;
             continue;
         }

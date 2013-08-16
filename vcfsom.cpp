@@ -171,15 +171,16 @@ void printSummary(char** argv) {
          << "    " << argv[0] << " -s output.som -x 20 -y 20 -f \"AF DP ABP\" training.vcf" << endl
          << endl
          << "application: " << endl
-         << "    " << argv[0] << " -a output.som -x 20 -y 20 -f \"AF DP ABP\" test.vcf >results.vcf" << endl
+         << "    " << argv[0] << " -a output.som test.vcf >results.vcf" << endl
          << endl
          << argv[0] << "trains and/or applies a self-organizing map to the input VCF data" << endl
          << "on stdin, adding two columns for the x and y coordinates of the winning" << endl
          << "neuron in the network and an optional euclidean distance from a given" << endl
          << "node (--center)." << endl
          << endl
-         << "If a map is provided via --apply,  map will be applied to input without" << endl
-         << "training.  Automated filtering to an estimated FP rate is " << endl
+         << "If a map is provided via --apply, it will be applied to input without" << endl
+         << "training.  A .meta file describing network parameters and input parameter" << endl
+         << "distributions is used to automatically setup the network." << endl
          << endl
          << "options:" << endl
          << endl

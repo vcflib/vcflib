@@ -518,7 +518,7 @@ VariantFieldType Variant::infoType(string& key) {
                         for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
                             map<string, vector<string> >::iterator g = sample.find(*f);
                             out << ((f == var.format.begin()) ? "" : ":");
-                            if (g != sample.end()) {
+                            if (g != sample.end() && !g->second.empty()) {
                                 out << join(g->second, ",");
                             } else {
                                 out << ".";
@@ -1673,6 +1673,7 @@ void Variant::removeAlt(string& altAllele) {
     map<int, int> alleleIndexMapping;
     // setup the new alt string
     alleleIndexMapping[0] = 0; // reference allele remains the same
+    alleleIndexMapping[NULL_ALLELE] = NULL_ALLELE; // null allele remains the same
     int i = 1; // current index
     int j = 1; // new index
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a, ++i) {

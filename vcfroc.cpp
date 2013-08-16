@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
             for (vector<VariantAllele>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
                 if (va->ref != va->alt) { 		// use only non-reference alleles
                     // false negatives at threshold 0 XXX --- may not apply if threshold is generalized
-                    falseNegativeAllelesAtCutoff[0].push_back(&*va);
+                    falseNegativeAllelesAtCutoff[-1].push_back(&*va);
                 }
             }
         }
@@ -342,7 +342,6 @@ int main(int argc, char** argv) {
         for (vector<VariantAllele*>::iterator va = alleles.begin(); va != alleles.end(); ++va) {
             VariantAllele& allele = **va;
             if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
-                assert(allele.ref.size() == 1);
                 ++totalSNPs;
             } else if (allele.ref.size() != allele.alt.size()) {
                 if (allele.ref.size() == 1 || allele.alt.size() == 1) {
@@ -360,7 +359,6 @@ int main(int argc, char** argv) {
     for (list<VariantAllele*>::iterator va = allFalsePositiveAlleles.begin(); va != allFalsePositiveAlleles.end(); ++va) {
         VariantAllele& allele = **va;
         if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
-            assert(allele.ref.size() == 1);
             ++falsePositiveSNPs;
         } else if (allele.ref.size() != allele.alt.size()) {
             if (allele.ref.size() == 1 || allele.alt.size() == 1) {
@@ -374,7 +372,7 @@ int main(int argc, char** argv) {
     }
 
     // get categorical false negatives
-    vector<VariantAllele*>& categoricalFalseNegatives = falseNegativeAllelesAtCutoff[0];
+    vector<VariantAllele*>& categoricalFalseNegatives = falseNegativeAllelesAtCutoff[-1];
     for (vector<VariantAllele*>::iterator va = categoricalFalseNegatives.begin(); va != categoricalFalseNegatives.end(); ++va) {
         VariantAllele& allele = **va;
         if (allele.ref.size() == 1 && allele.ref.size() == allele.alt.size()) {
@@ -390,7 +388,7 @@ int main(int argc, char** argv) {
             ++falseNegativeComplex;
         }
     }
-    cout << 0 << "\t"
+    cout << -1 << "\t"
          << totalSNPs << "\t"
          << falsePositiveSNPs << "\t"
          << falseNegativeSNPs << "\t"

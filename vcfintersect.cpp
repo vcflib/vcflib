@@ -169,15 +169,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    bool usingBED = false;
-    if (!bedFileName.empty()) {
-        usingBED = true;
-    }
-    
-    BedReader bed;
-    if (usingBED) {
-        bed.open(bedFileName);
-    }
 
     VariantCallFile variantFile;
     bool usingstdin = false;
@@ -195,8 +186,36 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+
+    bool usingBED = false;
+    if (!bedFileName.empty()) {
+        usingBED = true;
+    }
+    
     if (usingBED) {
         variantFile.parseSamples = false;
+    }
+
+    // it runs much faster to do this first.  then downstream processes don't block!
+
+    if (!tag.empty()) {
+        variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
+    }
+
+    if (!mergeToTag.empty()) {
+        if (mergeFromTag.empty()) {
+            cerr << "must specify a tag to merge from" << endl;
+            exit(1);
+        }
+        variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
+    }
+
+    cout << variantFile.header << endl;
+
+
+    BedReader bed;
+    if (usingBED) {
+        bed.open(bedFileName);
     }
 
     VariantCallFile otherVariantFile;
@@ -263,20 +282,6 @@ int main(int argc, char** argv) {
 
     long int lastOutputPosition = 0;
     string lastSequenceName;
-
-    if (!tag.empty()) {
-        variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
-    }
-
-    if (!mergeToTag.empty()) {
-        if (mergeFromTag.empty()) {
-            cerr << "must specify a tag to merge from" << endl;
-            exit(1);
-        }
-        variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
-    }
-
-    cout << variantFile.header << endl;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
