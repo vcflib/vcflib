@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 
     cout << variantFile.header << endl;
 
-    map<string, map<long int, vector<Variant> > > records;
+    map<string, map<long int, map<string, vector<Variant> > > > records;
     long int back = 0;
     int numrecords = 0;
     list<string> sequenceNames;
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
             //cerr << "adding new sequence name " << var.sequenceName << endl;
             sequenceNames.push_back(var.sequenceName);
         }
-        records[var.sequenceName][var.position].push_back(var);
+        records[var.sequenceName][var.position][var.vrepr()].push_back(var);
         if (records[var.sequenceName][var.position].size() == 1) ++numrecords;
         if (!sortAll && numrecords > sortSitesWindow) {
             //cerr << "outputting a position" << endl;
@@ -112,10 +112,12 @@ int main(int argc, char** argv) {
                 //cerr << "end of reference sequence " << sequenceNames.front() << endl;
                 sequenceNames.pop_front();
             }
-            map<long int, vector<Variant> >& frecords = records[sequenceNames.front()];
-            vector<Variant>& vars = frecords.begin()->second;
-            for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
-                cout << v->originalLine << endl;
+            map<long int, map<string, vector<Variant> > >& frecords = records[sequenceNames.front()];
+            map<string, vector<Variant> >& vars = frecords.begin()->second;
+            for (map<string, vector<Variant> >::iterator v = vars.begin(); v != vars.end(); ++v) {
+                for (vector<Variant>::iterator s = v->second.begin(); s != v->second.end(); ++s) {
+                    cout << s->originalLine << endl;
+                }
             }
             frecords.erase(frecords.begin());
             --numrecords;
@@ -123,10 +125,12 @@ int main(int argc, char** argv) {
     }
     //cerr << "done processing input, cleaning up" << endl;
     for (list<string>::iterator s = sequenceNames.begin(); s != sequenceNames.end(); ++s) {
-        map<long int, vector<Variant> >& q = records[*s];
-        for (map<long int, vector<Variant> >::iterator r = q.begin(); r != q.end(); ++r) {
-            for (vector<Variant>::iterator v = r->second.begin(); v != r->second.end(); ++v) {
-                cout << v->originalLine << endl;
+        map<long int, map<string, vector<Variant> > >& q = records[*s];
+        for (map<long int, map<string, vector<Variant> > >::iterator r = q.begin(); r != q.end(); ++r) {
+            for (map<string, vector<Variant> >::iterator v = r->second.begin(); v != r->second.end(); ++v) {
+                for (vector<Variant>::iterator s = v->second.begin(); s != v->second.end(); ++s) {
+                    cout << s->originalLine << endl;
+                }
             }
             --numrecords;
         }

@@ -173,6 +173,7 @@ public:
 
     string sequenceName;
     long position;
+    long zeroBasedPosition(void);
     string id;
     string ref;
     vector<string> alt;      // a list of all the alternate alleles present at this locus
@@ -180,6 +181,7 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
+    string vrepr(void);  // a comparable record of the variantion described by the record
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
                                                          bool useMNPs = false,

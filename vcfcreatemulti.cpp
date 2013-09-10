@@ -150,8 +150,13 @@ int main(int argc, char** argv) {
     bool already = false;
     Variant var(variantFile);
     vector<Variant> vars;
+    string lastSeq;
 
     while (variantFile.getNextVariant(var)) {
+
+        if (lastSeq.empty()) {
+            lastSeq = var.sequenceName;
+        }
 
         if (vars.empty()) {
             vars.push_back(var);
@@ -163,7 +168,13 @@ int main(int argc, char** argv) {
                     maxpos = v->position + v->ref.size();
                 }
             }
-            if (var.position < maxpos) {
+            if (var.sequenceName != lastSeq) {
+                Variant result = createMultiallelic(vars);
+                cout << result << endl;
+                vars.clear();
+                lastSeq = var.sequenceName;
+                vars.push_back(var);
+            } else if (var.position < maxpos) {
                 vars.push_back(var);
             } else {
                 Variant result = createMultiallelic(vars);

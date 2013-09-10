@@ -366,6 +366,9 @@ int main(int argc, char** argv) {
                                 }
                             }
                         }
+                        // TODO
+                        // here, if we don't use genotype filters, we shouldn't re-print the samples
+                        // we haven't done anything to this part of the input.
                         cout << var << endl;
                     }
                 }

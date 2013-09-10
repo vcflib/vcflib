@@ -207,6 +207,9 @@ int main(int argc, char** argv) {
             cerr << "must specify a tag to merge from" << endl;
             exit(1);
         }
+        // todo...
+        // adjust to pick up flags from the other file to determine what it is we're merging
+        // otherwise, here be hacks
         variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
     }
 
@@ -448,6 +451,8 @@ int main(int argc, char** argv) {
                                 // now you have to find the exact allele...
                                 string& otherValue = v->info[mergeFromTag].at(index);
                                 var.info[mergeToTag].push_back(otherValue);
+                            } else if (mergeFromTag == "QUAL") {
+                                var.info[mergeToTag].push_back(convert(v->quality));
                             } else {
                                 var.info[mergeToTag].push_back(".");
                             }

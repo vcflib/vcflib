@@ -2016,6 +2016,12 @@ bool Variant::isPhased(void) {
     return true;
 }
 
+long Variant::zeroBasedPosition(void) {
+    return position - 1;
+}
 
+string Variant::vrepr(void) {
+    return sequenceName + "\t" + convert(position) + "\t" + join(alleles, ",");
+}
 
 } // end namespace vcf
