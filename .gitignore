@@ -47,7 +47,6 @@ vcfcheck
 vcfclassify
 vcfcleancomplex
 vcfcommonsamples
-vcfcomplex
 vcfcountalleles
 vcfcreatemulti
 vcfdistance

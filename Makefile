@@ -1,70 +1,72 @@
 #OBJ_DIR = ./
-HEADERS = Variant.h \
-		  split.h \
-		  join.h
-SOURCES = Variant.cpp \
-		  split.cpp
+HEADERS = src/Variant.h \
+		  src/split.h \
+		  src/join.h
+SOURCES = src/Variant.cpp \
+		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
 # TODO
 #vcfstats.cpp
 
-BIN_SOURCES = vcfecho.cpp \
-			  vcfaltcount.cpp \
-			  vcfhetcount.cpp \
-			  vcfhethomratio.cpp \
-			  vcffilter.cpp \
-			  vcf2tsv.cpp \
-			  vcfgenotypes.cpp \
-			  vcfannotategenotypes.cpp \
-			  vcfcommonsamples.cpp \
-			  vcfremovesamples.cpp \
-			  vcfkeepsamples.cpp \
-			  vcfsamplenames.cpp \
-			  vcfgenotypecompare.cpp \
-			  vcffixup.cpp \
-			  vcfclassify.cpp \
-			  vcfsamplediff.cpp \
-			  vcfremoveaberrantgenotypes.cpp \
-			  vcfrandom.cpp \
-			  vcfparsealts.cpp \
-			  vcfstats.cpp \
-			  vcfflatten.cpp \
-			  vcfprimers.cpp \
-			  vcfnumalt.cpp \
-			  vcfcleancomplex.cpp \
-			  vcfintersect.cpp \
-			  vcfannotate.cpp \
-			  vcfallelicprimitives.cpp \
-			  vcfoverlay.cpp \
-			  vcfaddinfo.cpp \
-			  vcfkeepinfo.cpp \
-			  vcfkeepgeno.cpp \
-			  vcfafpath.cpp \
-			  vcfcountalleles.cpp \
-			  vcflength.cpp \
-			  vcfdistance.cpp \
-			  vcfrandomsample.cpp \
-			  vcfentropy.cpp \
-			  vcfglxgt.cpp \
-			  vcfroc.cpp \
-			  vcfsom.cpp \
-			  vcfcheck.cpp \
-			  vcfstreamsort.cpp \
-			  vcfuniq.cpp \
-			  vcfuniqalleles.cpp \
-			  vcfremap.cpp \
-			  vcf2fasta.cpp \
-			  vcfsitesummarize.cpp \
-			  vcfbreakmulti.cpp \
-			  vcfcreatemulti.cpp \
-			  vcfevenregions.cpp \
-			  vcfcat.cpp \
-			  vcfgenosummarize.cpp \
-			  vcfgenosamplenames.cpp \
-			  vcfgeno2haplo.cpp
+BIN_SOURCES = src/vcfecho.cpp \
+			  src/vcfaltcount.cpp \
+			  src/vcfhetcount.cpp \
+			  src/vcfhethomratio.cpp \
+			  src/vcffilter.cpp \
+			  src/vcf2tsv.cpp \
+			  src/vcfgenotypes.cpp \
+			  src/vcfannotategenotypes.cpp \
+			  src/vcfcommonsamples.cpp \
+			  src/vcfremovesamples.cpp \
+			  src/vcfkeepsamples.cpp \
+			  src/vcfsamplenames.cpp \
+			  src/vcfgenotypecompare.cpp \
+			  src/vcffixup.cpp \
+			  src/vcfclassify.cpp \
+			  src/vcfsamplediff.cpp \
+			  src/vcfremoveaberrantgenotypes.cpp \
+			  src/vcfrandom.cpp \
+			  src/vcfparsealts.cpp \
+			  src/vcfstats.cpp \
+			  src/vcfflatten.cpp \
+			  src/vcfprimers.cpp \
+			  src/vcfnumalt.cpp \
+			  src/vcfcleancomplex.cpp \
+			  src/vcfintersect.cpp \
+			  src/vcfannotate.cpp \
+			  src/vcfallelicprimitives.cpp \
+			  src/vcfoverlay.cpp \
+			  src/vcfaddinfo.cpp \
+			  src/vcfkeepinfo.cpp \
+			  src/vcfkeepgeno.cpp \
+			  src/vcfafpath.cpp \
+			  src/vcfcountalleles.cpp \
+			  src/vcflength.cpp \
+			  src/vcfdistance.cpp \
+			  src/vcfrandomsample.cpp \
+			  src/vcfentropy.cpp \
+			  src/vcfglxgt.cpp \
+			  src/vcfroc.cpp \
+			  src/vcfsom.cpp \
+			  src/vcfcheck.cpp \
+			  src/vcfstreamsort.cpp \
+			  src/vcfuniq.cpp \
+			  src/vcfuniqalleles.cpp \
+			  src/vcfremap.cpp \
+			  src/vcf2fasta.cpp \
+			  src/vcfsitesummarize.cpp \
+			  src/vcfbreakmulti.cpp \
+			  src/vcfcreatemulti.cpp \
+			  src/vcfevenregions.cpp \
+			  src/vcfcat.cpp \
+			  src/vcfgenosummarize.cpp \
+			  src/vcfgenosamplenames.cpp \
+			  src/vcfgeno2haplo.cpp \
+#			  src/vcfleftalign.cpp
 
-BINS = $(BIN_SOURCES:.cpp=)
+#BINS = $(BIN_SOURCES:.cpp=)
+BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
 
 TABIX = tabixpp/tabix.o
 
@@ -82,7 +84,7 @@ LEFTALIGN = smithwaterman/LeftAlign.o
 
 FSOM = fsom/fsom.o
 
-INCLUDES = -lm -lz -L. -Ltabixpp/ -ltabix
+INCLUDES = -I. -lm -lz -L. -Ltabixpp/ -ltabix
 
 all: $(OBJECTS) $(BINS)
 
@@ -91,10 +93,10 @@ CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
-SSW = ssw.o ssw_cpp.o
+SSW = src/ssw.o src/ssw_cpp.o
 
-ssw.o: ssw.h
-ssw_cpp.o:ssw_cpp.h
+ssw.o: src/ssw.h
+ssw_cpp.o:src/ssw_cpp.h
 
 openmp:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -fopenmp -D HAS_OPENMP"
@@ -106,7 +108,7 @@ gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
 $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX)
-	$(CXX) -c -o $@ $(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 $(TABIX):
 	cd tabixpp && $(MAKE)
@@ -129,7 +131,7 @@ $(FSOM):
 	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) tabixpp/tabix.o tabixpp/bgzf.o $@.cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
