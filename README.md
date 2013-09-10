@@ -26,38 +26,68 @@ Extensions and applications of the library provided in the included utilities (*
 
 ## usage
 
-With vcflib you can:
+vcflib provides a variety of functions for VCF manipulation:
 
- * Obtain aggregate **statistics** about VCF files ([vcfstats](#vcfstats)).
- * Calculate the allele **frequencies** in the records in a VCF file provided it includes genotypes ([vcffixup](#vcffixup)).
+### comparison
+
  * Generate **haplotype-aware intersections** ([vcfintersect](#vcfintersect) -i), **unions** (vcfintersect -u), and **complements** (vcfintersect -v -i).
+ * **Overlay-merge** multiple VCF files together, using provided order as precedence ([vcfoverlay](#vcfoverlay)).
  * **Validate** the integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file ([vcfcheck](#vcfcheck)).
+
+### format conversion
+
  * Convert a VCF file into a per-allele or per-genotype **tab-separated (.tsv)** file ([vcf2tsv](#vcf2tsv)).
+ * Store a VCF file in an **SQLite3** database (vcf2sqlite.py).
+ * Make a **BED file** from the intervals in a VCF file (vcf2bed.py).
+
+### filtering and subsetting
+
  * **Filter** variants and genotypes using arbitrary expressions based on values in the INFO and sample fields ([vcffilter](#vcffilter)).
+ * **Randomly sample** a subset of records from a VCF file, given a rate ([vcfrandomsample](#vcfrandomsample)).
+ * **Select variants** of a certain type (vcfsnps, vcfbiallelic, vcfindels, vcfcomplex, etc.)
+
+### annotation
+
  * **Annotate** one VCF file with fields from the INFO column of another, based on position ([vcfaddinfo](#vcfaddinfo), [vcfintersect](#vcfintersect)).
  * Incorporate annotations or targets provided by a *BED* file ([vcfannotate](#vcfannotate), [vcfintersect](#vcfintersect)).
  * Examine **genotype correspondence** between two VCF files by annotating samples in one file with genotypes from another ([vcfannotategenotypes](#vcfannotategenotypes)).
- * Quickly obtain the **list of samples** in a given VCF file ([vcfsamplenames](#vcfsamplenames)).
- * **Remove samples** from a VCF file ([vcfkeepsamples](#vcfkeepsamples), [vcfremovesamples](#vcfremovesamples)).
- * Count the number of alternate alleles represented in samples at each variant record ([vcfaltcount](#vcfaltcount)).
- * **Break multiallelic records** into multiple records ([vcfbreakmulti](#vcfbreakmulti)), retaining allele-specific INFO fields.
- * **Combine overlapping biallelic** records into a single record ([vcfcreatemulti](#vcfcreatemulti)).
  * Annotate variants with the **distance** to the nearest variant ([vcfdistance](#vcfdistance)).
- * **Decompose complex variants** into a canonical SNP and indel representation ([vcfallelicprimitives](#vcfallelicprimitives)), generating phased genotypes for available samples.
- * **Reconstitute complex variants** provided a phased VCF with samples ([vcfgeno2haplo](#vcfgeno2haplo)).
- * Calculate the heterozygosity rate ([vcfhetcount](#vcfhetcount)).
- * Annotate VCF records with the **Shannon entropy** of flanking sequence [vcfentropy]([#vcfentropy](##vcfentropy)).
- * **Set genotypes** in a VCF file provided genotype likelihoods in the GL field ([vcfglxgt](#vcfglxgt)).
+ * Count the number of alternate alleles represented in samples at each variant record ([vcfaltcount](#vcfaltcount)).
  * **Subset INFO fields** to decrease file size and processing time ([vcfkeepinfo](#vcfkeepinfo)).
  * Lighten up VCF files by keeping only a **subset of per-sample information** ([vcfkeepgeno](#vcfkeepgeno)).
- * **Overlay-merge** multiple VCF files together, using provided order as precedence ([vcfoverlay](#vcfoverlay)).
- * Generate potential **primers** from VCF records ([vcfprimers](#vcfprimers)), to check for genome uniqueness.
- * Convert the numerical represenation of genotypes provided by the GT field to a **human-readable genotype format** ([vcfgenotypes](#vcfgenotypes)).
- * **Randomly sample** a subset of records from a VCF file, given a rate ([vcfrandomsample](#vcfrandomsample)).
- * Observe how different alignment parameters, including context and entropy-dependent ones, influence **variant classification and interpretation** ([vcfremap](#vcfremap)).
+
+### samples
+
+ * Quickly obtain the **list of samples** in a given VCF file ([vcfsamplenames](#vcfsamplenames)).
+ * **Remove samples** from a VCF file ([vcfkeepsamples](#vcfkeepsamples), [vcfremovesamples](#vcfremovesamples)).
+
+### ordering
+
+ * **Sort variants** by genome coordinate ([vcfstreamsort](#vcfstreamsort)).
+ * **Remove duplicate** variants in vcfstreamsort'ed files according to their REF and ALT fields ([vcfuniq](#vcfuniq)).
+
+### variant representation
+
+ * **Break multiallelic** records into multiple records ([vcfbreakmulti](#vcfbreakmulti)), retaining allele-specific INFO fields.
+ * **Combine overlapping biallelic** records into a single record ([vcfcreatemulti](#vcfcreatemulti)).
+ * **Decompose complex variants** into a canonical SNP and indel representation ([vcfallelicprimitives](#vcfallelicprimitives)), generating phased genotypes for available samples.
+ * **Reconstitute complex variants** provided a phased VCF with samples ([vcfgeno2haplo](#vcfgeno2haplo)).
+
+### genotype manipulation
+
+ * **Set genotypes** in a VCF file provided genotype likelihoods in the GL field ([vcfglxgt](#vcfglxgt)).
  * Establish putative **somatic variants** using reported differences between germline and somatic samples ([vcfsamplediff](#vcfsamplediff)).
  * Remove samples for which the reported genotype (GT) and observation counts disagree (AO, RO) ([vcfremoveaberrantgenotypes](#vcfremoveaberrantgenotypes)).
+
+### interpretation and classification of variants
+
+ * Obtain aggregate **statistics** about VCF files ([vcfstats](#vcfstats)).
  * Print the **receiver-operating characteristic (ROC)** of one VCF given a truth set ([vcfroc](#vcfroc)).
+ * Annotate VCF records with the **Shannon entropy** of flanking sequence ([vcfentropy](#vcfentropy)).
+ * Calculate the heterozygosity rate ([vcfhetcount](#vcfhetcount)).
+ * Generate potential **primers** from VCF records ([vcfprimers](#vcfprimers)), to check for genome uniqueness.
+ * Convert the numerical represenation of genotypes provided by the GT field to a **human-readable genotype format** ([vcfgenotypes](#vcfgenotypes)).
+ * Observe how different alignment parameters, including context and entropy-dependent ones, influence **variant classification and interpretation** ([vcfremap](#vcfremap)).
  * **Classify variants** by annotations in the INFO field using a self-organizing map ([vcfsom](#vcfsom)); **re-estimate their quality** given known variants.
 
 
