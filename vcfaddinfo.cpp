@@ -10,9 +10,9 @@ using namespace vcf;
 // adds non-overlapping info fields from varB to varA
 void addInfo(Variant& varA, Variant& varB) {
     for (map<string, vector<string> >::iterator i = varB.info.begin(); i != varB.info.end(); ++i) {
-	if (varA.info.find(i->first) == varA.info.end()) {
-	    varA.info[i->first] = i->second;
-	}
+        if (varA.info.find(i->first) == varA.info.end()) {
+            varA.info[i->first] = i->second;
+        }
     }
 }
 
@@ -68,41 +68,41 @@ int main(int argc, char** argv) {
     do {
 
         while (!variantFileB.done()
-	       && (varB.sequenceName < varA.sequenceName
-		   || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
-	    ) {
+               && (varB.sequenceName < varA.sequenceName
+                   || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
+            ) {
             variantFileB.getNextVariant(varB);
         }
 
         while (!variantFileA.done()
-	       && (varA.sequenceName < varB.sequenceName
-		   || (varA.sequenceName == varB.sequenceName && varA.position < varB.position))
-	    ) {
+               && (varA.sequenceName < varB.sequenceName
+                   || (varA.sequenceName == varB.sequenceName && varA.position < varB.position))
+            ) {
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
 
         while (!variantFileB.done()
-	       && (varB.sequenceName < varA.sequenceName
-		   || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
-	    ) {
-	    variantFileB.getNextVariant(varB);
+               && (varB.sequenceName < varA.sequenceName
+                   || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
+            ) {
+            variantFileB.getNextVariant(varB);
         }
 
         while (!variantFileA.done() && varA.sequenceName == varB.sequenceName && varA.position == varB.position) {
             addInfo(varA, varB);
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
-	    variantFileB.getNextVariant(varB);
+            variantFileB.getNextVariant(varB);
         }
         
     } while (!variantFileA.done() && !variantFileB.done());
 
     if (!variantFileA.done()) {
-	cout << varA << endl;
-	while (variantFileA.getNextVariant(varA)) {
-	    cout << varA << endl;
-	}
+        cout << varA << endl;
+        while (variantFileA.getNextVariant(varA)) {
+            cout << varA << endl;
+        }
     }
 
     return 0;
