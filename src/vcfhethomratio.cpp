@@ -19,9 +19,9 @@ int main(int argc, char** argv) {
 
     VariantCallFile variantFile;
     if (filename == "-") {
-	variantFile.open(std::cin);
+        variantFile.open(std::cin);
     } else {
-	variantFile.open(filename);
+        variantFile.open(filename);
     }
     if (!variantFile.is_open()) {
         cerr << "could not open " << filename << endl;
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     map<string, unsigned int> homCounts;
     for (vector<string>::iterator s = variantFile.sampleNames.begin(); s != variantFile.sampleNames.end(); ++s) {
         hetCounts[*s] = 0;
-	homCounts[*s] = 0;
+        homCounts[*s] = 0;
     }
 
     Variant var(variantFile);
@@ -42,12 +42,12 @@ int main(int argc, char** argv) {
             string name = s->first;
             map<string, vector<string> >& sample = s->second;
             string& gt = sample["GT"].front();
-	    map<int, int> genotype = decomposeGenotype(gt);
-	    if (isHet(genotype)) {
-		++hetCounts[name];
-	    } else {
-		++homCounts[name];
-	    }
+            map<int, int> genotype = decomposeGenotype(gt);
+            if (isHet(genotype)) {
+                ++hetCounts[name];
+            } else if (isHomNonRef(genotype)) {
+                ++homCounts[name];
+            }
         }
     }
 
