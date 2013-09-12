@@ -67,6 +67,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 
 #BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
+SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
 TABIX = tabixpp/tabix.o
 
@@ -129,6 +130,9 @@ $(FASTAHACK):
 
 $(FSOM):
 	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
+
+$(SHORTBINS):
+	$(MAKE) bin/$@
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM)
 	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
