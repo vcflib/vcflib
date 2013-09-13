@@ -309,7 +309,7 @@ int main(int argc, char** argv) {
         }
 
         if (usingBED) {
-            BedTarget record(var.sequenceName, var.position, var.position + var.ref.size(), "");
+            BedTarget record(var.sequenceName, var.position, var.position + var.ref.size() - 1, "");
             vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
 
             if (!invert && !overlaps.empty()) {

@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-        BedTarget record(var.sequenceName, var.position, var.position + var.ref.size(), "");
+        BedTarget record(var.sequenceName, var.position, var.position + var.ref.size() - 1, "");
         vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
         vector<string> annotations;
         if (!overlaps.empty()) {
