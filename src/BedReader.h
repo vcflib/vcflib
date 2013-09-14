@@ -110,7 +110,7 @@ public:
         targets = entries();
         map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
         for (vector<BedTarget>::iterator t = targets.begin(); t != targets.end(); ++t) {
-            intervalsBySeq[t->seq].push_back(Interval<BedTarget*>(t->left, t->right, &*t));
+            intervalsBySeq[t->seq].push_back(Interval<BedTarget*>(1 + t->left, t->right, &*t));
         }
         for (map<string, vector<Interval<BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
             intervals[s->first] = IntervalTree<BedTarget*>(s->second);
