@@ -16,6 +16,7 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl 
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl
+         << "    -R, --region REGION       use 0-based half-open region (e.g. chrZ:0-20), multiples allowed" << endl
          << "    -v, --invert              invert the selection, printing only records which would" << endl
          << "                                not have been printed out" << endl
          << "    -i, --intersect-vcf FILE  use this VCF for set intersection generation" << endl
@@ -42,6 +43,7 @@ void printSummary(char** argv) {
     exit(0);
 }
 
+
 int main(int argc, char** argv) {
 
     string bedFileName;
@@ -59,6 +61,7 @@ int main(int argc, char** argv) {
     string tagValue = "PASS";
     string mergeFromTag;
     string mergeToTag;
+    vector<BedTarget> regions;
 
     if (argc == 1)
         printSummary(argv);
@@ -71,6 +74,7 @@ int main(int argc, char** argv) {
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
                 {"bed",  required_argument, 0, 'b'},
+                {"region",  required_argument, 0, 'R'},
                 {"invert",  no_argument, 0, 'v'},
                 {"intersect-vcf", required_argument, 0, 'i'},
                 {"union-vcf", required_argument, 0, 'u'},
@@ -89,7 +93,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:t:V:M:T:",
+        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:t:V:M:T:R:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -141,6 +145,10 @@ int main(int argc, char** argv) {
 
 	    case 't':
 	        tag = optarg;
+            break;
+
+        case 'R':
+            regions.push_back(BedTarget(optarg));
             break;
 
 	    case 'V':
@@ -219,6 +227,11 @@ int main(int argc, char** argv) {
     BedReader bed;
     if (usingBED) {
         bed.open(bedFileName);
+    }
+    if (!regions.empty()) {
+        // add to the bed
+        bed.addTargets(regions);
+        usingBED = true;
     }
 
     VariantCallFile otherVariantFile;

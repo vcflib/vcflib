@@ -31,7 +31,8 @@ using namespace vcf;
 //
 // In practice, we must call this function until the alignment is stabilized.
 
-using namespace std;
+#define VCFLEFTALIGN_DEBUG(msg) \
+    if (true) { cerr << msg; }
 
 class VCFIndelAllele {
     friend ostream& operator<<(ostream&, const VCFIndelAllele&);
@@ -197,7 +198,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
 
     int alignedLength = sp;
 
-    LEFTALIGN_DEBUG("| " << cigar_before.str() << endl
+    VCFLEFTALIGN_DEBUG("| " << cigar_before.str() << endl
        << "| " << alignedReferenceSequence << endl
        << "| " << alignmentAlignedBases << endl);
 
@@ -243,7 +244,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
                    && (id == indels.begin()
                        || (previous->insertion && steppos >= previous->position)
                        || (!previous->insertion && steppos >= previous->position + previous->length))) {
-                LEFTALIGN_DEBUG((indel.insertion ? "insertion " : "deletion ") << indel << " shifting " << i << "bp left" << endl);
+                VCFLEFTALIGN_DEBUG((indel.insertion ? "insertion " : "deletion ") << indel << " shifting " << i << "bp left" << endl);
                 indel.position -= i;
                 indel.readPosition -= i;
                 steppos = indel.position - i;
@@ -276,7 +277,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
                && (id == indels.begin()
                    || (previous->insertion && indel.position - 1 >= previous->position)
                    || (!previous->insertion && indel.position - 1 >= previous->position + previous->length))) {
-            LEFTALIGN_DEBUG((indel.insertion ? "insertion " : "deletion ") << indel << " exchanging bases " << 1 << "bp left" << endl);
+            VCFLEFTALIGN_DEBUG((indel.insertion ? "insertion " : "deletion ") << indel << " exchanging bases " << 1 << "bp left" << endl);
             indel.sequence = indel.sequence.at(indel.sequence.size() - 1) + indel.sequence.substr(0, indel.sequence.size() - 1);
             indel.position -= 1;
             indel.readPosition -= 1;
@@ -311,11 +312,11 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
                 if (previous->homopolymer()) {
                     string seq = referenceSequence.substr(prev_end_ref, indel.position - prev_end_ref);
                     string readseq = alternateSequence.substr(prev_end_read, indel.position - prev_end_ref);
-                    LEFTALIGN_DEBUG("seq: " << seq << endl << "readseq: " << readseq << endl);
+                    VCFLEFTALIGN_DEBUG("seq: " << seq << endl << "readseq: " << readseq << endl);
                     if (previous->sequence.at(0) == seq.at(0)
                             && FBhomopolymer(seq)
                             && FBhomopolymer(readseq)) {
-                        LEFTALIGN_DEBUG("moving " << *previous << " right to " 
+                        VCFLEFTALIGN_DEBUG("moving " << *previous << " right to " 
                                 << (indel.insertion ? indel.position : indel.position - previous->length) << endl);
                         previous->position = indel.insertion ? indel.position : indel.position - previous->length;
                     }
@@ -335,7 +336,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
                         ||
                         (!previous->insertion && pos == indel.position - previous->length))
                        ) {
-                        LEFTALIGN_DEBUG("right-merging tandem repeat: moving " << *previous << " right to " << pos << endl);
+                        VCFLEFTALIGN_DEBUG("right-merging tandem repeat: moving " << *previous << " right to " << pos << endl);
                         previous->position = pos;
                     }
                 }
@@ -366,11 +367,11 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
         newCigar.push_back(make_pair(last.length, (last.insertion ? "I" : "D")));
     }
     int lastend = last.insertion ? last.position : (last.position + last.length);
-    LEFTALIGN_DEBUG(last << ",");
+    VCFLEFTALIGN_DEBUG(last << ",");
 
     for (; id != indels.end(); ++id) {
         VCFIndelAllele& indel = *id;
-        LEFTALIGN_DEBUG(indel << ",");
+        VCFLEFTALIGN_DEBUG(indel << ",");
         if (indel.position < lastend) {
             cerr << "impossibility?: indel realigned left of another indel" << endl
                  << referenceSequence << endl << alternateSequence << endl;
@@ -394,7 +395,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
         newCigar.push_back(make_pair(softEnd.size(), "S"));
     }
 
-    LEFTALIGN_DEBUG(endl);
+    VCFLEFTALIGN_DEBUG(endl);
 
     cigar = newCigar;
 
@@ -404,7 +405,9 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
         char t = c->second.at(0);
         cigar_after << l << t;
     }
-    LEFTALIGN_DEBUG(cigar_after.str() << endl);
+
+    cerr << cigar_before.str() << " changes to " << cigar_after.str() << endl;
+    VCFLEFTALIGN_DEBUG(cigar_after.str() << endl);
 
     // check if we're realigned
     if (cigar_after.str() == cigar_before.str()) {
@@ -419,15 +422,20 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
 // realignment.  Returns true on realignment success or non-realignment.
 // Returns false if we exceed the maximum number of realignment iterations.
 //
-bool stablyLeftAlign(string& alternateSequence, string referenceSequence, int maxiterations, bool debug) {
+bool stablyLeftAlign(string& alternateSequence, string referenceSequence, vector<pair<int, string> >& cigar, int maxiterations, bool debug) {
 
-    if (!leftAlign(alignment, referenceSequence, debug)) {
+    if (!leftAlign(alternateSequence, cigar, referenceSequence, debug)) {
 
         return true;
 
     } else {
 
-        while (leftAlign(alignment, referenceSequence, debug) && --maxiterations > 0) {
+        bool result = true;
+        while ((result = leftAlign(alternateSequence, cigar, referenceSequence, debug)) && --maxiterations > 0) { 
+        }
+
+        if (!result) {
+            cout << maxiterations << endl;
         }
 
         if (maxiterations <= 0) {
@@ -472,7 +480,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hmt:",
+        c = getopt_long (argc, argv, "hw:r:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -514,12 +522,12 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    FastaReference freference;
+    FastaReference fastaReference;
     if (fastaFileName.empty()) {
         cerr << "a reference is required" << endl;
         exit(1);
     } else {
-        freference.open(fastaFileName);
+        fastaReference.open(fastaFileName);
     }
 
     /*
@@ -534,9 +542,19 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-        vector<AltAlignments> alignments;
-        getAlignment(var, reference, alignments);
+        cout << var << endl;
 
+        vector<AltAlignment> alignments;
+        string ref;
+        getAlignment(var, fastaReference, ref, alignments, window);
+        //for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+        for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end(); ++a) {
+            vector<pair<int, string> > cigarBefore = a->cigar;
+            cout << a->seq << endl;
+            cout << "before : " << a->pos << " " << joinCigar(a->cigar) << endl;
+            stablyLeftAlign(a->seq, ref, a->cigar, 20, false);
+            cout << "after  : " << a->pos << " " << joinCigar(a->cigar) << endl;
+        }
         //cout << var << endl;
 
         // for each parsedalternate, get the position
@@ -549,9 +567,6 @@ int main(int argc, char** argv) {
         
 
         //for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-        for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-            cout << v->second << endl;
-        }
     }
 
     return 0;

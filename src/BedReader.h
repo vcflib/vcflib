@@ -20,6 +20,45 @@ string strip(string const& str, char const* separators = " \t") {
         : str.substr(first, str.find_last_not_of(separators) - first + 1);
 }
 
+void parseRegion(
+    string& region,
+    string& startSeq,
+    int& startPos,
+    int& stopPos) {
+
+    size_t foundFirstColon = region.find(":");
+
+    // we only have a single string, use the whole sequence as the target
+    if (foundFirstColon == string::npos) {
+        startSeq = region;
+        startPos = 0;
+        stopPos = -1;
+    } else {
+        startSeq = region.substr(0, foundFirstColon);
+        string sep = "..";
+        size_t foundRangeSep = region.find(sep, foundFirstColon);
+        if (foundRangeSep == string::npos) {
+            sep = "-";
+            foundRangeSep = region.find("-", foundFirstColon);
+        }
+        if (foundRangeSep == string::npos) {
+            startPos = atoi(region.substr(foundFirstColon + 1).c_str());
+            // differ from bamtools in this regard, in that we process only
+            // the specified position if a range isn't given
+            stopPos = startPos + 1;
+        } else {
+            startPos = atoi(region.substr(foundFirstColon + 1, foundRangeSep - foundFirstColon).c_str());
+            // if we have range sep specified, but no second number, read to the end of sequence
+            if (foundRangeSep + sep.size() != region.size()) {
+                stopPos = atoi(region.substr(foundRangeSep + sep.size()).c_str()); // end-exclusive, bed-format
+            } else {
+                //stopPos = reference.sequenceLength(startSeq);
+                stopPos = -1;
+            }
+        }
+    }
+}
+
 // stores the posiitional information of a bed target entry
 class BedTarget {
 
@@ -29,6 +68,10 @@ public:
     int left;    // left position
     int right;   // right position, adjusted to 0-base
     string desc; // descriptive information, target name typically
+
+    BedTarget(string s) {
+        parseRegion(s, seq, left, right); 
+    }
 
     BedTarget(string s, int l, int r, string d = "")
         : seq(s)
@@ -95,18 +138,28 @@ public:
         return overlapping;
     }
 
-    BedReader(void)
+BedReader(void)
 	: _isOpen(false)
     { }
 
-    BedReader(string& fname)
+BedReader(string& fname)
 	: _isOpen(false) {
-	open(fname);
+        open(fname);
+    }
+
+    void addTargets(vector<BedTarget>& targets) {
+        map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
+        for (vector<BedTarget>::iterator t = targets.begin(); t != targets.end(); ++t) {
+            intervalsBySeq[t->seq].push_back(Interval<BedTarget*>(1 + t->left, t->right, &*t));
+        }
+        for (map<string, vector<Interval<BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
+            intervals[s->first] = IntervalTree<BedTarget*>(s->second);
+        }
     }
 
     void open(const string& fname) {
         file.open(fname.c_str());
-	_isOpen = true;
+        _isOpen = true;
         targets = entries();
         map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
         for (vector<BedTarget>::iterator t = targets.begin(); t != targets.end(); ++t) {
