@@ -16,7 +16,7 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl 
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl
-         << "    -R, --region REGION       use 0-based half-open region (e.g. chrZ:0-20), multiples allowed" << endl
+         << "    -R, --region REGION       use 1-based tabix-style region (e.g. chrZ:10-20), multiples allowed" << endl
          << "    -v, --invert              invert the selection, printing only records which would" << endl
          << "                                not have been printed out" << endl
          << "    -i, --intersect-vcf FILE  use this VCF for set intersection generation" << endl
@@ -149,6 +149,7 @@ int main(int argc, char** argv) {
 
         case 'R':
             regions.push_back(BedTarget(optarg));
+            regions.back().left -= 1;
             break;
 
 	    case 'V':
