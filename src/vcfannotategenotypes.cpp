@@ -127,10 +127,8 @@ int main(int argc, char** argv) {
     variantFileA.addHeaderLine(line);
 
     cout << variantFileA.header << endl;
-	int counter = 0;
 
     do {
-		counter ++;
 
         // this is broken.  to do it right, it'll be necessary to get reference ids from the fasta reference used to make the alignments...
 		// if B is NOT done, and is less than A, read new B.
@@ -213,9 +211,9 @@ int main(int argc, char** argv) {
             varA.infoFlags[annotag + ".has_variant"] = true;
             cout << varA << endl;
         }
+
     } while (!variantFileA.done() || !variantFileB.done());
 
-    cerr << "check: " << counter << "\n";
     return 0;
 
 }
