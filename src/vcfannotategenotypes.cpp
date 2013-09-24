@@ -127,20 +127,27 @@ int main(int argc, char** argv) {
     variantFileA.addHeaderLine(line);
 
     cout << variantFileA.header << endl;
+	int counter = 0;
 
     do {
+		counter ++;
 
         // this is broken.  to do it right, it'll be necessary to get reference ids from the fasta reference used to make the alignments...
+		// if B is NOT done, and is less than A, read new B.
         if (!variantFileB.done()
             && (varB.sequenceName != varA.sequenceName
-                || (varB.sequenceName == varA.sequenceName && varB.position < varA.position))
+                || (varB.sequenceName == varA.sequenceName && varB.position < varA.position)
+				|| variantFileA.done())
             ) {
             variantFileB.getNextVariant(varB);
         }
 
+		// if A is not done- and A is less than B, read A.  
+		// should also read if variant B is done. 
         if (!variantFileA.done()
             && (varA.sequenceName != varB.sequenceName
-                || (varA.sequenceName == varB.sequenceName && varA.position < varB.position))
+                || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)
+				|| variantFileB.done())
             ) {
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
@@ -206,9 +213,9 @@ int main(int argc, char** argv) {
             varA.infoFlags[annotag + ".has_variant"] = true;
             cout << varA << endl;
         }
-        
-    } while (!variantFileA.done() && !variantFileB.done());
+    } while (!variantFileA.done() || !variantFileB.done());
 
+    cerr << "check: " << counter << "\n";
     return 0;
 
 }
