@@ -126,10 +126,9 @@ This makes installation easy, as users can add vcflib/bin to their path, or copy
 
 ### vcf2tsv
     
-    usage: vcf2tsv [-n null_string] [vcf file]
-    Converts stdin or given VCF file to tab-delimited format, using null string to replace empty
-    values in the table.
-
+    usage: vcf2tsv [-n null_string] [-g] [vcf file]
+    Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
+    Specifying -g will output one line per sample with genotype information.
     
 ### vcfaddinfo
     
