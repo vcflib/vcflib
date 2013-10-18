@@ -186,9 +186,8 @@ int main(int argc, char** argv) {
 
     }
 
-    for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
-        cout << *v << endl;
-    }
+    Variant result = createMultiallelic(vars);
+    cout << result << endl;
 
     return 0;
 

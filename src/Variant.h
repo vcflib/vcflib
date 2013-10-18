@@ -45,6 +45,7 @@ const int NULL_ALLELE = -1;
 VariantFieldType typeStrToFieldType(string& typeStr);
 ostream& operator<<(ostream& out, VariantFieldType type);
 
+typedef map<string, map<string, vector<string> > > Samples;
 
 class VariantCallFile {
 
@@ -71,6 +72,7 @@ public:
     bool _done;
 
     void updateSamples(vector<string>& newSampleNames);
+    string headerWithSampleNames(vector<string>& newSamples); // non-destructive, for output
     void addHeaderLine(string line);
     void removeInfoHeaderLine(string line);
     void removeGenoHeaderLine(string line);
@@ -182,6 +184,7 @@ public:
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
     string vrepr(void);  // a comparable record of the variantion described by the record
+    set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
                                                          bool useMNPs = false,
@@ -219,7 +222,6 @@ public:
     //void addInfoString(string& tag, string& value);
 
     void removeAlt(string& altallele);
-
 
 public:
 
@@ -264,6 +266,7 @@ private:
     string lastFormat;
 
 };
+
 
 // from BamTools
 // RuleToken implementation

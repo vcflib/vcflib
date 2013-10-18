@@ -978,6 +978,19 @@ void VariantCallFile::updateSamples(vector<string>& newSamples) {
     header = join(headerLines, "\n");
 }
 
+// non-destructive version of above
+string VariantCallFile::headerWithSampleNames(vector<string>& newSamples) {
+    // regenerate the last line of the header
+    vector<string> headerLines = split(header, '\n');
+    vector<string> colnames = split(headerLines.at(headerLines.size() - 1), '\t'); // get the last, update the samples
+    vector<string> newcolnames;
+    newcolnames.resize(9 + newSamples.size());
+    copy(colnames.begin(), colnames.begin() + 9, newcolnames.begin());
+    copy(newSamples.begin(), newSamples.end(), newcolnames.begin() + 9);
+    headerLines.at(headerLines.size() - 1) = join(newcolnames, "\t");
+    return join(headerLines, "\n");
+}
+
 // TODO cleanup, store header lines instead of bulk header
 void VariantCallFile::addHeaderLine(string line) {
     vector<string> headerLines = split(header, '\n');
@@ -1187,7 +1200,7 @@ bool VariantCallFile::parseHeader(string& hs) {
     return true;
 }
 
-    bool VariantCallFile::getNextVariant(Variant& var) {
+bool VariantCallFile::getNextVariant(Variant& var) {
         if (firstRecord && !justSetRegion) {
             if (!line.empty()) {
                 var.parse(line, parseSamples);
@@ -1530,16 +1543,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                 refpos += len;
                 break;
             case 'M':
-            {
-                for (int i = 0; i < len; ++i) {
-                    variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
-                                                     alternate.substr(altpos + i, 1),
-                                                     refpos + i + position));
+                {
+                    for (int i = 0; i < len; ++i) {
+                        variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
+                                                         alternate.substr(altpos + i, 1),
+                                                         refpos + i + position));
+                    }
                 }
-            }
-            refpos += len;
-            altpos += len;
-            break;
+                refpos += len;
+                altpos += len;
+                break;
             case 'S':
                 refpos += len;
                 altpos += len;
@@ -1582,6 +1595,11 @@ map<string, vector<VariantAllele> > Variant::flatAlternates(void) {
         variants.push_back(VariantAllele(ref, alternate, position));
     }
     return variantAlleles;
+}
+
+set<string> Variant::altSet(void) {
+    set<string> altset(alt.begin(), alt.end());
+    return altset;
 }
 
 ostream& operator<<(ostream& out, VariantAllele& var) {

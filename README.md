@@ -32,6 +32,7 @@ vcflib provides a variety of functions for VCF manipulation:
 
  * Generate **haplotype-aware intersections** ([vcfintersect](#vcfintersect) -i), **unions** (vcfintersect -u), and **complements** (vcfintersect -v -i).
  * **Overlay-merge** multiple VCF files together, using provided order as precedence ([vcfoverlay](#vcfoverlay)).
+ * **Combine** multiple VCF files together, handling samples when alternate allele descriptions are identical ([vcfcombine](#vcfcombine)).
  * **Validate** the integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file ([vcfcheck](#vcfcheck)).
 
 ### format conversion
@@ -213,6 +214,15 @@ Removes reference-matching sequence from complex alleles and adjusts records to
 reflect positional change.
     
     
+### vcfcombine
+
+Combines VCF files positionally, combining samples when sites and alleles are identical.
+Any number of VCF files may be combined.  The INFO field and other columns are taken from
+one of the files which are combined when records in multiple files match.  Alleles must
+have identical ordering to be combined into one record.  If they do not, multiple records
+will be emitted.
+
+
 ### vcfcommonsamples
     
     usage: vcfcommonsamples <vcf file> <vcf file> outputs each record in the

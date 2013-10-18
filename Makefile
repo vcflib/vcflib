@@ -63,7 +63,8 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfgenosummarize.cpp \
 			  src/vcfgenosamplenames.cpp \
 			  src/vcfgeno2haplo.cpp \
-			  src/vcfleftalign.cpp
+			  src/vcfleftalign.cpp \
+			  src/vcfcombine.cpp
 
 #BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
@@ -85,7 +86,7 @@ LEFTALIGN = smithwaterman/LeftAlign.o
 
 FSOM = fsom/fsom.o
 
-INCLUDES = -I. -lm -lz -L. -Ltabixpp/ -ltabix
+INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
 
 all: $(OBJECTS) $(BINS)
 
