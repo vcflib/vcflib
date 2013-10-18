@@ -97,9 +97,7 @@ int main(int argc, char** argv) {
         map<vector<string>, map<VariantCallFile*, Variant*> >& pos = chrom.begin()->second;
         map<vector<string>, map<VariantCallFile*, Variant*> >::iterator s = pos.begin();
         for ( ; s != pos.end(); ++s) {
-            vector<string> alt;
             Variant variant(outputCallFile);
-            variant.alt = alt;
             map<VariantCallFile*, Variant*>& vars = s->second;
             map<VariantCallFile*, Variant*>::iterator v = vars.begin();
             for ( ; v != vars.end(); ++v) {
@@ -126,7 +124,8 @@ int main(int argc, char** argv) {
                     variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
                 }
             }
-            cout << variant << endl;
+            if (!variant.info.empty())
+                cout << variant << endl;
         }
         chrom.erase(chrom.begin());
     }
