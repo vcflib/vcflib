@@ -56,6 +56,8 @@ int main(int argc, char** argv) {
     string randomHeader;
     VariantCallFile* vcf;
 
+    list<string> chromOrder;
+
     map<string, // chrom
         map<long int, // pos
             map<vector<string>, // alts
@@ -66,6 +68,9 @@ int main(int argc, char** argv) {
         vcf->open(inputFilename);
         Variant* var = new Variant(*vcf);
         vcf->getNextVariant(*var);
+        if (variantFiles.find(var->sequenceName) == variantFiles.end()) {
+            chromOrder.push_back(var->sequenceName);
+        }
         variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
         sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
     }
@@ -83,9 +88,10 @@ int main(int argc, char** argv) {
         // get lowest variant(s)
         // if they have identical alts and position, combine
         // otherwise just output, but with the same sample names
-        map<long int, map<vector<string>, map<VariantCallFile*, Variant*> > >& chrom = variantFiles.begin()->second;
+        map<long int, map<vector<string>, map<VariantCallFile*, Variant*> > >& chrom = variantFiles[chromOrder.front()];
         if (chrom.empty()) {
-            variantFiles.erase(variantFiles.begin());
+            variantFiles.erase(chromOrder.front());
+            chromOrder.pop_front();
             continue;
         }
         map<vector<string>, map<VariantCallFile*, Variant*> >& pos = chrom.begin()->second;
@@ -113,8 +119,12 @@ int main(int argc, char** argv) {
                 for (Samples::iterator sample = var->samples.begin(); sample != var->samples.end(); ++sample) {
                     variant.samples[sample->first] = sample->second;
                 }
-                if (vcf->getNextVariant(*var))
+                if (vcf->getNextVariant(*var)) {
+                    if (variantFiles.find(var->sequenceName) == variantFiles.end()) {
+                        chromOrder.push_back(var->sequenceName);
+                    }
                     variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
+                }
             }
             cout << variant << endl;
         }
