@@ -35,9 +35,7 @@ void printSummary(char** argv) {
          << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
          << endl
          << "For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp" << endl
-         << "as determined by haplotype comparison alleles." << endl
-         << endl
-         << "When unioning, samples and genotypes from both files will be combined." << endl;
+         << "as determined by haplotype comparison alleles." << endl;
 	//<< "Intersect the records in the VCF file with targets provided in a BED file." << endl
 	//<< "Intersections are done on the reference sequences in the VCF file." << endl
 	//<< "If no VCF filename is specified on the command line (last argument) the VCF" << endl
@@ -210,8 +208,7 @@ int main(int argc, char** argv) {
     // it runs much faster to do this first.  then downstream processes don't block!
 
     if (!tag.empty()) {
-        variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue
-                                  + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
+        variantFile.addHeaderLine("##INFO=<ID="+ tag +",Number=A,Type=String,Description=\"" + tagValue + " if this allele intersects with one in " + vcfFileName  +  ", '.' if not.\">");
     }
 
     if (!mergeToTag.empty()) {
@@ -222,10 +219,11 @@ int main(int argc, char** argv) {
         // todo...
         // adjust to pick up flags from the other file to determine what it is we're merging
         // otherwise, here be hacks
-        variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of "
-                                  + mergeFromTag + " in " + vcfFileName
-                                  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
+        variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=String,Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
     }
+
+    cout << variantFile.header << endl;
+
 
     BedReader bed;
     if (usingBED) {
@@ -302,18 +300,6 @@ int main(int argc, char** argv) {
     long int lastOutputPosition = 0;
     string lastSequenceName;
 
-    // add the samples from the other file into this one
-    vector<string> newSamples;
-    if (unioning) {
-        set_union(otherVariantFile.sampleNames.begin(), otherVariantFile.sampleNames.end(),
-                  variantFile.sampleNames.begin(), variantFile.sampleNames.end(),
-                  back_inserter(newSamples));
-        cout << variantFile.headerWithSampleNames(newSamples) << endl;
-    } else {
-        newSamples = variantFile.sampleNames;
-        cout << variantFile.header << endl;
-    }
-
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
@@ -328,8 +314,7 @@ int main(int argc, char** argv) {
                     Variant* v = r->value;
                     if (outputVariants.find(v) == outputVariants.end()) {
                         outputVariants.insert(v);
-                        v->setOutputSampleNames(newSamples);
-                        cout << *v << endl; // Q: does this output everything in correct order?.... A: No. A: sort it... vcfstreamsort
+                        cout << *v << endl; // Q: does this output everything in correct order?.... A: No.
                     }
                 }
                 lastSequenceName = var.sequenceName;
@@ -388,7 +373,6 @@ int main(int argc, char** argv) {
 
                 for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
                     for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
-                        (*o)->setOutputSampleNames(newSamples);
                         cout << **o << endl;
                         lastOutputPosition = max(lastOutputPosition, (*o)->position);
                     }
@@ -401,7 +385,6 @@ int main(int argc, char** argv) {
             if (overlapping.empty()) {
 
                 if (unioning || (intersecting && invert)) {
-                    var.setOutputSampleNames(newSamples);
                     cout << var << endl;
                     lastOutputPosition = max(lastOutputPosition, var.position);
                 } else if (intersecting && (!tag.empty() || !mergeToTag.empty())) {
@@ -413,7 +396,6 @@ int main(int argc, char** argv) {
                             var.info[mergeToTag].push_back(".");
                         }
                     }
-                    var.setOutputSampleNames(newSamples);
                     cout << var << endl;
                     lastOutputPosition = max(lastOutputPosition, var.position);
                 }
@@ -520,16 +502,15 @@ int main(int argc, char** argv) {
                             numalts += (*v)->alt.size();
                         }
                         if (numalts + var.alt.size() == originalVar.alt.size()) {
-                            // combined previously
                             variants[var.position].clear();
                             variants[var.position].push_back(&originalVar);
                         } else {
                             variants[var.position].push_back(&var);
                         }
                     }
+
                     for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
                         for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
-                            (*o)->setOutputSampleNames(newSamples);
                             cout << **o << endl;
                             lastOutputPosition = max(lastOutputPosition, (*o)->position);
                         }
@@ -537,7 +518,6 @@ int main(int argc, char** argv) {
                 } else {
                     // if any alts remain, output the variant record
                     if (!var.alt.empty()) {
-                        var.setOutputSampleNames(newSamples);
                         cout << var << endl;
                         lastOutputPosition = max(lastOutputPosition, var.position);
                     }
@@ -559,7 +539,6 @@ int main(int argc, char** argv) {
                 Variant* variant = &*v;
                 if (outputVariants.find(variant) == outputVariants.end()) {
                     outputVariants.insert(variant);
-                    variant->setOutputSampleNames(newSamples);
                     cout << *variant << endl;
                     // TODO guarantee sorting
                 }

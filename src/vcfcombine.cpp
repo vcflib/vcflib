@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
             if (!variant.info.empty())
                 cout << variant << endl;
         }
+        // XXXXXXX this will cause problems if the files have more than one record per position!!!
         chrom.erase(chrom.begin());
     }
 
