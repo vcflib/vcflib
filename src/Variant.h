@@ -46,6 +46,7 @@ VariantFieldType typeStrToFieldType(string& typeStr);
 ostream& operator<<(ostream& out, VariantFieldType type);
 
 typedef map<string, map<string, vector<string> > > Samples;
+typedef vector<pair<int, string> > Cigar;
 
 class VariantCallFile {
 

@@ -32,7 +32,7 @@ using namespace vcf;
 // In practice, we must call this function until the alignment is stabilized.
 
 #define VCFLEFTALIGN_DEBUG(msg) \
-    if (true) { cerr << msg; }
+    if (false) { cerr << msg; }
 
 class VCFIndelAllele {
     friend ostream& operator<<(ostream&, const VCFIndelAllele&);
@@ -50,7 +50,7 @@ public:
 
     VCFIndelAllele(bool i, int l, int p, int rp, string s)
         : insertion(i), length(l), position(p), readPosition(rp), sequence(s)
-    { }
+        { }
 };
 
 bool FBhomopolymer(string sequence);
@@ -121,8 +121,8 @@ void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<A
     // default alignment params
     float matchScore = 10.0f;
     float mismatchScore = -9.0f;
-    float gapOpenPenalty = 15.0f;
-    float gapExtendPenalty = 6.66f;
+    float gapOpenPenalty = 25.0f;
+    float gapExtendPenalty = 3.33f;
 
     // establish reference sequence
     string leftFlank = reference.getSubSequence(var.sequenceName, var.zeroBasedPosition() - window/2, window/2);
@@ -141,10 +141,10 @@ void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<A
 }
 
 
-bool stablyLeftAlign(string& alternateSequence, string referenceSequence, int maxiterations = 20, bool debug = false);
+bool stablyLeftAlign(string& alternateSequence, string referenceSequence, int maxiterations = 50, bool debug = false);
 int countMismatches(string& alternateSequence, string referenceSequence);
 
-bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, string& referenceSequence, bool debug = false) {
+bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug = false) {
 
     int arsOffset = 0; // pointer to insertion point in aligned reference sequence
     string alignedReferenceSequence = referenceSequence;
@@ -165,6 +165,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
         c != cigar.end(); ++c) {
         unsigned int l = c->first;
         char t = c->second.at(0);
+
         cigar_before << l << t;
         if (t == 'M') { // match or mismatch
             sp += l;
@@ -352,7 +353,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
     //
     // and simultaneously reconstruct the cigar
 
-    vector<pair<int, string> > newCigar;
+    Cigar newCigar;
 
     if (!softBegin.empty()) {
         newCigar.push_back(make_pair(softBegin.size(), "S"));
@@ -406,7 +407,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
         cigar_after << l << t;
     }
 
-    cerr << cigar_before.str() << " changes to " << cigar_after.str() << endl;
+    //cerr << cigar_before.str() << " changes to " << cigar_after.str() << endl;
     VCFLEFTALIGN_DEBUG(cigar_after.str() << endl);
 
     // check if we're realigned
@@ -422,7 +423,7 @@ bool leftAlign(string& alternateSequence, vector<pair<int, string> >& cigar, str
 // realignment.  Returns true on realignment success or non-realignment.
 // Returns false if we exceed the maximum number of realignment iterations.
 //
-bool stablyLeftAlign(string& alternateSequence, string referenceSequence, vector<pair<int, string> >& cigar, int maxiterations, bool debug) {
+bool stablyLeftAlign(string& alternateSequence, string referenceSequence, Cigar& cigar, int maxiterations, bool debug) {
 
     if (!leftAlign(alternateSequence, cigar, referenceSequence, debug)) {
 
@@ -432,10 +433,6 @@ bool stablyLeftAlign(string& alternateSequence, string referenceSequence, vector
 
         bool result = true;
         while ((result = leftAlign(alternateSequence, cigar, referenceSequence, debug)) && --maxiterations > 0) { 
-        }
-
-        if (!result) {
-            cout << maxiterations << endl;
         }
 
         if (maxiterations <= 0) {
@@ -462,7 +459,7 @@ void printSummary(char** argv) {
 
 int main(int argc, char** argv) {
 
-    int window = 50;
+    int window = 150;
     VariantCallFile variantFile;
     string fastaFileName;
 
@@ -542,20 +539,121 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-        cout << var << endl;
+        // if there is no indel, there is nothing to realign
+        bool hasIndel = false;
+        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+            if (a->size() != var.ref.size()) {
+                hasIndel = true;
+                break;
+            }
+        }
+        if (!hasIndel) {
+            cout << var << endl;
+            continue;
+        }
 
         vector<AltAlignment> alignments;
         string ref;
-        getAlignment(var, fastaReference, ref, alignments, window);
-        //for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+
+        // determine window size to prevent mismapping with SW algorithm
+        int currentWindow = window;
+        for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
+            if (a->size()*2 > currentWindow) currentWindow = a->size()*2;
+        }
+
+        // do the alignments
+        getAlignment(var, fastaReference, ref, alignments, currentWindow);
+
+        // stably left align the alignments
         for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end(); ++a) {
-            vector<pair<int, string> > cigarBefore = a->cigar;
-            cout << a->seq << endl;
-            cout << "before : " << a->pos << " " << joinCigar(a->cigar) << endl;
+            Cigar cigarBefore = a->cigar;
+            //cerr << a->seq << endl;
+            //cerr << "before : " << a->pos << " " << joinCigar(a->cigar) << endl;
             stablyLeftAlign(a->seq, ref, a->cigar, 20, false);
-            cout << "after  : " << a->pos << " " << joinCigar(a->cigar) << endl;
+            //cerr << "after  : " << a->pos << " " << joinCigar(a->cigar) << endl;
         }
         //cout << var << endl;
+
+        // transform the mappings
+        // chop off leading matching bases
+        // find the range of bp in the alleles
+        // make the new ref allele
+        // make the new alt alleles
+        // emit the var
+
+        long int newPosition = var.position+currentWindow/2;
+        long int newEndPosition = var.position-currentWindow/2;
+        // check for no-indel case
+        int newLength = var.ref.size();
+        for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end(); ++a) {
+            // get the first mismatching position
+            Cigar::iterator c = a->cigar.begin();
+            int matchingBpAtStart = 0;
+            // check for clipping??  shouldn't need to... with the window size set above dynamically for allele length
+            char op = c->second[0];
+            while (c != a->cigar.end() && c->second[0] == 'M') {
+                matchingBpAtStart += c->first;
+                ++c;
+            }
+            if (c == a->cigar.end()) {
+                //cerr << "variant at " << var.sequenceName << ":" << var.position << " appears to be equal to the reference" << endl;
+                //exit(1);
+                continue;
+            }
+            // if the first mismatching op is an indel, step back 1bp
+            op = c->second[0];
+            if (op == 'I' || op == 'D') {
+                --matchingBpAtStart;
+            }
+            // now get the last non-reference position
+            assert(a->cigar.size() > 1);
+            c = (a->cigar.end()-1);
+            op = c->second[0];
+            if (op != 'M') {
+                cerr << "variant at " << var.sequenceName << ":" << var.position << endl;
+                cerr << "alignment of alt " << a->seq << " against ref allele yields non-match state at end of alignment" << endl;
+                exit(1);
+            }
+            int matchingBpAtEnd = c->first;
+            int altMismatchLength = a->seq.size() - matchingBpAtEnd - matchingBpAtStart;
+            int refMismatchLength = (var.ref.size() + currentWindow) - matchingBpAtEnd - matchingBpAtStart;
+            /*
+            cerr << "alt mismatch length " << altMismatchLength << endl
+                 << "ref mismatch length " << refMismatchLength << endl;
+            */
+            long int newStart = var.position - currentWindow/2 + matchingBpAtStart;
+            long int newEnd = newStart + refMismatchLength;
+            //cerr << "ref should run from " << newStart << " to " << newStart + refMismatchLength << endl;
+            newPosition = min(newStart, newPosition);
+            newEndPosition = max(newEnd, newEndPosition);
+            //cerr << newPosition << " " << newEndPosition << endl;
+            //if (newRefSize < refMismatchLength) newRefSize = refMismatchLength;
+        }
+
+        //cerr << "new ref start " << newPosition << " and end " << newEndPosition << " was " << var.position << "," << var.position + var.ref.size() << endl;
+        int newRefSize = newEndPosition - newPosition;
+        string newRef = fastaReference.getSubSequence(var.sequenceName, newPosition-1, newRefSize);
+        // get the number of bp to strip from the alts
+        int stripFromStart = currentWindow/2 - (var.position - newPosition);
+        int stripFromEnd = (currentWindow + newRefSize) - (stripFromStart + newRefSize) + (var.ref.size() - newRefSize);
+        /*
+        cerr << "strip from start " << stripFromStart << endl;
+        cerr << "strip from end " << stripFromEnd << endl;
+        */
+        vector<string> newAlt;
+        vector<string>::iterator l = var.alt.begin();
+        for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end();
+             ++a, ++l) {
+            int diff = newRef.size() - l->size();
+            string alt = a->seq.substr(stripFromStart, a->seq.size() - (stripFromEnd + stripFromStart));
+            newAlt.push_back(alt);
+        }
+
+
+        var.ref = newRef;
+        var.alt = newAlt;
+        var.position = newPosition;
+        cout << var << endl;
 
         // for each parsedalternate, get the position
         // build a new vcf record for that position

@@ -2046,4 +2046,130 @@ string Variant::vrepr(void) {
     return sequenceName + "\t" + convert(position) + "\t" + join(alleles, ",");
 }
 
+// TODO
+/*
+vector<Variant*> Variant::matchingHaplotypes() {
+
+    int haplotypeStart = var.position;
+    int haplotypeEnd = var.position + var.ref.size();
+
+    for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+        haplotypeStart = min((*v)->position, (long int) haplotypeStart);
+        haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
+    }
+
+    // for everything overlapping and the current variant, construct the local haplotype within the bounds
+    // if there is an exact match, the allele in the current VCF does intersect
+
+    string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
+    map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
+
+    for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+        Variant& variant = **v;
+        int altindex = 0;
+        for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
+            string haplotype = referenceHaplotype;
+            // get the relative start and end coordinates for the variant alternate allele
+            int relativeStart = variant.position - haplotypeStart;
+            haplotype.replace(relativeStart, variant.ref.size(), *a);
+            haplotypes[haplotype].push_back(make_pair(*v, altindex));
+        }
+    }
+
+    Variant originalVar = var;
+
+    // determine the non-intersecting alts
+    vector<string> altsToRemove;
+    vector<int> altIndexesToRemove;
+    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+        string haplotype = referenceHaplotype;
+        int relativeStart = var.position - haplotypeStart;
+        haplotype.replace(relativeStart, var.ref.size(), *a);
+        map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
+        if ((intersecting && !invert && h == haplotypes.end())
+            || (intersecting && invert && h != haplotypes.end())
+            || (unioning && h != haplotypes.end())) {
+            if (tag.empty() && mergeToTag.empty()) {
+                altsToRemove.push_back(*a);
+            } else {
+                if (!tag.empty()) {
+                    var.info[tag].push_back(".");
+                }
+                if (!mergeToTag.empty()) {
+                    var.info[mergeToTag].push_back(".");
+                }
+            }
+        } else {
+            if (!tag.empty()) {
+                var.info[tag].push_back(tagValue);
+            }
+            // NB: just take the first value for the mergeFromTag
+            if (!mergeToTag.empty()) {
+                Variant* v = h->second.front().first;
+                int index = h->second.front().second;
+                if (v->info.find(mergeFromTag) != v->info.end()) {
+                    // now you have to find the exact allele...
+                    string& otherValue = v->info[mergeFromTag].at(index);
+                    var.info[mergeToTag].push_back(otherValue);
+                } else if (mergeFromTag == "QUAL") {
+                    var.info[mergeToTag].push_back(convert(v->quality));
+                } else {
+                    var.info[mergeToTag].push_back(".");
+                }
+            }
+        }
+    }
+
+    // remove the non-overlapping (intersecting) or overlapping (unioning) alts
+    if (intersecting && loci && altsToRemove.size() != var.alt.size()) {
+        // we have a match in loci mode, so we should output the whole loci, not just the matching sequence
+    } else {
+        for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
+            var.removeAlt(*a);
+        }
+    }
+
+    if (unioning) {
+
+        // somehow sort the records and combine them?
+        map<long int, vector<Variant*> > variants;
+        for (vector<Variant*>::iterator o = overlapping.begin(); o != overlapping.end(); ++o) {
+            if ((*o)->position <= var.position && // check ensures proper ordering of variants on output
+                outputVariants.find(*o) == outputVariants.end()) {
+                outputVariants.insert(*o);
+                variants[(*o)->position].push_back(*o);
+            }
+        }
+        // add in the current variant, if it has alts left
+        if (!var.alt.empty()) {
+            vector<Variant*>& vars = variants[var.position];
+            int numalts = 0;
+            for (vector<Variant*>::iterator v = vars.begin(); v != vars.end(); ++v) {
+                numalts += (*v)->alt.size();
+            }
+            if (numalts + var.alt.size() == originalVar.alt.size()) {
+                variants[var.position].clear();
+                variants[var.position].push_back(&originalVar);
+            } else {
+                variants[var.position].push_back(&var);
+            }
+        }
+
+        for (map<long int, vector<Variant*> >::iterator v = variants.begin(); v != variants.end(); ++v) {
+            for (vector<Variant*>::iterator o = v->second.begin(); o != v->second.end(); ++o) {
+                cout << **o << endl;
+                lastOutputPosition = max(lastOutputPosition, (*o)->position);
+            }
+        }
+    } else {
+        // if any alts remain, output the variant record
+        if (!var.alt.empty()) {
+            cout << var << endl;
+            lastOutputPosition = max(lastOutputPosition, var.position);
+        }
+    }
+
+}
+*/
+
 } // end namespace vcf
