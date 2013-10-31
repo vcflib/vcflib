@@ -557,6 +557,7 @@ int main(int argc, char** argv) {
 
         // determine window size to prevent mismapping with SW algorithm
         int currentWindow = window;
+        if (var.ref.size()*2 > currentWindow) currentWindow = var.ref.size()*2;
         for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
             if (a->size()*2 > currentWindow) currentWindow = a->size()*2;
         }
@@ -609,7 +610,7 @@ int main(int argc, char** argv) {
             assert(a->cigar.size() > 1);
             c = (a->cigar.end()-1);
             op = c->second[0];
-            if (op != 'M') {
+            if (op != 'M' && op != 'S') {
                 cerr << "variant at " << var.sequenceName << ":" << var.position << endl;
                 cerr << "alignment of alt " << a->seq << " against ref allele yields non-match state at end of alignment" << endl;
                 exit(1);
@@ -642,17 +643,22 @@ int main(int argc, char** argv) {
         */
         vector<string> newAlt;
         vector<string>::iterator l = var.alt.begin();
+        bool failedAlt = false;
         for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end();
              ++a, ++l) {
             int diff = newRef.size() - l->size();
             string alt = a->seq.substr(stripFromStart, a->seq.size() - (stripFromEnd + stripFromStart));
             newAlt.push_back(alt);
+            if (alt.empty()) failedAlt = true;
         }
 
+        // *if* everything is OK, update the variant
+        if (!newRef.empty() && !failedAlt) {
+            var.ref = newRef;
+            var.alt = newAlt;
+            var.position = newPosition;
+        }
 
-        var.ref = newRef;
-        var.alt = newAlt;
-        var.position = newPosition;
         cout << var << endl;
 
         // for each parsedalternate, get the position
