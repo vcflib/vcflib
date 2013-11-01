@@ -73,6 +73,7 @@ vcflib provides a variety of functions for VCF manipulation:
  * **Combine overlapping biallelic** records into a single record ([vcfcreatemulti](#vcfcreatemulti)).
  * **Decompose complex variants** into a canonical SNP and indel representation ([vcfallelicprimitives](#vcfallelicprimitives)), generating phased genotypes for available samples.
  * **Reconstitute complex variants** provided a phased VCF with samples ([vcfgeno2haplo](#vcfgeno2haplo)).
+ * **Left-align indel and complex variants** ([vcfleftalign](#vcfleftalign)).
 
 ### genotype manipulation
 
@@ -412,6 +413,24 @@ Provides the ratio between heterozygotes and homozygotes.
     outputs each record in the vcf file, removing samples not listed on the command line
     
     
+### vcfleftalign
+
+Left-align indels and complex variants in the input using a pairwise ref/alt
+alignment followed by a heuristic, iterative left realignment process that
+shifts indel representations to their absolute leftmost (5') extent.  This is
+the same procedure used in the internal left alignment in freebayes, and can be
+used when preparing VCF files for input to freebayes to decrease positional
+representation differences between the input alleles and left-realigned
+alignments.
+
+    usage: vcfleftalign [options] [file]
+
+    options:
+        -r, --reference FILE  Use this reference as a basis for realignment.
+        -w, --window N        Use a window of this many bp when left aligning (50).
+
+    Left-aligns variants in the specified input file or stdin.
+
 ### vcflength
     
 Adds the length of the variant record (in [-/+]) relative to the reference allele to each VCF record.
