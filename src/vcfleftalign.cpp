@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 #include <getopt.h>
+#include <cmath>
 
 using namespace std;
 using namespace vcf;
@@ -115,6 +116,28 @@ public:
         cigar = splitCigar(c);
     }
 };
+
+double entropy(const string& st) {
+    vector<char> stvec(st.begin(), st.end());
+    set<char> alphabet(stvec.begin(), stvec.end());
+    vector<double> freqs;
+    for (set<char>::iterator c = alphabet.begin(); c != alphabet.end(); ++c) {
+        int ctr = 0;
+        for (vector<char>::iterator s = stvec.begin(); s != stvec.end(); ++s) {
+            if (*s == *c) {
+                ++ctr;
+            }
+        }
+        freqs.push_back((double)ctr / (double)stvec.size());
+    }
+    double ent = 0;
+    double ln2 = log(2);
+    for (vector<double>::iterator f = freqs.begin(); f != freqs.end(); ++f) {
+        ent += *f * log(*f)/ln2;
+    }
+    ent = -ent;
+    return ent;
+}
 
 void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<AltAlignment>& alignments, int window) {
     
@@ -459,7 +482,7 @@ void printSummary(char** argv) {
 
 int main(int argc, char** argv) {
 
-    int window = 150;
+    int window = 50;
     VariantCallFile variantFile;
     string fastaFileName;
 
@@ -560,6 +583,17 @@ int main(int argc, char** argv) {
         if (var.ref.size()*2 > currentWindow) currentWindow = var.ref.size()*2;
         for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
             if (a->size()*2 > currentWindow) currentWindow = a->size()*2;
+        }
+
+        // while the entropy of either flank is < some target entropy (~1 is fine), increase the flank sizes
+        while (true) {
+            string refTarget = fastaReference.getSubSequence(var.sequenceName, var.position - 1 - currentWindow/2, currentWindow);
+            if (entropy(refTarget.substr(0, refTarget.size()/2)) < 1 ||
+                entropy(refTarget.substr(refTarget.size()/2)) < 1) {
+                currentWindow *= 2;
+            } else {
+                break;
+            }
         }
 
         // do the alignments
