@@ -586,7 +586,7 @@ int main(int argc, char** argv) {
         }
 
         // while the entropy of either flank is < some target entropy (~1 is fine), increase the flank sizes
-        while (true) {
+        while (currentWindow < 2000) { // limit to one step > than this
             string refTarget = fastaReference.getSubSequence(var.sequenceName, var.position - 1 - currentWindow/2, currentWindow);
             if (entropy(refTarget.substr(0, refTarget.size()/2)) < 1 ||
                 entropy(refTarget.substr(refTarget.size()/2)) < 1) {
