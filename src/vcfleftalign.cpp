@@ -482,7 +482,7 @@ void printSummary(char** argv) {
 
 int main(int argc, char** argv) {
 
-    int window = 50;
+    int window = 150;
     VariantCallFile variantFile;
     string fastaFileName;
 
