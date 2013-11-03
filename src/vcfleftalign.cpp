@@ -474,9 +474,11 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl
          << "    -r, --reference FILE  Use this reference as a basis for realignment." << endl
-         << "    -w, --window N        Use a window of this many bp when left aligning (50)." << endl
+         << "    -w, --window N        Use a window of this many bp when left aligning (150)." << endl
          << endl
-         << "Left-aligns variants in the specified input file or stdin." << endl;
+         << "Left-aligns variants in the specified input file or stdin.  Window size is determined" << endl
+         << "dynamically according to the entropy of the regions flanking the indel.  These must have" << endl
+         << "entropy > 1 bit/bp, or be shorter than ~5kb." << endl;
     exit(0);
 }
 

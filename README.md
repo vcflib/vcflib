@@ -427,9 +427,12 @@ alignments.
 
     options:
         -r, --reference FILE  Use this reference as a basis for realignment.
-        -w, --window N        Use a window of this many bp when left aligning (50).
+        -w, --window N        Use a window of this many bp when left aligning (150).
 
-    Left-aligns variants in the specified input file or stdin.
+    Left-aligns variants in the specified input file or stdin.  Window size is determined
+    dynamically according to the entropy of the regions flanking the indel.  These must have
+    entropy > 1 bit/bp, or be shorter than ~5kb.
+
 
 ### vcflength
     
