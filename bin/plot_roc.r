@@ -6,6 +6,7 @@
 require(plyr)
 require(ggplot2)
 require(pracma)
+require(grid)
 
 argv <- commandArgs(trailingOnly = TRUE)
 
@@ -55,30 +56,98 @@ auc <- ddply(roc, .(set),
 
 write.table(auc, paste(prefix, ".auc.tsv", sep=""), row.names=FALSE, quote=FALSE, sep="\t")
 
+
+rocsnps <- ddply(roc, .(set),
+      function(x) {
+        data.frame(
+                   FPR=
+                     with(x,
+                          c(1,
+                            false_positive_snps/(false_positive_snps+ max(false_negative_snps + num_snps - false_positive_snps)))),
+                   TPR=
+                      with(x,
+                          c(max(1- false_negative_snps/true_snps),
+                            1- false_negative_snps/true_snps)),
+                   type=as.factor("snps")
+                   )
+          }
+      )
+
+rocindels <- ddply(roc, .(set),
+      function(x) {
+        data.frame(
+                   FPR=
+                     with(x,
+                          c(1,
+                            false_positive_indels/(false_positive_indels+ max(false_negative_indels + num_indels - false_positive_indels)))),
+                   TPR=
+                      with(x,
+                          c(max(1- false_negative_indels/true_indels),
+                            1- false_negative_indels/true_indels)),
+                   type=as.factor("indels")
+                   )
+          }
+      )
+
+
+if (FALSE) {
 if (true_snps>0) {
   ggplot(subset(roc, set != truthset),
          aes(false_positive_snps/(false_positive_snps+with(subset(roc, set==set), max(false_negative_snps + num_snps - false_positive_snps))),
              1- false_negative_snps/with(subset(roc, set==set), max(false_negative_snps + num_snps - false_positive_snps)),
              group=set,
-             color=set)) + scale_x_continuous("false positive rate",lim=c(xmin,xmax)) + scale_y_continuous("true positive rate",lim=c(ymin,ymax)) + geom_path() + theme_bw()
+             color=set)) + scale_x_continuous("false positive rate") + scale_y_continuous("true positive rate") + geom_path() + theme_bw()
+            + coord_cartesian(xlim=c(xmin,xmax), ylim=c(ymin,ymax))
   ggsave(paste(prefix, ".snps.png", sep=""), height=6, width=9)
 }
-
-#ggplot(roc, aes(false_positive_snps/(false_positive_snps+with(subset(roc, set==set), max(false_negative_snps + num_snps - false_positive_snps))), 1- false_negative_snps/with(subset(roc, set==set), max(false_negative_snps + num_snps - false_positive_snps)), group=set, color=set)) + scale_x_continuous("false positive rate", lim=c(0,0.025)) + scale_y_continuous("true positive rate", lim=c(0.9,1)) + geom_path()
-#ggsave(paste(prefix, "roc.snps.detail.png", sep=""), height=6, width=9)
 
 if (true_indels>0) {
   ggplot(subset(roc, set != truthset),
          aes(false_positive_indels/(false_positive_indels+with(subset(roc, set==set), max(false_negative_indels + num_indels - false_positive_indels))),
              1- false_negative_indels/with(subset(roc, set==set), max(false_negative_indels + num_indels - false_positive_indels)),
              group=set,
-             color=set)) + scale_x_continuous("false positive rate",lim=c(xmin,xmax)) + scale_y_continuous("true positive rate",lim=c(ymin,ymax)) + geom_path() + theme_bw()
+             color=set)) + scale_x_continuous("false positive rate") + scale_y_continuous("true positive rate") + geom_path() + theme_bw()
+            + coord_cartesian(xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+  ggsave(paste(prefix, ".indels.png", sep=""), height=6, width=9)
+}
+}
+
+
+# new versions
+if (true_snps>0) {
+  ggplot(subset(rocsnps, set != truthset),
+         aes(FPR,
+             TPR,
+             group=set,
+             color=set)) + scale_x_continuous("false positive rate") + scale_y_continuous("true positive rate") + geom_path() + theme_bw() + coord_cartesian(xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+  ggsave(paste(prefix, ".snps.png", sep=""), height=6, width=9)
+}
+
+if (true_indels>0) {
+  ggplot(subset(rocindels, set != truthset),
+         aes(FPR,
+             TPR,
+             group=set,
+             color=set)) + scale_x_continuous("false positive rate") + scale_y_continuous("true positive rate") + geom_path() + theme_bw() + coord_cartesian(xlim=c(xmin,xmax), ylim=c(ymin,ymax))
   ggsave(paste(prefix, ".indels.png", sep=""), height=6, width=9)
 }
 
-#ggplot(roc, aes(false_positive_indels/(false_positive_indels+with(subset(roc, set==set), max(false_negative_indels + num_indels - false_positive_indels))), 1- false_negative_indels/with(subset(roc, set==set), max(false_negative_indels + num_indels - false_positive_indels)), group=set, color=set)) + scale_x_continuous("false positive rate", lim=c(0,0.1)) + scale_y_continuous("true positive rate", lim=c(0,1)) + geom_path()
-#ggsave(paste(prefix, "roc.indels.detail.png", sep=""), height=6, width=9)
+if (true_indels>0 && true_snps>0) {
 
-#ggplot(roc, aes(false_positive_snps/(false_positive_snps+with(subset(roc, set==set), max(false_negative_snps + num_snps - false_positive_snps))), 1- false_negative_snps/with(subset(roc, set==set), max(false_negative_snps + num_snps - false_positive_snps)), group=set, color=set)) + scale_x_continuous("false positive rate", lim=c(0,0.3)) + scale_y_continuous("true positive rate", lim=c(0.7,1)) + geom_path()
-#ggsave(paste(prefix, "roc.snps.wide.png", sep=""), height=6, width=9)
+(
+  ggplot(subset(rbind(rocsnps,rocindels), set != truthset),
+         aes(FPR,
+             TPR,
+             group=set,
+             color=set))
+    + scale_x_continuous("false positive rate")
+    + scale_y_continuous("true positive rate")
+    + geom_path()
+    + theme_bw()
+    + coord_cartesian(xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+    + facet_grid(type ~ .)
+    + theme(panel.margin = unit(1, "lines")) 
+)
+  ggsave(paste(prefix, ".both.png", sep=""), height=5, width=5)
 
+}
