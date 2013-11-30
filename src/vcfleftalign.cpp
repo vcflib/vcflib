@@ -33,7 +33,7 @@ using namespace vcf;
 // In practice, we must call this function until the alignment is stabilized.
 
 #define VCFLEFTALIGN_DEBUG(msg) \
-    if (true) { cerr << msg; }
+    if (false) { cerr << msg; }
 
 class VCFIndelAllele {
     friend ostream& operator<<(ostream&, const VCFIndelAllele&);
