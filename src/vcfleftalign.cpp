@@ -33,7 +33,7 @@ using namespace vcf;
 // In practice, we must call this function until the alignment is stabilized.
 
 #define VCFLEFTALIGN_DEBUG(msg) \
-    if (false) { cerr << msg; }
+    if (true) { cerr << msg; }
 
 class VCFIndelAllele {
     friend ostream& operator<<(ostream&, const VCFIndelAllele&);
@@ -148,13 +148,14 @@ void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<A
     float gapExtendPenalty = 3.33f;
 
     // establish reference sequence
+    string pad = string(window/2, 'Z');
     string leftFlank = reference.getSubSequence(var.sequenceName, var.zeroBasedPosition() - window/2, window/2);
     string rightFlank = reference.getSubSequence(var.sequenceName, var.zeroBasedPosition() + var.ref.size(), window/2);
-    ref = leftFlank + var.ref + rightFlank;
+    ref = pad + leftFlank + var.ref + rightFlank + pad;
 
     // and iterate through the alternates, generating alignments
     for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string alt = leftFlank + *a + rightFlank;
+        string alt = pad + leftFlank + *a + rightFlank + pad;
         CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
         unsigned int referencePos;
         string cigar;
@@ -582,9 +583,12 @@ int main(int argc, char** argv) {
 
         // determine window size to prevent mismapping with SW algorithm
         int currentWindow = window;
-        if (var.ref.size()*2 > currentWindow) currentWindow = var.ref.size()*2;
+        int scale = 2;
+        if (var.ref.size()*scale > currentWindow) currentWindow = var.ref.size()*scale;
         for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
-            if (a->size()*2 > currentWindow) currentWindow = a->size()*2;
+            if (a->size()*scale > currentWindow) {
+                currentWindow = a->size()*scale;
+            }
         }
 
         // while the entropy of either flank is < some target entropy (~1 is fine), increase the flank sizes
@@ -592,7 +596,7 @@ int main(int argc, char** argv) {
             string refTarget = fastaReference.getSubSequence(var.sequenceName, var.position - 1 - currentWindow/2, currentWindow);
             if (entropy(refTarget.substr(0, refTarget.size()/2)) < 1 ||
                 entropy(refTarget.substr(refTarget.size()/2)) < 1) {
-                currentWindow *= 2;
+                currentWindow *= scale;
             } else {
                 break;
             }
@@ -622,42 +626,70 @@ int main(int argc, char** argv) {
         long int newEndPosition = var.position-currentWindow/2;
         // check for no-indel case
         int newLength = var.ref.size();
-        for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end(); ++a) {
+        bool giveUp = false;
+        for (vector<AltAlignment>::iterator a = alignments.begin(); a != alignments.end() && !giveUp; ++a) {
             // get the first mismatching position
             Cigar::iterator c = a->cigar.begin();
+
+            int rp = 0;
+            int sp = 0;
+            bool hitMismatch = false;
+
             int matchingBpAtStart = 0;
-            // check for clipping??  shouldn't need to... with the window size set above dynamically for allele length
-            char op = c->second[0];
-            while (c != a->cigar.end() && c->second[0] == 'M') {
-                matchingBpAtStart += c->first;
+            int matchingBpAtEnd = 0;
+            // will be set to true if the first reference position match is broken by a SNP, not an indel
+            bool leadingSNP = false;
+
+            while (c != a->cigar.end()) {
+                char op = c->second[0];
+                if (c == a->cigar.begin()) {
+                    if (op != 'M') {
+                        cerr << "alignment does not start on matched sequence" << endl;
+                        cerr << var << endl;
+                        exit(1);
+                    }
+                    int i = 0;
+                    for ( ; i < c->first; ++i) {
+                        if (ref[i] != a->seq[i]) {
+                            leadingSNP = true;
+                            break;
+                        }
+                    }
+                    matchingBpAtStart = i;
+                }
+                if (!leadingSNP && c == (a->cigar.begin()+1)) {
+                    // if the first thing we run into is an indel, step back, per VCF spec
+                    if (op == 'D' || op == 'I') {
+                        --matchingBpAtStart;
+                    }
+                }
+                if (c == (a->cigar.end()-1)) {
+                    if (op != 'M') {
+                        // soft clip at end
+                        // it'll be hard to interpret this
+                        // the alignments sometimes generate this
+                        // best thing to do is to move on
+                        //cerr << "alignment does not end on matched sequence" << endl;
+                        //cout << var << endl;
+                        //exit(1);
+                        giveUp = true;
+                        break;
+                    }
+                    int i = 0;
+                    for ( ; i < c->first; ++i) {
+                        if (ref[ref.size()-1-i] != a->seq[a->seq.size()-1-i]) {
+                            break;
+                        }
+                    }
+                    matchingBpAtEnd = i;
+                }
                 ++c;
             }
-            if (c == a->cigar.end()) {
-                //cerr << "variant at " << var.sequenceName << ":" << var.position << " appears to be equal to the reference" << endl;
-                //exit(1);
-                continue;
-            }
-            // if the first mismatching op is an indel, step back 1bp
-            op = c->second[0];
-            if (op == 'I' || op == 'D') {
-                --matchingBpAtStart;
-            }
-            // now get the last non-reference position
-            assert(a->cigar.size() > 1);
-            c = (a->cigar.end()-1);
-            op = c->second[0];
-            if (op != 'M' && op != 'S') {
-                cerr << "variant at " << var.sequenceName << ":" << var.position << endl;
-                cerr << "alignment of alt " << a->seq << " against ref allele yields non-match state at end of alignment" << endl;
-                exit(1);
-            }
-            int matchingBpAtEnd = c->first;
+
             int altMismatchLength = a->seq.size() - matchingBpAtEnd - matchingBpAtStart;
             int refMismatchLength = (var.ref.size() + currentWindow) - matchingBpAtEnd - matchingBpAtStart;
-            /*
-            cerr << "alt mismatch length " << altMismatchLength << endl
-                 << "ref mismatch length " << refMismatchLength << endl;
-            */
+            //cerr << "alt mismatch length " << altMismatchLength << endl
+            //     << "ref mismatch length " << refMismatchLength << endl;
             long int newStart = var.position - currentWindow/2 + matchingBpAtStart;
             long int newEnd = newStart + refMismatchLength;
             //cerr << "ref should run from " << newStart << " to " << newStart + refMismatchLength << endl;
@@ -667,16 +699,22 @@ int main(int argc, char** argv) {
             //if (newRefSize < refMismatchLength) newRefSize = refMismatchLength;
         }
 
+        // the alignment failed for some reason, continue
+        if (giveUp) {
+            cout << var << endl;
+            continue;
+        }
+
         //cerr << "new ref start " << newPosition << " and end " << newEndPosition << " was " << var.position << "," << var.position + var.ref.size() << endl;
         int newRefSize = newEndPosition - newPosition;
         string newRef = fastaReference.getSubSequence(var.sequenceName, newPosition-1, newRefSize);
         // get the number of bp to strip from the alts
         int stripFromStart = currentWindow/2 - (var.position - newPosition);
         int stripFromEnd = (currentWindow + newRefSize) - (stripFromStart + newRefSize) + (var.ref.size() - newRefSize);
-        /*
-        cerr << "strip from start " << stripFromStart << endl;
-        cerr << "strip from end " << stripFromEnd << endl;
-        */
+
+        //cerr << "strip from start " << stripFromStart << endl;
+        //cerr << "strip from end " << stripFromEnd << endl;
+
         vector<string> newAlt;
         vector<string>::iterator l = var.alt.begin();
         bool failedAlt = false;
@@ -688,8 +726,34 @@ int main(int argc, char** argv) {
             if (alt.empty()) failedAlt = true;
         }
 
-        // *if* everything is OK, update the variant
+        // check the before/after haplotypes
+        bool brokenRealignment = false;
         if (!newRef.empty() && !failedAlt) {
+            int slop = 50; // 50 extra bp!
+            int haplotypeStart = min(var.position, newPosition) - slop;
+            int haplotypeEnd = max(var.position + var.ref.size(), newPosition + newRef.size()) + slop;
+            string referenceHaplotype = fastaReference.getSubSequence(var.sequenceName, haplotypeStart - 1,
+                                                                      haplotypeEnd - haplotypeStart);
+            vector<string>::iterator o = var.alt.begin();
+            vector<string>::iterator n = newAlt.begin();
+            for ( ; o != var.alt.end() ; ++o, ++n) {
+                // map the haplotypes
+                string oldHaplotype = referenceHaplotype;
+                string newHaplotype = referenceHaplotype;
+                oldHaplotype.replace(var.position - haplotypeStart, var.ref.size(), *o);
+                newHaplotype.replace(newPosition - haplotypeStart, newRef.size(), *n);
+                if (oldHaplotype != newHaplotype) {
+                    cerr << "broken left alignment!" << endl
+                         << "old " << oldHaplotype << endl
+                         << "new " << newHaplotype << endl;
+                    cerr << "was: " << var << endl;
+                    brokenRealignment = true;
+                }
+            }
+        }
+
+        // *if* everything is OK, update the variant
+        if (!brokenRealignment && !newRef.empty() && !failedAlt) {
             var.ref = newRef;
             var.alt = newAlt;
             var.position = newPosition;

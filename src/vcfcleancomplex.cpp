@@ -50,37 +50,16 @@ int main(int argc, char** argv) {
             for (vector<VariantAllele>::iterator a = vs.begin(); a != vs.end(); ++a) {
                 if (a->ref != a->alt) {
                     valleles.push_back(*a);
-                    //cerr << a->ref << " " << a->alt << endl;
                 }
             }
             if (valleles.size() == 1) {
                 // do we have extra sequence hanging around?
                 VariantAllele& varallele = valleles.front();
-                //cout << varallele.ref << " " << varallele.alt << endl;
-                // this works for the special case where there is one variant allele
                 if (vs.front().ref == vs.front().alt) {
                     var.position = varallele.position;
                     var.ref = var.ref.substr(vs.front().ref.size(), varallele.ref.size());
                     var.alt.front() = varallele.alt;
                 }
-                // for deletions and insertions, we have to keep a leading base
-                // but the variant allele doesn't have these
-                /*
-                if (varallele.ref.size() == varallele.alt.size()) {
-                    //if (varallele.position != var.position) {
-                    var.ref = varallele.ref;
-                    var.alt.front() = varallele.alt;
-                    var.position = varallele.position;
-                } else if (varallele.ref.size() < varallele.alt.size()) {
-                    if (varallele.position != var.position + 1) {
-                        // TODO unhandled
-                    }
-                } else if (varallele.ref.size() < varallele.alt.size()) {
-                    if (varallele.position != var.position) {
-                        // TODO unhandled
-                    }
-                }
-                */
             }
         }
         cout << var << endl;
