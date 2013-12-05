@@ -21,14 +21,14 @@ void printSummary(char** argv) {
          << "options:" << endl
          << endl
          << "    -h, --help             this dialog" << endl
-         << "    -w, --window N         number of sites to sort (default 100)" << endl
+         << "    -w, --window N         number of sites to sort (default 10000)" << endl
          << "    -a, --all              load all sites and then sort in memory" << endl;
 }
 
 int main(int argc, char** argv) {
 
     VariantCallFile variantFile;
-    int sortSitesWindow = 100;
+    int sortSitesWindow = 10000;
     bool sortAll = false;
 
     int c;
