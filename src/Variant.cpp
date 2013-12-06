@@ -981,6 +981,7 @@ void VariantCallFile::updateSamples(vector<string>& newSamples) {
 // non-destructive version of above
 string VariantCallFile::headerWithSampleNames(vector<string>& newSamples) {
     // regenerate the last line of the header
+    if (newSamples.empty()) return header;
     vector<string> headerLines = split(header, '\n');
     vector<string> colnames = split(headerLines.at(headerLines.size() - 1), '\t'); // get the last, update the samples
     vector<string> newcolnames;

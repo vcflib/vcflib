@@ -11,12 +11,18 @@ void printSummary(char** argv) {
          << "Any number of VCF files may be combined.  The INFO field and other columns are taken from" << endl
          << "one of the files which are combined when records in multiple files match.  Alleles must" << endl
          << "have identical ordering to be combined into one record.  If they do not, multiple records" << endl
-         << "will be emitted." << endl;
+         << "will be emitted." << endl
+         << "WARNING: input VCFs are assumed to have no more than one record per position!" << endl
+         << "This can be guaranteed using vcfcreatemulti on inputs." << endl;
     exit(1);
 }
 
 
 int main(int argc, char** argv) {
+
+    if (argc < 2) {
+        printSummary(argv);
+    }
 
     int c;
     while (true) {
@@ -66,19 +72,22 @@ int main(int argc, char** argv) {
         string inputFilename = argv[i];
         vcf = new VariantCallFile;
         vcf->open(inputFilename);
-        Variant* var = new Variant(*vcf);
-        vcf->getNextVariant(*var);
-        if (variantFiles.find(var->sequenceName) == variantFiles.end()) {
-            chromOrder.push_back(var->sequenceName);
+        if (vcf->is_open()) {
+            Variant* var = new Variant(*vcf);
+            vcf->getNextVariant(*var);
+            if (variantFiles.find(var->sequenceName) == variantFiles.end()) {
+                chromOrder.push_back(var->sequenceName);
+            }
+            variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
+            sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
         }
-        variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
-        sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
     }
 
     sort(sampleNames.begin(), sampleNames.end());
     sampleNames.erase(unique(sampleNames.begin(), sampleNames.end()), sampleNames.end());
 
     VariantCallFile outputCallFile;
+    
     string header = vcf->headerWithSampleNames(sampleNames);
     outputCallFile.openForOutput(header);
 
@@ -103,7 +112,8 @@ int main(int argc, char** argv) {
             for ( ; v != vars.end(); ++v) {
                 VariantCallFile* vcf = v->first;
                 Variant* var = v->second;
-                if (variant.info.empty()) {
+                //if (variant.info.empty()) {
+                if (v == vars.begin()) { // set these using the first matching variant
                     variant.sequenceName = var->sequenceName;
                     variant.position = var->position;
                     variant.id = var->id;
