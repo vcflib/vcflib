@@ -119,6 +119,7 @@ int main(int argc, char** argv) {
                     variant.id = var->id;
                     variant.ref = var->ref;
                     variant.alt = var->alt;
+                    variant.filter = var->filter;
                     variant.quality = var->quality;
                     variant.info = var->info;
                     variant.format = var->format;
