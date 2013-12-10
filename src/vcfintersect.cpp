@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     bool invert = false;
     bool contained = true;
     bool overlapping = false;
-    int windowsize = 50;
+    int windowsize = 30;
     bool loci = false;
     bool refmatch = false;
     string tag;

@@ -472,6 +472,7 @@ vector<pair<int, string> > splitCigar(const string& cigarStr);
 list<pair<int, string> > splitCigarList(const string& cigarStr);
 int cigarRefLen(const vector<pair<int, char> >& cigar);
 int cigarRefLen(const vector<pair<int, string> >& cigar);
+vector<pair<int, string> > cleanCigar(const vector<pair<int, string> >& cigar);
 string joinCigar(const vector<pair<int, string> >& cigar);
 string joinCigar(const vector<pair<int, char> >& cigar);
 string joinCigarList(const list<pair<int, string> >& cigar);

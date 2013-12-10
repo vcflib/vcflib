@@ -1501,6 +1501,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         // left-realign the alignment...
 
         vector<pair<int, string> > cigarData = splitCigar(cigar);
+
         if (cigarData.front().second != "M" || cigarData.back().second != "M"
             || cigarData.front().first < paddingLen || cigarData.back().first < paddingLen) {
             cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
@@ -1512,6 +1513,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;;
         }
+        cigarData = cleanCigar(cigarData);
         cigar = joinCigar(cigarData);
 
         int altpos = 0;
@@ -1878,6 +1880,16 @@ list<pair<int, string> > splitCigarList(const string& cigarStr) {
         cigar.push_back(make_pair(atoi(number.c_str()), type));
     }
     return cigar;
+}
+
+vector<pair<int, string> > cleanCigar(const vector<pair<int, string> >& cigar) {
+    vector<pair<int, string> > cigarClean;
+    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+        if (c->first > 0) {
+            cigarClean.push_back(*c);
+        }
+    }
+    return cigarClean;
 }
 
 string joinCigar(const vector<pair<int, string> >& cigar) {
