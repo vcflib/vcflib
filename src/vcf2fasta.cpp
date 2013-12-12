@@ -96,7 +96,7 @@ void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, vector<strin
         map<int, SampleFastaFile*>& outs = outputs[*s];
         int p = ploidies[*s];
         for (int i = 0; i < p; ++i) {
-            string name = *s + "_" + seqName + ":" + convert(i) + ".fasta";
+            string name = prefix + *s + "_" + seqName + ":" + convert(i) + ".fasta";
             if (!outs[i]) {
                 SampleFastaFile* fp = new SampleFastaFile;
                 outs[i] = fp;

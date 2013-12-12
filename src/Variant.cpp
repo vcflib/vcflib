@@ -1513,7 +1513,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;;
         }
-        cigarData = cleanCigar(cigarData);
+        //cigarData = cleanCigar(cigarData);
         cigar = joinCigar(cigarData);
 
         int altpos = 0;
