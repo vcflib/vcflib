@@ -14,6 +14,9 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl 
          << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
+         << "    -w, --window-size N     Merge variants at most this many bp apart (default 30)" << endl
+         << "    -o, --only-variants     Don't output the entire haplotype, just concatenate" << endl
+         << "                            REF/ALT strings (delimited by \":\")" << endl
          << endl
          << "Convert genotype-based phased alleles within --window-size into haplotype alleles." << endl
          << "Will break haplotype construction when encountering non-phased genotypes on input." << endl
@@ -40,6 +43,7 @@ int main(int argc, char** argv) {
     string vcfFileName;
     string fastaFileName;
     int windowsize = 30;
+    bool onlyVariants = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -53,18 +57,23 @@ int main(int argc, char** argv) {
                 {"help", no_argument, 0, 'h'},
                 {"window-size", required_argument, 0, 'w'},
                 {"reference", required_argument, 0, 'r'},
+                {"only-variants", no_argument, 0, 'o'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hw:r:",
+        c = getopt_long (argc, argv, "how:r:",
                          long_options, &option_index);
 
         if (c == -1)
             break;
 
         switch (c) {
+
+        case 'o':
+            onlyVariants = true;
+            break;
 
 	    case 'w':
             windowsize = atoi(optarg);
@@ -251,7 +260,10 @@ int main(int argc, char** argv) {
                 cerr << endl;
                 */
 
-                string haplotype = referenceHaplotype;
+                string haplotype;
+                if (!onlyVariants) {
+                    haplotype = referenceHaplotype;
+                }
                 bool isreference = true;
                 bool impossibleHaplotype = false;
                 int referenceInsertOffset = 0;
@@ -260,9 +272,15 @@ int main(int argc, char** argv) {
                 int lastrefend = 0;
                 for (vector<int>::const_iterator z = u->begin(); z != u->end(); ++z, ++j) {
                     int i = *z;
+                    Variant& vartoInsert = cluster.at(j);
+                    if (i == 0) {
+                        if (onlyVariants) {
+                            if (!haplotype.empty()) haplotype.append(":");
+                            haplotype.append(vartoInsert.ref);
+                        }
+                    }
                     if (i != 0) {
                         isreference = false;
-                        Variant& vartoInsert = cluster.at(j);
                         string& alternate = vartoInsert.alleles.at(i);
                         if (vartoInsert.position < lastrefend) {
                             cerr << "impossible haplotype, overlapping alleles at " << vartoInsert.sequenceName << ":" << vartoInsert.position << endl;
@@ -271,13 +289,18 @@ int main(int argc, char** argv) {
                         } else {
                             //cerr << vartoInsert.position << " " << cluster.front().position + referenceInsertOffset << endl;
                             //cerr << "replacing " << vartoInsert.ref << " at " << vartoInsert.position - cluster.front().position + referenceInsertOffset << " with " << alternate << endl;
-                            haplotype.replace(vartoInsert.position - cluster.front().position + referenceInsertOffset,
-                                              vartoInsert.ref.size(), alternate);
-                            if (alternate.size() != vartoInsert.ref.size()) {
-                                referenceInsertOffset += alternate.size() - vartoInsert.ref.size();
+                            if (onlyVariants) {
+                                if (!haplotype.empty()) haplotype.append(":");
+                                haplotype.append(alternate);
+                            } else {
+                                haplotype.replace(vartoInsert.position - cluster.front().position + referenceInsertOffset,
+                                                  vartoInsert.ref.size(), alternate);
+                                if (alternate.size() != vartoInsert.ref.size()) {
+                                    referenceInsertOffset += alternate.size() - vartoInsert.ref.size();
+                                }
+                                lastpos = vartoInsert.position;
+                                lastrefend = vartoInsert.position + vartoInsert.ref.size();
                             }
-                            lastpos = vartoInsert.position;
-                            lastrefend = vartoInsert.position + vartoInsert.ref.size();
                         }
                     }
                 }
@@ -304,7 +327,16 @@ int main(int argc, char** argv) {
                 }
             }
 
-            outputVar.ref = alleles[0];
+            if (onlyVariants) {
+                string newRef;
+                for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {
+                    if (!newRef.empty()) newRef.append(":");
+                    newRef.append(v->ref);
+                }
+                outputVar.ref = newRef;
+            } else {
+                outputVar.ref = alleles[0];
+            }
             outputVar.alt.clear();
             for (int i = 1; i < alleleIndex; ++i) {
                 outputVar.alt.push_back(alleles[i]);
