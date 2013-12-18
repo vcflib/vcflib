@@ -501,7 +501,7 @@ int main(int argc, char** argv) {
 
     // now print the results
 
-    if (!addTags) {
+    if (!addTags && !addType) {
         cout << "total variant sites:\t" << variantSites << endl
              << "of which " << biallelics << " (" << (double) biallelics / variantSites << ") are biallelic and "
                             << multiallelics << " (" << (double) multiallelics / variantSites << ") are multiallelic" << endl
