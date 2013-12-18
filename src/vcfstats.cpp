@@ -66,6 +66,7 @@ void printSummary(char** argv) {
          << "                          regions may be specified." << endl
          << "    -a, --add-info        add the statistics intermediate information to the VCF file," << endl
          << "                          writing out VCF records instead of summary statistics" << endl
+         << "    -t, --add-type        only add the type= field to the info (faster than -a)" << endl
          << "    -l, --no-length-frequency    don't out the indel and mnp length-frequency spectra" << endl
          << "    -m, --match-score N          match score for SW algorithm" << endl
          << "    -x, --mismatch-score N       mismatch score for SW algorithm" << endl
@@ -80,6 +81,7 @@ int main(int argc, char** argv) {
 
     vector<string> regions;
     bool addTags = false;
+    bool addType = false;
     bool lengthFrequency = true;
 
     // constants for SmithWaterman algorithm
@@ -98,7 +100,8 @@ int main(int argc, char** argv) {
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
                 {"region", required_argument, 0, 'r'},
-                {"add", no_argument, 0, 'a'},
+                {"add-info", no_argument, 0, 'a'},
+                {"add-type", no_argument, 0, 't'},
                 {"no-length-frequency", no_argument, 0, 'l'},
                 {"match-score", required_argument, 0, 'm'},
                 {"mismatch-score", required_argument, 0, 'x'},
@@ -110,7 +113,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hlar:m:x:o:e:",
+        c = getopt_long (argc, argv, "hlatr:m:x:o:e:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -146,6 +149,10 @@ int main(int argc, char** argv) {
             addTags = true;
             break;
 
+	    case 't':
+            addType = true;
+            break;
+
 	    case 'm':
             matchScore = atof(optarg);
 	        break;
@@ -178,6 +185,12 @@ int main(int argc, char** argv) {
 
     if (!variantFile.is_open()) {
         return 1;
+    }
+
+    if (addType && !addTags) {
+        variantFile.addHeaderLine("##INFO=<ID=type,Number=A,Type=String,Description=\"The type of the allele, either snp, ins, del, complex, or ref.\">");
+        variantFile.addHeaderLine("##INFO=<ID=cigar,Number=A,Type=String,Description=\"The CIGAR-style representation of the alternate allele as aligned to the reference\">");
+        cout << variantFile.header << endl;
     }
 
     if (addTags) {
@@ -274,7 +287,7 @@ int main(int argc, char** argv) {
                     uniqueVariants[*v].push_back(alternate);
                 }
 
-                if (addTags) {
+                if (addTags || addType) {
                     string cigar;
                     pair<int, string> element;
                     for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
@@ -310,6 +323,8 @@ int main(int argc, char** argv) {
             if (addTags) {
                 var.info["cigar"] = cigars;
                 var.info["reflen"].push_back(convert(var.ref.size()));
+            } else if (addType) {
+                var.info["cigar"] = cigars;
             }
 
             variantAlleles += var.alt.size();
@@ -319,7 +334,7 @@ int main(int argc, char** argv) {
                 const VariantAllele& va = v->first;
                 vector<string>& alternates = v->second;
 
-                if (!addTags) { // don't add any tag information if we're not going to output it
+                if (!(addTags || addType)) { // don't add any tag information if we're not going to output it
                     alternates.clear();
                 }
 
@@ -416,7 +431,7 @@ int main(int argc, char** argv) {
                     }
                 }
             }
-            if (addTags) {
+            if (addTags || addType) {
                 for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                     string vartype;
                     if (alleleStats[*a].insertions + alleleStats[*a].deletions == 0) {
@@ -436,13 +451,15 @@ int main(int argc, char** argv) {
                     } else {
                         vartype = "complex";
                     }
-                    var.info["mismatches"].push_back(convert(alleleStats[*a].mismatches));
-                    var.info["insertions"].push_back(convert(alleleStats[*a].insertions));
-                    var.info["deletions"].push_back(convert(alleleStats[*a].deletions));
-                    var.info["transitions"].push_back(convert(alleleStats[*a].transitions));
-                    var.info["transversions"].push_back(convert(alleleStats[*a].transversions));
-                    var.info["deaminations"].push_back(convert(alleleStats[*a].deaminations));
-                    var.info["aminations"].push_back(convert(alleleStats[*a].aminations));
+                    if (addTags) {
+                        var.info["mismatches"].push_back(convert(alleleStats[*a].mismatches));
+                        var.info["insertions"].push_back(convert(alleleStats[*a].insertions));
+                        var.info["deletions"].push_back(convert(alleleStats[*a].deletions));
+                        var.info["transitions"].push_back(convert(alleleStats[*a].transitions));
+                        var.info["transversions"].push_back(convert(alleleStats[*a].transversions));
+                        var.info["deaminations"].push_back(convert(alleleStats[*a].deaminations));
+                        var.info["aminations"].push_back(convert(alleleStats[*a].aminations));
+                    }
                     var.info["type"].push_back(vartype);
                 }
                 cout << var << endl;
