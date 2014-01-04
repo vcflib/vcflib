@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include <getopt.h>
 
+
 using namespace std;
 using namespace vcf;
 
@@ -16,7 +17,6 @@ void printSummary(char** argv) {
          << "This can be guaranteed using vcfcreatemulti on inputs." << endl;
     exit(1);
 }
-
 
 int main(int argc, char** argv) {
 
@@ -62,12 +62,27 @@ int main(int argc, char** argv) {
     string randomHeader;
     VariantCallFile* vcf;
 
-    list<string> chromOrder;
+    // structure to track ordered variants
+    //ChromNameCompare chromCompare;
 
-    map<string, // chrom
-        map<long int, // pos
-            map<vector<string>, // alts
-                map<VariantCallFile*, Variant*> > > > variantFiles;
+    typedef 
+        map<vector<string>, // alts
+            map<VariantCallFile*, Variant*> >
+        Position;
+
+    typedef
+        map<long int, Position>
+        ChromVariants;
+
+    typedef
+        map<string, // chrom
+            ChromVariants,
+            ChromNameCompare>
+        VariantsByChromPosAltFile;
+
+    VariantsByChromPosAltFile  variantsByChromPosAltFile;
+
+
     for (int i = optind; i != argc; ++i) {
         string inputFilename = argv[i];
         vcf = new VariantCallFile;
@@ -75,10 +90,7 @@ int main(int argc, char** argv) {
         if (vcf->is_open()) {
             Variant* var = new Variant(*vcf);
             vcf->getNextVariant(*var);
-            if (variantFiles.find(var->sequenceName) == variantFiles.end()) {
-                chromOrder.push_back(var->sequenceName);
-            }
-            variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
+            variantsByChromPosAltFile[var->sequenceName][var->position][var->alt][vcf] = var;
             sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
         }
     }
@@ -93,18 +105,19 @@ int main(int argc, char** argv) {
 
     cout << outputCallFile.header << endl;
 
-    while (!variantFiles.empty()) {
+    while (!variantsByChromPosAltFile.empty()) {
         // get lowest variant(s)
         // if they have identical alts and position, combine
         // otherwise just output, but with the same sample names
-        map<long int, map<vector<string>, map<VariantCallFile*, Variant*> > >& chrom = variantFiles[chromOrder.front()];
+
+        ChromVariants& chrom = variantsByChromPosAltFile.begin()->second;
         if (chrom.empty()) {
-            variantFiles.erase(chromOrder.front());
-            chromOrder.pop_front();
+            variantsByChromPosAltFile.erase(variantsByChromPosAltFile.begin());
             continue;
         }
-        map<vector<string>, map<VariantCallFile*, Variant*> >& pos = chrom.begin()->second;
-        map<vector<string>, map<VariantCallFile*, Variant*> >::iterator s = pos.begin();
+        
+        Position& pos = chrom.begin()->second;
+        Position::iterator s = pos.begin();
         for ( ; s != pos.end(); ++s) {
             Variant variant(outputCallFile);
             map<VariantCallFile*, Variant*>& vars = s->second;
@@ -129,14 +142,12 @@ int main(int argc, char** argv) {
                     variant.samples[sample->first] = sample->second;
                 }
                 if (vcf->getNextVariant(*var)) {
-                    if (variantFiles.find(var->sequenceName) == variantFiles.end()) {
-                        chromOrder.push_back(var->sequenceName);
-                    }
-                    variantFiles[var->sequenceName][var->position][var->alt][vcf] = var;
+                    variantsByChromPosAltFile[var->sequenceName][var->position][var->alt][vcf] = var;
                 }
             }
-            if (!variant.info.empty())
-                cout << variant << endl;
+            // what was this chck for?
+            //if (!variant.info.empty())
+            cout << variant << endl;
         }
         // XXXXXXX this will cause problems if the files have more than one record per position!!!
         chrom.erase(chrom.begin());

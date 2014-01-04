@@ -16,3 +16,6 @@
 [submodule "fsom"]
 	path = fsom
 	url = git://github.com/ekg/fsom.git
+[submodule "filevercmp"]
+	path = filevercmp
+	url = https://github.com/ekg/filevercmp.git

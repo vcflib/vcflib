@@ -87,6 +87,8 @@ LEFTALIGN = smithwaterman/LeftAlign.o
 
 FSOM = fsom/fsom.o
 
+FILEVERCMP = filevercmp/filevercmp.o
+
 INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
 
 all: $(OBJECTS) $(BINS)
@@ -133,11 +135,14 @@ $(FASTAHACK):
 $(FSOM):
 	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
 
+$(FILEVERCMP):
+	cd filevercmp && make
+
 $(SHORTBINS):
 	$(MAKE) bin/$@
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
+	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) $(FILEVERCMP) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

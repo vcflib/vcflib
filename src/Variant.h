@@ -21,6 +21,9 @@
 #include "ssw_cpp.h"
 #include "convert.h"
 #include "multichoose/multichoose.h"
+extern "C" {
+    #include "filevercmp/filevercmp.h"
+}
 
 using namespace std;
 
@@ -477,6 +480,15 @@ string joinCigar(const vector<pair<int, string> >& cigar);
 string joinCigar(const vector<pair<int, char> >& cigar);
 string joinCigarList(const list<pair<int, string> >& cigar);
 bool isEmptyCigarElement(const pair<int, string>& elem);
+
+// for sorting, generating maps ordered by chromosome name
+class ChromNameCompare {
+public:
+    bool operator()(const string& a, const string& b) {
+        return (filevercmp(a.c_str(), b.c_str()) < 0);
+        //return a < b;
+    }
+};
 
 
 } // end namespace VCF

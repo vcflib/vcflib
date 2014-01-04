@@ -484,21 +484,26 @@ VariantFieldType Variant::infoType(string& key) {
         var.printAlt(out);
         out << "\t"
             << var.quality << "\t"
-            << (var.filter.empty() ? "." : var.filter) << "\t";
-        for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-            if (!i->second.empty()) {
-                out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+            << (var.filter.empty() ? "." : var.filter)
+            << "\t";
+        if (var.info.empty() && var.infoFlags.empty()) {
+            out << ".";
+        } else {
+            for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
+                if (!i->second.empty()) {
+                    out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+                }
             }
-        }
-        for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
-            if (i == var.infoFlags.end()) {
-                out << "";
-            } else if (i == var.infoFlags.begin() && var.info.empty()) {
-                out << "";
-            } else {
-                out << ";";
+            for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
+                if (i == var.infoFlags.end()) {
+                    out << "";
+                } else if (i == var.infoFlags.begin() && var.info.empty()) {
+                    out << "";
+                } else {
+                    out << ";";
+                }
+                out << i->first;
             }
-            out << i->first;
         }
         if (!var.format.empty()) {
             out << "\t";
