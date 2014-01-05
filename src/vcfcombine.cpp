@@ -12,9 +12,7 @@ void printSummary(char** argv) {
          << "Any number of VCF files may be combined.  The INFO field and other columns are taken from" << endl
          << "one of the files which are combined when records in multiple files match.  Alleles must" << endl
          << "have identical ordering to be combined into one record.  If they do not, multiple records" << endl
-         << "will be emitted." << endl
-         << "WARNING: input VCFs are assumed to have no more than one record per position!" << endl
-         << "This can be guaranteed using vcfcreatemulti on inputs." << endl;
+         << "will be emitted." << endl;
     exit(1);
 }
 
@@ -82,7 +80,7 @@ int main(int argc, char** argv) {
 
     VariantsByChromPosAltFile  variantsByChromPosAltFile;
 
-
+    VariantCallFile* firstVCF = NULL;
     for (int i = optind; i != argc; ++i) {
         string inputFilename = argv[i];
         vcf = new VariantCallFile;
@@ -92,15 +90,18 @@ int main(int argc, char** argv) {
             vcf->getNextVariant(*var);
             variantsByChromPosAltFile[var->sequenceName][var->position][var->alt][vcf] = var;
             sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
+            // the first file is tracked for header generation
+            if (firstVCF == NULL) firstVCF = vcf;
         }
     }
 
+    // get sorted, unique samples in all files
     sort(sampleNames.begin(), sampleNames.end());
     sampleNames.erase(unique(sampleNames.begin(), sampleNames.end()), sampleNames.end());
 
+    // now that we've accumulated the sample information we can generate the combined header
     VariantCallFile outputCallFile;
-    
-    string header = vcf->headerWithSampleNames(sampleNames);
+    string header = firstVCF->headerWithSampleNames(sampleNames);
     outputCallFile.openForOutput(header);
 
     cout << outputCallFile.header << endl;

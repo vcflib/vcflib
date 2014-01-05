@@ -486,7 +486,6 @@ class ChromNameCompare {
 public:
     bool operator()(const string& a, const string& b) {
         return (filevercmp(a.c_str(), b.c_str()) < 0);
-        //return a < b;
     }
 };
 
