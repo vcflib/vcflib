@@ -87,10 +87,11 @@ int main(int argc, char** argv) {
         vcf->open(inputFilename);
         if (vcf->is_open()) {
             Variant* var = new Variant(*vcf);
-            vcf->getNextVariant(*var);
-            variantsByChromPosAltFile[var->sequenceName][var->position][var->alt][vcf] = var;
-            sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
-            // the first file is tracked for header generation
+            if (vcf->getNextVariant(*var)) {
+                variantsByChromPosAltFile[var->sequenceName][var->position][var->alt][vcf] = var;
+                sampleNames.insert(sampleNames.end(), vcf->sampleNames.begin(), vcf->sampleNames.end());
+                // the first file is tracked for header generation
+            }
             if (firstVCF == NULL) firstVCF = vcf;
         }
     }
