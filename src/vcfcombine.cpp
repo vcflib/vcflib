@@ -12,7 +12,11 @@ void printSummary(char** argv) {
          << "Any number of VCF files may be combined.  The INFO field and other columns are taken from" << endl
          << "one of the files which are combined when records in multiple files match.  Alleles must" << endl
          << "have identical ordering to be combined into one record.  If they do not, multiple records" << endl
-         << "will be emitted." << endl;
+         << "will be emitted." << endl
+         << endl
+         << "options:" << endl
+         << "    -h --help           This text." << endl
+         << "    -r --region REGION  A region specifier of the form chrN:x-y to bound the merge" << endl;
     exit(1);
 }
 
@@ -22,6 +26,8 @@ int main(int argc, char** argv) {
         printSummary(argv);
     }
 
+    string region;
+
     int c;
     while (true) {
         static struct option long_options[] =
@@ -29,12 +35,13 @@ int main(int argc, char** argv) {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
             {"help", no_argument, 0, 'h'},
+            {"region", required_argument, 0, 'r'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "h",
+        c = getopt_long (argc, argv, "hr:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -44,6 +51,10 @@ int main(int argc, char** argv) {
 
         case 'h':
             printSummary(argv);
+            break;
+
+        case 'r':
+            region = optarg;
             break;
             
         case '?':
@@ -85,6 +96,9 @@ int main(int argc, char** argv) {
         string inputFilename = argv[i];
         vcf = new VariantCallFile;
         vcf->open(inputFilename);
+        if (!region.empty()) {
+            vcf->setRegion(region);
+        }
         if (vcf->is_open()) {
             Variant* var = new Variant(*vcf);
             if (vcf->getNextVariant(*var)) {
