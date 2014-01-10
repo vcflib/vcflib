@@ -20,8 +20,10 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [file]" << endl
          << endl
          << "options:" << endl
-         << "    -m, --use-mnps          Retain MNPs as separate events (default: false)" << endl
-         << "    -t, --tag-parsed FLAG   Tag records which are split apart of a complex allele with this flag" << endl
+         << "    -m, --use-mnps          Retain MNPs as separate events (default: false)." << endl
+         << "    -t, --tag-parsed FLAG   Tag records which are split apart of a complex allele with this flag." << endl
+         << "    -L, --max-length LEN    Do not manipulate records in which either the ALT or" << endl
+         << "                            REF is longer than LEN (default: 200)." << endl
          << endl
          << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
          << "a single VCF record, split the record into multiple lines, but drop all" << endl
@@ -35,6 +37,7 @@ int main(int argc, char** argv) {
     bool includePreviousBaseForIndels = true;
     bool useMNPs = false;
     string parseFlag;
+    int maxLength = 200;
 
     VariantCallFile variantFile;
 
@@ -46,13 +49,14 @@ int main(int argc, char** argv) {
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
                 {"use-mnps", no_argument, 0, 'm'},
+                {"max-length", required_argument, 0, 'L'},
                 {"tag-parsed", required_argument, 0, 't'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hmt:",
+        c = getopt_long (argc, argv, "hmt:L:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -70,6 +74,10 @@ int main(int argc, char** argv) {
 
 	    case 't':
             parseFlag = optarg;
+            break;
+
+        case 'L':
+            maxLength = atoi(optarg);
             break;
 
         case '?':
@@ -103,7 +111,19 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
 
-        //cout << var << endl;
+
+        // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
+        // we also don't handle anything larger than maxLength bp
+        if (var.alt.size() == 1 
+            && (   var.alt.front().size() == 1
+                || var.ref.size() == 1
+                || var.alt.front().size() > maxLength
+                || var.ref.size() > maxLength
+                )) {
+            // nothing to do
+            cout << var << endl;
+            continue;
+        }
 
         // for each parsedalternate, get the position
         // build a new vcf record for that position
