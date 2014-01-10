@@ -97,7 +97,11 @@ int main(int argc, char** argv) {
         vcf = new VariantCallFile;
         vcf->open(inputFilename);
         if (!region.empty()) {
-            vcf->setRegion(region);
+            if (!vcf->setRegion(region)) {
+                cerr << "could not set region on " << inputFilename << endl;
+                delete vcf;
+                continue;
+            }
         }
         if (vcf->is_open()) {
             Variant* var = new Variant(*vcf);
