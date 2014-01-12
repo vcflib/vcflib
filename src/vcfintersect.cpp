@@ -17,6 +17,8 @@ void printSummary(char** argv) {
          << "options:" << endl 
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl
          << "    -R, --region REGION       use 1-based tabix-style region (e.g. chrZ:10-20), multiples allowed" << endl
+         << "    -S, --start-only          don't use the reference length information in the record to determine" << endl
+         << "                              overlap status, just use the start posiion" << endl
          << "    -v, --invert              invert the selection, printing only records which would" << endl
          << "                                not have been printed out" << endl
          << "    -i, --intersect-vcf FILE  use this VCF for set intersection generation" << endl
@@ -54,6 +56,7 @@ int main(int argc, char** argv) {
     bool invert = false;
     bool contained = true;
     bool overlapping = false;
+    bool startPositionOnly = false;
     int windowsize = 30;
     bool loci = false;
     bool refmatch = false;
@@ -88,12 +91,13 @@ int main(int argc, char** argv) {
                 {"tag-value", required_argument, 0, 'V'},
                 {"merge-from", required_argument, 0, 'M'},
                 {"merge-to", required_argument, 0, 'T'},
+                {"start-only", no_argument, 0, 'S'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvclmob:i:u:w:r:t:V:M:T:R:",
+        c = getopt_long (argc, argv, "hvcSlmob:i:u:w:r:t:V:M:T:R:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -150,6 +154,10 @@ int main(int argc, char** argv) {
         case 'R':
             regions.push_back(BedTarget(optarg));
             regions.back().left -= 1;
+            break;
+
+        case 'S':
+            startPositionOnly = true;
             break;
 
 	    case 'V':
@@ -323,8 +331,16 @@ int main(int argc, char** argv) {
         }
 
         if (usingBED) {
-            BedTarget record(var.sequenceName, var.position, var.position + var.ref.size() - 1, "");
-            vector<BedTarget*> overlaps = bed.targetsOverlapping(record);
+            vector<BedTarget*> overlaps;
+            if (startPositionOnly) {
+                // only intersect if start position (not end) is in target
+                BedTarget record(var.sequenceName, var.position, var.position, "");
+                overlaps = bed.targetsOverlapping(record);
+            } else {
+                // default behavior
+                BedTarget record(var.sequenceName, var.position, var.position + var.ref.size() - 1, "");
+                overlaps = bed.targetsOverlapping(record);
+            }
 
             if (!invert && !overlaps.empty()) {
                 cout << variantFile.line << endl;
