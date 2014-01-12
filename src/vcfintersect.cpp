@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
         usingBED = true;
     }
     
-    if (usingBED) {
+    if (usingBED || !regions.empty()) {
         variantFile.parseSamples = false;
     }
 
