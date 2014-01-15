@@ -476,6 +476,13 @@ VariantFieldType Variant::infoType(string& key) {
     }
 
     ostream& operator<<(ostream& out, Variant& var) {
+        // ensure there are no empty fields
+        if (var.sequenceName.empty()) var.sequenceName = ".";
+        if (var.id.empty()) var.id = ".";
+        if (var.ref.empty()) var.ref = ".";
+        if (var.alt.empty()) var.alt.push_back(".");
+        if (var.filter.empty()) var.filter = ".";
+
         out << var.sequenceName << "\t"
             << var.position << "\t"
             << var.id << "\t"
@@ -484,8 +491,7 @@ VariantFieldType Variant::infoType(string& key) {
         var.printAlt(out);
         out << "\t"
             << var.quality << "\t"
-            << (var.filter.empty() ? "." : var.filter)
-            << "\t";
+            << var.filter << "\t";
         if (var.info.empty() && var.infoFlags.empty()) {
             out << ".";
         } else {
