@@ -15,7 +15,7 @@ while (<STDIN>) {
         @alts = split(/,/, $alts);
         $snp = 1;
         foreach $alt (@alts) {
-            if (length($ref) > 1 || length($alt) != length($ref)) {
+            if (length($alt) != length($ref)) {
                 $snp = 0;
             }
         }
