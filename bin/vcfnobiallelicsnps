@@ -12,13 +12,16 @@ while (<STDIN>) {
         $ref = $4;
         $alts = $5;
         $hasnonsnp = 0;
+        if (!($alt =~ /,/)) {
+            $biallelic = 1;
+        }
         @alts = split(/,/, $alts);
         foreach $alt (@alts) {
             if (!(length($alt)==1 && length($alt) == length($ref))) {
                 $hasnonsnp = 1;
             }
         }
-        if ($hasnonsnp || scalar(@alts) > 1) {
+        if ($hasnonsnp || !$biallelic) {
             print;
         }
     }
