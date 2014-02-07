@@ -11,16 +11,16 @@ while (<STDIN>) {
         $tag = $3;
         $ref = $4;
         $alts = $5;
-	$hasindel = 0;
-	@alts = split(/,/, $alts);
-	$snp = 1;
-	foreach $alt (@alts) {
-	    if (length($ref) > 1 || length($alt) != length($ref)) {
-		$snp = 0;
-	    }
+        $hasindel = 0;
+        @alts = split(/,/, $alts);
+        $snp = 1;
+        foreach $alt (@alts) {
+            if (length($ref) > 1 || length($alt) != length($ref)) {
+                $snp = 0;
+            }
         }
-	if (!$snp) {
-	    print;
-	}
+        if (!$snp) {
+            print;
+        }
     }
 }

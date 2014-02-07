@@ -12,8 +12,9 @@ while (<STDIN>) {
         $ref = $4;
         $alts = $5;
         $hasnonsnp = 0;
-        if (!($alt =~ /,/)) {
-            $biallelic = 1;
+        $biallelic = 1;
+        if ($alts =~ /,/) {
+            $biallelic = 0;
         }
         @alts = split(/,/, $alts);
         foreach $alt (@alts) {
