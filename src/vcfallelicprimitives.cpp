@@ -24,6 +24,10 @@ void printSummary(char** argv) {
          << "    -t, --tag-parsed FLAG   Tag records which are split apart of a complex allele with this flag." << endl
          << "    -L, --max-length LEN    Do not manipulate records in which either the ALT or" << endl
          << "                            REF is longer than LEN (default: 200)." << endl
+         << "    -k, --keep-info         Maintain site and allele-level annotations when decomposing." << endl
+         << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
+         << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
+         << "                            VCFs, they should be usable with caution." << endl
          << endl
          << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
          << "a single VCF record, split the record into multiple lines, but drop all" << endl
@@ -38,6 +42,7 @@ int main(int argc, char** argv) {
     bool useMNPs = false;
     string parseFlag;
     int maxLength = 200;
+    bool keepInfo = false;
 
     VariantCallFile variantFile;
 
@@ -51,12 +56,13 @@ int main(int argc, char** argv) {
                 {"use-mnps", no_argument, 0, 'm'},
                 {"max-length", required_argument, 0, 'L'},
                 {"tag-parsed", required_argument, 0, 't'},
+                {"keep-info", no_argument, 0, 'k'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hmt:L:",
+        c = getopt_long (argc, argv, "hmkt:L:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -66,6 +72,10 @@ int main(int argc, char** argv) {
 
 	    case 'm':
             useMNPs = true;
+            break;
+
+	    case 'k':
+            keepInfo = true;
             break;
 
         case 'h':
@@ -165,6 +175,7 @@ int main(int argc, char** argv) {
 
         map<VariantAllele, double> alleleFrequencies;
         map<VariantAllele, int> alleleCounts;
+        map<VariantAllele, map<string, string> > alleleInfos;
 
         bool hasAf = false;
         if (var.info.find("AF") != var.info.end()) {
@@ -173,8 +184,13 @@ int main(int argc, char** argv) {
                 vector<VariantAllele>& vars = varAlleles[*a];
                 for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
                     double freq;
-                    convert(var.info["AF"].at(var.altAlleleIndexes[*a]), freq);
-                    alleleFrequencies[*va] += freq;
+                    try {
+                        convert(var.info["AF"].at(var.altAlleleIndexes[*a]), freq);
+                        alleleFrequencies[*va] += freq;
+                    } catch (...) {
+                        cerr << "vcfallelicprimitives WARNING: AF does not have count == alts @ "
+                             << var.sequenceName << ":" << var.position << endl;
+                    }
                 }
             }
         }
@@ -190,10 +206,30 @@ int main(int argc, char** argv) {
                         convert(var.info["AC"].at(var.altAlleleIndexes[*a]), freq);
                         alleleCounts[*va] += freq;
                     } catch (...) {
-                        /*
-                        cerr << "AC does not have the right number of fields for allele "
-                             << *a << " which would be at index " << var.altAlleleIndexes[*a] << endl;
-                        */
+                        cerr << "vcfallelicprimitives WARNING: AC does not have count == alts @ "
+                             << var.sequenceName << ":" << var.position << endl;
+                    }
+                }
+            }
+        }
+
+        if (keepInfo) {
+            for (map<string, vector<string> >::iterator infoit = var.info.begin();
+                 infoit != var.info.end(); ++infoit) {
+                string key = infoit->first;
+                for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+                    vector<VariantAllele>& vars = varAlleles[*a];
+                    for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+                        string val;
+                        vector<string>& vals = var.info[key];
+                        if (vals.size() == var.alt.size()) { // allele count for info
+                            val = vals.at(var.altAlleleIndexes[*a]);
+                        } else if (vals.size() == 1) { // site-wise count
+                            val = vals.front();
+                        } // don't handle other multiples... how would we do this without going crazy?
+                        if (!val.empty()) {
+                            alleleInfos[*va][key] = val;
+                        }
                     }
                 }
             }
@@ -258,6 +294,17 @@ int main(int argc, char** argv) {
             if (hasAc) {
                 v.info["AC"].push_back(convert(alleleCounts[*a]));
             }
+            if (keepInfo) {
+                for (map<string, vector<string> >::iterator infoit = var.info.begin();
+                     infoit != var.info.end(); ++infoit) {
+                    string key = infoit->first;
+                    if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
+                        v.info[key].push_back(alleleInfos[*a][key]);
+                    }
+                }
+            }
+
+            // now, keep all the other infos if we are asked to
 
             v.sequenceName = var.sequenceName;
             v.position = a->position; // ... by definition, this should be == if the variant was found
