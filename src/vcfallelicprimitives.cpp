@@ -28,6 +28,8 @@ void printSummary(char** argv) {
          << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
          << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
          << "                            VCFs, they should be usable with caution." << endl
+         << "    -g, --keep-geno         Maintain genotype-level annotations when decomposing.  Similar" << endl
+         << "                            caution should be used for this as for --keep-info." << endl
          << endl
          << "If multiple alleleic primitives (gaps or mismatches) are specified in" << endl
          << "a single VCF record, split the record into multiple lines, but drop all" << endl
@@ -43,6 +45,7 @@ int main(int argc, char** argv) {
     string parseFlag;
     int maxLength = 200;
     bool keepInfo = false;
+    bool keepGeno = false;
 
     VariantCallFile variantFile;
 
@@ -57,12 +60,13 @@ int main(int argc, char** argv) {
                 {"max-length", required_argument, 0, 'L'},
                 {"tag-parsed", required_argument, 0, 't'},
                 {"keep-info", no_argument, 0, 'k'},
+                {"keep-geno", no_argument, 0, 'g'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hmkt:L:",
+        c = getopt_long (argc, argv, "hmkgt:L:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -76,6 +80,10 @@ int main(int argc, char** argv) {
 
 	    case 'k':
             keepInfo = true;
+            break;
+
+	    case 'g':
+            keepGeno = true;
             break;
 
         case 'h':
@@ -176,6 +184,7 @@ int main(int argc, char** argv) {
         map<VariantAllele, double> alleleFrequencies;
         map<VariantAllele, int> alleleCounts;
         map<VariantAllele, map<string, string> > alleleInfos;
+        map<VariantAllele, map<string, map<string, string> > > alleleGenos;
 
         bool hasAf = false;
         if (var.info.find("AF") != var.info.end()) {
@@ -234,6 +243,17 @@ int main(int argc, char** argv) {
                 }
             }
         }
+
+        /*
+        if (keepGeno) {
+            for (map<string, map<string, vector<string> > >::iterator sampleit = var.samples.begin();
+                 sampleit != var.samples.end(); ++sampleit) {
+                string& sampleName = sampleit->first;
+                map<string, vector<string> >& sampleValues = var.samples[sampleName];
+                
+            }
+        }
+        */
 
         // from old allele index to a new series across the unpacked positions
         map<int, map<long unsigned int, int> > unpackedAlleleIndexes;
@@ -371,6 +391,12 @@ int main(int argc, char** argv) {
                     }
                 }
                 string genotype = join(gtstrs, "|");
+                // if we are keeping the geno info, pull it over here
+                if (keepGeno) {
+                    variant.format = var.format;
+                    variant.samples[sampleName] = var.samples[sampleName];
+                }
+                // note that this will replace the old geno, but otherwise it is the same
                 variant.samples[sampleName]["GT"].clear();
                 variant.samples[sampleName]["GT"].push_back(genotype);
             }
