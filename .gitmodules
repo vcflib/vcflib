@@ -1,21 +1,21 @@
 [submodule "tabixpp"]
 	path = tabixpp
-	url = git://github.com/ekg/tabixpp.git
+	url = https://github.com/ekg/tabixpp.git
 [submodule "smithwaterman"]
 	path = smithwaterman
-	url = git://github.com/ekg/smithwaterman.git
+	url = https://github.com/ekg/smithwaterman.git
 [submodule "multichoose"]
 	path = multichoose
-	url = git://github.com/ekg/multichoose.git
+	url = https://github.com/ekg/multichoose.git
 [submodule "fastahack"]
 	path = fastahack
-	url = git://github.com/ekg/fastahack.git
+	url = https://github.com/ekg/fastahack.git
 [submodule "intervaltree"]
 	path = intervaltree
-	url = git://github.com/ekg/intervaltree.git
+	url = https://github.com/ekg/intervaltree.git
 [submodule "fsom"]
 	path = fsom
-	url = git://github.com/ekg/fsom.git
+	url = https://github.com/ekg/fsom.git
 [submodule "filevercmp"]
 	path = filevercmp
 	url = https://github.com/ekg/filevercmp.git
