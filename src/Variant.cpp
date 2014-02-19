@@ -1260,7 +1260,7 @@ bool VariantCallFile::setRegion(string seq, long int start, long int end) {
     } else {
         regionstr << seq << ":" << start;
     }
-    setRegion(regionstr.str());
+    return setRegion(regionstr.str());
 }
 
 bool VariantCallFile::setRegion(string region) {
@@ -1287,7 +1287,6 @@ bool VariantCallFile::setRegion(string region) {
 
 
 // genotype manipulation
-
 /*
 map<string, int> decomposeGenotype(string& genotype) {
     string splitter = "/";
