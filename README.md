@@ -56,6 +56,7 @@ vcflib provides a variety of functions for VCF manipulation:
  * Count the number of alternate alleles represented in samples at each variant record ([vcfaltcount](#vcfaltcount)).
  * **Subset INFO fields** to decrease file size and processing time ([vcfkeepinfo](#vcfkeepinfo)).
  * Lighten up VCF files by keeping only a **subset of per-sample information** ([vcfkeepgeno](#vcfkeepgeno)).
+ * **Numerically index** alleles in a VCF file ([vcfindex](#vcfindex)).
 
 ### samples
 
@@ -366,6 +367,9 @@ Count the number of heterozygotes in the input VCF.
     
 Provides the ratio between heterozygotes and homozygotes.
 
+### vcfindex
+
+Adds a field (id) which contains an allele-specific numerical index.
     
 ### vcfintersect
     
