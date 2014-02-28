@@ -66,6 +66,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfleftalign.cpp \
 			  src/vcfcombine.cpp \
 			  src/vcfgeno2alleles.cpp \
+			  src/vcfindex.cpp \
 
 #BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
