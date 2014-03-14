@@ -51,11 +51,6 @@ void printSummary(char** argv) {
 
 int main(int argc, char** argv) {
 
-    if (argc < 5) {
-        printSummary(argv);
-        exit(0);
-    }
-
     bool strict = false;
     int c;
 
@@ -109,6 +104,11 @@ int main(int argc, char** argv) {
         default:
             abort ();
         }
+    }
+
+    if(argc - optind < 4) {
+        printSummary(argv);
+        exit(0);
     }
 
     string tag = argv[optind];
