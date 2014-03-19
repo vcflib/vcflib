@@ -156,7 +156,7 @@ VariantFieldType typeStrToVariantFieldType(string& typeStr) {
     }
 }
 
-VariantFieldType Variant::infoType(string& key) {
+VariantFieldType Variant::infoType(const string& key) {
     map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
     if (s == vcf->infoTypes.end()) {
         if (key == "QUAL") { // hack to use QUAL as an "info" field
@@ -169,7 +169,7 @@ VariantFieldType Variant::infoType(string& key) {
     }
 }
 
-    VariantFieldType Variant::formatType(string& key) {
+    VariantFieldType Variant::formatType(const string& key) const {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->formatTypes.end()) {
             cerr << "no format field " << key << endl;
@@ -179,7 +179,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    bool Variant::getInfoValueBool(string& key, int index) {
+    bool Variant::getInfoValueBool(const string& key, int index) const {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
@@ -200,19 +200,20 @@ VariantFieldType Variant::infoType(string& key) {
             }
             VariantFieldType type = s->second;
             if (type == FIELD_BOOL) {
-                map<string, bool>::iterator b = infoFlags.find(key);
+                map<string, bool>::const_iterator b = infoFlags.find(key);
                 if (b == infoFlags.end())
                     return false;
                 else
                     return true;
             } else {
                 cerr << "not flag type " << key << endl;
+                return false;
             }
         }
     }
 
-    string Variant::getInfoValueString(string& key, int index) {
-        map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+    string Variant::getInfoValueString(const string& key, int index) const {
+        map<string, VariantFieldType>::const_iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
             exit(1);
@@ -232,7 +233,7 @@ VariantFieldType Variant::infoType(string& key) {
             }
             VariantFieldType type = s->second;
             if (type == FIELD_STRING) {
-                map<string, vector<string> >::iterator b = info.find(key);
+                map<string, vector<string> >::const_iterator b = info.find(key);
                 if (b == info.end())
                     return "";
                 return b->second.at(index);
@@ -243,8 +244,8 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    double Variant::getInfoValueFloat(string& key, int index) {
-        map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
+    double Variant::getInfoValueFloat(const string& key, int index) const {
+        map<string, VariantFieldType>::const_iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             if (key == "QUAL") {
                 return quality;
@@ -267,7 +268,7 @@ VariantFieldType Variant::infoType(string& key) {
             }
             VariantFieldType type = s->second;
             if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
-                map<string, vector<string> >::iterator b = info.find(key);
+                map<string, vector<string> >::const_iterator b = info.find(key);
                 if (b == info.end())
                     return false;
                 double r;
@@ -283,11 +284,11 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    int Variant::getNumSamples(void) {
+    int Variant::getNumSamples(void) const {
         return sampleNames.size();
     }
 
-    int Variant::getNumValidGenotypes(void) {
+    int Variant::getNumValidGenotypes(void) const {
         int valid_genotypes = 0;
         map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
         map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();
@@ -300,8 +301,8 @@ VariantFieldType Variant::infoType(string& key) {
         return valid_genotypes;
     }
 
-    bool Variant::getSampleValueBool(string& key, string& sample, int index) {
-        map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+    bool Variant::getSampleValueBool(const string& key, const string& sample, int index) const {
+        map<string, VariantFieldType>::const_iterator s = vcf->formatTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
             exit(1);
@@ -320,20 +321,21 @@ VariantFieldType Variant::infoType(string& key) {
                 }
             }
             VariantFieldType type = s->second;
-            map<string, vector<string> >& sampleData = samples[sample];
+            const map<string, vector<string> >& sampleData = samples.at(sample);
             if (type == FIELD_BOOL) {
-                map<string, vector<string> >::iterator b = sampleData.find(key);
+                map<string, vector<string> >::const_iterator b = sampleData.find(key);
                 if (b == sampleData.end())
                     return false;
                 else
                     return true;
             } else {
                 cerr << "not bool type " << key << endl;
+                return false;
             }
         }
     }
 
-    string Variant::getSampleValueString(string& key, string& sample, int index) {
+    string Variant::getSampleValueString(const string& key, const string& sample, int index) const {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
@@ -353,9 +355,9 @@ VariantFieldType Variant::infoType(string& key) {
                 }
             }
             VariantFieldType type = s->second;
-            map<string, vector<string> >& sampleData = samples[sample];
+            const map<string, vector<string> >& sampleData = samples.at(sample);
             if (type == FIELD_STRING) {
-                map<string, vector<string> >::iterator b = sampleData.find(key);
+                map<string, vector<string> >::const_iterator b = sampleData.find(key);
                 if (b == sampleData.end()) {
                     return "";
                 } else {
@@ -363,12 +365,13 @@ VariantFieldType Variant::infoType(string& key) {
                 }
             } else {
                 cerr << "not string type " << key << endl;
+                return "";
             }
         }
     }
 
-    double Variant::getSampleValueFloat(string& key, string& sample, int index) {
-        map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
+    double Variant::getSampleValueFloat(const string& key, const string& sample, int index) const {
+        map<string, VariantFieldType>::const_iterator s = vcf->formatTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
             exit(1);
@@ -388,11 +391,11 @@ VariantFieldType Variant::infoType(string& key) {
                 }
             }
             VariantFieldType type = s->second;
-            map<string, vector<string> >& sampleData = samples[sample];
+            const map<string, vector<string> >& sampleData = samples.at(sample);
             if (type == FIELD_FLOAT || type == FIELD_INTEGER) {
-                map<string, vector<string> >::iterator b = sampleData.find(key);
+                map<string, vector<string> >::const_iterator b = sampleData.find(key);
                 if (b == sampleData.end())
-                    return false;
+                    return 0.0;
                 double r;
                 if (!convert(b->second.at(index), r)) {
                     cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
@@ -401,11 +404,12 @@ VariantFieldType Variant::infoType(string& key) {
                 return r;
             } else {
                 cerr << "unsupported type for sample " << type << endl;
+                return 0.0;
             }
         }
     }
 
-    bool Variant::getValueBool(string& key, string& sample, int index) {
+    bool Variant::getValueBool(const string& key, const string& sample, int index) const {
         if (sample.empty()) { // an empty sample name means
             return getInfoValueBool(key, index);
         } else {
@@ -413,7 +417,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    double Variant::getValueFloat(string& key, string& sample, int index) {
+    double Variant::getValueFloat(const string& key, const string& sample, int index) const {
         if (sample.empty()) { // an empty sample name means
             return getInfoValueFloat(key, index);
         } else {
@@ -421,7 +425,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    string Variant::getValueString(string& key, string& sample, int index) {
+    string Variant::getValueString(const string& key, const string& sample, int index) const {
         if (sample.empty()) { // an empty sample name means
             return getInfoValueString(key, index);
         } else {
@@ -429,8 +433,8 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    int Variant::getAltAlleleIndex(string& allele) {
-        map<string, int>::iterator f = altAlleleIndexes.find(allele);
+    int Variant::getAltAlleleIndex(const string& allele) const {
+        map<string, int>::const_iterator f = altAlleleIndexes.find(allele);
         if (f == altAlleleIndexes.end()) {
             cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
             exit(1);
@@ -439,14 +443,14 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    void Variant::addFilter(string& tag) {
+    void Variant::addFilter(const string& tag) {
         if (filter == "" || filter == ".")
             filter = tag;
         else
             filter += "," + tag;
     }
 
-    void Variant::addFormatField(string& key) {
+    void Variant::addFormatField(const string& key) {
         bool hasTag = false;
         for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
             if (*t == key) {
@@ -459,16 +463,16 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    void Variant::printAlt(ostream& out) {
-        for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
+    void Variant::printAlt(ostream& out) const {
+        for (vector<string>::const_iterator i = alt.begin(); i != alt.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alt.end() - 1)) out << ",";
         }
     }
 
-    void Variant::printAlleles(ostream& out) {
-        for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
+    void Variant::printAlleles(ostream& out) const {
+        for (vector<string>::const_iterator i = alleles.begin(); i != alleles.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alleles.end() - 1)) out << ",";
