@@ -9,19 +9,24 @@ using namespace vcf;
 
 int main(int argc, char** argv) {
 
-    if (argc != 2) {
+    if (argc == 2 && (argv[1] == "-h" || argv[1] == "--help")) {
         cerr << "usage: " << argv[0] << " <vcf file>" << endl
              << "count the number of alternate alleles in heterozygous genotypes in all records in the vcf file" << endl
              << "outputs a count for each individual in the file" << endl;
         return 1;
     }
 
-    string filename = argv[1];
 
+    string inputFilename;
     VariantCallFile variantFile;
-    variantFile.open(filename);
+    if (optind == argc - 1) {
+        inputFilename = argv[optind];
+        variantFile.open(inputFilename);
+    } else {
+        variantFile.open(std::cin);
+    }
+
     if (!variantFile.is_open()) {
-        cerr << "could not open " << filename << endl;
         return 1;
     }
 

@@ -3,6 +3,7 @@
 #include "fastahack/Fasta.h"
 #include <getopt.h>
 #include <algorithm>
+#include <numeric>
 
 using namespace std;
 using namespace vcf;
@@ -33,7 +34,7 @@ double median(vector<double> &v)
 
 double mean(vector<double> &v)
 {
-    double sum = std::accumulate(v.begin(), v.end(), 0.0);
+    double sum = accumulate(v.begin(), v.end(), 0.0);
     return sum / v.size();
 }
 
@@ -108,6 +109,10 @@ int main(int argc, char** argv) {
             statType = MAX;
             break;
 
+        case 'h':
+            printSummary(argv);
+            exit(0);
+
         case '?':
             /* getopt_long already printed an error message. */
             printSummary(argv);
@@ -167,10 +172,11 @@ int main(int argc, char** argv) {
         vector<double> vals;
         for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin();
              s != var.samples.end(); ++s) {
-            if (s->find(sampleField) != s->end()) {
+            map<string, vector<string> >& sample = s->second;
+            if (sample.find(sampleField) != sample.end()) {
                 double val;
-                string& s = s[sampleField].front();
-                if (s[sampleField].size() > 1) {
+                string& s = sample[sampleField].front();
+                if (sample[sampleField].size() > 1) {
                     cerr << "Error: cannot handle sample fields with multiple values" << endl;
                     return 1;
                 }
@@ -182,16 +188,16 @@ int main(int argc, char** argv) {
         double result;
         switch (statType) {
         case MEAN:
-            result = mean(v);
+            result = mean(vals);
             break;
         case MEDIAN:
-            result = median(v);
+            result = median(vals);
             break;
         case MIN:
-            result = min_element(v.begin(), v.end());
+            result = *min_element(vals.begin(), vals.end());
             break;
         case MAX:
-            result = max_element(v.begin(), v.end());
+            result = *max_element(vals.begin(), vals.end());
             break;
         default:
             cerr << "Error: unrecognized StatType" << endl;
