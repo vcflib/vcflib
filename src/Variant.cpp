@@ -289,6 +289,8 @@ VariantFieldType Variant::infoType(const string& key) {
     }
 
     int Variant::getNumValidGenotypes(void) const {
+        // TODO: probably broken because "./." and "." genotypes are simply deleted, if I
+        // understand parse() line 75-ish
         int valid_genotypes = 0;
         map<string, map<string, vector<string> > >::const_iterator s     = samples.begin();
         map<string, map<string, vector<string> > >::const_iterator sEnd  = samples.end();

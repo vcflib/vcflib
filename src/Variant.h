@@ -60,6 +60,7 @@ public:
 
     bool usingTabix;
 
+    string filename; // the name used to open the file, if opened with a name
     string header;
     string line; // the current line
     string fileformat;
@@ -83,36 +84,40 @@ public:
     vector<string> infoIds(void);
     vector<string> formatIds(void);
 
-    bool open(string& filename) {
-        vector<string> filenameParts = split(filename, ".");
-        if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
-            return openTabix(filename);
+    bool open(string& fn) {
+        vector<string> fnParts = split(fn, ".");
+        if (fnParts.back() == "gz" || fnParts.back() == "bgz") {
+            return openTabix(fn);
         } else {
-            return openFile(filename);
+            return openFile(fn);
         }
     }
 
-    bool openFile(string& filename) {
+    bool openFile(string& fn) {
+        filename = fn;
         file = &_file;
-        _file.open(filename.c_str(), ifstream::in);
+        _file.open(fn.c_str(), ifstream::in);
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
-    bool openTabix(string& filename) {
+    bool openTabix(string& fn) {
+        filename = fn;
         usingTabix = true;
-        tabixFile = new Tabix(filename);
+        tabixFile = new Tabix(fn);
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
     bool open(istream& stream) {
+        filename = "*stream*";
         file = &stream;
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
     bool open(ifstream& stream) {
+        filename = "*stream*";
         file = &stream;
         parsedHeader = parseHeader();
         return parsedHeader;

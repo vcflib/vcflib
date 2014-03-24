@@ -105,3 +105,7 @@ vcfevenregions
 vcfgenosummarize
 vcfgenosamplenames
 vcf2fasta
+vcfcombine
+vcfgeno2alleles
+vcfindex
+vcfleftalign
