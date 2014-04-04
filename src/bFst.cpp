@@ -354,7 +354,7 @@ int main(int argc, char** argv) {
   // deltaaf is the difference of allele frequency we bother to look at 
 
   string deltaaf ;
-  double daf  = 0;
+  double daf  = -1;
 
     const struct option longopts[] = 
       {
@@ -448,11 +448,19 @@ int main(int argc, char** argv) {
 	  }
 
       }
-    
+
+    if(daf == -1){
+    cerr << endl;
+      cerr << "FATAL: did not specify deltaaf" << endl;
+      cerr << "INFO:  please use bFst --help      " << endl; 
+      cerr << endl;
+      return(1);
+    }
 
     if(filename == "NA"){
       cerr << endl;
       cerr << "FATAL: did not specify VCF file" << endl;
+      cerr << "INFO:  please use bFst --help      " << endl; 
       cerr << endl;
       return(1);
     }
@@ -516,7 +524,7 @@ int main(int argc, char** argv) {
 	index += 1;
 	}
 	
-	if(target.size() < 5 || background.size() < 5 ){
+	if(target.size() < 2 || background.size() < 2 ){
 	  continue;
 	}
 	
