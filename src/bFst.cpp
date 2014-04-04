@@ -215,8 +215,8 @@ double FullProb(pop & target, pop & back, vector<double>& p)
 
 
   double afprior  = log( r8_normal_pdf (p[6], 0.1, p[4]));
-  double afpriorT = log( r8_normal_pdf (target.af, 0.1, p[0]));
-  double afpriorB = log( r8_normal_pdf (back.af,   0.1, p[1]));
+  double afpriorT = log( r8_normal_pdf (target.af, 0.05, p[0]));
+  double afpriorB = log( r8_normal_pdf (back.af,   0.05, p[1]));
   
   if(isinf(afprior) || isnan(afprior)){
     return -100000;
@@ -341,11 +341,11 @@ int main(int argc, char** argv) {
 
   // the filename
 
-  string filename;
+  string filename = "NA";
 
   // using vcflib; thanks to Erik Garrison 
   
-  VariantCallFile variantFile;
+  VariantCallFile variantFile ;
 
   // zero based index for the target and background indivudals 
   
@@ -368,7 +368,7 @@ int main(int argc, char** argv) {
       };
 
     int index;
-    int iarg=0;
+    int iarg = 0;
 
     while(iarg != -1)
       {
@@ -376,19 +376,38 @@ int main(int argc, char** argv) {
 	
 	switch (iarg)
 	  {
+	  case 0:
+	    break;
 	  case 'h':
-	    cerr << endl << endl;
-	    cerr << "INFO: help" << endl;
-	    cerr << "INFO: description: bFst is a bayesian approach to Fst, where Fst is a free parameter.  Importantly bFst taken genotype  " << endl;
-	    cerr << "                   into account, meaning sites of poor quality will result in wider credible intervals.  For more more  " << endl;
-	    cerr << "                   information see \" A bayesian approach to inferring population structure from dominant markers. bFst " << endl;
-	    cerr << "                   is not using the likelihood in equation 3.                                                           " << endl;
+	    cerr << endl;
+
+	    cerr << "INFO: help: " << endl << endl;
+
+	    cerr << "     bFst is a Bayesian approach to Fst.  Importantly bFst account for genotype uncertainty in the model using genotype likelihoods."       << endl;
+	    cerr << "     For a more detailed description see: Holsinger et al. Molecular Ecology Vol 11, issue 7 2002.  The likelihood function has been "	     << endl;
+	    cerr << "     modified to use genotype likelihoods provided by variant callers. There are five free parameters estimated in the model: each "	     << endl;
+	    cerr << "     subpopulation's allele frequency and Fis (fixation index, within each subpopulation), a free parameter for the total population\'s "  << endl;
+	    cerr << "     allele frequency, and Fst. "                                                                                      << endl             << endl;
+	
+	      cerr << "Output : 11 columns :                          " << endl; 
+	      cerr << "     1.  Seqid                                     " << endl;
+	      cerr << "     2.  Position				     " << endl;
+	      cerr << "     3.  Observed allele frequency in target.	     " << endl;
+	      cerr << "     4.  Estimated allele frequency in target.     " << endl;
+	      cerr << "     5.  Observed allele frequency in background.  " << endl;
+	      cerr << "     6.  Estimated allele frequency in background. " << endl;
+	      cerr << "     7.  Observed allele frequency combined. 	     " << endl;
+	      cerr << "     8.  Estimated allele frequency in combined.   " << endl;
+	      cerr << "     9.  ML estimate of Fst (mean)		     " << endl;
+	      cerr << "     10. Lower bound of the 95% credible interval  " << endl;
+	      cerr << "     11. Upper bound of the 95% credible interval  " << endl << endl;
+											 
 
 	    cerr << "INFO: usage:  bFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
 	    cerr << endl;
 	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"" << endl; 
+	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns" << endl;
+	    cerr << "INFO: required: f,file a     -- a proper formatted VCF file.  the FORMAT field MUST contain \"PL\"" << endl; 
 	    cerr << "INFO: required: d,deltaaf    -- skip sites were the difference in allele frequency is less than deltaaf" << endl;
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
@@ -396,56 +415,69 @@ int main(int argc, char** argv) {
 	    return 0;
 
 	  case 'v':
-	    cerr << endl << endl;
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
-	    cerr << endl << endl;
 	    return 0;
 
 	  case 't':
 	    loadIndices(ib, optarg);
-	    cerr << endl << endl;
 	    cerr << "INFO: There are " << ib.size() << " individuals in the target" << endl;
-	    cerr << endl << endl;
 	    break;
 
 	  case 'b':
 	    loadIndices(it, optarg);
-	    cerr << endl << endl;
 	    cerr << "INFO: There are " << it.size() << " individuals in the background" << endl;
-	    cerr << endl << endl;
 	    break;
 
 	  case 'f':
-	    cerr << endl << endl;
 	    cerr << "INFO: File: " << optarg  <<  endl;
-	    cerr << endl << endl;
 	    filename = optarg;
 	    break;
 
 	  case 'd':
-	    cerr << endl << endl;
 	    cerr << "INFO: difference in allele frequency : " << optarg << endl;
-	    cerr << endl << endl;
 	    deltaaf = optarg;
-	    daf = atof(deltaaf.c_str());
-	    
+	    daf = atof(deltaaf.c_str());	    
 	    break;
-
-	  case '?':
-	    break;
-	  
-	  default:
-	    printf ("?? getopt returned character code 0%o ??\n", iarg);
+	  default: 
+	    break; 
+	    cerr << endl;
+	    cerr << "FATAL: unknown command line option " << optarg << endl << endl ;
+	    cerr << "INFO:  please use bFst --help      " << endl; 
+	    cerr << endl;
+	    return(1);
 	  }
 
       }
     
 
+    if(filename == "NA"){
+      cerr << endl;
+      cerr << "FATAL: did not specify VCF file" << endl;
+      cerr << endl;
+      return(1);
+    }
+
     variantFile.open(filename);
     
 
     if (!variantFile.is_open()) {
-        return 1;
+      cerr << endl;
+      cerr << "FATAL: could not open VCF file" << endl;
+      cerr << "INFO:  please use bFst --help" << endl; 
+      cerr << endl;
+      return(1);
+    }
+    if(it.size() < 2){
+      cerr << endl;
+      cerr << "FATAL: target not specified or less than two indviduals" << endl; 
+      cerr << "INFO:  please use bFst --help                          " << endl; 
+      cerr << endl;
+    }
+    if(ib.size() < 2){
+      cerr << endl;
+      cerr << "FATAL: target not specified or less than two indviduals"<< endl;
+      cerr << "INFO:  please use bFst --help                          " << endl;
+      cerr << endl;
     }
     
     Variant var(variantFile);
