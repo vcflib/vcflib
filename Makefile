@@ -1,8 +1,12 @@
 #OBJ_DIR = ./
 HEADERS = src/Variant.h \
 		  src/split.h \
+		  src/pdflib.hpp \
+		  src/rnglib.hpp \
 		  src/join.h
 SOURCES = src/Variant.cpp \
+		  src/rnglib.cpp \
+		  src/pdflib.cpp \
 		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
@@ -13,6 +17,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfaltcount.cpp \
 			  src/vcfhetcount.cpp \
 			  src/vcfhethomratio.cpp \
+			  src/bFst.cpp \
 			  src/vcffilter.cpp \
 			  src/vcf2tsv.cpp \
 			  src/vcfgenotypes.cpp \
