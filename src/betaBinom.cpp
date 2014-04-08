@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string seqid = "NA"; 
+  string region = "NA"; 
 
   // using vcflib; thanks to Erik Garrison 
 
@@ -204,6 +204,10 @@ int main(int argc, char** argv) {
   string deltaaf ;
   double daf  = 0;
 
+  // 
+
+  double counts = 1;
+
     const struct option longopts[] = 
       {
 	{"version"   , 0, 0, 'v'},
@@ -212,7 +216,8 @@ int main(int argc, char** argv) {
 	{"target"    , 1, 0, 't'},
 	{"background", 1, 0, 'b'},
 	{"deltaaf"   , 1, 0, 'd'},
-	{"seqid"     , 1, 0, 'd'},
+	{"region"    , 1, 0, 'r'},
+	{"genotype"  , 1, 0, 'g'},
 	{0,0,0,0}
       };
 
@@ -221,7 +226,7 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "s:d:t:b:f:hv", longopts, &index);
+	iarg = getopt_long(argc, argv, "r:d:t:b:f:hv", longopts, &index);
 	
 	switch (iarg)
 	  {
@@ -270,7 +275,6 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    filename = optarg;
 	    break;
-
 	  case 'd':
 	    cerr << endl << endl;
 	    cerr << "INFO: difference in allele frequency : " << optarg << endl;
@@ -278,10 +282,10 @@ int main(int argc, char** argv) {
 	    deltaaf = optarg;
 	    daf = atof(deltaaf.c_str());	    
 	    break;
-	  case 's':
+	  case 'r':
 	    cerr << endl << endl;
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    seqid = optarg; 
+	    region = optarg; 
 	    break;
 	  default:
 	    printf ("?? getopt returned character code 0%o ??\n", iarg);
@@ -289,11 +293,10 @@ int main(int argc, char** argv) {
 
       }
     
-
     variantFile.open(filename);
     
-    if(seqid != "NA"){
-      variantFile.setRegion(seqid);
+    if(region != "NA"){
+      variantFile.setRegion(region);
     }
 
     if (!variantFile.is_open()) {
@@ -370,13 +373,14 @@ int main(int argc, char** argv) {
 	double alphaB = 0.01;
 	double betaT  = 0.01;
 	double betaB  = 0.01;
-
+      
 	getPosterior(popt, &alphaT, &betaT);
 	getPosterior(popb, &alphaB, &betaB);
-
+	
 	double targm = alphaT / ( alphaT + betaT );
 	double backm = alphaB / ( alphaB + betaB );
-
+	
+    
 	double p, q, x, y, bound;
 	p = -1;
 	q = -1;
@@ -390,7 +394,6 @@ int main(int argc, char** argv) {
 	cdfbet(&which, &p, &q, &x, &y, &alphaB, &betaB, &status, &bound);
 
 
-        double pd = r8_beta_pdf(alphaB, betaB, targm)/100;
 
 	int n = int(popt.nalt + popt.nref);
 
