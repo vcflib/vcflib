@@ -26,5 +26,7 @@ float r4_uni_01 ( );
 double r8_uni_01 ( );
 void set_initial_seed ( int ig1, int ig2 );
 void set_seed (  int cg1, int cg2 );
+#if !defined(TIMESTAMP)
+#define TIMESTAMP
 void timestamp ( );
-
+#endif

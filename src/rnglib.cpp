@@ -1756,6 +1756,8 @@ void set_seed ( int cg1, int cg2 )
 }
 //****************************************************************************80
 
+#if !defined(TIMESTAMP)
+#define TIMESTAMP
 void timestamp ( )
 
 //****************************************************************************80
@@ -1802,4 +1804,4 @@ void timestamp ( )
   return;
 # undef TIME_SIZE
 }
-
+#endif
