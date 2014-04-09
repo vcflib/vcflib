@@ -16,8 +16,7 @@ OBJECTS= $(SOURCES:.cpp=.o)
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
-
-			  src/betaBinom.cpp \
+			  src/pFst.cpp \
 			  src/bFst.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
