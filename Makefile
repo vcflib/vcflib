@@ -16,11 +16,12 @@ OBJECTS= $(SOURCES:.cpp=.o)
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
-			  src/vcfaltcount.cpp \
+
 			  src/betaBinom.cpp \
+			  src/bFst.cpp \
+#			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \
-#			  src/bFst.cpp \
 #			  src/strat.cpp \
 #			  src/vcffilter.cpp \
 #			  src/vcf2tsv.cpp \

@@ -1,7 +1,7 @@
 #include "Variant.h"
 #include "split.h"
-#include "pdflib.hpp"
 #include "cdflib.hpp"
+#include "pdflib.hpp"
 
 #include <string>
 #include <iostream>
@@ -206,18 +206,18 @@ int main(int argc, char** argv) {
 
   // 
 
-  double counts = 1;
+  int counts = 0;
 
     const struct option longopts[] = 
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
+	{"counts"    , 0, 0, 'c'},
         {"file"      , 1, 0, 'f'},
 	{"target"    , 1, 0, 't'},
 	{"background", 1, 0, 'b'},
 	{"deltaaf"   , 1, 0, 'd'},
 	{"region"    , 1, 0, 'r'},
-	{"genotype"  , 1, 0, 'g'},
 	{0,0,0,0}
       };
 
@@ -226,69 +226,70 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "r:d:t:b:f:hv", longopts, &index);
+	iarg = getopt_long(argc, argv, "r:d:t:b:f:chv", longopts, &index);
 	
 	switch (iarg)
 	  {
 	  case 'h':
 	    cerr << endl << endl;
 	    cerr << "INFO: help" << endl;
-	    cerr << "INFO: description: bFst is a bayesian approach to Fst, where Fst is a free parameter.  Importantly bFst taken genotype  " << endl;
-	    cerr << "                   into account, meaning sites of poor quality will result in wider credible intervals.  For more more  " << endl;
-	    cerr << "                   information see \" A bayesian approach to inferring population structure from dominant markers. bFst " << endl;
-	    cerr << "                   is not using the likelihood in equation 3.                                                           " << endl;
+	    cerr << "INFO: description:" << endl;
+            cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between      " << endl;
+	    cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate         " << endl;
+	    cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing	" << endl;
+	    cerr << "     the target's allele frequency given the posterior distribution of the background. By default	" << endl;
+	    cerr << "     pFst uses the genotype likelihoods to estimate alpha, beta and the allele frequency of the target group.  If you would like to assume	" << endl;
+	    cerr << "     all genotypes are correct set the count flag equal to one.                                    " << endl << endl;
 
-	    cerr << "INFO: usage:  bFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
+	    cerr << "Output : 3 columns :     "    << endl;
+	    cerr << "     1. seqid            "    << endl;
+	    cerr << "     2. position         "    << endl;
+	    cerr << "     3. pFst probability "    << endl  << endl;
+
+	    cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
 	    cerr << endl;
 	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
 	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
 	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"" << endl; 
-	    cerr << "INFO: required: d,deltaaf    -- skip sites were the difference in allele frequency is less than deltaaf" << endl;
+	    cerr << "INFO: optional: d,deltaaf    -- skip sites were the difference in allele frequency is less than deltaaf, default is zero"      << endl;
+	    cerr << "INFO: optional: c,counts     -- use genotype counts rather than genotype likelihoods to estimate parameters, default false"  << endl; 
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 	    cerr << endl << endl;
 	    return 0;
-
 	  case 'v':
 	    cerr << endl << endl;
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
-	    cerr << endl << endl;
 	    return 0;
-
+	  case 'c':
+	    cerr << "INFO: using genotype counts rather than gentoype likelihoods" << endl;
+	    counts = 1;
+	    break;
 	  case 't':
 	    loadIndices(ib, optarg);
-	    cerr << endl << endl;
 	    cerr << "INFO: There are " << ib.size() << " individuals in the target" << endl;
-	    cerr << endl << endl;
+	    cerr << "INFO: target ids: " << optarg << endl;
 	    break;
-
 	  case 'b':
 	    loadIndices(it, optarg);
-	    cerr << endl << endl;
 	    cerr << "INFO: There are " << it.size() << " individuals in the background" << endl;
-	    cerr << endl << endl;
+	    cerr << "INFO: background ids: " << optarg << endl;
 	    break;
-
 	  case 'f':
-	    cerr << endl << endl;
 	    cerr << "INFO: File: " << optarg  <<  endl;
-	    cerr << endl << endl;
 	    filename = optarg;
 	    break;
 	  case 'd':
-	    cerr << endl << endl;
-	    cerr << "INFO: difference in allele frequency : " << optarg << endl;
-	    cerr << endl << endl;
+	    cerr << "INFO: only scoring sites where the allele frequency difference is greater than: " << optarg << endl;
 	    deltaaf = optarg;
 	    daf = atof(deltaaf.c_str());	    
 	    break;
 	  case 'r':
-	    cerr << endl << endl;
             cerr << "INFO: set seqid region to : " << optarg << endl;
 	    region = optarg; 
 	    break;
 	  default:
-	    printf ("?? getopt returned character code 0%o ??\n", iarg);
+	    break;
 	  }
 
       }
@@ -374,30 +375,37 @@ int main(int argc, char** argv) {
 	double betaT  = 0.01;
 	double betaB  = 0.01;
       
-	getPosterior(popt, &alphaT, &betaT);
-	getPosterior(popb, &alphaB, &betaB);
-	
+	if(counts == 1){
+	  alphaT += popt.nref ;
+	  alphaB += popb.nref ;
+	  betaT  += popt.nalt ;
+	  betaB  += popb.nalt ;
+	}
+	else{
+	  getPosterior(popt, &alphaT, &betaT);
+	  getPosterior(popb, &alphaB, &betaB);
+	}
+	    
 	double targm = alphaT / ( alphaT + betaT );
-	double backm = alphaB / ( alphaB + betaB );
+        double backm = alphaB / ( alphaB + betaB );
+
+	double xa = targm - 0.001;
+	double xb = targm + 0.001;
+	if(xa <= 0){
+	  xa = 0;
+	  xb = 0.002;
+	}
+	if(xb >= 1){
+	  xa = 0.998;
+	  xb = 1;
+	}
+
+	double dph = r8_beta_pdf(alphaB, betaB, xa);
+	double dpl = r8_beta_pdf(alphaB, betaB, xb);
 	
-    
-	double p, q, x, y, bound;
-	p = -1;
-	q = -1;
-	
-	int status, which;
-	which = 1;
-
-	x = targm;
-	y = 1 - x; 
-
-	cdfbet(&which, &p, &q, &x, &y, &alphaB, &betaB, &status, &bound);
+	double p   = ((dph + dpl)/2) *  0.01;
 
 
-
-	int n = int(popt.nalt + popt.nref);
-
-	
 	cout << var.sequenceName << "\t"  << var.position << "\t" << p << endl ;
 
     }
