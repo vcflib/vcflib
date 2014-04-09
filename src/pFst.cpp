@@ -234,9 +234,9 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    cerr << "INFO: help" << endl;
 	    cerr << "INFO: description:" << endl;
-            cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between      " << endl;
-	    cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate         " << endl;
-	    cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing	" << endl;
+            cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations,           " << endl;
+	    cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate              " << endl;
+	    cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing     " << endl;
 	    cerr << "     the target's allele frequency given the posterior distribution of the background. By default	" << endl;
 	    cerr << "     pFst uses the genotype likelihoods to estimate alpha, beta and the allele frequency of the target group.  If you would like to assume	" << endl;
 	    cerr << "     all genotypes are correct set the count flag equal to one.                                    " << endl << endl;
@@ -249,9 +249,9 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
 	    cerr << endl;
 	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
+	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns" << endl;
 	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"" << endl; 
-	    cerr << "INFO: optional: d,deltaaf    -- skip sites were the difference in allele frequency is less than deltaaf, default is zero"      << endl;
+	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero"      << endl;
 	    cerr << "INFO: optional: c,counts     -- use genotype counts rather than genotype likelihoods to estimate parameters, default false"  << endl; 
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
