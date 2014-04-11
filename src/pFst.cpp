@@ -267,7 +267,7 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
 	    return 0;
 	  case 'c':
-	    cerr << "INFO: using genotype counts rather than gentoype likelihoods" << endl;
+	    cerr << "INFO: using genotype counts rather than genotype likelihoods" << endl;
 	    counts = 1;
 	    break;
 	  case 't':
