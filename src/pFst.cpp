@@ -57,7 +57,6 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
   
   for(; targ_it != group.end(); targ_it++){
     
-    population.ngeno += 1;
     
     string genotype = (*targ_it)["GT"].front();
     
@@ -71,12 +70,14 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
     
 	while(1){
 	  if(genotype == "0/0"){
+	    population.ngeno += 1;
 	    population.nhomr += 1;
 	    population.nref  += 2;
 	    population.geno_index.push_back(0);
 	    break;
 	  }
 	  if(genotype == "0/1"){
+	    population.ngeno += 1;
 	    population.nhet  += 1;
 	    population.nref  += 1;
 	    population.nalt  += 1;
@@ -84,18 +85,21 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
 	    break;
 	  }
 	  if(genotype == "1/1"){
+	    population.ngeno += 1;
 	    population.nhoma += 1;
 	    population.nalt  += 2;
 	    population.geno_index.push_back(2);
 	    break;
 	  }
 	  if(genotype == "0|0"){
+	    population.ngeno += 1;
 	    population.nhomr += 1;
 	    population.nref  += 2;
 	    population.geno_index.push_back(0);
 	    break;
 	  }
 	  if(genotype == "0|1"){
+	    population.ngeno += 1;
 	    population.nhet  += 1;
 	    population.nref  += 1;
 	    population.nalt  += 1;
@@ -103,6 +107,7 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
 	    break;
 	  }
 	  if(genotype == "1|1"){
+	    population.ngeno += 1;
 	    population.nhoma += 1;
 	    population.nalt  += 2;
 	    population.geno_index.push_back(2);
