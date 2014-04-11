@@ -18,6 +18,7 @@ OBJECTS= $(SOURCES:.cpp=.o)
 BIN_SOURCES = src/vcfecho.cpp \
 			  src/pFst.cpp \
 			  src/bFst.cpp \
+			  src/wcFst.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \
