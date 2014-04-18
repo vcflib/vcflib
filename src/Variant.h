@@ -78,9 +78,10 @@ public:
 
     void updateSamples(vector<string>& newSampleNames);
     string headerWithSampleNames(vector<string>& newSamples); // non-destructive, for output
-    void addHeaderLine(string line);
-    void removeInfoHeaderLine(string line);
-    void removeGenoHeaderLine(string line);
+    void addHeaderLine(string ln);
+    void removeHeaderLines(string pfx);
+    void removeInfoHeaderLine(string tag);
+    void removeGenoHeaderLine(string tag);
     vector<string> infoIds(void);
     vector<string> formatIds(void);
 

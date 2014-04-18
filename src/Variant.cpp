@@ -449,7 +449,7 @@ VariantFieldType Variant::infoType(const string& key) {
         if (filter == "" || filter == ".")
             filter = tag;
         else
-            filter += "," + tag;
+            filter += ";" + tag;
     }
 
     void Variant::addFormatField(const string& key) {
@@ -1010,9 +1010,19 @@ string VariantCallFile::headerWithSampleNames(vector<string>& newSamples) {
 }
 
 // TODO cleanup, store header lines instead of bulk header
-void VariantCallFile::addHeaderLine(string line) {
+void VariantCallFile::addHeaderLine(string ln) {
     vector<string> headerLines = split(header, '\n');
-    headerLines.insert(headerLines.end() - 1, line);
+    headerLines.insert(headerLines.end() - 1, ln);
+    header = join(unique(headerLines), "\n");
+}
+
+void VariantCallFile::removeHeaderLines(string pfx) {
+    size_t len = pfx.length();
+    vector<string> headerLines = split(header, '\n');
+    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
+        if (s->substr(0, len) == pfx)
+            headerLines.erase(s);
+    }
     header = join(unique(headerLines), "\n");
 }
 
@@ -1034,14 +1044,14 @@ vector<string> VariantCallFile::infoIds(void) {
     vector<string> tags;
     vector<string> headerLines = split(header, '\n');
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
-        if (line.find("##INFO") == 0) {
-            size_t pos = line.find("ID=");
+        string& ln = *s;
+        if (ln.find("##INFO") == 0) {
+            size_t pos = ln.find("ID=");
             if (pos != string::npos) {
                 pos += 3;
-                size_t tagend = line.find(",", pos);
+                size_t tagend = ln.find(",", pos);
                 if (tagend != string::npos) {
-                    tags.push_back(line.substr(pos, tagend - pos));
+                    tags.push_back(ln.substr(pos, tagend - pos));
                 }
             }
         }
@@ -1053,14 +1063,14 @@ vector<string> VariantCallFile::formatIds(void) {
     vector<string> tags;
     vector<string> headerLines = split(header, '\n');
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
-        if (line.find("##FORMAT") == 0) {
-            size_t pos = line.find("ID=");
+        string& ln = *s;
+        if (ln.find("##FORMAT") == 0) {
+            size_t pos = ln.find("ID=");
             if (pos != string::npos) {
                 pos += 3;
-                size_t tagend = line.find(",", pos);
+                size_t tagend = ln.find(",", pos);
                 if (tagend != string::npos) {
-                    tags.push_back(line.substr(pos, tagend - pos));
+                    tags.push_back(ln.substr(pos, tagend - pos));
                 }
             }
         }
@@ -1073,13 +1083,13 @@ void VariantCallFile::removeInfoHeaderLine(string tag) {
     vector<string> newHeader;
     string id = "ID=" + tag + ",";
     for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
-        if (line.find("##INFO") == 0) {
-            if (line.find(id) == string::npos) {
-                newHeader.push_back(line);
+        string& ln = *s;
+        if (ln.find("##INFO") == 0) {
+            if (ln.find(id) == string::npos) {
+                newHeader.push_back(ln);
             }
         } else {
-            newHeader.push_back(line);
+            newHeader.push_back(ln);
         }
     }
     header = join(newHeader, "\n");
@@ -1635,7 +1645,7 @@ map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
     map<pair<int, int>, int> genotypeIndexes;
     //map<int, map<Genotype*, int> > vcfGenotypeOrder;
     vector<int> indexes;
-    for (int i = 0; i < alleles.size(); ++i) {
+    for (size_t i = 0; i < alleles.size(); ++i) {
         indexes.push_back(i);
     }
     int ploidy = 2; // ONLY diploid

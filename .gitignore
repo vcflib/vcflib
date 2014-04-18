@@ -3,6 +3,7 @@
 .*swp
 .nfs*
 *.o
+smithwaterman
 BedReader.cpp
 Fasta.cpp
 Fasta.h
