@@ -175,7 +175,7 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background, string state){
+void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background, string state, string seqid){
 
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
@@ -224,7 +224,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
       }
 
       for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
-	if( (*th).first.substr( (end - start)/2,1 ) == state ){     
+	if( (*th).first.substr( (end - start)/2,1 ) == state){     
 	   sumaT += r8_choose(th->second, 2);  
 	   naltT += th->second;
 	}
@@ -235,7 +235,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
       }
 
       for( map<string, int>::iterator bh = backgroundH.begin(); bh != backgroundH.end(); bh++){
-        if( (*bh).first.substr( (end - start)/2,1 ) == state ){
+        if( (*bh).first.substr( (end - start)/2,1 ) == state){
 	  sumaB += r8_choose(bh->second, 2);
 	  naltB += bh->second;
         }
@@ -256,7 +256,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
       ehhsab += ehhAB;
 
     }
-    cout << pos[snp] << "\t" << ehhsat/ehhsab << "\t" << iHSA /iHSR << endl;
+    cout << seqid << "\t" << pos[snp] << "\t" << ehhsat/ehhsab << "\t" << iHSA /iHSR << endl;
   }    
 }
 
@@ -318,7 +318,7 @@ void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
   
   string totalHaplotypes[ntarget][2];
   
-  for(int k = 0; k < 2000; k++){
+  for(int k = 0; k < 1000; k++){
     
     string tempHaplotypes[ntarget][2] ;
     
@@ -416,7 +416,7 @@ int main(int argc, char** argv) {
 
   // ancestral state is set to zero by default
 
-  string ancestral = "0";
+  string mut = "1";
 
   int counts = 0;
 
@@ -429,6 +429,7 @@ int main(int argc, char** argv) {
 	{"background", 1, 0, 'b'},
 	{"deltaaf"   , 1, 0, 'd'},
 	{"region"    , 1, 0, 'r'},
+	{"mutation"  , 1, 0, 'm'},
 	{0,0,0,0}
       };
 
@@ -437,7 +438,7 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "a:r:d:t:b:f:hv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "m:r:d:t:b:f:hv", longopts, &findex);
 	
 	switch (iarg)
 	  {
@@ -463,7 +464,7 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns        " << endl;
 	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns    " << endl;
 	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"                                 " << endl; 
-	    cerr << "INFO: optional: a,ancestral   -- which state is ancestral [0,1] default is 0                                                " << endl;
+	    cerr << "INFO: optional: m,mutation   -- which state is derived in vcf [0,1] default is 1                                            " << endl;
 	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
@@ -473,9 +474,9 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
 	    return 0;
-	  case 'a':
-	    ancestral = optarg;
-	    cerr << "INFO ancestral state set to " << ancestral << endl;
+	  case 'm':
+	    mut = optarg;
+	    cerr << "INFO derived state set to " << mut << endl;
 	    break;
 	  case 't':
 	    loadIndices(it, optarg);
@@ -505,19 +506,20 @@ int main(int argc, char** argv) {
 	  }
 
       }
-    
+
+    if(filename == "NA"){
+      cerr << "FATAL: did not specify a file" << endl;
+      cerr << "INFO: please use gl-XPEHH --help" << endl;
+      return(1);
+    }
+
 
     variantFile.open(filename);
     
 
-    if(region != "NA"){
-      variantFile.setRegion(region); 
-    }
-    else{
-      cerr << "FATAL: did not specify region"    << endl;
-      cerr << "INFO: please use gl-XPEHH --help" << endl;
-      return(1);
-    }
+   if(region != "NA"){
+     variantFile.setRegion(region); 
+   }
     
     if (!variantFile.is_open()) {
         return 1;
@@ -627,9 +629,8 @@ int main(int argc, char** argv) {
     }
 
     cerr << "INFO: phasing done" << endl;
-
    
-    calc(haplotypes, (it.size() + ib.size()), positions, target_h, background_h,  ancestral);
+    calc(haplotypes, (it.size() + ib.size()), positions, target_h, background_h,  mut, zdat.front().seqid);
 
     cerr << "INFO: gl-XPEHH finished" << endl;
 
