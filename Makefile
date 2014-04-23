@@ -16,10 +16,11 @@ OBJECTS= $(SOURCES:.cpp=.o)
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
-			  src/pFst.cpp \
 			  src/bFst.cpp \
 			  src/wcFst.cpp \
+			  src/gl-XPEHH.cpp \
 			  src/smoother.cpp \
+			  src/pFst.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \

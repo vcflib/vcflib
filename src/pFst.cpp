@@ -31,6 +31,17 @@ struct pop{
   
 };
 
+struct popPool : pop{
+  double nalt  ;
+  double nref  ;
+  double af    ;
+  double npop  ;
+  double ntot  ;
+  vector<double> nalts;
+  vector<double> nrefs;
+};
+
+
 double unphred(string phred){
   
   double unphred = atof(phred.c_str());
@@ -48,7 +59,13 @@ void initPop(pop & population){
   population.nhet  = 0;
   population.ngeno = 0;
   population.fis   = 0;
-  
+}
+
+void initPop(popPool & population){
+  population.nalt = 0;
+  population.nref = 0;
+  population.npop = 0;
+  population.ntot = 0;
 }
 
 void loadPop( vector< map< string, vector<string> > >& group, pop & population){
@@ -137,6 +154,33 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
   }  
 }
 
+void loadPop( vector< map< string, vector<string> > >& group, popPool & population){
+  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
+
+  for(; targ_it != group.end(); targ_it++){
+
+    string allelecounts = (*targ_it)["AD"].front();
+
+    vector<string> ac   = split(allelecounts, ',');
+
+    population.npop += 1;
+
+    population.nrefs.push_back(atof(ac[0].c_str()));
+    population.nalts.push_back(atof(ac[1].c_str()));
+
+    population.nref += atof(ac[0].c_str());
+    population.ntot += atof(ac[0].c_str());
+    population.nalt += atof(ac[1].c_str());
+    population.ntot += atof(ac[1].c_str());
+  }
+  if(population.npop < 1){
+    population.af = -1;
+  }
+  else{
+    population.af = population.nalt / population.ntot;
+  }  
+}
+
 double bound(double v){
   if(v <= 0.00001){
     return  0.00001;
@@ -181,12 +225,17 @@ void getPosterior(pop & population, double *alpha, double *beta){
   }
 }
 
+void getPosterior(popPool & population, double *alpha, double *beta){
+  
+
+}
+
 
 int main(int argc, char** argv) {
 
-  // set the random seed for MCMC
-
-  srand((unsigned)time(NULL));
+  // pooled or genotyped
+  
+  int pool = 0;
 
   // the filename
 
@@ -312,17 +361,15 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
 
     while (variantFile.getNextVariant(var)) {
-        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-        map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
+
+      if(var.alt.size() > 1){
+	continue;
+      }
+      
+      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
+      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
-	// biallelic sites naturally 
-
-	if(var.alt.size() > 1){
-	  continue;
-	}
-
-	
-	vector < map< string, vector<string> > > target, background, total;
+    	vector < map< string, vector<string> > > target, background;
 	        
 	int index = 0;
 
@@ -332,44 +379,42 @@ int main(int argc, char** argv) {
 
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
-		target.push_back(sample);
-		total.push_back(sample);
-		
+		target.push_back(sample);		
 	      }
 	      if(ib.find(index) != ib.end()){
 		background.push_back(sample);
-		total.push_back(sample);
 	      }
 	    }
             
 	index += 1;
 	}
 	
-	if(target.size() < 5 || background.size() < 5 ){
-	  continue;
+	pop * popt;
+	pop * popb;
+
+	if(pool == 1){
+	  popt = new popPool;
+	  popb = new popPool;
 	}
 	
-	pop popt, popb, popTotal;
-	
-	initPop(popt);
-	initPop(popb);
-	initPop(popTotal);
 
-	loadPop(target,     popt);
-	loadPop(background, popb);
-	loadPop(total,  popTotal);
+	initPop(*popt);
+	initPop(*popb);
 
-	if(popt.af == -1 || popb.af == -1){
+	loadPop(target,     *popt);
+	loadPop(background, *popb);
+
+	if((*popt).af == -1 || (*popb).af == -1){
 	  continue;
 	}
-	if(popt.af == 1  && popb.af == 1){
+	if((*popt).af == 1  && (*popb).af == 1){
 	  continue;
 	}
-	if(popt.af == 0 && popb.af  == 0){
+	if((*popt).af == 0 && (*popb).af  == 0){
 	  continue;
 	}
 
-	double afdiff = abs(popt.af - popb.af);
+	double afdiff = abs((*popt).af - (*popb).af);
 
 	if(afdiff < daf){
 	  continue;
@@ -381,14 +426,14 @@ int main(int argc, char** argv) {
 	double betaB  = 0.01;
       
 	if(counts == 1){
-	  alphaT += popt.nref ;
-	  alphaB += popb.nref ;
-	  betaT  += popt.nalt ;
-	  betaB  += popb.nalt ;
+	  alphaT += (*popt).nref ;
+	  alphaB += (*popb).nref ;
+	  betaT  += (*popt).nalt ;
+	  betaB  += (*popb).nalt ;
 	}
 	else{
-	  getPosterior(popt, &alphaT, &betaT);
-	  getPosterior(popb, &alphaB, &betaB);
+	  getPosterior(*popt, &alphaT, &betaT);
+	  getPosterior(*popb, &alphaB, &betaB);
 	}
 	    
 	double targm = alphaT / ( alphaT + betaT );
@@ -413,6 +458,11 @@ int main(int argc, char** argv) {
 
 	cout << var.sequenceName << "\t"  << var.position << "\t" << p << endl ;
 
+	delete popt;
+	delete popb;
+	
+	popt = NULL;
+	popb = NULL;
     }
     return 0;		    
 }

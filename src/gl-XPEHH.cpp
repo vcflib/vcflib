@@ -175,7 +175,7 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background){
+void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background, string state){
 
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
@@ -224,7 +224,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
       }
 
       for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
-	if( (*th).first.substr( (end - start)/2,1 ) == "1" ){     
+	if( (*th).first.substr( (end - start)/2,1 ) == state ){     
 	   sumaT += r8_choose(th->second, 2);  
 	   naltT += th->second;
 	}
@@ -235,7 +235,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
       }
 
       for( map<string, int>::iterator bh = backgroundH.begin(); bh != backgroundH.end(); bh++){
-        if( (*bh).first.substr( (end - start)/2,1 ) == "1" ){
+        if( (*bh).first.substr( (end - start)/2,1 ) == state ){
 	  sumaB += r8_choose(bh->second, 2);
 	  naltB += bh->second;
         }
@@ -260,7 +260,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
   }    
 }
 
-double uniqHaplotypeCount(string haplotypes[][2], int nhaps){
+double EHH(string haplotypes[][2], int nhaps){
 
   map<string , int> hapcounts;
 
@@ -284,12 +284,6 @@ double uniqHaplotypeCount(string haplotypes[][2], int nhaps){
 
 }
 
-void clearHaps(string haps[][2], int ntargets){
-  for(int i = 0; i < ntargets ; i++){
-    haps[i][0].clear();
-    haps[i][1].clear();
-  }
-}
 
 void printHaplotypes(string haps[][2], int ntargets){
   for(int snp = 0; snp < haps[0][1].length(); snp++){
@@ -311,26 +305,36 @@ void loadImprovement(string tmpHaplotypes[][2], string haplotypes[][2], int ntar
 }
 
 void appendHaplotypes(string tmpHaplotypes[][2], string haplotypes[][2], int ntarget){
-
   for(int i= 0; i < ntarget; i++){
-    haplotypes[i][0].append(tmpHaplotypes[i][0]);
-    haplotypes[i][1].append(tmpHaplotypes[i][1]);
+    haplotypes[i][0].append(tmpHaplotypes[i][0].substr(5,20));
+    haplotypes[i][1].append(tmpHaplotypes[i][1].substr(5,20));
   }
 
 }
 
 void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
  
-  double ehhsum = 0;
+  double ehhmax = 0;
   
   string totalHaplotypes[ntarget][2];
   
-  for(int k = 0; k < 1000; k++){
+  for(int k = 0; k < 2000; k++){
     
     string tempHaplotypes[ntarget][2] ;
     
-    clearHaps(tempHaplotypes, ntarget);
-
+    int tlength = haplotypes[0][0].size();
+    
+    for(int nt = 0; nt < ntarget ; nt++){
+      if(tlength > 0 ){
+   	tempHaplotypes[nt][0] = haplotypes[nt][0].substr(tlength - 5, 5);
+   	tempHaplotypes[nt][1] = haplotypes[nt][1].substr(tlength - 5, 5);
+      }
+      else{
+   	tempHaplotypes[nt][0] = "00000";
+   	tempHaplotypes[nt][1] = "00000";
+      }
+    }
+ 
     int snpIndex  = 0;
 
     for(list<pop>::iterator pos = window.begin(); pos != window.end(); pos++){    
@@ -372,9 +376,9 @@ void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
       }
       snpIndex++; 
     } 
-    double teh = uniqHaplotypeCount(tempHaplotypes, ntarget);
-    if(teh > ehhsum){
-      ehhsum = teh;
+    double ehh = EHH(tempHaplotypes, ntarget);
+    if(ehh > ehhmax){
+      ehhmax = ehh;
       loadImprovement(tempHaplotypes, totalHaplotypes, ntarget);
     }
   }
@@ -410,7 +414,9 @@ int main(int argc, char** argv) {
   string deltaaf ;
   double daf  = 0;
 
-  // 
+  // ancestral state is set to zero by default
+
+  string ancestral = "0";
 
   int counts = 0;
 
@@ -418,7 +424,6 @@ int main(int argc, char** argv) {
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
-	{"counts"    , 0, 0, 'c'},
         {"file"      , 1, 0, 'f'},
 	{"target"    , 1, 0, 't'},
 	{"background", 1, 0, 'b'},
@@ -432,7 +437,7 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "r:d:t:b:f:chv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "a:r:d:t:b:f:hv", longopts, &findex);
 	
 	switch (iarg)
 	  {
@@ -440,25 +445,26 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    cerr << "INFO: help" << endl;
 	    cerr << "INFO: description:" << endl;
-            cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations,           " << endl;
-	    cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate              " << endl;
-	    cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing     " << endl;
-	    cerr << "     the target's allele frequency given the posterior distribution of the background. By default	" << endl;
-	    cerr << "     pFst uses the genotype likelihoods to estimate alpha, beta and the allele frequency of the target group.  If you would like to assume	" << endl;
-	    cerr << "     all genotypes are correct set the count flag equal to one.                                    " << endl << endl;
+            cerr << "     gl-XPEHH estimates haplotype decay between the target and background populations.  SNVs are integrated                           " << endl;
+	    cerr << "     until EHH in the target is less than 0.05.  The reported score is the itegrated EHH (target) / integrated EHH (background).	   " << endl;
+	    cerr << "     gl-XPEHH does NOT integrate over genetic distance, as genetic maps are not availible for most non-model organisms. 		   " << endl;
+	    cerr << "     gl-XPEHH phases genotypes, imuputes missing genotypes, and changes poor quality genotypes. Phasing is done in a sliding window   " << endl;
+	    cerr << "     with a stochastic search, therefore, every time gl-XPEHH is run it will generate slightly different results.                     " << endl;
 
-	    cerr << "Output : 3 columns :     "    << endl;
+	    cerr << "Output : 4 columns :     "    << endl;
 	    cerr << "     1. seqid            "    << endl;
 	    cerr << "     2. position         "    << endl;
-	    cerr << "     3. pFst probability "    << endl  << endl;
+	    cerr << "     3. xp-ehh           "    << endl;
+	    cerr << "     4. iHS              "    << endl  << endl;
 
-	    cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
+	    cerr << "INFO: gl-XPEHH  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --ancestral 0        " << endl;
 	    cerr << endl;
-	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"" << endl; 
-	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero"      << endl;
-	    cerr << "INFO: optional: c,counts     -- use genotype counts rather than genotype likelihoods to estimate parameters, default false"  << endl; 
+	    cerr << "INFO: required: r,region     -- a genomice range to calculate gl-XPEHH on in the format : seqid:start-end                   " << endl;
+	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns        " << endl;
+	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns    " << endl;
+	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"                                 " << endl; 
+	    cerr << "INFO: optional: a,ancestral   -- which state is ancestral [0,1] default is 0                                                " << endl;
+	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 	    cerr << endl << endl;
@@ -467,22 +473,22 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
 	    return 0;
-	  case 'c':
-	    cerr << "INFO: using genotype counts rather than genotype likelihoods" << endl;
-	    counts = 1;
+	  case 'a':
+	    ancestral = optarg;
+	    cerr << "INFO ancestral state set to " << ancestral << endl;
 	    break;
 	  case 't':
 	    loadIndices(it, optarg);
-	    cerr << "INFO: There are " << it.size() << " individuals in the target" << endl;
+	    cerr << "INFO: there are " << it.size() << " individuals in the target" << endl;
 	    cerr << "INFO: target ids: " << optarg << endl;
 	    break;
 	  case 'b':
 	    loadIndices(ib, optarg);
-	    cerr << "INFO: There are " << ib.size() << " individuals in the background" << endl;
+	    cerr << "INFO: there are " << ib.size() << " individuals in the background" << endl;
 	    cerr << "INFO: background ids: " << optarg << endl;
 	    break;
 	  case 'f':
-	    cerr << "INFO: File: " << optarg  <<  endl;
+	    cerr << "INFO: file: " << optarg  <<  endl;
 	    filename = optarg;
 	    break;
 	  case 'd':
@@ -503,10 +509,16 @@ int main(int argc, char** argv) {
 
     variantFile.open(filename);
     
-    if(region != "NA"){
-      variantFile.setRegion(region);
-    }
 
+    if(region != "NA"){
+      variantFile.setRegion(region); 
+    }
+    else{
+      cerr << "FATAL: did not specify region"    << endl;
+      cerr << "INFO: please use gl-XPEHH --help" << endl;
+      return(1);
+    }
+    
     if (!variantFile.is_open()) {
         return 1;
     }
@@ -518,8 +530,14 @@ int main(int argc, char** argv) {
 
     int index, indexi = 0;
 
-    cerr << "INFO : nsamples in VCF " << samples.size() << endl;
-    
+    cerr << "INFO: there are " << samples.size() << " individuals in the VCF" << endl;
+
+    if(samples.size() == 0){
+      cerr << "FATAL: too few samples or no VCF header"    << endl;
+      cerr << "INFO: please use gl-XPEHH --help"           << endl;
+      return(1);
+    }
+
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
      
       if(it.find(index) != it.end() ){
@@ -533,8 +551,6 @@ int main(int argc, char** argv) {
       index++;
     }
     
-    cerr << "INFO: ntarget : " << target_h.size() << endl;
-    cerr << "INFO: nback   : " << background_h.size() << endl;
 
     list< pop > tdat, bdat, zdat;
 
@@ -610,9 +626,12 @@ int main(int argc, char** argv) {
 	}
     }
 
-    cerr << "data phased" << endl;
-    
-    calc(haplotypes, (it.size() + ib.size()), positions, target_h, background_h);
+    cerr << "INFO: phasing done" << endl;
+
+   
+    calc(haplotypes, (it.size() + ib.size()), positions, target_h, background_h,  ancestral);
+
+    cerr << "INFO: gl-XPEHH finished" << endl;
 
     return 0;		    
 }
