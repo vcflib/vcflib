@@ -74,65 +74,63 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
   
   for(; targ_it != group.end(); targ_it++){
     
-    
     string genotype = (*targ_it)["GT"].front();
     
-    vector<double> phreds;
-
-	phreds.push_back( unphred((*targ_it)["PL"][0]));
-	phreds.push_back( unphred((*targ_it)["PL"][1]));
-	phreds.push_back( unphred((*targ_it)["PL"][2]));
-    
-	population.unphred_p.push_back(phreds);
-    
-	while(1){
-	  if(genotype == "0/0"){
-	    population.ngeno += 1;
-	    population.nhomr += 1;
-	    population.nref  += 2;
-	    population.geno_index.push_back(0);
-	    break;
-	  }
-	  if(genotype == "0/1"){
-	    population.ngeno += 1;
-	    population.nhet  += 1;
-	    population.nref  += 1;
-	    population.nalt  += 1;
-	    population.geno_index.push_back(1);
-	    break;
-	  }
-	  if(genotype == "1/1"){
-	    population.ngeno += 1;
-	    population.nhoma += 1;
-	    population.nalt  += 2;
-	    population.geno_index.push_back(2);
-	    break;
-	  }
-	  if(genotype == "0|0"){
-	    population.ngeno += 1;
-	    population.nhomr += 1;
-	    population.nref  += 2;
-	    population.geno_index.push_back(0);
-	    break;
-	  }
-	  if(genotype == "0|1"){
-	    population.ngeno += 1;
-	    population.nhet  += 1;
-	    population.nref  += 1;
-	    population.nalt  += 1;
-	    population.geno_index.push_back(1);
-	    break;
-	  }
-	  if(genotype == "1|1"){
-	    population.ngeno += 1;
-	    population.nhoma += 1;
-	    population.nalt  += 2;
-	    population.geno_index.push_back(2);
-	    break;
-	  }
-	  cerr << "FATAL: unknown genotype" << endl;
-	  exit(1);
-	}
+    if(genotype != "./."){
+      vector<double> phreds;
+      phreds.push_back( unphred((*targ_it)["PL"][0]));
+      phreds.push_back( unphred((*targ_it)["PL"][1]));
+      phreds.push_back( unphred((*targ_it)["PL"][2]));  
+      population.unphred_p.push_back(phreds);
+    } 
+    while(1){
+      if(genotype == "0/0"){
+	population.ngeno += 1;
+	population.nhomr += 1;
+	population.nref  += 2;
+	population.geno_index.push_back(0);
+	break;
+      }
+      if(genotype == "0/1"){
+	population.ngeno += 1;
+	population.nhet  += 1;
+	population.nref  += 1;
+	population.nalt  += 1;
+	population.geno_index.push_back(1);
+	break;
+      }
+      if(genotype == "1/1"){
+	population.ngeno += 1;
+	population.nhoma += 1;
+	population.nalt  += 2;
+	population.geno_index.push_back(2);
+	break;
+      }
+      if(genotype == "0|0"){
+	population.ngeno += 1;
+	population.nhomr += 1;
+	population.nref  += 2;
+	population.geno_index.push_back(0);
+	break;
+      }
+      if(genotype == "0|1"){
+	population.ngeno += 1;
+	population.nhet  += 1;
+	population.nref  += 1;
+	population.nalt  += 1;
+	population.geno_index.push_back(1);
+	break;
+      }
+      if(genotype == "1|1"){
+	population.ngeno += 1;
+	population.nhoma += 1;
+	population.nalt  += 2;
+	population.geno_index.push_back(2);
+	break;
+      }
+      cerr << "FATAL: unknown genotype" << endl;
+      exit(1);
+    }
   }
 
   if(population.nalt == 0 && population.nref == 0){
