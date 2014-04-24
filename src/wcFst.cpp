@@ -256,13 +256,13 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
 	    return 0;
 	  case 't':
-	    loadIndices(ib, optarg);
-	    cerr << "INFO: There are " << ib.size() << " individuals in the target" << endl;
+	    loadIndices(it, optarg);
+	    cerr << "INFO: There are " << it.size() << " individuals in the target" << endl;
 	    cerr << "INFO: target ids: " << optarg << endl;
 	    break;
 	  case 'b':
-	    loadIndices(it, optarg);
-	    cerr << "INFO: There are " << it.size() << " individuals in the background" << endl;
+	    loadIndices(ib, optarg);
+	    cerr << "INFO: There are " << ib.size() << " individuals in the background" << endl;
 	    cerr << "INFO: background ids: " << optarg << endl;
 	    break;
 	  case 'f':
@@ -305,7 +305,6 @@ int main(int argc, char** argv) {
 	if(var.alt.size() > 1){
 	  continue;
 	}
-
 	
 	vector < map< string, vector<string> > > target, background, total;
 	        
@@ -318,41 +317,31 @@ int main(int argc, char** argv) {
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
 		target.push_back(sample);
-		total.push_back(sample);
-		
 	      }
 	      if(ib.find(index) != ib.end()){
 		background.push_back(sample);
-		total.push_back(sample);
 	      }
-	    }
-            
-	index += 1;
+	    }            
+	    index += 1;
 	}
 	
 	if(target.size() < 5 || background.size() < 5 ){
 	  continue;
 	}
 	
-	pop popt, popb, popTotal;
+	pop popt, popb;
 	
 	initPop(popt);
 	initPop(popb);
-	initPop(popTotal);
 
 	loadPop(target,     popt);
 	loadPop(background, popb);
-	loadPop(total,  popTotal);
+
 
 	if(popt.af == -1 || popb.af == -1){
 	  continue;
 	}
-	if(popt.af == 1  && popb.af == 1){
-	  continue;
-	}
-	if(popt.af == 0 && popb.af  == 0){
-	  continue;
-	}
+
 
 	double afdiff = abs(popt.af - popb.af);
 
@@ -370,9 +359,10 @@ int main(int argc, char** argv) {
 	nc -= (pow(popt.ngeno,2)/rn);
 	nc -= (pow(popb.ngeno,2)/rn);
 	// average sample frequency
-	double pbar = 0 ;
-	pbar += ((popt.af * popt.ngeno)/ rn);
-	pbar += ((popb.af * popb.ngeno)/ rn);
+	double pbar = (popt.af + popb.af) / 2;
+
+	//	pbar += ((popt.af * popt.ngeno)/ rn);
+	//pbar += ((popb.af * popb.ngeno)/ rn);
 	// sample variance of allele A frequences over the population 
 	
 	double s2 = 0;
@@ -381,9 +371,9 @@ int main(int argc, char** argv) {
 	
 	// average heterozygosity 
 	
-	double hbar = 0;
-	hbar += ((popt.ngeno*popt.hfrq)/rn);
-	hbar += ((popb.ngeno*popb.hfrq)/rn);
+	double hbar = (popt.hfrq + popb.hfrq) / 2;
+	//	hbar += ((popt.ngeno*popt.hfrq)/rn);
+	//      hbar += ((popb.ngeno*popb.hfrq)/rn);
 	
 	//global af var
 	double pvar = pbar * (1 - pbar);
