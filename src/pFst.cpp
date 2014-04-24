@@ -76,13 +76,12 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
     
     string genotype = (*targ_it)["GT"].front();
     
-    if(genotype != "./."){
-      vector<double> phreds;
-      phreds.push_back( unphred((*targ_it)["PL"][0]));
-      phreds.push_back( unphred((*targ_it)["PL"][1]));
-      phreds.push_back( unphred((*targ_it)["PL"][2]));  
-      population.unphred_p.push_back(phreds);
-    } 
+    vector<double> phreds;
+    phreds.push_back( unphred((*targ_it)["PL"][0]));
+    phreds.push_back( unphred((*targ_it)["PL"][1]));
+    phreds.push_back( unphred((*targ_it)["PL"][2]));  
+    population.unphred_p.push_back(phreds);
+   
     while(1){
       if(genotype == "0/0"){
 	population.ngeno += 1;
@@ -387,14 +386,9 @@ int main(int argc, char** argv) {
 	index += 1;
 	}
 	
-	pop * popt;
-	pop * popb;
+	pop * popt = new pop;
+	pop * popb = new pop;
 
-	if(pool == 1){
-	  popt = new popPool;
-	  popb = new popPool;
-	}
-	
 
 	initPop(*popt);
 	initPop(*popb);
