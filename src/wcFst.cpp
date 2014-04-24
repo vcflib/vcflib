@@ -114,7 +114,14 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population){
 	population.geno_index.push_back(2);
 	break;
       }
-      break;
+      if(genotype == "1/0"){
+        population.ngeno += 1;
+        population.nhet  += 1;
+        population.nref  += 1;
+        population.nalt  += 1;
+        population.geno_index.push_back(1);
+        break;
+      }
       cerr << "FATAL: unknown genotype:" <<  genotype << endl;
       exit(1);
     }
