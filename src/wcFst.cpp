@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: help" << endl;
 	    cerr << "INFO: description:" << endl;
 	    cerr << "      wcFst is Weir & Cockerham's Fst for two populations.  Negative values are VALID,  " << endl;
-	    cerr << "      they are sites with excessive hetrozygosity. For more information see Evolution, Vol. 38 N. 6 Nov 1984. " << endl;
+	    cerr << "      they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. " << endl;
 	    cerr << "      Specifically wcFst uses equations 1,2,3,4.                                                              " << endl << endl;
 
 	    cerr << "Output : 3 columns :     "    << endl;
