@@ -21,6 +21,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/gl-XPEHH.cpp \
 			  src/smoother.cpp \
 			  src/pFst.cpp \
+			  src/plotHaps.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \
