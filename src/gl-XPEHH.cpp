@@ -29,7 +29,7 @@ struct pop{
 
   vector<int>    geno_index ;
   vector< vector< double > > unphred_p;  
-  
+  vector<string> genotypes;
 };
 
 
@@ -52,7 +52,7 @@ void initPop(pop & population){
   
 }
 
-void loadPop( vector< map< string, vector<string> > >& group, pop & population, string seqid, long int pos){
+void loadPop( vector< map< string, vector<string> > >& group, pop & population, string seqid, long int pos, int phased){
 
   vector< map< string, vector<string> > >::iterator targ_it = group.begin();
   
@@ -67,30 +67,34 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
     
     double sum  = 0;
     
-    if(genotype != "./."){
-      
-      double pa  = exp( unphred((*targ_it)["PL"][0])) ; 
-      double pab = exp( unphred((*targ_it)["PL"][1])) ; 
-      double pbb = exp( unphred((*targ_it)["PL"][2])) ; 
-      
-      double norm = pa + pab + pbb  ;
+    if(phased == 0){
 
-      sum += (pa  / norm);
-      phreds.push_back(sum);
-      sum += (pab / norm);
-      phreds.push_back(sum);
-      sum += (pbb / norm);
-      phreds.push_back(sum);
+      if(genotype != "./."){
+	
+	double pa  = exp( unphred((*targ_it)["PL"][0])) ; 
+	double pab = exp( unphred((*targ_it)["PL"][1])) ; 
+	double pbb = exp( unphred((*targ_it)["PL"][2])) ; 
+	
+	double norm = pa + pab + pbb  ;
+	
+	sum += (pa  / norm);
+	phreds.push_back(sum);
+	sum += (pab / norm);
+	phreds.push_back(sum);
+	sum += (pbb / norm);
+	phreds.push_back(sum);
+      }
+      else{
+	phreds.push_back(1/3);
+	phreds.push_back(2/3);
+	phreds.push_back(1);
+      }
     }
-    else{
-      phreds.push_back(1/3);
-      phreds.push_back(2/3);
-      phreds.push_back(1);
-    }
-
     
     population.unphred_p.push_back(phreds);
-  
+
+    population.genotypes.push_back(genotype);  
+
     while(1){
       if(genotype == "./."){
       	population.geno_index.push_back(-1);
@@ -132,6 +136,14 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
 	population.nalt  += 1;
 	population.geno_index.push_back(1);
 	break;
+      }
+      if(genotype == "1|0"){
+        population.ngeno += 1;
+        population.nhet  += 1;
+        population.nref  += 1;
+        population.nalt  += 1;
+        population.geno_index.push_back(1);
+        break;
       }
       if(genotype == "1|1"){
 	population.ngeno += 1;
@@ -309,7 +321,19 @@ void appendHaplotypes(string tmpHaplotypes[][2], string haplotypes[][2], int nta
     haplotypes[i][0].append(tmpHaplotypes[i][0].substr(5,20));
     haplotypes[i][1].append(tmpHaplotypes[i][1].substr(5,20));
   }
+}
 
+void loadPhased(string haplotypes[][2], list<pop> & window, int ntarget){
+  for(list<pop>::iterator pos = window.begin(); pos != window.end(); pos++){
+    int indIndex = 0;
+    for(vector<int>::iterator ind = pos->geno_index.begin(); ind != pos->geno_index.end(); ind++){
+      string g = pos->genotypes[indIndex];
+      vector< string > gs = split(g, "|");
+      haplotypes[indIndex][0].append(gs[0]);
+      haplotypes[indIndex][1].append(gs[1]);
+      indIndex++;
+    }
+  }
 }
 
 void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
@@ -411,14 +435,15 @@ int main(int argc, char** argv) {
   
   // deltaaf is the difference of allele frequency we bother to look at 
 
-  string deltaaf ;
-  double daf  = 0;
-
   // ancestral state is set to zero by default
 
   string mut = "1";
 
   int counts = 0;
+  
+  // phased 
+
+  int phased = 0;
 
     const struct option longopts[] = 
       {
@@ -430,6 +455,7 @@ int main(int argc, char** argv) {
 	{"deltaaf"   , 1, 0, 'd'},
 	{"region"    , 1, 0, 'r'},
 	{"mutation"  , 1, 0, 'm'},
+	{"phased"    , 1, 0, 'p'},
 	{0,0,0,0}
       };
 
@@ -438,7 +464,7 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "m:r:d:t:b:f:hv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "p:m:r:d:t:b:f:hv", longopts, &findex);
 	
 	switch (iarg)
 	  {
@@ -460,12 +486,12 @@ int main(int argc, char** argv) {
 
 	    cerr << "INFO: gl-XPEHH  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --ancestral 0        " << endl;
 	    cerr << endl;
-	    cerr << "INFO: required: r,region     -- a genomice range to calculate gl-XPEHH on in the format : seqid:start-end                   " << endl;
+	    cerr << "INFO: required: r,region     -- a genomice range to calculate gl-XPEHH on in the format : \"seqid:start-end]\" or \"seqid\" " << endl;
 	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns        " << endl;
 	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns    " << endl;
-	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"                                 " << endl; 
+	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\" if option phased == 0           " << endl; 
 	    cerr << "INFO: optional: m,mutation   -- which state is derived in vcf [0,1] default is 1                                            " << endl;
-	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
+	    cerr << "INFO: optional: p,phased     -- [0,1] if phased == 1 gl-XPEHH does not phase default is 0                                   " << endl;
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 	    cerr << endl << endl;
@@ -474,6 +500,10 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
 	    return 0;
+	  case 'p':
+	    phased = atoi(optarg);
+	    cerr << "INFO setting phase to: " << phased << endl;
+	    break;
 	  case 'm':
 	    mut = optarg;
 	    cerr << "INFO derived state set to " << mut << endl;
@@ -491,11 +521,6 @@ int main(int argc, char** argv) {
 	  case 'f':
 	    cerr << "INFO: file: " << optarg  <<  endl;
 	    filename = optarg;
-	    break;
-	  case 'd':
-	    cerr << "INFO: only scoring sites where the allele frequency difference is greater than: " << optarg << endl;
-	    deltaaf = optarg;
-	    daf = atof(deltaaf.c_str());	    
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
@@ -563,6 +588,8 @@ int main(int argc, char** argv) {
     vector<long int> positions;
 
     string haplotypes [it.size() + ib.size()][2];    
+    
+    string seqid;
 
     while (variantFile.getNextVariant(var)) {
         map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
@@ -593,15 +620,17 @@ int main(int argc, char** argv) {
 	  sindex += 1;
 	}
 	
+	seqid = var.sequenceName;
+
 	pop popt, popb, popz;
 
 	initPop(popt);
 	initPop(popb);
 	initPop(popz);
 
-	loadPop(target,     popt, var.sequenceName, var.position );
-	loadPop(background, popb, var.sequenceName, var.position );
-	loadPop(total,      popz, var.sequenceName, var.position );
+	loadPop(target,     popt, var.sequenceName, var.position, phased );
+	loadPop(background, popb, var.sequenceName, var.position, phased );
+	loadPop(total,      popz, var.sequenceName, var.position, phased );
 
 	if(popt.af == -1 || popb.af == -1){
 	  continue;
@@ -623,18 +652,33 @@ int main(int argc, char** argv) {
        
 	positions.push_back(var.position);
 	
-
 	while(zdat.size() >= 20 && !zdat.empty()){
-	  localPhase(haplotypes, zdat, (it.size() + ib.size()));
-	  while(!zdat.empty()){
-	    zdat.pop_front();
-	  }
+          if(phased == 0){
+            localPhase(haplotypes, zdat, (it.size() + ib.size()));
+          }
+          else{
+            loadPhased(haplotypes, zdat, (it.size() + ib.size()));
+          }
+          while(!zdat.empty()){
+            zdat.pop_front();
+          }
 	}
     }
 
+    if(phased == 0){
+      localPhase(haplotypes, zdat, (it.size() + ib.size()));
+    }
+    else{
+      loadPhased(haplotypes, zdat, (it.size() + ib.size()));
+    }
+    while(!zdat.empty()){
+      zdat.pop_front();
+    }
+
+
     cerr << "INFO: phasing done" << endl;
    
-    calc(haplotypes, (it.size() + ib.size()), positions, target_h, background_h,  mut, zdat.front().seqid);
+    calc(haplotypes, (it.size() + ib.size()), positions, target_h, background_h,  mut, seqid);
 
     cerr << "INFO: gl-XPEHH finished" << endl;
 
