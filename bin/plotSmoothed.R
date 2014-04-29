@@ -14,7 +14,7 @@ plotPfst<-function(x){
 		theplot<-ggplot(dat, aes(x=V2, y=-log10(V5), colour=V4))+geom_point()+theme_grey(15)+labs(x="SNP index", y="-log10(smoothed pFst)")+scale_colour_continuous(low="grey", high="red", name="variants in window")
 	}
 	if(x[2] == "wcFst"){
-		theplot<-ggplot(dat, aes(x=V2, y=-log10(V5), colour=V4))+geom_point()+theme_grey(15)+labs(x="SNP index", y="-log10(smoothed pFst)")+scale_colour_continuous(low="grey", high="red", name="variants in window")
+		theplot<-ggplot(dat, aes(x=V2, y=V5, colour=V4))+geom_point()+theme_grey(15)+labs(x="SNP index", y="-log10(smoothed pFst)")+scale_colour_continuous(low="grey", high="red", name="variants in window")
 	}
 	ggsave(filename=pngName, width=20, height=4, units="in", theplot)
 }
