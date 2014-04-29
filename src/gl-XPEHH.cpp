@@ -516,6 +516,10 @@ int main(int argc, char** argv) {
 
     variantFile.open(filename);
     
+    if(region == "NA"){
+      cerr << "FATAL: did not specify a region"  << endl;
+      cerr << "INFO: please use gl-XPEHH --help" << endl;
+    }
 
    if(region != "NA"){
      variantFile.setRegion(region); 
