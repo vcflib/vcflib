@@ -494,12 +494,12 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: optional: m,mutation   -- which state is derived in vcf [0,1] default is 1                                            " << endl;
 	    cerr << "INFO: optional: p,phased     -- phasing flag [0,1] 0 = phase vcf, 1 = vcf is already phased                                 " << endl;
 	    cerr << endl; 
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
+	    cerr << "INFO: version 1.0.1 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 	    cerr << endl << endl;
 	    return 0;
 	  case 'v':
 	    cerr << endl << endl;
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+	    cerr << "INFO: version 1.0.1 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
 	    return 0;
 	  case 'p':
 	    phased = atoi(optarg);
