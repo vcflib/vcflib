@@ -488,8 +488,8 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: gl-XPEHH  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --ancestral 0        " << endl;
 	    cerr << endl;
 	    cerr << "INFO: required: r,region     -- a genomice range to calculate gl-XPEHH on in the format : \"seqid:start-end]\" or \"seqid\" " << endl;
-	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns        " << endl;
-	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns    " << endl;
+	    cerr << "INFO: required: t,target     -- a zero base comma seperated list of target individuals corrisponding to VCF columns        " << endl;
+	    cerr << "INFO: required: b,background -- a zero base comma seperated list of background individuals corrisponding to VCF columns    " << endl;
 	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\" if option phased == 0           " << endl; 
 	    cerr << "INFO: optional: m,mutation   -- which state is derived in vcf [0,1] default is 1                                            " << endl;
 	    cerr << "INFO: optional: p,phased     -- phasing flag [0,1] 0 = phase vcf, 1 = vcf is already phased                                 " << endl;
