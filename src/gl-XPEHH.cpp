@@ -32,8 +32,6 @@ struct pop{
   vector<string> genotypes;
 };
 
-
-
 double unphred(string phred){  
   double unphred = atof(phred.c_str());
   unphred = unphred / -10;
@@ -316,10 +314,10 @@ void loadImprovement(string tmpHaplotypes[][2], string haplotypes[][2], int ntar
 
 }
 
-void appendHaplotypes(string tmpHaplotypes[][2], string haplotypes[][2], int ntarget){
+void appendHaplotypes(string tmpHaplotypes[][2], string haplotypes[][2], int ntarget){ 
   for(int i= 0; i < ntarget; i++){
-    haplotypes[i][0].append(tmpHaplotypes[i][0].substr(5,20));
-    haplotypes[i][1].append(tmpHaplotypes[i][1].substr(5,20));
+    haplotypes[i][0].append(tmpHaplotypes[i][0].substr(5,15));
+    haplotypes[i][1].append(tmpHaplotypes[i][1].substr(5,15));
   }
 }
 
@@ -338,7 +336,7 @@ void loadPhased(string haplotypes[][2], list<pop> & window, int ntarget){
 
 void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
  
-  double ehhmax = 0;
+  double ehhmax = -1;
   
   string totalHaplotypes[ntarget][2];
   
@@ -400,10 +398,13 @@ void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
       }
       snpIndex++; 
     } 
-    double ehh = EHH(tempHaplotypes, ntarget);
+
+
+    double ehh = EHH(tempHaplotypes, ntarget);    
     if(ehh > ehhmax){
       ehhmax = ehh;
       loadImprovement(tempHaplotypes, totalHaplotypes, ntarget);
+
     }
   }
   appendHaplotypes(totalHaplotypes, haplotypes, ntarget);
@@ -502,11 +503,11 @@ int main(int argc, char** argv) {
 	    return 0;
 	  case 'p':
 	    phased = atoi(optarg);
-	    cerr << "INFO setting phase to: " << phased << endl;
+	    cerr << "INFO: setting phase to: " << phased << endl;
 	    break;
 	  case 'm':
 	    mut = optarg;
-	    cerr << "INFO derived state set to " << mut << endl;
+	    cerr << "INFO: derived state set to " << mut << endl;
 	    break;
 	  case 't':
 	    loadIndices(it, optarg);
@@ -644,16 +645,21 @@ int main(int argc, char** argv) {
 	if(popt.af == 1 && popb.af == 0){
 	  continue;
 	}
-	
-	
+		
 	tdat.push_back(popt);
 	bdat.push_back(popb);
 	zdat.push_back(popz);
        
 	positions.push_back(var.position);
 	
-	while(zdat.size() >= 20 && !zdat.empty()){
-          if(phased == 0){
+	counts += 1;
+	if(counts >= 1000){
+	  cerr << "INFO: processed " << haplotypes[0][0].size() << " SNPs; current location : " << var.position << endl;
+	  counts = 0;
+	}
+
+	while(zdat.size() >= 15 && !zdat.empty()){
+          if(phased == 0){	    
             localPhase(haplotypes, zdat, (it.size() + ib.size()));
           }
           else{
