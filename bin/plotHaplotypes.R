@@ -5,7 +5,7 @@ cmd_args <- commandArgs(trailingOnly = TRUE)
 
 imageHap<-function(x){
 
-	pngName<-paste(c(x, format(Sys.time(), "%a%b%d_%H_%M_%S.png")), collapse="_")
+	pngName<-paste(c(x, format(Sys.time(), "%a%b%d_%H_%M_%S.pdf")), collapse="_")
 
 	dat<-read.table( x[1], header=FALSE )
 	pos<-dat[,1]
@@ -16,7 +16,7 @@ imageHap<-function(x){
 	or$labels<-1:length(dat)
 	print(or$labels)
 	
-	png(filename=pngName, width=6, height=8, units="in", res=300)
+	pdf(pngName, width=9, height=8)
 	par(mfrow=c(2,1))
 	image(1-as.matrix(dat[,or$order]), yaxt="n", xaxt="n", ylab="Haplotypes", xlab="SNP", cex.lab=1.1)
 	plot(or, main="", cex=1.1, lwd=2, sub="", xlab="")
