@@ -209,8 +209,9 @@ double EHH(string haplotypes[][2], int nhaps){
 
 }
 
-void printHaplotypes(string haps[][2], vector<int> target){
+void printHaplotypes(string haps[][2], vector<int> target, vector<long int> pos){
   for(int snp = 0; snp < haps[0][1].length(); snp++){
+    cout << pos[snp] << "\t" ;
     for(int ind = 0; ind < target.size(); ind++){
       cout << haps[target[ind]][0].substr(snp , 1) << "\t";
       cout << haps[target[ind]][1].substr(snp , 1) << "\t";
@@ -282,34 +283,57 @@ void localPhase(string haplotypes[][2], list<pop> & window, int ntarget){
       for(vector<int>::iterator ind = pos->geno_index.begin(); ind != pos->geno_index.end(); ind++){      
 	int g = pos->geno_index[indIndex];
 	double rang  = ((double)rand() / (double)(RAND_MAX));
-	if(rang < pos->unphred_p[indIndex][0]){
-	  g = 0;
+	
+	
+	if(g == -1){
+	  g = rand() % 3;
 	}
-	else if(rang < pos->unphred_p[indIndex][1]){
-	  g = 1;
-	}
-	else{
-	  g = 2;
-	}	
-	if(g == 0 ){
-          tempHaplotypes[indIndex][0].append("0");
-          tempHaplotypes[indIndex][1].append("0");
-        }
-	if( g == 2 ){	
-	  tempHaplotypes[indIndex][0].append("1");
-	  tempHaplotypes[indIndex][1].append("1");
+	if(g == 0){
+	  tempHaplotypes[indIndex][0].append("0");    
+	  tempHaplotypes[indIndex][1].append("0");    
 	}
 	if(g == 1){
-	  double ranh  = ((double)rand() / (double)(RAND_MAX)); 
-	  if(ranh < 0.5){
+	  if(rang < 0.5){                        
 	    tempHaplotypes[indIndex][0].append("0");
-	    tempHaplotypes[indIndex][1].append("1");
+	    tempHaplotypes[indIndex][1].append("1");  
+	  }                                                                                                                           	  else{                                                                  
+	    tempHaplotypes[indIndex][0].append("1");                                    
+	    tempHaplotypes[indIndex][1].append("0"); 
 	  }
-	  else{
-	    tempHaplotypes[indIndex][0].append("1");
-	    tempHaplotypes[indIndex][1].append("0");
-	  }
-	}	
+	}
+	if(g == 2){
+	  tempHaplotypes[indIndex][0].append("1");                                    
+	  tempHaplotypes[indIndex][1].append("1");                                    
+	}
+
+//if(rang < pos->unphred_p[indIndex][0]){
+//  g = 0;
+//}
+//else if(rang < pos->unphred_p[indIndex][1]){
+//  g = 1;
+//}
+//else{
+//  g = 2;
+//}	
+//if(g == 0 ){
+//  tempHaplotypes[indIndex][0].append("0");
+//  tempHaplotypes[indIndex][1].append("0");
+//}
+//if( g == 2 ){	
+//  tempHaplotypes[indIndex][0].append("1");
+//  tempHaplotypes[indIndex][1].append("1");
+//}
+//if(g == 1){
+//  double ranh  = ((double)rand() / (double)(RAND_MAX)); 
+//  if(ranh < 0.5){
+//    tempHaplotypes[indIndex][0].append("0");
+//    tempHaplotypes[indIndex][1].append("1");
+//  }
+//  else{
+//    tempHaplotypes[indIndex][0].append("1");
+//    tempHaplotypes[indIndex][1].append("0");
+//  }
+//}	
 	indIndex++; 
       }
       snpIndex++; 
@@ -358,7 +382,7 @@ int main(int argc, char** argv) {
 
   int counts = 0;
 
-  int phased = 1;
+  int phased = 0;
 
     const struct option longopts[] = 
       {
@@ -370,6 +394,7 @@ int main(int argc, char** argv) {
 	{"deltaaf"   , 1, 0, 'd'},
 	{"region"    , 1, 0, 'r'},
 	{"mutation"  , 1, 0, 'm'},
+	{"phased"    , 1, 0, 'p'},
 	{0,0,0,0}
       };
 
@@ -386,30 +411,24 @@ int main(int argc, char** argv) {
 	    cerr << endl << endl;
 	    cerr << "INFO: help" << endl;
 	    cerr << "INFO: description:" << endl;
-            cerr << "     gl-XPEHH estimates haplotype decay between the target and background populations.  SNVs are integrated                           " << endl;
-	    cerr << "     until EHH in the target is less than 0.05.  The reported score is the itegrated EHH (target) / integrated EHH (background).	   " << endl;
-	    cerr << "     gl-XPEHH does NOT integrate over genetic distance, as genetic maps are not availible for most non-model organisms. 		   " << endl;
-	    cerr << "     gl-XPEHH phases genotypes, imuputes missing genotypes, and changes poor quality genotypes. Phasing is done in a sliding window   " << endl;
-	    cerr << "     with a stochastic search, therefore, every time gl-XPEHH is run it will generate slightly different results.                     " << endl;
 
-	    cerr << "Output : 4 columns :     "    << endl;
-	    cerr << "     1. seqid            "    << endl;
-	    cerr << "     2. position         "    << endl;
-	    cerr << "     3. xp-ehh           "    << endl;
-	    cerr << "     4. iHS              "    << endl  << endl;
-
-	    cerr << "INFO: gl-XPEHH  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --ancestral 0        " << endl;
+	    cerr << "INFO: plotHapps  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --ancestral 0        " << endl;
 	    cerr << endl;
 	    cerr << "INFO: required: r,region     -- a genomice range to calculate gl-XPEHH on in the format : seqid:start-end                   " << endl;
 	    cerr << "INFO: required: t,target     -- a zero bases comma seperated list of target individuals corrisponding to VCF columns        " << endl;
 	    cerr << "INFO: required: b,background -- a zero bases comma seperated list of background individuals corrisponding to VCF columns    " << endl;
 	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"                                 " << endl; 
 	    cerr << "INFO: optional: m,mutation   -- which state is derived in vcf [0,1] default is 1                                            " << endl;
-	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
+
 	    cerr << endl; 
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 	    cerr << endl << endl;
 	    return 0;
+
+	  case 'p':
+	    phased = atoi(optarg);
+	    cerr << "INFO: setting phase to:" << phased << endl;
+	    break;
 	  case 'v':
 	    cerr << endl << endl;
 	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
@@ -539,27 +558,15 @@ int main(int argc, char** argv) {
 	loadPop(background, popb, var.sequenceName, var.position, phased );
 	loadPop(total,      popz, var.sequenceName, var.position, phased );
 
-	if(popt.af == -1 || popb.af == -1){
-	  continue;
-	}
-	if(popz.af > 0.95 || popz.af < 0.05){
-	  continue;
-	}
-	if(popt.af == 0 && popb.af == 1){
-	  continue;
-	}
-	if(popt.af == 1 && popb.af == 0){
-	  continue;
-	}
 	
 	tdat.push_back(popt);
 	bdat.push_back(popb);
 	zdat.push_back(popz);
+
+	cerr << var.position << endl;
        
 	positions.push_back(var.position);
 	
-
-
 	while(zdat.size() >= 20 && !zdat.empty()){
 	  if(phased == 0){
 	    localPhase(haplotypes, zdat, (it.size() + ib.size()));
@@ -573,9 +580,19 @@ int main(int argc, char** argv) {
 	}
     }
 
+    if(phased == 0){
+      localPhase(haplotypes, zdat, (it.size() + ib.size()));
+    }
+    else{
+      loadPhased(haplotypes, zdat, (it.size() + ib.size()));
+    }
+    while(!zdat.empty()){
+      zdat.pop_front();
+    }
+  
     cerr << "INFO: phasing done" << endl;
    
-    printHaplotypes( haplotypes, target_h);
+    printHaplotypes( haplotypes, target_h, positions);
 
     cerr << "INFO: plotHaps finished" << endl;
 
