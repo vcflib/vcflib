@@ -24,4 +24,4 @@ imageHap<-function(x){
 
 }
 
-imageHap(x)
+imageHap(cmd_args)
