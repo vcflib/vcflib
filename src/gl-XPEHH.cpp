@@ -201,7 +201,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> &
     int start = snp;
     int end   = snp;
 
-    while( ehhAT > 0.05 ) {
+    while( ehhAT > 0.05 && ehhAB > 0.05 ) {
      
       start -= 1;
       end   += 1;
@@ -474,7 +474,7 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: help" << endl;
 	    cerr << "INFO: description:" << endl;
             cerr << "     gl-XPEHH estimates haplotype decay between the target and background populations.  SNVs are integrated                           " << endl;
-	    cerr << "     until EHH in the target is less than 0.05.  The reported score is the itegrated EHH (target) / integrated EHH (background).	   " << endl;
+	    cerr << "     until EHH in the target and background is less than 0.05. The score is the itegrated EHH (target) / integrated EHH (background). " << endl;
 	    cerr << "     gl-XPEHH does NOT integrate over genetic distance, as genetic maps are not availible for most non-model organisms. 		   " << endl;
 	    cerr << "     gl-XPEHH phases genotypes, imuputes missing genotypes, and changes poor quality genotypes. Phasing is done in a sliding window   " << endl;
 	    cerr << "     with a stochastic search, therefore, every time gl-XPEHH is run it will generate slightly different results.                     " << endl;
