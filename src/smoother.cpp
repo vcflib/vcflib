@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
   else if (opt.format == "wcFst"){
     opt.seqid = 0;
     opt.pos   = 1;
-    opt.value = 2;
+    opt.value = 4;
   }
   else{
     cerr << "FATAL: input format flag not specified correctly : " << opt.format << endl;
