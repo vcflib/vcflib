@@ -25,6 +25,40 @@ struct score{
   double score;
 };
 
+void printVersion(void){
+  cerr << endl ;
+  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+  cerr << endl << endl;
+}
+
+void printHelp(void){
+  cerr << endl << endl;
+  cerr << "INFO: help" << endl;
+  cerr << "INFO: description:" << endl;
+  cerr << "      Smoother averages a set of scores over a sliding genomic window.            " << endl;
+  cerr << "      Smoother slides over genomic coordinates not SNP index. In other words      " << endl;
+  cerr << "      The number of scores within a window will not be constant. The last         " << endl;
+  cerr << "      window for each seqid can be smaller than the defined window size.          " << endl;
+  cerr << "      Smoother automatically analyses seqids seperately.                          " << endl;
+
+  cerr << "Output : 4 columns :     "    << endl;
+  cerr << "     1. seqid            "    << endl;
+  cerr << "     2. window start     "    << endl;
+  cerr << "     2. window end       "    << endl;
+  cerr << "     3. averaged score   "    << endl  << endl;
+
+  cerr << "INFO: usage: smoother --format pFst --file GPA.output.txt" << endl;
+  cerr << endl;
+  cerr << "INFO: required: f,file     -- argument: a file created by GPAT++                           " << endl;
+  cerr << "INFO: required: o,format   -- argument: format of input file, case sensative               " << endl;
+  cerr << "                              availible format options:                                    " << endl;
+  cerr << "                                wcFst, pFst, bFst, iHS, xpEHH                              " << endl;
+  cerr << "INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)" << endl;
+  cerr << "INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)      " << endl;
+  printVersion();
+  cerr << endl << endl;
+}
+
 double windowAvg(list<score> & rangeData){
 
   double n = 0;
@@ -87,7 +121,9 @@ int main(int argc, char** argv) {
   acceptableFormats["pFst"]  = 1;
   acceptableFormats["bFst"]  = 1;
   acceptableFormats["wcFst"] = 1;
-  
+  acceptableFormats["xpEHH"] = 1;
+  acceptableFormats["iHS"]   = 1;
+  acceptableFormats["cqf"]   = 1;
 
   opts opt;
   opt.size = 5000;
@@ -114,33 +150,10 @@ int main(int argc, char** argv) {
     iarg = getopt_long(argc, argv, "f:w:s:o:vh", longopts, &index);
     switch(iarg){
     case 'h':
-      cerr << endl << endl;
-      cerr << "INFO: help" << endl;
-      cerr << "INFO: description:" << endl;
-      cerr << "      smoother averages a set of values over a genomic range, window smoothing. " << endl;      
-      cerr << "      The window size and step can be specified by the user. Smoother supports  " << endl;
-      cerr << "      most of GPA++ formats and is specifed with the format flag                " << endl << endl;
-      
-      cerr << "Output : 4 columns :     "    << endl;
-      cerr << "     1. seqid            "    << endl;
-      cerr << "     2. position start   "    << endl;
-      cerr << "     2. position end     "    << endl;
-      cerr << "     3. averaged score   "    << endl  << endl;
-
-      cerr << "INFO: usage: smoother --format pFst --file GPA.output.txt" << endl;
-      cerr << endl;
-      cerr << "INFO: required: f,file     -- a file created by GPA++"  << endl;
-      cerr << "INFO: required: o,format   -- format of input file only: pFst or bFst, or wcFst" << endl;
-      cerr << "INFO: optional: w,window   -- size of genomic window in base pairs (default 5000)"  << endl;
-      cerr << "INFO: optional: s,step     -- window step size in base pairs (default 1000)" << endl;
-      cerr << endl ;
-      cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
-      cerr << endl << endl;
-
+      printHelp();
       return 0;
     case 'v':
-      cerr << endl << endl;
-      cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+      printVersion();
       return 0;
     case 'f':
       filename = optarg;
@@ -161,15 +174,14 @@ int main(int argc, char** argv) {
     }
   }
   if(filename == "NA"){
-    cerr << "FATAL: file was not specified!" << endl;
-    cerr << "INFO:  please use smoother --help" << endl;
+    cerr << "FATAL: file was not specified!" << endl << endl;
+    printHelp();
     return 1;
   }
 
   if(acceptableFormats.find(opt.format) == acceptableFormats.end()){
-    cerr << "FATAL: input format flag not specified correctly : " << opt.format << endl;
-    cerr << "INFO : acceptable options for --o : pFst | bFst | wcFst "  << endl;
-    cerr << "INFO:  please use smoother --help" << endl;
+    cerr << "FATAL: unacceptable input file format, see --format "  << endl << endl;
+    printHelp();
     return 1;
   }
   
@@ -188,6 +200,22 @@ int main(int argc, char** argv) {
     opt.pos   = 1;
     opt.value = 4;
   }
+  else if(opt.format == "cqf"){
+    opt.seqid = 0;
+    opt.pos   = 1;
+    opt.value = 5;
+  }
+  else if(opt.format == "xpEHH"){
+    opt.seqid = 0;
+    opt.pos   = 1;
+    opt.value = 5;
+  }
+  else if(opt.format == "iHS"){
+    opt.seqid = 0;
+    opt.pos   = 1;
+    opt.value = 5;
+  }
+
   else{
     cerr << "FATAL: input format flag not specified correctly : " << opt.format << endl;
     cerr << "INFO:  please use smoother --help" << endl;
