@@ -36,10 +36,10 @@ void printHelp(void){
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
   cerr << "      Smoother averages a set of scores over a sliding genomic window.            " << endl;
-  cerr << "      Smoother slides over genomic coordinates not SNP index. In other words      " << endl;
-  cerr << "      The number of scores within a window will not be constant. The last         " << endl;
+  cerr << "      Smoother slides over genomic positions not the SNP indices. In other words  " << endl;
+  cerr << "      the number of scores within a window will not be constant. The last         " << endl;
   cerr << "      window for each seqid can be smaller than the defined window size.          " << endl;
-  cerr << "      Smoother automatically analyses seqids seperately.                          " << endl;
+  cerr << "      Smoother automatically analyses different seqids seperately.                " << endl;
 
   cerr << "Output : 4 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;
