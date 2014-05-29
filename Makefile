@@ -2,11 +2,13 @@
 HEADERS = src/Variant.h \
 		  src/split.h \
 		  src/pdflib.hpp \
+		  src/var.hpp \
                   src/cdflib.hpp \
 		  src/rnglib.hpp \
 		  src/join.h
 SOURCES = src/Variant.cpp \
 		  src/rnglib.cpp \
+		  src/var.cpp \
 		  src/pdflib.cpp \
 		  src/cdflib.cpp \
 		  src/split.cpp
@@ -17,11 +19,13 @@ OBJECTS= $(SOURCES:.cpp=.o)
 
 BIN_SOURCES = src/vcfecho.cpp \
 			  src/bFst.cpp \
+			  src/popStats.cpp \
 			  src/wcFst.cpp \
-			  src/gl-XPEHH.cpp \
+			  src/pFst.cpp \
+			  src/xpEHH.cpp \
 			  src/iHS.cpp \
 			  src/smoother.cpp \
-			  src/pFst.cpp \
+			  src/LD.cpp \
 			  src/plotHaps.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
