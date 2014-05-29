@@ -29,7 +29,7 @@ void printHelp(void){
   cerr << "Output : haplotype matrix and positions" << endl << endl;
 
   cerr << "INFO: plotHaps  --target 0,1,2,3,4,5,6,7  --file my.phased.vcf.gz                                                           " << endl;
-  cerr << "INFO: required: r,region     -- a tabix complian genomic range : \"seqid:start-end\" or \"seqid\"                           " << endl;
+  cerr << "INFO: required: r,region     -- a tabix compliant genomic range : \"seqid:start-end\" or \"seqid\"                           " << endl;
   cerr << "INFO: required: t,target     -- a zero base comma seperated list of target individuals corrisponding to VCF column s        " << endl;
   cerr << "INFO: required: f,file       -- proper formatted phased VCF file                                                            " << endl;
   cerr << "INFO: required: y,type       -- genotype likelihood format: PL,GP,GP                                                        " << endl;
