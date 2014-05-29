@@ -19,6 +19,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/bFst.cpp \
 			  src/wcFst.cpp \
 			  src/gl-XPEHH.cpp \
+			  src/iHS.cpp \
 			  src/smoother.cpp \
 			  src/pFst.cpp \
 			  src/plotHaps.cpp \
