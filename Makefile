@@ -21,6 +21,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/bFst.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
+			  src/sequenceDiversity.cpp \
 			  src/pFst.cpp \
 			  src/xpEHH.cpp \
 			  src/iHS.cpp \
