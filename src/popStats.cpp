@@ -151,6 +151,11 @@ int main(int argc, char** argv) {
 	  }
 
       }
+
+    if(filename == "NA"){
+      cerr << "FATAL: failed to specify a file" << endl;
+      printHelp();
+    }
     
     if(!variantFile.open(filename)){
       cerr << "FATAL: could not open file for reading" << endl;
