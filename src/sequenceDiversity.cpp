@@ -39,10 +39,10 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf                                                                      " << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- argument: a zero base comma seperated list of target individuals corrisponding to VCF columns        " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
-  cerr << "INFO: optional; r,region     -- argumetn: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
+  cerr << "INFO: optional; r,region     -- argument: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
   cerr << endl;
  
   printVersion();
