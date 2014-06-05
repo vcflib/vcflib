@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
 	
 	cdfchi(&which, &p, &q, &x, &df, &status, &bound );
 	
-	cout << var.sequenceName << "\t"  << var.position << "\t" << l << "\t" << 1-p << endl ;
+	cout << var.sequenceName << "\t"  << var.position << "\t" << 1-p << endl ;
 	
 	delete populationTarget;
 	delete populationBackground;
