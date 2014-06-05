@@ -17,7 +17,6 @@ double pooled::bound(double v){
   return v;
 }
 
-
 gl::gl(void){
   nalt  = 0;
   nref  = 0;
@@ -104,15 +103,14 @@ double gt::unphred(map< string, vector<string> > & geno, int index){
 double gl::unphred(map< string, vector<string> > & geno, int index){
  
   double unphreded = atof(geno["GL"][index].c_str());
-  return unphreded;
+  return log(unphreded);
 }
 
 double gp::unphred(map< string, vector<string> > & geno, int index){
  
   double unphreded = atof(geno["GP"][index].c_str());
-  return unphreded / -10;
+  return log(unphreded) ;
 }
-
 
 double pl::unphred(map< string, vector<string> > & geno, int index){
 
@@ -165,6 +163,10 @@ void genotype::estimatePosterior(void){
 
   for(int i = 0 ; i < ng; i++){
 
+    if(genoIndex[i] == -1){
+      continue;
+    }
+
     double aa = genoLikelihoods[i][0] ;
     double ab = genoLikelihoods[i][1] ;
     double bb = genoLikelihoods[i][2] ;
@@ -174,10 +176,9 @@ void genotype::estimatePosterior(void){
 
     alpha += 2 * exp(aa);
     beta  += 2 * exp(bb);
-
-
-
   }
+  
+  
 }
 
 void pooled::estimatePosterior(void){
@@ -243,10 +244,10 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
       phreds.push_back(pbb - norm);
 
       
-       //cerr << exp(pa  - norm) << endl;
-       //cerr << exp(pab - norm) << endl;
-       //cerr << exp(pbb - norm) << endl;
-       //cerr << endl;
+       // cerr << exp(pa  - norm) << endl;
+       // cerr << exp(pab - norm) << endl;
+       // cerr << exp(pbb - norm) << endl;
+       // cerr << endl;
 
       sum += exp(pa - norm);
       //      cerr << sum << endl;
@@ -260,9 +261,9 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
       phredsCDF.push_back(sum);
     }
     else{
-      phreds.push_back(1/3);
-      phreds.push_back(1/3);
-      phreds.push_back(1/3);
+      phreds.push_back(log(1/3));
+      phreds.push_back(log(1/3));
+      phreds.push_back(log(1/3));
       phredsCDF.push_back(1/3);
       phredsCDF.push_back(2/3);
       phredsCDF.push_back(1);

@@ -2,6 +2,7 @@
 #include "split.h"
 #include "cdflib.hpp"
 #include "pdflib.hpp"
+#include "var.hpp"
 
 #include <string>
 #include <iostream>
@@ -15,183 +16,37 @@
 using namespace std;
 using namespace vcf;
 
-struct pop{
-
-  double nalt ;
-  double nref ;
-  double af   ; 
-  double nhomr;
-  double nhoma;
-  double nhet ;
-  double ngeno;
-  double fis  ;
-
-  vector<int>    geno_index ;
-  vector< vector< double > > unphred_p;  
-  
-};
-
-struct popPool : pop{
-  double nalt  ;
-  double nref  ;
-  double af    ;
-  double npop  ;
-  double ntot  ;
-  vector<double> nalts;
-  vector<double> nrefs;
-};
-
-
-double unphred(string phred){
-  
-  double unphred = atof(phred.c_str());
-  unphred = unphred / -10;
-  return unphred;
-  
+void printVersion(void){
+  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 }
 
-void initPop(pop & population){
-  population.nalt  = 0;
-  population.nref  = 0;
-  population.af    = 0;
-  population.nhomr = 0;
-  population.nhoma = 0;
-  population.nhet  = 0;
-  population.ngeno = 0;
-  population.fis   = 0;
-}
+void printHelp(void){
+  cerr << endl << endl;
+  cerr << "INFO: help" << endl;
+  cerr << "INFO: description:" << endl;
+  cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations,                             " << endl;
+  cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate                                " << endl;
+  cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing                       " << endl;
+  cerr << "     the target's allele frequency given the posterior distribution of the background. By default                                          " << endl;
+  cerr << "     pFst uses the genotype likelihoods to estimate alpha, beta and the allele frequency of the target group.  If you would like to assume " << endl;
+  cerr << "     all genotypes are correct set the count flag equal to one.                                    " << endl << endl;
 
-void initPop(popPool & population){
-  population.nalt = 0;
-  population.nref = 0;
-  population.npop = 0;
-  population.ntot = 0;
-}
+  cerr << "Output : 3 columns :     "    << endl;
+  cerr << "     1. seqid            "    << endl;
+  cerr << "     2. position         "    << endl;
+  cerr << "     3. pFst probability "    << endl  << endl;
 
-void loadPop( vector< map< string, vector<string> > >& group, pop & population){
+  cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
+  cerr << endl;
+  cerr << "INFO: required: t,target     -- a zero based comma seperated list of target individuals corrisponding to VCF columns"         << endl;
+  cerr << "INFO: required: b,background -- a zero based comma seperated list of background individuals corrisponding to VCF columns"     << endl;
+  cerr << "INFO: required: f,file       -- a properly formatted VCF.                                                               "     << endl;
+  cerr << "INFO: required: y,type       -- genotype likelihood format ; genotypes: GP,GL or PL; pooled: PO                            "  << endl;
+  cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero"  << endl;
+  cerr << "INFO: optional: c,counts     -- use genotype counts rather than genotype likelihoods to estimate parameters, default false"   << endl;
+  cerr << endl;
 
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-  
-  for(; targ_it != group.end(); targ_it++){
-    
-    string genotype = (*targ_it)["GT"].front();
-    
-    vector<double> phreds;
-    phreds.push_back( unphred((*targ_it)["PL"][0]));
-    phreds.push_back( unphred((*targ_it)["PL"][1]));
-    phreds.push_back( unphred((*targ_it)["PL"][2]));  
-    population.unphred_p.push_back(phreds);
-   
-    while(1){
-      if(genotype == "0/0"){
-	population.ngeno += 1;
-	population.nhomr += 1;
-	population.nref  += 2;
-	population.geno_index.push_back(0);
-	break;
-      }
-      if(genotype == "0/1"){
-	population.ngeno += 1;
-	population.nhet  += 1;
-	population.nref  += 1;
-	population.nalt  += 1;
-	population.geno_index.push_back(1);
-	break;
-      }
-      if(genotype == "1/1"){
-	population.ngeno += 1;
-	population.nhoma += 1;
-	population.nalt  += 2;
-	population.geno_index.push_back(2);
-	break;
-      }
-      if(genotype == "0|0"){
-	population.ngeno += 1;
-	population.nhomr += 1;
-	population.nref  += 2;
-	population.geno_index.push_back(0);
-	break;
-      }
-      if(genotype == "0|1"){
-	population.ngeno += 1;
-	population.nhet  += 1;
-	population.nref  += 1;
-	population.nalt  += 1;
-	population.geno_index.push_back(1);
-	break;
-      }
-      if(genotype == "1|0"){
-        population.ngeno += 1;
-        population.nhet  += 1;
-        population.nref  += 1;
-        population.nalt  += 1;
-        population.geno_index.push_back(1);
-        break;
-      }
-      if(genotype == "1|1"){
-	population.ngeno += 1;
-	population.nhoma += 1;
-	population.nalt  += 2;
-	population.geno_index.push_back(2);
-	break;
-      }
-      if(genotype == "1/0"){
-        population.ngeno += 1;
-        population.nhet  += 1;
-        population.nref  += 1;
-        population.nalt  += 1;
-	population.geno_index.push_back(1);
-        break;
-      }
-      cerr << "FATAL: unknown genotype: " << genotype << endl;
-      exit(1);
-    }
-  }
-
-  if(population.nalt == 0 && population.nref == 0){
-    population.af = -1;
-  }
-  else{
-   
-    population.af  = (population.nalt / (population.nref + population.nalt));
-
-    if(population.nhet > 0){
-      population.fis = ( 1 - ((population.nhet/population.ngeno) / (2*population.af*(1 - population.af))));
-    }
-    else{
-      population.fis = 1;
-    }
-    if(population.fis < 0){
-      population.fis = 0.00001;
-    }
-  }  
-}
-
-void loadPop( vector< map< string, vector<string> > >& group, popPool & population){
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-
-  for(; targ_it != group.end(); targ_it++){
-
-    string allelecounts = (*targ_it)["AD"].front();
-
-    vector<string> ac   = split(allelecounts, ',');
-
-    population.npop += 1;
-
-    population.nrefs.push_back(atof(ac[0].c_str()));
-    population.nalts.push_back(atof(ac[1].c_str()));
-
-    population.nref += atof(ac[0].c_str());
-    population.ntot += atof(ac[0].c_str());
-    population.nalt += atof(ac[1].c_str());
-    population.ntot += atof(ac[1].c_str());
-  }
-  if(population.npop < 1){
-    population.af = -1;
-  }
-  else{
-    population.af = population.nalt / population.ntot;
-  }  
+  printVersion() ;
 }
 
 double bound(double v){
@@ -215,34 +70,12 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void getPosterior(pop & population, double *alpha, double *beta){
-  
-  int ng = population.geno_index.size();
+double logLbinomial(double x, double n, double p){
 
-  for(int i = 0 ; i < ng; i++){
+  double ans = lgamma(n+1)-lgamma(x+1)-lgamma(n-x+1) + x * log(p) + (n-x) * log(1-p);
+  return ans;
     
-    double aa = population.unphred_p[i][0] ; 
-    double ab = population.unphred_p[i][1] ; 
-    double bb = population.unphred_p[i][2] ; 
-
-    double norm = log(exp(aa) + exp(ab) + exp(bb));
-
-    int gi = population.geno_index[i];
-    
-    (*alpha) += exp(ab - norm);
-    (*beta ) += exp(ab - norm);
-
-    (*alpha) += 2 * exp(aa - norm);
-    (*beta ) += 2 * exp(bb - norm);
-    
-  }
 }
-
-void getPosterior(popPool & population, double *alpha, double *beta){
-  
-
-}
-
 
 int main(int argc, char** argv) {
 
@@ -275,6 +108,10 @@ int main(int argc, char** argv) {
 
   int counts = 0;
 
+  // type pooled GL PL
+
+  string type = "NA";
+
     const struct option longopts[] = 
       {
 	{"version"   , 0, 0, 'v'},
@@ -285,6 +122,7 @@ int main(int argc, char** argv) {
 	{"background", 1, 0, 'b'},
 	{"deltaaf"   , 1, 0, 'd'},
 	{"region"    , 1, 0, 'r'},
+	{"type"      , 1, 0, 'y'},
 	{0,0,0,0}
       };
 
@@ -293,41 +131,20 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "r:d:t:b:f:chv", longopts, &index);
+	iarg = getopt_long(argc, argv, "r:d:t:b:f:y:chv", longopts, &index);
 	
 	switch (iarg)
 	  {
 	  case 'h':
-	    cerr << endl << endl;
-	    cerr << "INFO: help" << endl;
-	    cerr << "INFO: description:" << endl;
-            cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations,           " << endl;
-	    cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate              " << endl;
-	    cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing     " << endl;
-	    cerr << "     the target's allele frequency given the posterior distribution of the background. By default	" << endl;
-	    cerr << "     pFst uses the genotype likelihoods to estimate alpha, beta and the allele frequency of the target group.  If you would like to assume	" << endl;
-	    cerr << "     all genotypes are correct set the count flag equal to one.                                    " << endl << endl;
-
-	    cerr << "Output : 3 columns :     "    << endl;
-	    cerr << "     1. seqid            "    << endl;
-	    cerr << "     2. position         "    << endl;
-	    cerr << "     3. pFst probability "    << endl  << endl;
-
-	    cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
-	    cerr << endl;
-	    cerr << "INFO: required: t,target     -- a zero based comma separated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: b,background -- a zero based comma separated list of background individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"" << endl; 
-	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero"      << endl;
-	    cerr << "INFO: optional: c,counts     -- use genotype counts rather than genotype likelihoods to estimate parameters, default false"  << endl; 
-	    cerr << endl; 
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
-	    cerr << endl << endl;
+	    printHelp();
 	    return 0;
 	  case 'v':
-	    cerr << endl << endl;
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+	    printVersion();
 	    return 0;
+	  case 'y':	    
+	    type = optarg;
+	    cerr << "INFO: genotype likelihoods set to: " << type << endl;
+	    break;
 	  case 'c':
 	    cerr << "INFO: using genotype counts rather than genotype likelihoods" << endl;
 	    counts = 1;
@@ -358,8 +175,14 @@ int main(int argc, char** argv) {
 	  default:
 	    break;
 	  }
-
       }
+
+    
+    if(filename == "NA"){
+      cerr << "FATAL: did not specify the file\n";
+      printHelp();
+      exit(1);
+    }
     
     variantFile.open(filename);
     
@@ -368,9 +191,25 @@ int main(int argc, char** argv) {
     }
 
     if (!variantFile.is_open()) {
-        return 1;
+      exit(1);
     }
-    
+    map<string, int> okayGenotypeLikelihoods;
+    okayGenotypeLikelihoods["PL"] = 1;
+    okayGenotypeLikelihoods["PO"] = 1;
+    okayGenotypeLikelihoods["GL"] = 1;
+    okayGenotypeLikelihoods["GP"] = 1;
+
+    if(type == "NA"){
+      cerr << "FATAL: failed to specify genotype likelihood format : PL,PO,GL,GP" << endl;
+      printHelp();
+      return 1;
+    }
+    if(okayGenotypeLikelihoods.find(type) == okayGenotypeLikelihoods.end()){
+      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL,PO,GL,GP" << endl;
+      printHelp();
+      return 1;
+    }    
+
     Variant var(variantFile);
 
     while (variantFile.getNextVariant(var)) {
@@ -382,7 +221,7 @@ int main(int argc, char** argv) {
       map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
       map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
-    	vector < map< string, vector<string> > > target, background;
+      vector < map< string, vector<string> > > target, background, total;
 	        
 	int index = 0;
 
@@ -393,84 +232,111 @@ int main(int argc, char** argv) {
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
 		target.push_back(sample);		
+		total.push_back(sample);		
 	      }
 	      if(ib.find(index) != ib.end()){
 		background.push_back(sample);
+		total.push_back(sample);		
 	      }
 	    }
             
 	index += 1;
 	}
 	
-	pop * popt = new pop;
-	pop * popb = new pop;
+	zvar * populationTarget        ;
+	zvar * populationBackground    ;
+	zvar * populationTotal         ;
 
+	if(type == "PO"){
+	  populationTarget     = new pooled();
+          populationBackground = new pooled();
+          populationTotal      = new pooled();
+	}
+	if(type == "PL"){
+	  populationTarget     = new pl();
+	  populationBackground = new pl();
+	  populationTotal      = new pl();
+	}
+	if(type == "GL"){
+	  populationTarget     = new gl();
+	  populationBackground = new gl();
+	  populationTotal      = new gl();	  
+	}
+	if(type == "GP"){
+	  populationTarget     = new gp();
+	  populationBackground = new gp();
+	  populationTotal      = new gp();
+	}
+	
+	populationTotal->loadPop(total          , var.sequenceName, var.position);	
+	populationTarget->loadPop(target        , var.sequenceName, var.position);
+	populationBackground->loadPop(background, var.sequenceName, var.position);
 
-	initPop(*popt);
-	initPop(*popb);
-
-	loadPop(target,     *popt);
-	loadPop(background, *popb);
-
-	if((*popt).af == -1 || (*popb).af == -1){
+	if(populationTarget->npop < 2 || populationBackground->npop < 2){
 	  continue;
 	}
-	if((*popt).af == 1  && (*popb).af == 1){
-	  continue;
-	}
-	if((*popt).af == 0 && (*popb).af  == 0){
-	  continue;
-	}
 
-	double afdiff = abs((*popt).af - (*popb).af);
+	populationTotal->estimatePosterior();	
+	populationTarget->estimatePosterior();
+	populationBackground->estimatePosterior();
 
-	if(afdiff < daf){
-	  continue;
-	}
+	if(populationTarget->alpha == -1 || populationBackground->alpha == -1){
+          continue;
+        }
 
-	double alphaT = 0.01;
-	double alphaB = 0.01;
-	double betaT  = 0.01;
-	double betaB  = 0.01;
-      
 	if(counts == 1){
-	  alphaT += (*popt).nref ;
-	  alphaB += (*popb).nref ;
-	  betaT  += (*popt).nalt ;
-	  betaB  += (*popb).nalt ;
-	}
-	else{
-	  getPosterior(*popt, &alphaT, &betaT);
-	  getPosterior(*popb, &alphaB, &betaB);
-	}
-	    
-	double targm = alphaT / ( alphaT + betaT );
-        double backm = alphaB / ( alphaB + betaB );
 
-	double xa = targm - 0.001;
-	double xb = targm + 0.001;
-	if(xa <= 0){
-	  xa = 0;
-	  xb = 0.002;
-	}
-	if(xb >= 1){
-	  xa = 0.998;
-	  xb = 1;
+	  populationTotal->alpha  = 0.001 + populationTotal->nref;
+	  populationTotal->beta   = 0.001 + populationTotal->nalt;
+	  
+	  populationTarget->alpha = 0.001 + populationTarget->nref;
+	  populationTarget->beta  = 0.001 + populationTarget->nalt;
+
+	  populationBackground->alpha = 0.001 + populationBackground->nref;
+	  populationBackground->beta  = 0.001 + populationBackground->nalt;
+
+
+
 	}
 
-	double dph = r8_beta_pdf(alphaB, betaB, xa);
-	double dpl = r8_beta_pdf(alphaB, betaB, xb);
+	double populationTotalEstAF       = bound(populationTotal->beta      / (populationTotal->alpha      + populationTotal->beta)     );
+	double populationTargetEstAF      = bound(populationTarget->beta     / (populationTarget->alpha     + populationTarget->beta)    );
+	double populationBackgroundEstAF  = bound(populationBackground->beta / (populationBackground->alpha + populationBackground->beta));
+
+	// cout << populationTotalEstAF << "\t" << populationTotal->af << endl;
+
+	// x, n, p
+	double null = logLbinomial(populationTarget->beta, (populationTarget->alpha + populationTarget->beta),  populationTotalEstAF) +
+	  logLbinomial(populationBackground->beta, (populationBackground->alpha + populationBackground->beta),  populationTotalEstAF) ;
+	double alt  = logLbinomial(populationTarget->beta, (populationTarget->alpha + populationTarget->beta),  populationTargetEstAF) +
+	  logLbinomial(populationBackground->beta, (populationBackground->alpha + populationBackground->beta),  populationBackgroundEstAF) ;
+		
+	double l = 2 * (alt - null);
 	
-	double p   = ((dph + dpl)/2) *  0.01;
+	if(l <= 0){
+	  continue;
+	}
 
-
-	cout << var.sequenceName << "\t"  << var.position << "\t" << p << endl ;
-
-	delete popt;
-	delete popb;
+	int     which = 1;
+	double  p ;
+	double  q ;
+	double  x  = l;
+	double  df = 1;
+	int     status;
+	double  bound ;
 	
-	popt = NULL;
-	popb = NULL;
+	cdfchi(&which, &p, &q, &x, &df, &status, &bound );
+	
+	cout << var.sequenceName << "\t"  << var.position << "\t" << l << "\t" << 1-p << endl ;
+	
+	delete populationTarget;
+	delete populationBackground;
+	delete populationTotal;
+	
+	populationTarget     = NULL;
+	populationBackground = NULL;
+	populationTotal      = NULL;
+
     }
     return 0;		    
 }
