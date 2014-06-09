@@ -32,7 +32,7 @@ void printHelp(void){
   cerr << "     Example:" << endl;
 
   cerr <<  "     D   C  B   A "  << endl;
-  cerr <<  "     \\   \\/    /  "  << endl;
+  cerr <<  "     \\ /  /    /  "  << endl;
   cerr <<  "      \\  /    /   "  << endl;
   cerr <<  "       \\    /    "  << endl;
   cerr <<  "        \\  /     "  << endl;
@@ -87,7 +87,7 @@ int  containsAlt(string gt){
   return 0;
 }
 
-void loadIndices(vector<int> tree, string set){
+void loadIndices(vector<int> & tree, string set){
   
   vector<string>  indviduals = split(set, ",");
 
@@ -96,6 +96,10 @@ void loadIndices(vector<int> tree, string set){
     exit(1);
   }
   for( vector<string>::iterator it = indviduals.begin(); it != indviduals.end(); it++){
+    
+    int indx = atoi((*it).c_str());
+    cerr << indx << endl;
+
     tree.push_back(atoi((*it).c_str()));
   }
 }
@@ -230,10 +234,11 @@ int main(int argc, char** argv) {
       
       map<string, vector<string> >  tA, tB, tC, tD;
 
-      tA = var.samples[sampleNames[1]];
-      tB = var.samples[sampleNames[2]];
-      tC = var.samples[sampleNames[3]];
-      tD = var.samples[sampleNames[4]];
+
+      tA = var.samples[sampleNames[tree[1]]];
+      tB = var.samples[sampleNames[tree[2]]];
+      tC = var.samples[sampleNames[tree[3]]];
+      tD = var.samples[sampleNames[tree[4]]];
 
       if(tA["GT"].front() == "./." || tB["GT"].front() == "./." || tC["GT"].front() == "./." || tD["GT"].front() == "./."){
 	continue;
