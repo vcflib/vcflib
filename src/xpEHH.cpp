@@ -41,9 +41,9 @@ void printHelp(void){
 
   cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
   cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    " << endl;
-  cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
-  cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
-  cerr << "INFO: optional: r,region     -- argument: a genomice range to calculate gl-XPEHH on in the format : \"seqid:start-end\" or \"seqid\" " << endl;
+  cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                        " << endl;
+  cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                   " << endl;
+  cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   " << endl;
   cerr << endl;
  
   printVersion();
