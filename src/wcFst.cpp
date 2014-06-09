@@ -17,7 +17,9 @@ using namespace std;
 using namespace vcf;
 
 void printVersion(void){
+  cerr << endl;
   cerr << "INFO: version 1.1.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
+  cerr << endl;
 }
 
 void printHelp(void){
@@ -42,7 +44,8 @@ void printHelp(void){
   cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: proper formatted VCF                                                                        " << endl;
   cerr << "INFO: required, y,type       -- argument: genotype likelihood format; genotype : GL,PL,GP                                             " << endl;
-  cerr << "INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero "   << endl;
+  cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   " << endl;
+  cerr << "INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
 
   printVersion();
 }
@@ -160,9 +163,14 @@ int main(int argc, char** argv) {
 	  default:
 	    break;
 	  }
-
       }
-    
+
+    if(filename == "NA"){
+      cerr << "FATAL: did not specify a required option: file" << endl;
+      printHelp();
+      exit(1);
+    }
+
     variantFile.open(filename);
     
     if(region != "NA"){
