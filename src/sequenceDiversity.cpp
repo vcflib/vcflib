@@ -101,6 +101,10 @@ double pi(map<string, int> & hapCounts, int nHaps, double * pi, double * eHH){
 
 void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, long int window, int derived, vector<int> & target, vector<int> & background, string seqid){
   
+  if(haplotypes[0][0].length() < 21){
+    return;
+  }
+
   for(int long snpA = 0; snpA < haplotypes[0][0].length() - 20; snpA += 1){
     
     map <string, int> targetHaplotypes;
@@ -344,7 +348,6 @@ int main(int argc, char** argv) {
 	printHelp();
 	return(1);
       }
-
       if(var.alt.size() > 1){
 	continue;
       }
