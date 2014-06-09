@@ -30,7 +30,7 @@ void printHelp(void){
   cerr << "      are unique and when eHH = 1 all haplotypes in the window are identical. The window size is 20 SNPs.                           " << endl;
 
   cerr << endl;
-  cerr << "Output : 5 columns:"            << endl;
+  cerr << "Output : 5 columns:"           << endl;
   cerr << "         1.  seqid"            << endl;
   cerr << "         2.  start of window"  << endl;
   cerr << "         3.  end of window  "  << endl;
@@ -39,10 +39,11 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf                                                                      " << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- argument: a zero base comma seperated list of target individuals corrisponding to VCF columns        " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
-  cerr << "INFO: optional; r,region     -- argumetn: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
+  cerr << "INFO: optional; r,region     -- argument: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
+  cerr << "INFO: optional; w,window     -- argument: the number of SNPs per window; default is 20                                               " << endl; 
   cerr << endl;
  
   printVersion();
@@ -99,9 +100,16 @@ double pi(map<string, int> & hapCounts, int nHaps, double * pi, double * eHH){
   
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, long int window, int derived, vector<int> & target, vector<int> & background, string seqid){
-  
-  for(int long snpA = 0; snpA < haplotypes[0][0].length() - 20; snpA += 1){
+
+//calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
+void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
+
+
+  if(haplotypes[0][0].length() < (window-1) ){
+    return;
+  }
+ 
+  for(int snpA = 0; snpA < haplotypes[0][0].length() - window; snpA += 1){
     
     map <string, int> targetHaplotypes;
    
@@ -110,8 +118,8 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
       string haplotypeA;
       string haplotypeB;
       
-      haplotypeA += haplotypes[target[targetIndex]][0].substr(snpA, 20) ;
-      haplotypeB += haplotypes[target[targetIndex]][1].substr(snpA, 20) ;
+      haplotypeA += haplotypes[target[targetIndex]][0].substr(snpA, window) ;
+      haplotypeB += haplotypes[target[targetIndex]][1].substr(snpA, window) ;
       
       targetHaplotypes[haplotypeA]++;
       targetHaplotypes[haplotypeB]++;
@@ -123,7 +131,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 
     pi(targetHaplotypes, target.size()*2, &piEst, &eHH); 
 
-    cout << seqid << "\t" << pos[snpA] << "\t" << pos[snpA + 20] << "\t" << piEst << "\t" << eHH << endl;
+    cout << seqid << "\t" << pos[snpA] << "\t" << pos[snpA + window] << "\t" << piEst << "\t" << eHH << endl;
    
   }
 
@@ -183,7 +191,7 @@ int main(int argc, char** argv) {
 
   int derived = 0;
 
-  long int windowSize = 1000;
+  int windowSize = 20;
 
   string type = "NA";
 
@@ -257,7 +265,7 @@ int main(int argc, char** argv) {
 	  case 'w':	    
 	    {
 	      string win = optarg;
-	      windowSize = atol( win.c_str() );
+	      windowSize = atof( win.c_str() );
 	      break;
 	    }
 	  default :
@@ -294,6 +302,7 @@ int main(int argc, char** argv) {
       return(1);
     }
 
+    cerr << "INFO: window size: " << windowSize << endl;
 
     variantFile.open(filename);
     
@@ -315,9 +324,7 @@ int main(int argc, char** argv) {
     int index, indexi = 0;
    
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
-
       string sampleName = (*samp);
-
       if(targetIndex.find(index) != targetIndex.end() ){
 	target_h.push_back(indexi);
 	indexi++;
@@ -344,13 +351,11 @@ int main(int argc, char** argv) {
 	printHelp();
 	return(1);
       }
-
       if(var.alt.size() > 1){
 	continue;
       }
-
       if(currentSeqid != var.sequenceName){
-	if(haplotypes[0][0].length() > 10){
+	if(haplotypes[0][0].length() > windowSize){
 	  calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid);
 	}
 	clearHaplotypes(haplotypes, nsamples);
@@ -368,9 +373,7 @@ int main(int argc, char** argv) {
       int sindex = 0;
       
       for (; s != sEnd; s++) {	  
-	
-	map<string, vector<string> >& sample = s->second;
-	  
+	map<string, vector<string> >& sample = s->second;	  
 	if(targetIndex.find(sindex) != targetIndex.end() ){
 	  target.push_back(sample);
 	  total.push_back(sample);	  
