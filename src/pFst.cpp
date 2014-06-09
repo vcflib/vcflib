@@ -24,12 +24,8 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations,                             " << endl;
-  cerr << "     a target and background.  pFst uses the conjugated form of the beta-binomial distributions to estimate                                " << endl;
-  cerr << "     the posterior distribution for the background's allele frequency.  pFst calculates the probability of observing                       " << endl;
-  cerr << "     the target's allele frequency given the posterior distribution of the background. By default                                          " << endl;
-  cerr << "     pFst uses the genotype likelihoods to estimate alpha, beta and the allele frequency of the target group.  If you would like to assume " << endl;
-  cerr << "     all genotypes are correct set the count flag equal to one.                                    " << endl << endl;
+  cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations." << endl;
+ 
 
   cerr << "Output : 3 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;
