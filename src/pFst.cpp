@@ -36,14 +36,16 @@ void printHelp(void){
   cerr << "     2. position         "    << endl;
   cerr << "     3. pFst probability "    << endl  << endl;
 
-  cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
+  cerr << "INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL" << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- a zero based comma seperated list of target individuals corrisponding to VCF columns"         << endl;
-  cerr << "INFO: required: b,background -- a zero based comma seperated list of background individuals corrisponding to VCF columns"     << endl;
-  cerr << "INFO: required: f,file       -- a properly formatted VCF.                                                               "     << endl;
-  cerr << "INFO: required: y,type       -- genotype likelihood format ; genotypes: GP,GL or PL; pooled: PO                            "  << endl;
-  cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero"  << endl;
-  cerr << "INFO: optional: c,counts     -- use genotype counts rather than genotype likelihoods to estimate parameters, default false"   << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns"         << endl;
+  cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns"     << endl;
+  cerr << "INFO: required: f,file       -- argument: a properly formatted VCF.                                                               "     << endl;
+  cerr << "INFO: required: y,type       -- argument: genotype likelihood format ; genotypes: GP,GL or PL; pooled: PO                            "  << endl;
+  cerr << "INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero"  << endl;
+  cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range : seqid or seqid:start-end                                 "  << endl;
+  cerr << "INFO: optional: c,counts     -- switch  : use genotype counts rather than genotype likelihoods to estimate parameters, default false"   << endl;
+
   cerr << endl;
 
   printVersion() ;
@@ -80,7 +82,7 @@ double logLbinomial(double x, double n, double p){
 int main(int argc, char** argv) {
 
   // pooled or genotyped
-  
+
   int pool = 0;
 
   // the filename
