@@ -39,10 +39,10 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf                                                                      " << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero base comma seperated list of target individuals corrisponding to VCF columns        " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
-  cerr << "INFO: optional; r,region     -- argument: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
+  cerr << "INFO: optional; r,region     -- argumetn: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
   cerr << endl;
  
   printVersion();
@@ -104,7 +104,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
   for(int long snpA = 0; snpA < haplotypes[0][0].length() - 20; snpA += 1){
     
     map <string, int> targetHaplotypes;
-    
+   
     for(int targetIndex = 0; targetIndex < target.size(); targetIndex++ ){
       
       string haplotypeA;
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 
   // zero based index for the target and background indivudals 
   
-  map<int, int> it, ib;
+  map<int, int> targetIndex, backgroundIndex;
   
   // deltaaf is the difference of allele frequency we bother to look at 
 
@@ -193,7 +193,6 @@ int main(int argc, char** argv) {
 	{"help"        , 0, 0, 'h'},
         {"file"        , 1, 0, 'f'},
 	{"target"      , 1, 0, 't'},
-	{"background"  , 1, 0, 'b'},
 	{"region"      , 1, 0, 'r'},
 	{"type"        , 1, 0, 'y'},
 	{"window"      , 1, 0, 'w'},
@@ -226,16 +225,9 @@ int main(int argc, char** argv) {
 	    }
 	  case 't':
 	    {
-	      loadIndices(it, optarg);
-	      cerr << "INFO: there are " << it.size() << " individuals in the target" << endl;
+	      loadIndices(targetIndex, optarg);
+	      cerr << "INFO: there are " << targetIndex.size() << " individuals in the target" << endl;
 	      cerr << "INFO: target ids: " << optarg << endl;
-	      break;
-	    }
-	  case 'b':
-	    {
-	      loadIndices(ib, optarg);
-	      cerr << "INFO: there are " << ib.size() << " individuals in the background" << endl;
-	      cerr << "INFO: background ids: " << optarg << endl;
 	      break;
 	    }
 	  case 'f':
@@ -278,7 +270,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
 
-    if(it.size() < 2){
+    if(targetIndex.size() < 2){
       cerr << endl;
       cerr << "FATAL: failed to specify a target - or - too few individuals in the target" << endl;
       printHelp();
@@ -321,14 +313,16 @@ int main(int argc, char** argv) {
     vector<int> target_h, background_h;
 
     int index, indexi = 0;
-
+   
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
-     
-      if(it.find(index) != it.end() ){
+
+      string sampleName = (*samp);
+
+      if(targetIndex.find(index) != targetIndex.end() ){
 	target_h.push_back(indexi);
 	indexi++;
       }
-      if(ib.find(index) != ib.end()){
+      if(backgroundIndex.find(index) != backgroundIndex.end()){
 	background_h.push_back(indexi);
 	indexi++;
       }
@@ -366,7 +360,6 @@ int main(int argc, char** argv) {
 	backgroundAFS.clear();
       }
 
-
       map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
       map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
       
@@ -378,11 +371,11 @@ int main(int argc, char** argv) {
 	
 	map<string, vector<string> >& sample = s->second;
 	  
-	if(it.find(sindex) != it.end() ){
+	if(targetIndex.find(sindex) != targetIndex.end() ){
 	  target.push_back(sample);
 	  total.push_back(sample);	  
 	}
-	if(ib.find(sindex) != ib.end()){
+	if(backgroundIndex.find(sindex) != backgroundIndex.end()){
 	  background.push_back(sample);
 	  total.push_back(sample);	  
 	}	
