@@ -2,6 +2,7 @@
 #include "split.h"
 #include "cdflib.hpp"
 #include "pdflib.hpp"
+#include "var.hpp"
 
 #include <string>
 #include <iostream>
@@ -15,137 +16,37 @@
 using namespace std;
 using namespace vcf;
 
-struct pop{
-
-  double nalt ;
-  double nref ;
-  double af   ; 
-  double nhomr;
-  double nhoma;
-  double nhet ;
-  double ngeno;
-  double hfrq ; 
-  double fis  ;
-
-  vector<int>    geno_index ;
-  vector< vector< double > > unphred_p;  
-  
-};
-
-double unphred(string phred){
-  
-  double unphred = atof(phred.c_str());
-  unphred = unphred / -10;
-  return unphred;
-  
+void printVersion(void){
+  cerr << "INFO: version 1.1.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
 }
 
-void initPop(pop & population){
-  population.nalt  = 0;
-  population.nref  = 0;
-  population.af    = 0;
-  population.nhomr = 0;
-  population.nhoma = 0;
-  population.nhet  = 0;
-  population.ngeno = 0;
-  population.fis   = 0;
-  population.hfrq  = 0; 
+void printHelp(void){
+
+  cerr << endl << endl;
+  cerr << "INFO: help" << endl;
+  cerr << "INFO: description:" << endl;
+  cerr << "      wcFst is Weir & Cockerham's Fst for two populations.  Negative values are VALID,  " << endl;
+  cerr << "      they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. " << endl;
+  cerr << "      Specifically wcFst uses equations 1,2,3,4.                                                              " << endl << endl;
+
+  cerr << "Output : 3 columns :                 "    << endl;
+  cerr << "     1. seqid                        "    << endl;
+  cerr << "     2. position                     "    << endl;
+  cerr << "     3. target allele frequency      "    << endl;
+  cerr << "     4. background allele frequency  "    << endl;
+  cerr << "     5. wcFst                        "    << endl  << endl;
+
+  cerr << "INFO: usage:  wcFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL                  " << endl;
+  cerr << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
+  cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    " << endl;
+  cerr << "INFO: required: f,file       -- argument: proper formatted VCF                                                                        " << endl;
+  cerr << "INFO: required, y,type       -- argument: genotype likelihood format; genotype : GL,PL,GP                                             " << endl;
+  cerr << "INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero "   << endl;
+
+  printVersion();
 }
 
-void loadPop( vector< map< string, vector<string> > >& group, pop & population){
-
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-  
-  for(; targ_it != group.end(); targ_it++){
-    
-    
-    string genotype = (*targ_it)["GT"].front();
-    
-    while(1){
-      if(genotype == "0/0"){
-	population.ngeno += 1;
-	population.nhomr += 1;
-	population.nref  += 2;
-	population.geno_index.push_back(0);
-	break;
-      }
-      if(genotype == "0/1"){
-	population.ngeno += 1;
-	population.nhet  += 1;
-	population.nref  += 1;
-	population.nalt  += 1;
-	population.geno_index.push_back(1);
-	break;
-      }
-      if(genotype == "1/1"){
-	population.ngeno += 1;
-	population.nhoma += 1;
-	population.nalt  += 2;
-	population.geno_index.push_back(2);
-	break;
-      }
-      if(genotype == "0|0"){
-	population.ngeno += 1;
-	population.nhomr += 1;
-	population.nref  += 2;
-	population.geno_index.push_back(0);
-	break;
-      }
-      if(genotype == "0|1"){
-	population.ngeno += 1;
-	population.nhet  += 1;
-	population.nref  += 1;
-	population.nalt  += 1;
-	population.geno_index.push_back(1);
-	break;
-      }
-      if(genotype == "1|0"){
-        population.ngeno += 1;
-        population.nhet  += 1;
-        population.nref  += 1;
-        population.nalt  += 1;
-	population.geno_index.push_back(1);
-        break;
-      }
-      if(genotype == "1|1"){
-	population.ngeno += 1;
-	population.nhoma += 1;
-	population.nalt  += 2;
-	population.geno_index.push_back(2);
-	break;
-      }
-      if(genotype == "1/0"){
-        population.ngeno += 1;
-        population.nhet  += 1;
-        population.nref  += 1;
-        population.nalt  += 1;
-        population.geno_index.push_back(1);
-        break;
-      }
-      cerr << "FATAL: unknown genotype:" <<  genotype << endl;
-      exit(1);
-    }
-  }
-  
-  if(population.nalt == 0 && population.nref == 0){
-    population.af = -1;
-  }
-  else{
-    
-    population.af  = (population.nalt / (population.nref + population.nalt));
-    population.hfrq = population.nhet / population.ngeno;
-    
-    if(population.nhet > 0){
-      population.fis = ( 1 - ((population.nhet/population.ngeno) / (2*population.af*(1 - population.af))));
-    }
-    else{
-      population.fis = 1;
-    }
-    if(population.fis < 0){
-      population.fis = 0.00001;
-    }
-  }  
-}
 
 double bound(double v){
   if(v <= 0.00001){
@@ -165,29 +66,6 @@ void loadIndices(map<int, int> & index, string set){
   
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
-  }
-}
-
-void getPosterior(pop & population, double *alpha, double *beta){
-  
-  int ng = population.geno_index.size();
-
-  for(int i = 0 ; i < ng; i++){
-    
-    double aa = population.unphred_p[i][0] ; 
-    double ab = population.unphred_p[i][1] ; 
-    double bb = population.unphred_p[i][2] ; 
-
-    double norm = log(exp(aa) + exp(ab) + exp(bb));
-
-    int gi = population.geno_index[i];
-    
-    (*alpha) += exp(ab - norm);
-    (*beta ) += exp(ab - norm);
-
-    (*alpha) += 2 * exp(aa - norm);
-    (*beta ) += 2 * exp(bb - norm);
-    
   }
 }
 
@@ -217,9 +95,11 @@ int main(int argc, char** argv) {
   // deltaaf is the difference of allele frequency we bother to look at 
 
   string deltaaf ;
-  double daf  = 0;
+  double daf  = 0.00;
 
-  // 
+  // genotype likelihood format
+
+  string type = "NA";
 
 
     const struct option longopts[] = 
@@ -230,6 +110,7 @@ int main(int argc, char** argv) {
 	{"target"    , 1, 0, 't'},
 	{"background", 1, 0, 'b'},
 	{"deltaaf"   , 1, 0, 'd'},
+	{"type"      , 1, 0, 'y'},
 	{"region"    , 1, 0, 'r'},
 	{0,0,0,0}
       };
@@ -239,55 +120,38 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "r:d:t:b:f:chv", longopts, &index);
+	iarg = getopt_long(argc, argv, "y:r:d:t:b:f:chv", longopts, &index);
 	
 	switch (iarg)
 	  {
 	  case 'h':
-	    cerr << endl << endl;
-	    cerr << "INFO: help" << endl;
-	    cerr << "INFO: description:" << endl;
-	    cerr << "      wcFst is Weir & Cockerham's Fst for two populations.  Negative values are VALID,  " << endl;
-	    cerr << "      they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. " << endl;
-	    cerr << "      Specifically wcFst uses equations 1,2,3,4.                                                              " << endl << endl;
-
-	    cerr << "Output : 3 columns :     "    << endl;
-	    cerr << "     1. seqid            "    << endl;
-	    cerr << "     2. position         "    << endl;
-	    cerr << "     3. wcFst            "    << endl  << endl;
-
-	    cerr << "INFO: usage:  wcFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
-	    cerr << endl;
-	    cerr << "INFO: required: t,target     -- a zero based comma separated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: b,background -- a zero based comma separated list of background individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\"" << endl; 
-	    cerr << "INFO: optional: d,deltaaf    -- skip sites where the difference in allele frequencies is less than deltaaf, default is zero"      << endl;
-	    cerr << endl; 
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
-	    cerr << endl << endl;
+	    printHelp();
 	    return 0;
 	  case 'v':
-	    cerr << endl << endl;
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+	    printVersion();
 	    return 0;
 	  case 't':
 	    loadIndices(it, optarg);
-	    cerr << "INFO: There are " << it.size() << " individuals in the target" << endl;
+	    cerr << "INFO: there are " << it.size() << " individuals in the target" << endl;
 	    cerr << "INFO: target ids: " << optarg << endl;
 	    break;
 	  case 'b':
 	    loadIndices(ib, optarg);
-	    cerr << "INFO: There are " << ib.size() << " individuals in the background" << endl;
+	    cerr << "INFO: there are " << ib.size() << " individuals in the background" << endl;
 	    cerr << "INFO: background ids: " << optarg << endl;
 	    break;
 	  case 'f':
-	    cerr << "INFO: File: " << optarg  <<  endl;
+	    cerr << "INFO: file: " << optarg  <<  endl;
 	    filename = optarg;
 	    break;
 	  case 'd':
 	    cerr << "INFO: only scoring sites where the allele frequency difference is greater than: " << optarg << endl;
 	    deltaaf = optarg;
 	    daf = atof(deltaaf.c_str());	    
+	    break;
+	  case 'y':
+	    type = optarg;
+	    cerr << "INFO: setting genotype likelihood format to: " << type << endl;
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
@@ -306,9 +170,27 @@ int main(int argc, char** argv) {
     }
 
     if (!variantFile.is_open()) {
-        return 1;
+      cerr << "FATAL: could not open VCF for reading" << endl;
+      printHelp();
+      return 1;
     }
-    
+
+    map<string, int> okayGenotypeLikelihoods;
+    okayGenotypeLikelihoods["PL"] = 1;
+    okayGenotypeLikelihoods["GL"] = 1;
+    okayGenotypeLikelihoods["GP"] = 1;
+
+    if(type == "NA"){
+      cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
+      printHelp();
+      return 1;
+    }
+    if(okayGenotypeLikelihoods.find(type) == okayGenotypeLikelihoods.end()){
+      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL or GL" << endl;
+      printHelp();
+      return 1;
+    }
+
     Variant var(variantFile);
 
     while (variantFile.getNextVariant(var)) {
@@ -340,55 +222,51 @@ int main(int argc, char** argv) {
 	    index += 1;
 	}
 	
-	if(target.size() < 5 || background.size() < 5 ){
-	  continue;
+	genotype * populationTarget      ;
+	genotype * populationBackground  ;
+
+	if(type == "PL"){
+	  populationTarget         = new pl();
+	  populationBackground     = new pl();
+	}
+	if(type == "GL"){
+	  populationTarget     = new gl();
+	  populationBackground = new gl();
+	}
+	if(type == "GP"){
+	  populationTarget     = new gp();
+	  populationBackground = new gp();
 	}
 	
-	pop popt, popb;
-	
-	initPop(popt);
-	initPop(popb);
+	populationTarget->loadPop(target, var.sequenceName, var.position);
+	populationBackground->loadPop(background, var.sequenceName, var.position);
 
-	loadPop(target,     popt);
-	loadPop(background, popb);
+	double afdiff = abs(populationTarget->af - populationBackground->af);
 
-
-	if(popt.af == -1 || popb.af == -1){
-	  continue;
-	}
-
-
-	double afdiff = abs(popt.af - popb.af);
-
-	if(afdiff < daf){
-	  continue;
-	}
-
+        if(afdiff < daf){
+          continue;
+        }
 	
 	// pg 1360 B.S Weir and C.C. Cockerham 1984
-	double nbar = ( popt.ngeno / 2 ) + (popb.ngeno / 2);
+	double nbar = ( populationTarget->ngeno / 2 ) + (populationBackground->ngeno / 2);
 	double rn   = 2*nbar;
 	
 	// special case of only two populations
 	double nc   =  rn ;
-	nc -= (pow(popt.ngeno,2)/rn);
-	nc -= (pow(popb.ngeno,2)/rn);
+	nc -= (pow(populationTarget->ngeno,2)/rn);
+	nc -= (pow(populationBackground->ngeno,2)/rn);
 	// average sample frequency
-	double pbar = (popt.af + popb.af) / 2;
+	double pbar = (populationTarget->af + populationBackground->af) / 2;
 
-	//	pbar += ((popt.af * popt.ngeno)/ rn);
-	//pbar += ((popb.af * popb.ngeno)/ rn);
 	// sample variance of allele A frequences over the population 
 	
 	double s2 = 0;
-	s2 += ((popt.ngeno * pow(popt.af - pbar, 2))/nbar);
-	s2 += ((popb.ngeno * pow(popb.af - pbar, 2))/nbar);
+	s2 += ((populationTarget->ngeno * pow(populationTarget->af - pbar, 2))/nbar);
+	s2 += ((populationBackground->ngeno * pow(populationBackground->af - pbar, 2))/nbar);
 	
 	// average heterozygosity 
 	
-	double hbar = (popt.hfrq + popb.hfrq) / 2;
-	//	hbar += ((popt.ngeno*popt.hfrq)/rn);
-	//      hbar += ((popb.ngeno*popb.hfrq)/rn);
+	double hbar = (populationTarget->hfrq + populationBackground->hfrq) / 2;
 	
 	//global af var
 	double pvar = pbar * (1 - pbar);
@@ -408,7 +286,7 @@ int main(int argc, char** argv) {
 	
 	double fst = avar / (avar+bvar+cvar);
 	
-	cout << var.sequenceName << "\t"  << var.position << "\t" << popt.af << "\t" << popb.af << "\t" << fst << endl ;
+	cout << var.sequenceName << "\t"  << var.position << "\t" << populationTarget->af << "\t" << populationBackground->af << "\t" << fst << endl ;
 
     }
     return 0;		    
