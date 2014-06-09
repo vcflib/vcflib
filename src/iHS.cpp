@@ -292,6 +292,8 @@ int main(int argc, char** argv) {
     int index, indexi = 0;
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
+      
+      string sampleName = (*samp);
      
       if(it.find(index) != it.end() ){
 	target_h.push_back(indexi);
