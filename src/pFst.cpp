@@ -24,7 +24,7 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations." << endl;
+  cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations." << endl << endl;
  
 
   cerr << "Output : 3 columns :     "    << endl;
