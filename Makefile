@@ -28,6 +28,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/smoother.cpp \
 			  src/LD.cpp \
 			  src/plotHaps.cpp \
+			  src/abba-baba.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \
