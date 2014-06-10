@@ -296,6 +296,14 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
         genoIndex.push_back(1);
         break;
       }
+      if(genotype == "1/0"){
+        ngeno += 1;
+        nhet  += 1;
+	nref  += 1;
+        nalt  += 1;
+        genoIndex.push_back(1);
+        break;
+      }
       if(genotype == "1/1"){
 	ngeno += 1;
         nhoma += 1;
