@@ -254,23 +254,28 @@ int main(int argc, char** argv) {
       C = containsAlt(tC["GT"].front());
       D = containsAlt(tD["GT"].front());
       
-      while(1){
+
+      if(A == 1){
+	if(D == 1 && C == 0 && B == 0 && A == 1){
+          abba = 1;
+        }
+	if(D == 0 && C == 1 && B == 0 && A == 1){
+          baba = 1;
+        }
+      }
+      else{
 	if(D == 0 && C == 1 && B == 1 && A == 0){
-	  abba = 1;
-	  break;
+          abba = 1;
 	}
 	if(D == 1 && C == 0 && B == 1 && A == 0){
-	  baba = 1;
-	}
-	break;
+          baba = 1;
+        }
       }
-
+      
       if(abba == 0 && baba == 0){
 	continue;
       }
-      
       cout << var.sequenceName << "\t" << var.position << "\t" << abba << "\t" << baba << endl;
-
     }
     return 0;		    
 }
