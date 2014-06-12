@@ -87,6 +87,25 @@ int  containsAlt(string gt){
   return 0;
 }
 
+int  containsRef(string gt){
+  if(gt == "1/1"){
+    return 0;
+  }
+  if(gt == "0/1"){
+    return 1;
+  }
+  if(gt == "1|1"){
+    return 0;
+  }
+  if(gt == "0|1"){
+    return 1;
+  }
+  if(gt == "1|0"){
+    return 1;
+  }
+  return 0;
+}
+
 void loadIndices(vector<int> & tree, string set){
   
   vector<string>  indviduals = split(set, ",");
@@ -253,28 +272,27 @@ int main(int argc, char** argv) {
       B = containsAlt(tB["GT"].front());
       C = containsAlt(tC["GT"].front());
       D = containsAlt(tD["GT"].front());
-      
 
       if(A == 1){
-	if(D == 1 && C == 0 && B == 0 && A == 1){
-          abba = 1;
-        }
-	if(D == 0 && C == 1 && B == 0 && A == 1){
-          baba = 1;
-        }
+	A = containsRef(tA["GT"].front());
+	B = containsRef(tB["GT"].front());
+	C = containsRef(tC["GT"].front());
+	D = containsRef(tD["GT"].front());
       }
-      else{
-	if(D == 0 && C == 1 && B == 1 && A == 0){
-          abba = 1;
-	}
-	if(D == 1 && C == 0 && B == 1 && A == 0){
-          baba = 1;
-        }
+      
+     
+      if(D == 0 && C == 1 && B == 1 && A == 0){
+	abba = 1;
       }
+      if(D == 1 && C == 0 && B == 1 && A == 0){
+	baba = 1;
+      }
+     
       
       if(abba == 0 && baba == 0){
 	continue;
       }
+
       cout << var.sequenceName << "\t" << var.position << "\t" << abba << "\t" << baba << endl;
     }
     return 0;		    
