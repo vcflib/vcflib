@@ -88,15 +88,16 @@ int  containsAlt(string gt){
 }
 
 int  containsRef(string gt){
-  if(gt == "1/1"){
-    return 0;
-  }
   if(gt == "0/1"){
     return 1;
   }
-  if(gt == "1|1"){
-    return 0;
+  if(gt == "0/0"){
+    return 1;
   }
+  if(gt == "0|0"){
+    return 1;
+  }
+
   if(gt == "0|1"){
     return 1;
   }
