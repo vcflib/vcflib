@@ -70,6 +70,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfsample2info.cpp \
 			  src/vcfqual2info.cpp \
 			  src/vcfglbound.cpp \
+			  src/vcfinfosummarize.cpp \
 
 #BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
