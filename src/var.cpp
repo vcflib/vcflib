@@ -103,7 +103,7 @@ double gt::unphred(map< string, vector<string> > & geno, int index){
 double gl::unphred(map< string, vector<string> > & geno, int index){
  
   double unphreded = atof(geno["GL"][index].c_str());
-  return log(unphreded);
+  return unphreded;
 }
 
 double gp::unphred(map< string, vector<string> > & geno, int index){
@@ -131,11 +131,23 @@ void pooled::loadPop(vector< map< string, vector<string> > >& group, string seqi
 
     vector<string> ac   = (*targ_it)["AD"];
     
-    if(allelecounts != "."){
+    string genotype = (*targ_it)["GT"].front();
+
+    if(genotype != "./."){
       npop += 1;
+    }
+    else{
+      continue;
     }
 
     double af = atof(ac[1].c_str()) / ( atof(ac[0].c_str()) + atof(ac[1].c_str()) );
+
+    if(atof(ac[1].c_str()) == 0){
+      af = 0;
+    }
+    if(atof(ac[0].c_str()) == 0){
+      af = 1;
+    }
         
     afsum += af;
 				 
