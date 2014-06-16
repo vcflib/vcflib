@@ -274,22 +274,21 @@ int main(int argc, char** argv) {
       C = containsAlt(tC["GT"].front());
       D = containsAlt(tD["GT"].front());
 
-      if(A == 1){
-	A = containsRef(tA["GT"].front());
-	B = containsRef(tB["GT"].front());
-	C = containsRef(tC["GT"].front());
-	D = containsRef(tD["GT"].front());
-      }
-      
-     
-      if(D == 0 && C == 1 && B == 1 && A == 0){
+      if(D == 1 && C == 0 && B == 0 && A == 1){
 	abba = 1;
+      }
+      if(D == 0 && C == 1 && B == 0 && A == 1){
+	baba = 1;
+      }
+
+      if(D == 0 && C == 1 && B == 1 && A == 0){
+        abba = 1;
       }
       if(D == 1 && C == 0 && B == 1 && A == 0){
 	baba = 1;
       }
-     
-      
+
+
       if(abba == 0 && baba == 0){
 	continue;
       }
