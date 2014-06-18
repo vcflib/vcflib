@@ -1,11 +1,15 @@
 
 #include "var.hpp"
 
-// constuctors for zvars 
+genotype::~genotype(){}
+
+zvar::~zvar(){}
 
 void zvar::setPopName(string  popName){
   name = popName;
 }
+
+pooled::~pooled(){}
 
 double pooled::bound(double v){
   if(v <= 0.00001){
@@ -16,6 +20,8 @@ double pooled::bound(double v){
   }
   return v;
 }
+
+gl::~gl(){}
 
 gl::gl(void){
   nalt  = 0;
@@ -31,6 +37,8 @@ gl::gl(void){
   alpha = 0.01;
   beta  = 0.01;
 }
+
+pl::~pl(){}
 
 pl::pl(void){
   nalt  = 0;
@@ -48,6 +56,8 @@ pl::pl(void){
 
 }
 
+gp::~gp(){}
+
 gp::gp(void){
   nalt  = 0;
   nref  = 0;
@@ -63,6 +73,9 @@ gp::gp(void){
   beta  = 0.01;
 
 }
+
+gt::~gt(){}
+
 gt::gt(void){
   nalt  = 0;
   nref  = 0;

@@ -271,6 +271,10 @@ int main(int argc, char** argv) {
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
 	if(populationTarget->npop < 2 || populationBackground->npop < 2){
+          delete populationTarget;
+	  delete populationBackground;
+          delete populationTotal;
+
 	  continue;
 	}
 
@@ -279,6 +283,11 @@ int main(int argc, char** argv) {
 	populationBackground->estimatePosterior();
 
 	if(populationTarget->alpha == -1 || populationBackground->alpha == -1){
+	  delete populationTarget;
+	  delete populationBackground;
+	  delete populationTotal;
+
+
           continue;
         }
 
@@ -292,7 +301,6 @@ int main(int argc, char** argv) {
 
 	  populationBackground->alpha = 0.001 + populationBackground->nref;
 	  populationBackground->beta  = 0.001 + populationBackground->nalt;
-
 
 
 	}
@@ -312,6 +320,11 @@ int main(int argc, char** argv) {
 	double l = 2 * (alt - null);
 	
 	if(l <= 0){
+	  delete populationTarget;
+	  delete populationBackground;
+	  delete populationTotal;
+
+
 	  continue;
 	}
 

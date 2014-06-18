@@ -234,8 +234,8 @@ int main(int argc, char** argv) {
 	genotype * populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget         = new pl();
-	  populationBackground     = new pl();
+	  populationTarget      = new pl();
+	  populationBackground  = new pl();
 	}
 	if(type == "GL"){
 	  populationTarget     = new gl();
@@ -250,18 +250,26 @@ int main(int argc, char** argv) {
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
 	if(populationTarget->af == -1 || populationBackground->af == -1){
+	  delete populationTarget;
+	  delete populationBackground;
 	  continue;
 	}
 	if(populationTarget->af == 1 &&  populationBackground->af == 1){
+	  delete populationTarget;
+          delete populationBackground;
 	  continue;
 	}
 	if(populationTarget->af == 0 &&  populationBackground->af == 0){
+	  delete populationTarget;
+          delete populationBackground;
 	  continue;
 	}
 
 	double afdiff = abs(populationTarget->af - populationBackground->af);
 
         if(afdiff < daf){
+	  delete populationTarget;
+          delete populationBackground;
           continue;
         }
 	
@@ -305,6 +313,9 @@ int main(int argc, char** argv) {
 	double fst = avar / (avar+bvar+cvar);
 	
 	cout << var.sequenceName << "\t"  << var.position << "\t" << populationTarget->af << "\t" << populationBackground->af << "\t" << fst << endl ;
+
+	delete populationTarget;
+	delete populationBackground;
 
     }
     return 0;		    
