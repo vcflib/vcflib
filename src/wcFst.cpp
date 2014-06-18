@@ -249,6 +249,16 @@ int main(int argc, char** argv) {
 	populationTarget->loadPop(target, var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
+	if(populationTarget->af == -1 || populationBackground->af == -1){
+	  continue;
+	}
+	if(populationTarget->af == 1 &&  populationBackground->af == 1){
+	  continue;
+	}
+	if(populationTarget->af == 0 &&  populationBackground->af == 0){
+	  continue;
+	}
+
 	double afdiff = abs(populationTarget->af - populationBackground->af);
 
         if(afdiff < daf){

@@ -34,6 +34,7 @@ public:
   virtual void loadPop(vector< map< string, vector<string> > >& group, string seqid, long int position) = 0;
   virtual void estimatePosterior() = 0 ;
   void setPopName(string  popName);
+  
 };
 
 class genotype : public zvar {
@@ -55,6 +56,7 @@ public:
   virtual double unphred(map< string, vector<string> > & geno, int index) = 0; 
   virtual void loadPop(vector< map< string, vector<string> > >& group, string seqid, long int position);
   void estimatePosterior();
+  
 
 };
 
@@ -80,18 +82,21 @@ class gt : public genotype{
 public:
   gt(void);
   double unphred(map< string, vector<string> > & geno, int index);
+  
 };
 
 class gl : public genotype{
 public:
   gl(void);
   double unphred(map< string, vector<string> > & geno, int index);
+  
 };
 
 class gp : public genotype{
 public:
   gp(void);
   double unphred(map< string, vector<string> > & geno, int index);
+  
 };
 
 
@@ -99,6 +104,7 @@ class pl : public genotype{
 public:
   pl(void);
   double unphred(map< string, vector<string> > & geno, int index);
+  
 }; 
 
 #endif 
