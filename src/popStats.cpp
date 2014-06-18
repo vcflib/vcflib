@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
 	genotype * populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget         = new pl();
+	  populationTarget     = new pl();
 	}
 	if(type == "GL"){
 	  populationTarget     = new gl();
@@ -239,6 +239,9 @@ int main(int argc, char** argv) {
 	 //cerr << "     8. number of homozygous alt     "    << endl;
 	 //cerr << "     9. target Fis                   "    << endl;
 
+	if(populationTarget->af == -1){
+	  continue;
+	}
 
 	double ehet = 2*(populationTarget->af * (1 - populationTarget->af));
 	
