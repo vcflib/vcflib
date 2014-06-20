@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     set<string> fieldsToKeep;
     for (int i = 2; i < argc; ++i) {
         fieldsToKeep.insert(argv[i]);
-	newFormat.push_back(argv[i]);
+        newFormat.push_back(argv[i]);
     }
 
     VariantCallFile variantFile;
@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
 
     vector<string> formatIds = variantFile.formatIds();
     for (vector<string>::iterator i = formatIds.begin(); i != formatIds.end(); ++i) {
-	if (!fieldsToKeep.count(*i)) {
-	    variantFile.removeGenoHeaderLine(*i);
-	}
+        if (!fieldsToKeep.count(*i)) {
+            variantFile.removeGenoHeaderLine(*i);
+        }
     }
 
     // write the header
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
  
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
-	var.format = newFormat;
+        var.format = newFormat;
         cout << var << endl;
     }
 
