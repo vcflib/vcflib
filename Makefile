@@ -19,6 +19,7 @@ OBJECTS= $(SOURCES:.cpp=.o)
 
 BIN_SOURCES = src/vcfecho.cpp \
 			  src/bFst.cpp \
+			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
 			  src/sequenceDiversity.cpp \
