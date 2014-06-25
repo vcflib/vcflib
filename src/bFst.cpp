@@ -494,9 +494,10 @@ int main(int argc, char** argv) {
     
     Variant var(variantFile);
 
+    vector<string> samples = variantFile.sampleNames;
+    int nsamples = samples.size();
+
     while (variantFile.getNextVariant(var)) {
-        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-        map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
 	// biallelic sites naturally 
 
@@ -509,23 +510,23 @@ int main(int argc, char** argv) {
 	        
 	int index = 0;
 
-        for (; s != sEnd; ++s) {
+	for(int nsamp = 0; nsamp < nsamples; nsamp++){
 
-            map<string, vector<string> >& sample = s->second;
-
-	    if(sample["GT"].front() != "./."){
-	      if(it.find(index) != it.end() ){
-		target.push_back(sample);
-		total.push_back(sample);
-		
-	      }
-	      if(ib.find(index) != ib.end()){
+          map<string, vector<string> > sample = var.samples[ samples[nsamp]];
+	  
+	  if(sample["GT"].front() != "./."){
+	    if(it.find(index) != it.end() ){
+	      target.push_back(sample);
+	      total.push_back(sample);
+	      
+	    }
+	    if(ib.find(index) != ib.end()){
 		background.push_back(sample);
 		total.push_back(sample);
-	      }
 	    }
-            
-	index += 1;
+	  }
+    
+	  index += 1;
 	}
 	
 	if(target.size() < 2 || background.size() < 2 ){

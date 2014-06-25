@@ -357,19 +357,15 @@ int main(int argc, char** argv) {
 	currentSeqid = var.sequenceName;
 	afs.clear();
       }
-
-
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
       
       vector < map< string, vector<string> > > target, background, total;
       
       int sindex = 0;
-      
-      for (; s != sEnd; s++) {	  
-	
-	map<string, vector<string> >& sample = s->second;
-	  
+
+      for(int nsamp = 0; nsamp < nsamples; nsamp++){
+
+	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
+      	  
 	if(it.find(sindex) != it.end() ){
 	  target.push_back(sample);
 	  total.push_back(sample);	  

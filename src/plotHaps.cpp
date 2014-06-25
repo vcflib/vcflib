@@ -308,6 +308,7 @@ int main(int argc, char** argv) {
     
     string currentSeqid = "NA";
     
+   
     while (variantFile.getNextVariant(var)) {
 
       if(!var.isPhased()){
@@ -319,16 +320,15 @@ int main(int argc, char** argv) {
 	continue;
       }
 
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
       
       vector < map< string, vector<string> > > target, background, total;
       
       int sindex = 0;
+
+      for(int nsamp = 0; nsamp < nsamples; nsamp++){
+
+	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
       
-      for (; s != sEnd; s++) {	  
-	
-	map<string, vector<string> >& sample = s->second;
 	if(it.find(sindex) != it.end() ){
 	  target.push_back(sample);
 	}	

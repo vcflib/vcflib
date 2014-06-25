@@ -284,12 +284,12 @@ int main(int argc, char** argv) {
     
     Variant var(variantFile);
 
-    vector<string> samples = variantFile.sampleNames;
-    int nsamples = samples.size();
-
     vector<int> target_h, background_h;
 
     int index, indexi = 0;
+
+    vector<string> samples = variantFile.sampleNames;
+    int nsamples = samples.size();
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
       
@@ -332,16 +332,14 @@ int main(int argc, char** argv) {
       }
 
 
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
-      
       vector < map< string, vector<string> > > target, background, total;
       
       int sindex = 0;
       
-      for (; s != sEnd; s++) {	  
+      for(int nsamp = 0; nsamp < nsamples; nsamp++){
+
+	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
 	
-	map<string, vector<string> >& sample = s->second;
 	if(it.find(sindex) != it.end() ){
 	  target.push_back(sample);
 	}	
