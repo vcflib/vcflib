@@ -247,6 +247,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
     
 
     if(type == "NA"){
@@ -358,7 +359,10 @@ int main(int argc, char** argv) {
       if(type == "GP"){
 	populationTarget     = new gp();
       }
-      
+      if(type == "GT"){
+	populationTarget     = new gt();
+      }
+
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
       if(populationTarget->af == 1 || populationTarget->af == 0){

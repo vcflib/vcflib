@@ -187,6 +187,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
 
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
@@ -246,6 +247,10 @@ int main(int argc, char** argv) {
 	  populationTarget     = new gp();
 	  populationBackground = new gp();
 	}
+	if(type == "GT"){
+          populationTarget     = new gt();
+          populationBackground = new gt();
+        }
 	
 	populationTarget->loadPop(target, var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);

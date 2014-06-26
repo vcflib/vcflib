@@ -142,6 +142,9 @@ int main(int argc, char** argv) {
 	  case 'y':	    
 	    type = optarg;
 	    cerr << "INFO: genotype likelihoods set to: " << type << endl;
+	    if(type == "GT"){
+	      cerr << "INFO: using counts flag as GT was specified" << endl;
+	    }
 	    break;
 	  case 'c':
 	    cerr << "INFO: using genotype counts rather than genotype likelihoods" << endl;
@@ -193,9 +196,14 @@ int main(int argc, char** argv) {
     }
     map<string, int> okayGenotypeLikelihoods;
     okayGenotypeLikelihoods["PL"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
     okayGenotypeLikelihoods["PO"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+
+    if(type == "GT"){
+      counts = 1;
+    }
 
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL,PO,GL,GP" << endl;
@@ -266,7 +274,12 @@ int main(int argc, char** argv) {
 	  populationBackground = new gp();
 	  populationTotal      = new gp();
 	}
-	
+	if(type == "GT"){
+          populationTarget     = new gt();
+          populationBackground = new gt();
+          populationTotal      = new gt();
+        }	
+
 	populationTotal->loadPop(total          , var.sequenceName, var.position);	
 	populationTarget->loadPop(target        , var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
