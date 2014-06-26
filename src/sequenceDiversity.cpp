@@ -277,6 +277,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
 
     if(targetIndex.size() < 2){
       cerr << endl;
@@ -403,6 +404,11 @@ int main(int argc, char** argv) {
 	populationTarget     = new gp();
 	populationBackground = new gp();
 	populationTotal      = new gp();
+      }
+      if(type == "GT"){
+        populationTarget     = new gt();
+        populationBackground = new gt();
+        populationTotal      = new gt();
       }
       
       populationTarget->loadPop(target,         var.sequenceName, var.position);
