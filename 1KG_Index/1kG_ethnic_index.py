@@ -1,4 +1,4 @@
-import argparse, csv, os
+import argparse, csv, os, sys
 
 parser=argparse.ArgumentParser(description="Determines the index of individuals\
  of a given ethnicity within a 1000 Genomes VCF")
@@ -8,7 +8,7 @@ to be found in the index, enter \"ALL|\" to print index for all populations in \
 the VCF")
 arg=parser.parse_args()
 
-a=os.path.abspath("1kG_ethnic_index.py").split("/")[:-1]
+a=os.path.abspath(sys.argv[0]).split("/")[:-1]
 b="/".join(a)
 
 try:
