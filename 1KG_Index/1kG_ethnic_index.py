@@ -1,4 +1,4 @@
-import argparse, csv
+import argparse, csv, os
 
 parser=argparse.ArgumentParser(description="Determines the index of individuals\
  of a given ethnicity within a 1000 Genomes VCF")
