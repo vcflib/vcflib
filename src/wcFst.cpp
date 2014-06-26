@@ -231,6 +231,11 @@ int main(int argc, char** argv) {
 	    }            
 	    index += 1;
 	}
+
+
+	if(target.size() < 5 || background.size() < 5){
+	  continue;
+	}
 	
 	genotype * populationTarget      ;
 	genotype * populationBackground  ;
