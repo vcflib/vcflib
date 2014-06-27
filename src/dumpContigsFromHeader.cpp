@@ -25,10 +25,19 @@ int main(int argc, char** argv) {
     //    cerr << "h:" <<  (*it) << endl;
     
   if((*it).substr(0,8) == "##contig"){
-    string contigInfo = (*it).substr(13, (*it).length() -14);
-
+    string contigInfo = (*it).substr(10, (*it).length() -11);
+    //    cerr << contigInfo << endl;
     vector<string> info = split(contigInfo, ",");
-    cout << info[0] << "\t" << info[1].substr(7) << endl;
+    for(vector<string>::iterator sub = info.begin(); sub != info.end(); sub++){
+      //      cerr << "s:" << (*sub) << endl;
+      vector<string> subfield = split((*sub), "=");
+      if(subfield[0] == "ID"){
+	cout << subfield[1] << "\t";
+      }
+      if(subfield[0] == "length"){
+	cout << subfield[1] << endl;
+      }
+    }
     
   }
 
