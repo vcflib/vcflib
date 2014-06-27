@@ -18,6 +18,7 @@ OBJECTS= $(SOURCES:.cpp=.o)
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
+			  src/dumpContigsFromHeader.cpp \
 			  src/bFst.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
