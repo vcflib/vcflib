@@ -170,6 +170,12 @@ $(SHORTBINS):
 $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
 	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) $(FILEVERCMP) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
+
+pull:
+	git pull
+
+update: pull all
+
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
