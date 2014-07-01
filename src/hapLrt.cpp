@@ -69,6 +69,10 @@ void loadIndices(map<int, int> & index, string set){
 
 void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[], int maxI){
 
+  for(int i = 0 ; i < maxI; i++){
+    lengths[i] = 0; 
+  }
+
   int g = group.size();
   
   for(int h = 0; h < g; h++){
@@ -199,8 +203,8 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
     int backgroundLengths[bl]; 
     int totalLengths[al];
 
-    findLengths(haplotypes, target,     snp, targetLengths, 16);
-    findLengths(haplotypes, background, snp, backgroundLengths, 16);
+    findLengths(haplotypes, target,     snp, targetLengths, tl);
+    findLengths(haplotypes, background, snp, backgroundLengths, bl);
 
     copy(targetLengths, targetLengths + tl, totalLengths);
     copy(backgroundLengths, backgroundLengths +bl, totalLengths + tl);
@@ -251,9 +255,12 @@ void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
 
   for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
     string g = (*ind);
+//    if((haplotypes[0][0].size() % 100) == 0){
+//      cerr << "string size:"  << haplotypes[0][0].size() << endl;
+//    }
     vector< string > gs = split(g, "|");
     haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);
+    haplotypes[indIndex][1].append(gs[1]);  
     indIndex += 1;
   }
 }
@@ -283,9 +290,6 @@ int main(int argc, char** argv) {
   // deltaaf is the difference of allele frequency we bother to look at 
 
   // ancestral state is set to zero by default
-
-
-  int counts = 0;
   
   // phased 
 
@@ -372,9 +376,12 @@ int main(int argc, char** argv) {
 
     variantFile.open(filename);
     
-   if(region != "NA"){
-     variantFile.setRegion(region); 
-   }
+    if(region != "NA"){
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
+    }
     
     if (!variantFile.is_open()) {
         return 1;
@@ -420,6 +427,9 @@ int main(int argc, char** argv) {
     
     string currentSeqid = "NA";
 
+    int count = 0;
+
+
     
     while (variantFile.getNextVariant(var)) {
 
@@ -462,7 +472,7 @@ int main(int argc, char** argv) {
 	
 	sindex += 1;
       }
-      
+            
       genotype * populationTarget    ;
       genotype * populationBackground;
       genotype * populationTotal     ;
@@ -487,7 +497,8 @@ int main(int argc, char** argv) {
 	populationBackground = new gt();
         populationTotal      = new gt();
       }
-      
+
+     
       populationTarget->loadPop(target,         var.sequenceName, var.position);
       
       populationBackground->loadPop(background, var.sequenceName, var.position);
@@ -496,24 +507,40 @@ int main(int argc, char** argv) {
       
       
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){
+	delete populationTarget;
+	delete populationBackground;
+	delete populationTotal;
+	
+	populationTarget     = NULL;
+	populationBackground = NULL;
+	populationTotal      = NULL;
 	continue;
       }
 
-      afs.push_back(populationTotal->af);
-      positions.push_back(var.position);
-      loadPhased(haplotypes, populationTotal, nsamples);
+     
 
+	afs.push_back(populationTotal->af);
+	positions.push_back(var.position);
+	loadPhased(haplotypes, populationTotal, nsamples);      
+	
+	delete populationTarget;
+	delete populationBackground;
+	delete populationTotal;
+	
+	populationTarget     = NULL;
+	populationBackground = NULL;
+	populationTotal      = NULL;
+	
 
-      delete populationTarget;
-      delete populationBackground;
-      delete populationTotal;
-
-      populationTarget     = NULL;
-      populationBackground = NULL;
-      populationTotal      = NULL;
-
-      
     }
+
+//    delete populationTarget;
+//    delete populationBackground;
+//    delete populationTotal;
+//
+//    populationTarget     = NULL;
+//    populationBackground = NULL;
+//    populationTotal      = NULL;
 
     calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
     

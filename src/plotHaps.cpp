@@ -274,14 +274,17 @@ int main(int argc, char** argv) {
       return 1;
     }
     
-   if(region != "NA"){
-     variantFile.setRegion(region); 
-   }
-   else{
-     cerr << "FATAL: must specifiy a region" << endl;
-     printHelp();
-     return 1;
-   }
+    if(region != "NA"){
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
+    }
+    else{
+      cerr << "FATAL: must specifiy a region" << endl;
+      printHelp();
+      return 1;
+    }
     
     Variant var(variantFile);
 

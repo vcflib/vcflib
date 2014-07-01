@@ -174,7 +174,10 @@ int main(int argc, char** argv) {
     variantFile.open(filename);
     
     if(region != "NA"){
-      variantFile.setRegion(region);
+      if(! variantFile.setRegion(region)){
+	cerr << "FATAL: unable to set region" << endl;
+	return 1;
+      }
     }
 
     if (!variantFile.is_open()) {
