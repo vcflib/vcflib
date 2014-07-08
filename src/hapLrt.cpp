@@ -67,52 +67,76 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[], int maxI){
+//changed (carson) --> void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]), int maxI){
+void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]){
+  int gmax = group.size();
+  int smax = haplotypes[0][0].length();
+  int matrix[gmax*2][gmax*2];
 
-  for(int i = 0 ; i < maxI; i++){
-    lengths[i] = 0; 
+  for(int i = 0 ; i < gmax*2; i++){
+    lengths[i] = 0;
   }
-
-  int g = group.size();
   
-  for(int h = 0; h < g; h++){
-    for(int a = 0; a < 2; a++){
+  for(int i = 0; i < gmax*2; i++){ //get group member 1
+    int g = (i < gmax) ? group[i] : group[i-gmax];
+    int c = (i < gmax) ? 0 : 1;
 
-      int start     = core;
-      int end       = core;
+    string& currentHap = haplotypes[g][c];
+    for(int j = i+1; j < gmax*2; j++){ //get group member 2 for comparison
+      int ag = (j < gmax) ? group[j] : group[j-gmax];
+      int ac = (j < gmax) ? 0 : 1;
 
-      while(1){
-	
-	start -= 1;
-	end   += 1;
-	
-	if(start == -1){
-	  start = 0;
-	  end  += 1;
-	}
-	if(end == haplotypes[0][0].length() ){
-	  start -= 1;
-	  end    = haplotypes[0][0].length() - 1;
-	}
-	if( (start == 0) && (end == haplotypes[0][0].length() - 1)){
-	  break;
-	}
-	map<string , int> subHaps;
-	string currentHap = haplotypes[ group[h] ][a].substr(start, end - start);	
+      string& altHap = haplotypes[ag][ac];
 
-	for(int i = 0; i < group.size(); i++){
-	  subHaps[haplotypes[group[i]][0].substr(start, end - start)]++;
-	  subHaps[haplotypes[group[i]][1].substr(start, end - start)]++;
+      typedef string::const_iterator iter;
+      iter cBeg = currentHap.begin(), cEnd = currentHap.end();
+      iter aBeg = altHap.begin(), aEnd = altHap.end();
+
+      iter citB = cBeg + core;
+      iter citE = cBeg + core;
+      iter aitB = aBeg + core;
+      iter aitE = aBeg + core;
+
+      int len = 0;
+      if(*citB != *aitB){ //block length is 0 on no match
+	matrix[i][j] = len;
+	break;
+      }
+      len++; //length is at least 1 on match
+
+      //block longer than 1
+      while(len < smax){
+	int to_add = 0;
+	if(citB > cBeg){
+	  citB--;
+	  aitB--;
+	  if(*citB != *aitB) break;
+	  to_add++;
+	}
+
+	if(citE < cEnd-1){
+	  citE++;
+          aitE++;
+          if(*citE != *aitE) break;
+	  to_add++;
 	}
 	
-	if(subHaps[currentHap] < 2){
-	  lengths[h + (a * g) ] = (end - start);
-	  break;
-	}
-      }      
+	len += to_add;
+      }
+
+      //set length
+      matrix[i][j] = len;
+      if(lengths[i] < len) lengths[i] = len;
+      if(lengths[j] < len) lengths[j] = len;
     }
   }
-
+  
+  //validate
+  //for(int h = 0; h < gmax; h++){
+  //for(int a = 0; a < 2; a++){
+  //  cerr << "length: " << lengths[h + (a * gmax) ] <<endl;
+  // }
+  //}
 }
 
 double mean(int data[], int n){
@@ -189,22 +213,24 @@ double var(int dat[], int n, double mean){
 
 void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background,  vector<int> total,  string seqid){
 
-  for(int snp = 0; snp < haplotypes[0][0].length(); snp++){   
+  //moved (carson)
+  int tl = 2*target.size();
+  int bl = 2*background.size();
+  int al = 2*total.size();
 
-    //    if((snp % 5) != 0){
-    //      continue;
-    //   }
-    
-    int tl = 2*target.size();
-    int bl = 2*background.size();
-    int al = 2*total.size();
+  //treat as buffers to seed findLengths (carson)
 
-    int targetLengths[tl]; 
+
+  for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
+
+    int targetLengths[tl];
     int backgroundLengths[bl]; 
     int totalLengths[al];
 
-    findLengths(haplotypes, target,     snp, targetLengths, tl);
-    findLengths(haplotypes, background, snp, backgroundLengths, bl);
+    //changed (carson) --> findLengths(haplotypes, target,     snp, targetLengths, tl);
+    //changed (carson) --> findLengths(haplotypes, background, snp, backgroundLengths, bl);
+    findLengths(haplotypes, target,     snp, targetLengths);
+    findLengths(haplotypes, background, snp, backgroundLengths);
 
     copy(targetLengths, targetLengths + tl, totalLengths);
     copy(backgroundLengths, backgroundLengths +bl, totalLengths + tl);
@@ -377,12 +403,44 @@ int main(int argc, char** argv) {
     variantFile.open(filename);
     
     if(region != "NA"){
-      if(! variantFile.setRegion(region)){
-	cerr <<"FATAL: unable to set region" << endl;
-	return 1;
+      if(!variantFile.setRegion(region)){ //check if region is even specified in header                                                                                        
+        bool region_exists = false;
+        vector<string> headerLines = split (variantFile.header, "\n");
+        for(vector<string>::iterator it = headerLines.begin(); it != headerLines.end(); it++){
+          if((*it).substr(0,8) == "##contig"){
+            string contigInfo = (*it).substr(10, (*it).length() -11);
+            vector<string> info = split(contigInfo, ",");
+            for(vector<string>::iterator sub = info.begin(); sub != info.end(); sub++){
+              vector<string> subfield = split((*sub), "=");
+              if (subfield[0] != "ID") break;
+              if(subfield[1] == region){
+                region_exists = true;
+                break;
+              }
+
+              vector<string> subregion = split(region, ":");
+              if(subfield[1] == subregion[0]){
+                region_exists = true;
+                break;
+              }
+            }
+            if(region_exists){
+              break;
+            }
+          }
+        }
+
+        if(region_exists){
+          cerr << "WARNING: There are no variants for the specified region" << endl;
+          return 0;
+        }
+        else{
+          cerr << "FATAL: You specified an invalid region" << endl;
+          return 1;
+        }
       }
     }
-    
+
     if (!variantFile.is_open()) {
         return 1;
     }
@@ -427,11 +485,10 @@ int main(int argc, char** argv) {
     
     string currentSeqid = "NA";
 
-    int count = 0;
-
-
-    
+    int count = 0;    
     while (variantFile.getNextVariant(var)) {
+      count++;
+      //cerr << count << endl;
 
       if(!var.isPhased()){
 	cerr <<"FATAL: Found an unphased variant. All genotypes must be phased!" << endl;
