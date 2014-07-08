@@ -100,7 +100,7 @@ void findLengths(string haplotypes[][2], vector<int> group, int core, int length
       int len = 0;
       if(*citB != *aitB){ //block length is 0 on no match
 	matrix[i][j] = len;
-	break;
+	continue;
       }
       len++; //length is at least 1 on match
 
@@ -130,12 +130,26 @@ void findLengths(string haplotypes[][2], vector<int> group, int core, int length
       if(lengths[j] < len) lengths[j] = len;
     }
   }
-  
-  //validate
-  //for(int h = 0; h < gmax; h++){
-  //for(int a = 0; a < 2; a++){
-  //  cerr << "length: " << lengths[h + (a * gmax) ] <<endl;
-  // }
+
+  //check for bugs
+  //for(int i = 0 ; i < gmax*2; i++){
+  //  if(lengths[i] == -1){
+  //  cerr << endl;
+  //  cerr << core;
+  //  for(int i = 0; i < gmax*2; i++){ //get group member 1
+  //    int g = (i < gmax) ? group[i] : group[i-gmax];
+  //    int c = (i < gmax) ? 0 : 1;
+  //
+  //    string& currentHap = haplotypes[g][c];
+  //    typedef string::const_iterator iter;
+  //    iter cBeg = currentHap.begin(), cEnd = currentHap.end();
+  //    iter citB = cBeg + core;
+  //    iter citE = cBeg + core;
+  //
+  //    cerr << *citB << endl;
+  //  }
+  //  cerr << endl;
+  //  }
   //}
 }
 
@@ -145,6 +159,7 @@ double mean(int data[], int n){
 
   for(int i = 0; i < n; i++){
     sum += data[i];
+    //cerr << data[i] << endl;
   }
   return (double(sum) / double(n));
 }
