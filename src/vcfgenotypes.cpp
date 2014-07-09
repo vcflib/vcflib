@@ -48,8 +48,12 @@ int main(int argc, char** argv) {
             // report the sample and it's genotype
             cout << s->first << ":";
             for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {
-                int index = atoi(g->c_str());
-                cout << var.alleles[index];
+                if (g->c_str() == ".") {
+                    cout << ".";
+                } else {
+                    int index = atoi(g->c_str());
+                    cout << var.alleles[index];
+                }
                 if (g != (gt.end()-1)) cout << "/";
             }
             cout << "\t";
