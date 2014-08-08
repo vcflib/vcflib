@@ -157,11 +157,19 @@ private:
 class VariantAllele {
     friend ostream& operator<<(ostream& out, VariantAllele& var);
     friend bool operator<(const VariantAllele& a, const VariantAllele& b);
+    friend VariantAllele operator+(const VariantAllele& a, const VariantAllele& b);
 public:
     string ref;
     string alt;
     string repr;
     long position;
+    /* // TODO
+    bool isSNP(void);
+    bool isMNP(void);
+    bool isInsertion(void);
+    bool isDeletion(void);
+    bool isIndel(void);
+    */
     VariantAllele(string r, string a, long p)
         : ref(r), alt(a), position(p)
     {

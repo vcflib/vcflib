@@ -1537,9 +1537,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
             switch (type.at(0)) {
             case 'I':
                 if (includePreviousBaseForIndels) {
-                    variants.push_back(VariantAllele(ref.substr(refpos - 1, 1),
-                                                     alternate.substr(altpos - 1, len + 1),
-                                                     refpos + position - 1));
+                    if (!variants.empty() && 
+                        variants.back().ref != variants.back().alt) {
+                        VariantAllele a = VariantAllele("", alternate.substr(altpos, len), refpos + position);
+                        variants.back() = variants.back() + a;
+                    } else {
+                        VariantAllele a = VariantAllele(ref.substr(refpos - 1, 1),
+                                                        alternate.substr(altpos - 1, len + 1),
+                                                        refpos + position - 1);
+                        variants.push_back(a);
+                    }
                 } else {
                     variants.push_back(VariantAllele("", alternate.substr(altpos, len), refpos + position));
                 }
@@ -1547,9 +1554,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                 break;
             case 'D':
                 if (includePreviousBaseForIndels) {
-                    variants.push_back(VariantAllele(ref.substr(refpos - 1, len + 1),
-                                                     alternate.substr(altpos - 1, 1),
-                                                     refpos + position - 1));
+                    if (!variants.empty() &&
+                        variants.back().ref != variants.back().alt) {
+                        VariantAllele a = VariantAllele(ref.substr(refpos, len), "", refpos + position);
+                        variants.back() = variants.back() + a;
+                    } else {
+                        VariantAllele a = VariantAllele(ref.substr(refpos - 1, len + 1),
+                                                        alternate.substr(altpos - 1, 1),
+                                                        refpos + position - 1);
+                        variants.push_back(a);
+                    }
                 } else {
                     variants.push_back(VariantAllele(ref.substr(refpos, len), "", refpos + position));
                 }
@@ -1558,9 +1572,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
             case 'M':
                 {
                     for (int i = 0; i < len; ++i) {
-                        variants.push_back(VariantAllele(ref.substr(refpos + i, 1),
-                                                         alternate.substr(altpos + i, 1),
-                                                         refpos + i + position));
+                        VariantAllele a = VariantAllele(ref.substr(refpos + i, 1),
+                                                        alternate.substr(altpos + i, 1),
+                                                        refpos + i + position);
+                        if (useMNPs &&
+                            variants.back().ref.size() == variants.back().alt.size()
+                            && variants.back().ref != variants.back().alt) {
+                            variants.back() = variants.back() + a;
+                        } else {
+                            variants.push_back(a);
+                        }
                     }
                 }
                 refpos += len;
@@ -1574,26 +1595,6 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                 break;
             }
 
-            // deal with MNP representation
-            if (useMNPs) {
-                vector<VariantAllele> adjustedVariants;
-                for (vector<VariantAllele>::iterator v = variants.begin(); v != variants.end(); ++v) {
-                    if (adjustedVariants.empty()) {
-                        adjustedVariants.push_back(*v);
-                    } else {
-                        if (adjustedVariants.back().ref.size() == adjustedVariants.back().alt.size()
-                            && adjustedVariants.back().ref != adjustedVariants.back().alt
-                            && v->ref.size() == v->alt.size()
-                            && v->ref != v->alt) {
-                            adjustedVariants.back().ref += v->ref;
-                            adjustedVariants.back().alt += v->alt;
-                        } else {
-                            adjustedVariants.push_back(*v);
-                        }
-                    }
-                }
-                variants = adjustedVariants;
-            }
         }
     }
 
@@ -1618,6 +1619,10 @@ set<string> Variant::altSet(void) {
 ostream& operator<<(ostream& out, VariantAllele& var) {
     out << var.position << " " << var.ref << " -> " << var.alt;
     return out;
+}
+
+VariantAllele operator+(const VariantAllele& a, const VariantAllele& b) {
+    return VariantAllele(a.ref + b.ref, a.alt + b.alt, a.position);
 }
 
 bool operator<(const VariantAllele& a, const VariantAllele& b) {
