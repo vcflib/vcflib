@@ -18,7 +18,9 @@ OBJECTS= $(SOURCES:.cpp=.o)
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
+			  src/dumpContigsFromHeader.cpp \
 			  src/bFst.cpp \
+			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
 			  src/sequenceDiversity.cpp \
@@ -167,6 +169,12 @@ $(SHORTBINS):
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
 	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) $(FILEVERCMP) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+
+
+pull:
+	git pull
+
+update: pull all
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

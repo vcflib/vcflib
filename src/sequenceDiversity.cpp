@@ -277,6 +277,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
 
     if(targetIndex.size() < 2){
       cerr << endl;
@@ -365,15 +366,15 @@ int main(int argc, char** argv) {
 	backgroundAFS.clear();
       }
 
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
       
       vector < map< string, vector<string> > > target, background, total;
       
       int sindex = 0;
       
-      for (; s != sEnd; s++) {	  
-	map<string, vector<string> >& sample = s->second;	  
+      for(int nsamp = 0; nsamp < nsamples; nsamp++){
+
+	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
+
 	if(targetIndex.find(sindex) != targetIndex.end() ){
 	  target.push_back(sample);
 	  total.push_back(sample);	  
@@ -403,6 +404,11 @@ int main(int argc, char** argv) {
 	populationTarget     = new gp();
 	populationBackground = new gp();
 	populationTotal      = new gp();
+      }
+      if(type == "GT"){
+        populationTarget     = new gt();
+        populationBackground = new gt();
+        populationTotal      = new gt();
       }
       
       populationTarget->loadPop(target,         var.sequenceName, var.position);

@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
 	    break;
 	  case 'y':
 	    type = optarg;
-	    cerr << "INFO: set genotype likelihood to: " << type;
+	    cerr << "INFO: set genotype likelihood to: " << type << endl;
 	    break;
 	  default:
 	    break;
@@ -163,7 +163,10 @@ int main(int argc, char** argv) {
     }
     
     if(region != "NA"){
-      variantFile.setRegion(region);
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
     }
 
     if (!variantFile.is_open()) {
@@ -176,6 +179,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
 
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
@@ -190,9 +194,10 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
+    vector<string> samples = variantFile.sampleNames;
+    int nsamples = samples.size();
+
     while (variantFile.getNextVariant(var)) {
-        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-        map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
 	// biallelic sites naturally 
 
@@ -204,9 +209,9 @@ int main(int argc, char** argv) {
 	        
 	int index = 0;
 
-        for (; s != sEnd; ++s) {
+	for(int nsamp = 0; nsamp < nsamples; nsamp++){
 
-            map<string, vector<string> >& sample = s->second;
+	  map<string, vector<string> > sample = var.samples[ samples[nsamp]];
 
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
@@ -220,13 +225,16 @@ int main(int argc, char** argv) {
 	genotype * populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget         = new pl();
+	  populationTarget     = new pl();
 	}
 	if(type == "GL"){
 	  populationTarget     = new gl();
 	}
 	if(type == "GP"){
 	  populationTarget     = new gp();
+	}
+	if(type == "GT"){
+          populationTarget     = new gt();
 	}
 	
 	populationTarget->loadPop(target, var.sequenceName, var.position);
@@ -239,6 +247,9 @@ int main(int argc, char** argv) {
 	 //cerr << "     8. number of homozygous alt     "    << endl;
 	 //cerr << "     9. target Fis                   "    << endl;
 
+	if(populationTarget->af == -1){
+	  continue;
+	}
 
 	double ehet = 2*(populationTarget->af * (1 - populationTarget->af));
 	

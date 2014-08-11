@@ -1,11 +1,15 @@
 
 #include "var.hpp"
 
-// constuctors for zvars 
+genotype::~genotype(){}
+
+zvar::~zvar(){}
 
 void zvar::setPopName(string  popName){
   name = popName;
 }
+
+pooled::~pooled(){}
 
 double pooled::bound(double v){
   if(v <= 0.00001){
@@ -16,6 +20,8 @@ double pooled::bound(double v){
   }
   return v;
 }
+
+gl::~gl(){}
 
 gl::gl(void){
   nalt  = 0;
@@ -31,6 +37,8 @@ gl::gl(void){
   alpha = 0.01;
   beta  = 0.01;
 }
+
+pl::~pl(){}
 
 pl::pl(void){
   nalt  = 0;
@@ -48,6 +56,8 @@ pl::pl(void){
 
 }
 
+gp::~gp(){}
+
 gp::gp(void){
   nalt  = 0;
   nref  = 0;
@@ -63,6 +73,9 @@ gp::gp(void){
   beta  = 0.01;
 
 }
+
+gt::~gt(){}
+
 gt::gt(void){
   nalt  = 0;
   nref  = 0;
@@ -103,7 +116,7 @@ double gt::unphred(map< string, vector<string> > & geno, int index){
 double gl::unphred(map< string, vector<string> > & geno, int index){
  
   double unphreded = atof(geno["GL"][index].c_str());
-  return log(unphreded);
+  return unphreded;
 }
 
 double gp::unphred(map< string, vector<string> > & geno, int index){
@@ -121,21 +134,33 @@ double pl::unphred(map< string, vector<string> > & geno, int index){
    return unphreded;
 }
 
-void pooled::loadPop(vector< map< string, vector<string> > >& group, string seqid, long int position){
+void pooled::loadPop(vector< map< string, vector<string> > > & group, string seqid, long int position){
   vector< map< string, vector<string> > >::iterator targ_it = group.begin();
 
 
   for(; targ_it != group.end(); targ_it++){
 
+    string genotype = (*targ_it)["GT"].front();
+
+    if(genotype == "./."){
+      continue;
+    }
+
     string allelecounts = (*targ_it)["AD"].front();
 
     vector<string> ac   = (*targ_it)["AD"];
     
-    if(allelecounts != "."){
-      npop += 1;
-    }
+    npop += 1;
+    
 
     double af = atof(ac[1].c_str()) / ( atof(ac[0].c_str()) + atof(ac[1].c_str()) );
+
+    if(atof(ac[1].c_str()) == 0){
+      af = 0;
+    }
+    if(atof(ac[0].c_str()) == 0){
+      af = 1;
+    }
         
     afsum += af;
 				 
@@ -188,11 +213,10 @@ void pooled::estimatePosterior(void){
     exit(1);
   }
   
-  double xbar = afsum / npop;
-  
+  double xbar = af;
   double ss = 0;
   
-  for(int i = 0 ; i < afs.size(); i++){
+  for(int i = 0 ; i < npop; i++){
     ss += pow(( afs[i] - xbar),2);
   }
   
@@ -202,7 +226,6 @@ void pooled::estimatePosterior(void){
   if(var < 0.01){
     var = 0.01;
   }
-
   if(var < xbar*(1-xbar)){
     alpha = xbar * (((xbar*(1-xbar))/var) -1);
     beta  = (1 - xbar) * (((xbar*(1-xbar))/var) -1);
@@ -211,13 +234,12 @@ void pooled::estimatePosterior(void){
     alpha = -1;
     beta  = -1;
   }
-  
 }
 
 void genotype::loadPop( vector< map< string, vector<string> > >& group, string seqid, long int position){
 
   seqid = seqid;
-  pos   = pos  ;
+  pos   = position  ;
 
   vector< map< string, vector<string> > >::iterator targ_it = group.begin();
 
@@ -292,6 +314,14 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
         ngeno += 1;
         nhet  += 1;
         nref  += 1;
+        nalt  += 1;
+        genoIndex.push_back(1);
+        break;
+      }
+      if(genotype == "1/0"){
+        ngeno += 1;
+        nhet  += 1;
+	nref  += 1;
         nalt  += 1;
         genoIndex.push_back(1);
         break;

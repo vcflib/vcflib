@@ -246,6 +246,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
     
 
     if(type == "NA"){
@@ -273,14 +274,17 @@ int main(int argc, char** argv) {
       return 1;
     }
     
-   if(region != "NA"){
-     variantFile.setRegion(region); 
-   }
-   else{
-     cerr << "FATAL: must specifiy a region" << endl;
-     printHelp();
-     return 1;
-   }
+    if(region != "NA"){
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
+    }
+    else{
+      cerr << "FATAL: must specifiy a region" << endl;
+      printHelp();
+      return 1;
+    }
     
     Variant var(variantFile);
 
@@ -308,6 +312,7 @@ int main(int argc, char** argv) {
     
     string currentSeqid = "NA";
     
+   
     while (variantFile.getNextVariant(var)) {
 
       if(!var.isPhased()){
@@ -319,16 +324,15 @@ int main(int argc, char** argv) {
 	continue;
       }
 
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
       
       vector < map< string, vector<string> > > target, background, total;
       
       int sindex = 0;
+
+      for(int nsamp = 0; nsamp < nsamples; nsamp++){
+
+	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
       
-      for (; s != sEnd; s++) {	  
-	
-	map<string, vector<string> >& sample = s->second;
 	if(it.find(sindex) != it.end() ){
 	  target.push_back(sample);
 	}	
@@ -345,6 +349,9 @@ int main(int argc, char** argv) {
       }
       if(type == "GP"){
 	populationTarget     = new gp();
+      }
+      if(type == "GT"){
+	populationTarget     = new gt();
       }
       
       populationTarget->loadPop(target, var.sequenceName, var.position);

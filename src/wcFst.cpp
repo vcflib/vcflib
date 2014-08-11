@@ -174,7 +174,10 @@ int main(int argc, char** argv) {
     variantFile.open(filename);
     
     if(region != "NA"){
-      variantFile.setRegion(region);
+      if(! variantFile.setRegion(region)){
+	cerr << "FATAL: unable to set region" << endl;
+	return 1;
+      }
     }
 
     if (!variantFile.is_open()) {
@@ -187,6 +190,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
 
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
@@ -201,9 +205,10 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
+    vector<string> samples = variantFile.sampleNames;
+    int nsamples = samples.size();
+
     while (variantFile.getNextVariant(var)) {
-        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-        map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
 	// biallelic sites naturally 
 
@@ -215,9 +220,9 @@ int main(int argc, char** argv) {
 	        
 	int index = 0;
 
-        for (; s != sEnd; ++s) {
+	for(int nsamp = 0; nsamp < nsamples; nsamp++){
 
-            map<string, vector<string> >& sample = s->second;
+          map<string, vector<string> > sample = var.samples[ samples[nsamp]];
 
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
@@ -229,13 +234,18 @@ int main(int argc, char** argv) {
 	    }            
 	    index += 1;
 	}
+
+
+	if(target.size() < 5 || background.size() < 5){
+	  continue;
+	}
 	
 	genotype * populationTarget      ;
 	genotype * populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget         = new pl();
-	  populationBackground     = new pl();
+	  populationTarget      = new pl();
+	  populationBackground  = new pl();
 	}
 	if(type == "GL"){
 	  populationTarget     = new gl();
@@ -245,13 +255,35 @@ int main(int argc, char** argv) {
 	  populationTarget     = new gp();
 	  populationBackground = new gp();
 	}
+	if(type == "GT"){
+          populationTarget     = new gt();
+          populationBackground = new gt();
+        }
 	
 	populationTarget->loadPop(target, var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
+	if(populationTarget->af == -1 || populationBackground->af == -1){
+	  delete populationTarget;
+	  delete populationBackground;
+	  continue;
+	}
+	if(populationTarget->af == 1 &&  populationBackground->af == 1){
+	  delete populationTarget;
+          delete populationBackground;
+	  continue;
+	}
+	if(populationTarget->af == 0 &&  populationBackground->af == 0){
+	  delete populationTarget;
+          delete populationBackground;
+	  continue;
+	}
+
 	double afdiff = abs(populationTarget->af - populationBackground->af);
 
         if(afdiff < daf){
+	  delete populationTarget;
+          delete populationBackground;
           continue;
         }
 	
@@ -295,6 +327,9 @@ int main(int argc, char** argv) {
 	double fst = avar / (avar+bvar+cvar);
 	
 	cout << var.sequenceName << "\t"  << var.position << "\t" << populationTarget->af << "\t" << populationBackground->af << "\t" << fst << endl ;
+
+	delete populationTarget;
+	delete populationBackground;
 
     }
     return 0;		    

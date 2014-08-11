@@ -1,4 +1,4 @@
-import argparse, csv
+import argparse, csv, os, sys
 
 parser=argparse.ArgumentParser(description="Determines the index of individuals\
  of a given ethnicity within a 1000 Genomes VCF")
@@ -8,13 +8,16 @@ to be found in the index, enter \"ALL|\" to print index for all populations in \
 the VCF")
 arg=parser.parse_args()
 
+a=os.path.abspath(sys.argv[0]).split("/")[:-1]
+b="/".join(a)
+
 try:
-	 open("1KG_IDs.txt")
+	 open(b+"/1KG_IDs.txt")
 except IOError:
 	print "Missing file \"1KG_IDs.txt\" containing the IDs for 1000 Genomes"
 
 popdict={}
-with open("1KG_IDs.txt") as t:
+with open(b+"/1KG_IDs.txt") as t:
 	for line in csv.reader(t,delimiter='\t'):
 		popdict[line[1]]=line[0]
 

@@ -274,8 +274,8 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
     
-
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
       printHelp();
@@ -296,9 +296,13 @@ int main(int argc, char** argv) {
 
     variantFile.open(filename);
     
-   if(region != "NA"){
-     variantFile.setRegion(region); 
-   }
+
+    if(region != "NA"){
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
+    }
     
     if (!variantFile.is_open()) {
         return 1;
@@ -357,19 +361,15 @@ int main(int argc, char** argv) {
 	currentSeqid = var.sequenceName;
 	afs.clear();
       }
-
-
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
       
       vector < map< string, vector<string> > > target, background, total;
       
       int sindex = 0;
-      
-      for (; s != sEnd; s++) {	  
-	
-	map<string, vector<string> >& sample = s->second;
-	  
+
+      for(int nsamp = 0; nsamp < nsamples; nsamp++){
+
+	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
+      	  
 	if(it.find(sindex) != it.end() ){
 	  target.push_back(sample);
 	  total.push_back(sample);	  
@@ -400,6 +400,11 @@ int main(int argc, char** argv) {
 	populationTarget     = new gp();
 	populationBackground = new gp();
 	populationTotal      = new gp();
+      }
+      if(type == "GT"){
+	populationTarget     = new gt();
+        populationBackground = new gt();
+        populationTotal      = new gt();
       }
       
       populationTarget->loadPop(target,         var.sequenceName, var.position);

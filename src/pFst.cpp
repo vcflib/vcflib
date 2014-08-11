@@ -142,6 +142,9 @@ int main(int argc, char** argv) {
 	  case 'y':	    
 	    type = optarg;
 	    cerr << "INFO: genotype likelihoods set to: " << type << endl;
+	    if(type == "GT"){
+	      cerr << "INFO: using counts flag as GT was specified" << endl;
+	    }
 	    break;
 	  case 'c':
 	    cerr << "INFO: using genotype counts rather than genotype likelihoods" << endl;
@@ -185,7 +188,10 @@ int main(int argc, char** argv) {
     variantFile.open(filename);
     
     if(region != "NA"){
-      variantFile.setRegion(region);
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
     }
 
     if (!variantFile.is_open()) {
@@ -193,9 +199,14 @@ int main(int argc, char** argv) {
     }
     map<string, int> okayGenotypeLikelihoods;
     okayGenotypeLikelihoods["PL"] = 1;
+    okayGenotypeLikelihoods["GT"] = 1;
     okayGenotypeLikelihoods["PO"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
+
+    if(type == "GT"){
+      counts = 1;
+    }
 
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL,PO,GL,GP" << endl;
@@ -210,22 +221,23 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
+    vector<string> samples = variantFile.sampleNames;
+    int nsamples = samples.size();
+
     while (variantFile.getNextVariant(var)) {
 
       if(var.alt.size() > 1){
 	continue;
       }
       
-      map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
-      map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
         
       vector < map< string, vector<string> > > target, background, total;
 	        
 	int index = 0;
 
-        for (; s != sEnd; ++s) {
+        for(int nsamp = 0; nsamp < nsamples; nsamp++){
 
-            map<string, vector<string> >& sample = s->second;
+          map<string, vector<string> > sample = var.samples[ samples[nsamp]];
 
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
@@ -265,12 +277,21 @@ int main(int argc, char** argv) {
 	  populationBackground = new gp();
 	  populationTotal      = new gp();
 	}
-	
+	if(type == "GT"){
+          populationTarget     = new gt();
+          populationBackground = new gt();
+          populationTotal      = new gt();
+        }	
+
 	populationTotal->loadPop(total          , var.sequenceName, var.position);	
 	populationTarget->loadPop(target        , var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
 	if(populationTarget->npop < 2 || populationBackground->npop < 2){
+          delete populationTarget;
+	  delete populationBackground;
+          delete populationTotal;
+
 	  continue;
 	}
 
@@ -279,6 +300,11 @@ int main(int argc, char** argv) {
 	populationBackground->estimatePosterior();
 
 	if(populationTarget->alpha == -1 || populationBackground->alpha == -1){
+	  delete populationTarget;
+	  delete populationBackground;
+	  delete populationTotal;
+
+
           continue;
         }
 
@@ -292,7 +318,6 @@ int main(int argc, char** argv) {
 
 	  populationBackground->alpha = 0.001 + populationBackground->nref;
 	  populationBackground->beta  = 0.001 + populationBackground->nalt;
-
 
 
 	}
@@ -312,6 +337,11 @@ int main(int argc, char** argv) {
 	double l = 2 * (alt - null);
 	
 	if(l <= 0){
+	  delete populationTarget;
+	  delete populationBackground;
+	  delete populationTotal;
+
+
 	  continue;
 	}
 
