@@ -1360,6 +1360,15 @@ string genotypeToString(const map<int, int>& genotype) {
     return join(r, "/"); // TODO adjust for phased/unphased
 }
 
+string phasedGenotypeToString(const vector<int>& genotype) {
+    vector<string> r;
+    for (vector<int>::const_iterator i = genotype.begin(); i != genotype.end(); ++i) {
+        if (*i == NULL_ALLELE) r.push_back(".");
+        else r.push_back(convert(*i));
+    }
+    return join(r, "|");
+}
+
 bool isHet(const map<int, int>& genotype) {
     return genotype.size() > 1;
 }
@@ -1737,14 +1746,26 @@ void Variant::removeAlt(string& altAllele) {
             if (gt.find("|") != string::npos) {
                 splitter = "|";
             }
-            samplePloidy[s->first] = split(gt, splitter).size();
-            map<int, int> genotype = decomposeGenotype(sample["GT"].front());
-            map<int, int> newGenotype;
-            for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-                newGenotype[alleleIndexMapping[g->first]] += g->second;
+
+            if (splitter == "/") {
+                samplePloidy[s->first] = split(gt, splitter).size();
+                map<int, int> genotype = decomposeGenotype(sample["GT"].front());
+                map<int, int> newGenotype;
+                for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+                    newGenotype[alleleIndexMapping[g->first]] += g->second;
+                }
+                sample["GT"].clear();
+                sample["GT"].push_back(genotypeToString(newGenotype));
+            } else {
+                samplePloidy[s->first] = split(gt, splitter).size();
+                vector<int> genotype = decomposePhasedGenotype(sample["GT"].front());
+                vector<int> newGenotype;
+                for (vector<int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
+                    newGenotype.push_back(alleleIndexMapping[*g]);
+                }
+                sample["GT"].clear();
+                sample["GT"].push_back(phasedGenotypeToString(newGenotype));
             }
-            sample["GT"].clear();
-            sample["GT"].push_back(genotypeToString(newGenotype));
         }
     }
 

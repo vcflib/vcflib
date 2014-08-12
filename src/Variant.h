@@ -452,6 +452,8 @@ map<int, int> decomposeGenotype(const string& genotype);
 
 string genotypeToString(const map<int, int>& genotype);
 
+string phasedGenotypeToString(const vector<int>& genotype);
+
 bool isHet(const map<int, int>& genotype);
 
 bool isHom(const map<int, int>& genotype);
