@@ -291,7 +291,8 @@ int main(int argc, char** argv) {
 
     vector<int> target_h, background_h;
 
-    int index, indexi = 0;
+    int index  = 0;
+    int indexi = 0;
 
     vector<string> samples = variantFile.sampleNames;
     int nsamples = samples.size();
