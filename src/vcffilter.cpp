@@ -33,7 +33,7 @@ void printSummary(char** argv) {
          << endl
          << "Any number of filters may be specified.  They are combined via logical AND" << endl
          << "unless --or is specified on the command line.  Obtain logical negation through" << endl
-         << "the use of parentheses, e.g. ! \"( DP = 10 )\"" << endl
+         << "the use of parentheses, e.g. \"! ( DP = 10 )\"" << endl
          << endl
          << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
          << "though it does not appear in the INFO fields." << endl
