@@ -415,6 +415,9 @@ int main(int argc, char** argv) {
       
       
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){
+	
+	delete populationTarget;
+	delete populationBackground;
 	continue;
       }
 
@@ -422,6 +425,9 @@ int main(int argc, char** argv) {
       positions.push_back(var.position);
       loadPhased(haplotypes, populationTotal, nsamples);
       
+      delete populationTarget;
+      delete populationBackground;
+
     }
 
     calc(haplotypes, nsamples, positions, afs, target_h, background_h, currentSeqid);
