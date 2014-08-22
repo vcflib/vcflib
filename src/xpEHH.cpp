@@ -418,6 +418,7 @@ int main(int argc, char** argv) {
 	
 	delete populationTarget;
 	delete populationBackground;
+	delete populationTotal;
 	continue;
       }
 
@@ -427,6 +428,7 @@ int main(int argc, char** argv) {
       
       delete populationTarget;
       delete populationBackground;
+      delete populationTotal;
 
     }
 
