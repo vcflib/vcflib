@@ -99,7 +99,7 @@ INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -g -O0
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 

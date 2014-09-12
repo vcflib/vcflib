@@ -437,7 +437,7 @@ public:
     VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables);
     bool passes(Variant& var, string& sample); // all alts pass
     bool passes(Variant& var, string& sample, string& allele);
-    void removeFilteredGenotypes(Variant& var);
+    void removeFilteredGenotypes(Variant& var, bool keepInfo);
 
 };
 
