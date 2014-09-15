@@ -944,12 +944,18 @@ VariantFieldType Variant::infoType(string& key) {
     }
 }
 
-void VariantFilter::removeFilteredGenotypes(Variant& var) {
+void VariantFilter::removeFilteredGenotypes(Variant& var, bool keepInfo) {
 
     for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
         string& name = *s;
         if (!passes(var, name)) {
-            var.samples.erase(name);
+        	if (keepInfo) {
+				var.samples[name]["GT"].clear();
+				var.samples[name]["GT"].push_back("./.");
+        	}
+        	else {
+			    var.samples.erase(name);
+        	}
         }
     }
 }
