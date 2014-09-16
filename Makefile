@@ -69,6 +69,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfindex.cpp \
 			  src/vcfsample2info.cpp \
 			  src/vcfqual2info.cpp \
+			  src/vcfinfo2qual.cpp \
 			  src/vcfglbound.cpp \
 			  src/vcfinfosummarize.cpp \
 
