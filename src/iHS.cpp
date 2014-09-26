@@ -68,6 +68,9 @@ void loadIndices(map<int, int> & index, string set){
 
 void calc(string haplotypes[][2], int nhaps, vector<double> afs, vector<long int> pos, vector<int> & target, vector<int> & background, string seqid){
 
+   //cerr << "about to calc" << endl;
+   //cerr << "nhap:        " << nhaps << endl;
+
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
     double ehhA = 1;
@@ -291,7 +294,8 @@ int main(int argc, char** argv) {
 
     vector<int> target_h, background_h;
 
-    int index, indexi = 0;
+    int index   = 0; 
+    int  indexi = 0;
 
     vector<string> samples = variantFile.sampleNames;
     int nsamples = samples.size();
@@ -307,6 +311,9 @@ int main(int argc, char** argv) {
       index++;
     }
     
+    
+    // cerr << "n in target : " << target_h.size() << endl;
+
     vector<long int> positions;
     
     vector<double> afs;
@@ -315,6 +322,8 @@ int main(int argc, char** argv) {
     
     string currentSeqid = "NA";
     
+    // cerr << "about to loop variants" << endl;
+
     while (variantFile.getNextVariant(var)) {
 
       if(!var.isPhased()){
@@ -370,6 +379,7 @@ int main(int argc, char** argv) {
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
       if(populationTarget->af == 1 || populationTarget->af == 0){
+	delete populationTarget;
 	continue;
       }
       positions.push_back(var.position);
