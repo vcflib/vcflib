@@ -494,7 +494,7 @@ bool isEmptyCigarElement(const pair<int, string>& elem);
 // for sorting, generating maps ordered by chromosome name
 class ChromNameCompare {
 public:
-    bool operator()(const string& a, const string& b) {
+    bool operator()(const string& a, const string& b) const {
         return (filevercmp(a.c_str(), b.c_str()) < 0);
     }
 };
