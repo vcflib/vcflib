@@ -100,6 +100,7 @@ void Variant::parse(string& line, bool parseSamples) {
             cerr << "error: more sample fields than samples listed in header" << endl;
             cerr << "samples: " << join(sampleNames, " ") << endl;
             cerr << "line: " << line << endl;
+            cerr << *sample << endl;
             exit(1);
         }
     } else if (!parseSamples) {
@@ -1122,7 +1123,7 @@ bool VariantCallFile::parseHeader(void) {
                 // done with header
                 if (headerStr.empty()) {
                     cerr << "error: no VCF header" << endl;
-                    exit(1);
+                    return false;
                 }
                 firstRecord = true;
                 break;

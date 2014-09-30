@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     int i = optind;
 
     if (!(optind < argc - 1)) {
-        cerr << "no input files specified" << endl;
+        cerr << "more than one input file must be specified" << endl;
         exit(1);
     }
 
@@ -68,17 +68,21 @@ int main(int argc, char** argv) {
 	    Variant& var = variantFiles[index].second;
 	    string inputFilename = argv[optind++];
 	    variantFile = new VariantCallFile;
-	    variantFile->open(inputFilename);
-	    var.setVariantCallFile(variantFile);
-	    if (!variantFile->is_open()) {
-            cout << "could not open VCF file" << endl;
-            exit(1);
-	    } else {
-            while (variantFile->getNextVariant(var)) {
-                linesByPrecedence[var.sequenceName][var.position][var.vrepr()][index] = variantFile->line;
+        try {
+            variantFile->open(inputFilename);
+            if (!variantFile->is_open()) {
+                cerr << "vcfoverlay could not open VCF file" << endl;
+                --index;
+            } else {
+                var.setVariantCallFile(variantFile);
+                while (variantFile->getNextVariant(var)) {
+                    linesByPrecedence[var.sequenceName][var.position][var.vrepr()][index] = variantFile->line;
+                }
             }
-	    }
-	}
+        } catch (...) {
+            cerr << "vcfoverlay encountered errors when opening " << inputFilename << endl;
+        }
+    }
     
     cout << variantFiles.begin()->second.first->header << endl;
 
