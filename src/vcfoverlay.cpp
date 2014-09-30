@@ -69,9 +69,8 @@ int main(int argc, char** argv) {
 	    string inputFilename = argv[optind++];
 	    variantFile = new VariantCallFile;
         try {
-            variantFile->open(inputFilename);
-            if (!variantFile->is_open()) {
-                cerr << "vcfoverlay could not open VCF file" << endl;
+            if (!variantFile->open(inputFilename)) {
+                cerr << "vcfoverlay could not open VCF file " << inputFilename << endl;
                 --index;
             } else {
                 var.setVariantCallFile(variantFile);
