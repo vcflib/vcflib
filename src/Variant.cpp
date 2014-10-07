@@ -1,4 +1,5 @@
 #include "Variant.h"
+#include <utility>
 
 namespace vcf {
 
@@ -1003,9 +1004,15 @@ string VariantCallFile::headerWithSampleNames(vector<string>& newSamples) {
     vector<string> headerLines = split(header, '\n');
     vector<string> colnames = split(headerLines.at(headerLines.size() - 1), '\t'); // get the last, update the samples
     vector<string> newcolnames;
-    newcolnames.resize(9 + newSamples.size());
-    copy(colnames.begin(), colnames.begin() + 9, newcolnames.begin());
-    copy(newSamples.begin(), newSamples.end(), newcolnames.begin() + 9);
+    unsigned int colCount = colnames.size(); // used to be hard-coded 9, hopefully the dynamic colCount isn't an issue
+    if (colCount < 8)
+    {
+        cout << "VCF file is not suitable for use because it does not have a format field." << endl;
+        exit(0);
+    }
+    newcolnames.resize(colCount + newSamples.size());
+    copy(colnames.begin(), colnames.begin() + colCount, newcolnames.begin());
+    copy(newSamples.begin(), newSamples.end(), newcolnames.begin() + colCount);
     headerLines.at(headerLines.size() - 1) = join(newcolnames, "\t");
     return join(headerLines, "\n");
 }
@@ -1103,6 +1110,36 @@ void VariantCallFile::removeGenoHeaderLine(string tag) {
     header = join(newHeader, "\n");
 }
 
+vector<string> VariantCallFile::getHeaderLinesFromFile()
+{
+    string headerStr = "";
+
+    if (usingTabix) {
+        tabixFile->getHeader(headerStr);
+        if (headerStr.empty()) {
+            cerr << "error: no VCF header" << endl;
+            exit(1);
+        }
+        tabixFile->getNextLine(line);
+        firstRecord = true;
+    } else {
+        while (std::getline(*file, line)) {
+            if (line.substr(0,1) == "#") {
+                headerStr += line + '\n';
+            } else {
+                // done with header
+                if (headerStr.empty()) {
+                    cerr << "error: no VCF header" << endl;
+                    return vector<string>();
+                }
+                firstRecord = true;
+                break;
+            }
+        }
+    }
+    return split(headerStr, "\n");
+}
+
 bool VariantCallFile::parseHeader(void) {
 
     string headerStr = "";
@@ -1130,6 +1167,7 @@ bool VariantCallFile::parseHeader(void) {
             }
         }
     }
+    this->vcf_header = headerStr;
 
     return parseHeader(headerStr);
 
@@ -2227,5 +2265,143 @@ vector<Variant*> Variant::matchingHaplotypes() {
 
 }
 */
+
+
+    VCFHeader::VCFHeader()
+    {
+
+        // add manditory fields
+        this->header_columns.push_back("#CHROM");
+        this->header_columns.push_back("POS");
+        this->header_columns.push_back("ID");
+        this->header_columns.push_back("REF");
+        this->header_columns.push_back("ALT");
+        this->header_columns.push_back("QUAL");
+        this->header_columns.push_back("FILTER");
+        this->header_columns.push_back("INFO");
+
+        // add the line names in order
+        // the order is used when outputting as a string
+        this->header_line_names_ordered.push_back("##fileFormat");
+        this->header_line_names_ordered.push_back("##fileDate");
+        this->header_line_names_ordered.push_back("##source");
+        this->header_line_names_ordered.push_back("##reference");
+        this->header_line_names_ordered.push_back( "##contig");
+        this->header_line_names_ordered.push_back("##phasing");
+        this->header_line_names_ordered.push_back( "##assembly");
+
+        // add the list names in order
+        // the order is used when outputting as a string (getHeaderString)
+        this->header_list_names_ordered.push_back("##info");
+        this->header_list_names_ordered.push_back("##filter");
+        this->header_list_names_ordered.push_back("##format");
+        this->header_list_names_ordered.push_back("##alt");
+        this->header_list_names_ordered.push_back("##sample");
+        this->header_list_names_ordered.push_back("##pedigree");
+        this->header_list_names_ordered.push_back("##pedigreedb");
+
+        // initialize the header_lines with the above vector.
+        // Set the key as the ##_type_ and the value as an empty string
+        // Empty strings are ignored when outputting as string (getHeaderString)
+        for (vector<string>::const_iterator header_lines_iter = this->header_line_names_ordered.begin(); header_lines_iter != this->header_line_names_ordered.end(); ++header_lines_iter)
+        {
+            this->header_lines[(*header_lines_iter)] = "";
+        }
+
+        // initialize the header_lines with the above vector.
+        // Set the key as the ##_type_ and the value as an empty vector<string>
+        // Empty vectors are ignored when outputting as string (getHeaderString)
+        for (vector<string>::const_iterator header_lists_iter = this->header_list_names_ordered.begin(); header_lists_iter != this->header_list_names_ordered.end(); ++header_lists_iter)
+        {
+            this->header_lists[(*header_lists_iter)] = vector<string>(0);
+        }
+
+    }
+
+    void VCFHeader::addMetaInformationLine(const string& meta_line)
+    {
+        // get the meta_line unique key (first chars before the =)
+        unsigned int meta_line_index = meta_line.find("=", 0);
+        string meta_line_prefix = meta_line.substr(0, meta_line_index);
+        // all map keys are lower case so when we check we need to be lower case too!
+        std::transform(meta_line_prefix.begin(), meta_line_prefix.end(), meta_line_prefix.begin(), ::tolower);
+
+        // check if the meta_line_prefix is in the header_lines, if so add it to the appropirate list
+        if (this->header_lines.find(meta_line_prefix) != header_lines.end()) // the meta_line is a header line so replace what was there
+        {
+            this->header_lines[meta_line_prefix] = meta_line;
+        }
+        else if (header_lists.find(meta_line_prefix) != header_lists.end() &&
+            !metaInfoIdExistsInVector(meta_line, this->header_lists[meta_line_prefix])) // check if the metalineprefix is in the headerLists, if so add it to the appropirate list
+        {
+            this->header_lists[meta_line_prefix].push_back(meta_line);
+        }
+    }
+
+    string VCFHeader::getHeaderString()
+    {
+        // getHeaderString generates the string each time it is called
+        string header_string;
+
+        // start by adding the header_lines
+        for (vector<string>::const_iterator header_lines_iter = this->header_line_names_ordered.begin(); header_lines_iter != this->header_line_names_ordered.end(); ++header_lines_iter)
+        {
+            if (this->header_lines[(*header_lines_iter)] != "")
+            {
+                header_string += this->header_lines[(*header_lines_iter)] + "\n";
+            }
+        }
+
+        // next add header_lists
+        for (vector<string>::const_iterator header_lists_iter = this->header_list_names_ordered.begin(); header_lists_iter != this->header_list_names_ordered.end(); ++header_lists_iter)
+        {
+            vector<string> tmp_header_lists = this->header_lists[(*header_lists_iter)];
+            for (vector<string>::const_iterator header_list = tmp_header_lists.begin(); header_list != tmp_header_lists.end(); ++header_list)
+            {
+                header_string += (*header_list) + "\n";
+            }
+        }
+
+        // last add header columns
+        vector<string>::const_iterator last_element = this->header_columns.end() - 1;
+        for (vector<string>::const_iterator header_column_iter = this->header_columns.begin(); header_column_iter != this->header_columns.end(); ++header_column_iter)
+        {
+            string delimiter = (header_column_iter == last_element) ? "\n" : "\t";
+            header_string += (*header_column_iter) + delimiter;
+        }
+        return header_string;
+    }
+
+    bool VCFHeader::metaInfoIdExistsInVector(const string& meta_line, vector<string>& meta_lines)
+    {
+        // extract the id from meta_line
+        size_t meta_line_id_start_idx = meta_line.find("ID=", 0); // used for the start of the substring index
+        size_t meta_line_id_end_idx = meta_line.find(",", meta_line_id_start_idx); // used for end of the substring index
+        string meta_line_id = (meta_line_id_start_idx < meta_line_id_end_idx) ? meta_line.substr(meta_line_id_start_idx, meta_line_id_end_idx - meta_line_id_start_idx) : "";
+
+        for (vector<string>::const_iterator iter = meta_lines.begin(); iter != meta_lines.end(); ++iter)
+        {
+            // extract the id from iter's meta_line string
+            size_t iter_meta_line_id_start_idx = (*iter).find("ID=", 0);
+            size_t iter_meta_line_id_end_idx = (*iter).find(",", iter_meta_line_id_start_idx);
+            string iter_meta_line_id = (iter_meta_line_id_start_idx < iter_meta_line_id_end_idx) ? (*iter).substr(iter_meta_line_id_start_idx, iter_meta_line_id_end_idx - iter_meta_line_id_start_idx) : "";
+            // compare the meta_line_id with the iter_meta_line_id
+            if (strcasecmp(meta_line_id.c_str(), iter_meta_line_id.c_str()) == 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void VCFHeader::addHeaderColumn(const string& header_column)
+    {
+        // don't add duplicates
+        //  vector<string>::iterator test = find(this->header_columns.begin(), this->header_columns.end(), header_column);
+        if (find(this->header_columns.begin(), this->header_columns.end(), header_column) == this->header_columns.end())
+        {
+            this->header_columns.push_back(header_column);
+        }
+    }
 
 } // end namespace vcf
