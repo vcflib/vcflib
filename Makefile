@@ -153,6 +153,9 @@ $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(L
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
 	ar rvs libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
 
+test: $(BINS)
+	@prove -Itests/lib -w tests/*.t
+
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
@@ -160,4 +163,4 @@ clean:
 	cd smithwaterman && make clean
 	cd fastahack && make clean
 
-.PHONY: clean all
+.PHONY: clean all test
