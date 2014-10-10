@@ -21,6 +21,9 @@ my ($output, $header) = ('', <<'');
 ##INFO=<ID=BasesToClosestVariant,Number=1,Type=Integer,Description="Number of bases to the closest variant in the file.">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 
+#
+# Various numbers of variant lines
+#
 ($output) = run_ok(["vcfdistance"], variants(5));
 is $output, $header . <<'', "distances for 5 variant lines";
 refseq	502	.	G	A	38553	PASS	BasesToClosestVariant=50;
@@ -53,5 +56,43 @@ refseq	502	.	G	A	38553	PASS
 
 ($output) = run_ok(["vcfdistance"], variants(0));
 is $output, $header, "distances for 0 variant lines";
+
+#
+# Various combinations of reference sequences (obviously non-comparable)
+#
+@vcf = split /\n/, <<'';
+##fileformat=VCFv4.0
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+ref1	502	.	G	A	38553	PASS	
+ref2	552	.	G	A	24044	PASS	
+ref2	660	.	G	A	38553	PASS	
+ref2	678	.	G	A	24044	PASS	
+ref3	684	.	G	A	24044	PASS	
+
+($output) = run_ok(["vcfdistance"], variants(5));
+is $output, $header . <<'', "distances for 5 variant lines; three references";
+ref1	502	.	G	A	38553	PASS	
+ref2	552	.	G	A	24044	PASS	BasesToClosestVariant=108;
+ref2	660	.	G	A	38553	PASS	BasesToClosestVariant=18;
+ref2	678	.	G	A	24044	PASS	BasesToClosestVariant=18;
+ref3	684	.	G	A	24044	PASS	
+
+($output) = run_ok(["vcfdistance"], variants(4));
+is $output, $header . <<'', "distances for 4 variant lines, two references";
+ref1	502	.	G	A	38553	PASS	
+ref2	552	.	G	A	24044	PASS	BasesToClosestVariant=108;
+ref2	660	.	G	A	38553	PASS	BasesToClosestVariant=18;
+ref2	678	.	G	A	24044	PASS	BasesToClosestVariant=18;
+
+($output) = run_ok(["vcfdistance"], variants(3));
+is $output, $header . <<'', "distances for 3 variant lines, two references";
+ref1	502	.	G	A	38553	PASS	
+ref2	552	.	G	A	24044	PASS	BasesToClosestVariant=108;
+ref2	660	.	G	A	38553	PASS	BasesToClosestVariant=108;
+
+($output) = run_ok(["vcfdistance"], variants(2));
+is $output, $header . <<'', "distances for 2 variant lines, two references";
+ref1	502	.	G	A	38553	PASS	
+ref2	552	.	G	A	24044	PASS	
 
 done_testing;
