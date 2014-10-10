@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 
     if (argc > 1) {
         cerr << "usage: " << argv[0] << " <[vcf file]" << endl
-             << "adds a tag (BasesToNextVariant) to each variant record which indicates" << endl
+             << "adds a tag (BasesToClosestVariant) to each variant record which indicates" << endl
              << "the distance to the nearest variant" << endl;
         return 1;
     }
