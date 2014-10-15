@@ -43,7 +43,7 @@ for i in range(len(vcfind)):
 if arg.Population=="All":
 	for j in indict.keys():
 		l=[str(i) for i in indict[j]]
-		print j,"\t",",".join(l)
+		print j,"=",",".join(l)
 
 else:
 	try:
