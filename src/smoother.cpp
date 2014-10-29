@@ -27,7 +27,7 @@ struct score{
 
 void printVersion(void){
   cerr << endl ;
-  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg & EJ Osborne; email : zev.kronenberg@utah.edu "  << endl;
   cerr << endl << endl;
 }
 
@@ -52,7 +52,7 @@ void printHelp(void){
   cerr << "INFO: required: f,file     -- argument: a file created by GPAT++                           " << endl;
   cerr << "INFO: required: o,format   -- argument: format of input file, case sensative               " << endl;
   cerr << "                              availible format options:                                    " << endl;
-  cerr << "                                wcFst, pFst, bFst, iHS, xpEHH                              " << endl;
+  cerr << "                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba                   " << endl;
   cerr << "INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)" << endl;
   cerr << "INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)      " << endl;
   printVersion();
@@ -69,6 +69,24 @@ double windowAvg(list<score> & rangeData){
     n += 1;
   }
   return (s/n);
+}
+
+//calculation of Patterson's D statistic
+double dStatistic(list<score> & rangeData){
+
+  double abba = 0;
+  double baba = 0;
+  double dstat ;
+  for(list<score>::iterator it = rangeData.begin(); it != rangeData.end(); it++){
+    if(it->score == 0){ // means we have BABA locus
+      baba += 1;
+    }
+    else{ // count towards ABBA locus
+      abba += 1;
+    }
+  }
+  dstat = (abba - baba) / (abba + baba ); // d-statistic implementation
+  return (dstat);
 }
 
 void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
@@ -96,10 +114,20 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
     }
     current.position = atol( sline[opt.pos].c_str() );
     current.score    = atof( sline[opt.value].c_str() );
-    
+    // add in if abba-baba to process second score. 
     if(current.position > end){
-      double mean = windowAvg(windowDat);
-      cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << mean << endl;
+
+      double reportValue ;
+
+
+      if(opt. format == "abba-baba"){
+	reportValue = dStatistic(windowDat);
+      }
+      else{
+	reportValue = windowAvg(windowDat);
+      }
+
+      cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << reportValue << endl;
     }
     while(end < current.position){
       start += opt.step;
@@ -110,6 +138,7 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
     }
     windowDat.push_back(current);  
   }
+  // add function for D-stat if abba-baba
   double finalMean = windowAvg(windowDat);
   cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << finalMean << endl;
   cerr << "INFO: smoother finished : " << seqid << endl;
@@ -124,6 +153,7 @@ int main(int argc, char** argv) {
   acceptableFormats["xpEHH"] = 1;
   acceptableFormats["iHS"]   = 1;
   acceptableFormats["cqf"]   = 1;
+  acceptableFormats["abba-baba"]   = 1;
 
   opts opt;
   opt.size = 5000;
@@ -185,7 +215,13 @@ int main(int argc, char** argv) {
     return 1;
   }
   
-  if(opt.format == "pFst"){
+  if(opt.format == "abba-baba"){
+    opt.seqid = 0;
+    opt.pos   = 1;
+    opt.value = 2;
+  }
+
+  else if(opt.format == "pFst"){
     opt.seqid = 0;
     opt.pos   = 1;
     opt.value = 2;

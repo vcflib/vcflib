@@ -17,7 +17,7 @@ using namespace std;
 using namespace vcf;
 
 void printVersion(void){
-  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
+  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg & EJ Osborne; email : zev.kronenberg@utah.edu " << endl;
 }
 
 void printHelp(void){
@@ -48,7 +48,7 @@ void printHelp(void){
   cerr << "     3. abba             "    << endl;
   cerr << "     4. baba             "    << endl;
 
-  cerr << "INFO: usage:  abba-baba-zabba --tree 0,1,2,3 --file my.vcf --type PL" << endl;
+  cerr << "INFO: usage:  abba-baba --tree 0,1,2,3 --file my.vcf --type PL" << endl;
   cerr << endl;
   cerr << "INFO: required: t,tree       -- a zero based comma seperated list of target individuals corrisponding to VCF columns" << endl;
   cerr << "INFO: required: f,file       -- a properly formatted VCF.                                                           " << endl;
@@ -68,25 +68,39 @@ double bound(double v){
   return v;
 }
 
+/*random sample heterozygous genotypes could eventually be weighted 
+by genotype likelihoods  and added complexity for linked, phased genos
+random sampling adds noise but will not affect the overall measurement
+of D-statistic */
+int  sample_het(int &rv){
+  rv = rand() % 2 ; // pick from 0/1 het with 50-50 odds
+}
+
+
 int  containsAlt(string gt){
   if(gt == "1/1"){
-    return 1;
-  }
-  if(gt == "0/1"){
     return 1;
   }
   if(gt == "1|1"){
     return 1;
   }
+  // heterozygous cases need to be randomly sampled for diploids
+  int rv = 0 ;
+  if(gt == "0/1"){
+    return rv = sample_het(rv);
+  }
   if(gt == "0|1"){
-    return 1;
+    return rv = sample_het(rv);
   }
   if(gt == "1|0"){
-    return 1;
+    return rv = sample_het(rv);
   }
+  // all else return zero state
   return 0;
 }
 
+
+// flag as unused func'n
 int  containsRef(string gt){
   if(gt == "0/1"){
     return 1;
@@ -118,9 +132,8 @@ void loadIndices(vector<int> & tree, string set){
   for( vector<string>::iterator it = indviduals.begin(); it != indviduals.end(); it++){
     
     int indx = atoi((*it).c_str());
-    cerr << indx << endl;
-
-    tree.push_back(atoi((*it).c_str()));
+    cerr << indx << endl; //print sample index for user check
+    tree.push_back(indx);
   }
 }
 
@@ -246,6 +259,8 @@ int main(int argc, char** argv) {
     
     vector<string> sampleNames = variantFile.sampleNames;
 
+    srand(time(0)); //initialize random number generator
+
     while (variantFile.getNextVariant(var)) {
 
       if(var.alt.size() > 1){
@@ -254,19 +269,18 @@ int main(int argc, char** argv) {
       
       map<string, vector<string> >  tA, tB, tC, tD;
 
-
-      tA = var.samples[sampleNames[tree[1]]];
-      tB = var.samples[sampleNames[tree[2]]];
-      tC = var.samples[sampleNames[tree[3]]];
-      tD = var.samples[sampleNames[tree[4]]];
+      tA = var.samples[sampleNames[tree[0]]];
+      tB = var.samples[sampleNames[tree[1]]];
+      tC = var.samples[sampleNames[tree[2]]];
+      tD = var.samples[sampleNames[tree[3]]];
 
       if(tA["GT"].front() == "./." || tB["GT"].front() == "./." || tC["GT"].front() == "./." || tD["GT"].front() == "./."){
 	continue;
       }
       
-      int A,B,C,D = 0;
+      int A = 0,B = 0,C = 0,D = 0; // set default allelic state to zero
 
-      double abba = 0;
+      double abba = 0; //booleans for abab or baba state.
       double baba = 0;
 
       A = containsAlt(tA["GT"].front());
@@ -294,6 +308,9 @@ int main(int argc, char** argv) {
       }
 
       cout << var.sequenceName << "\t" << var.position << "\t" << abba << "\t" << baba << endl;
+      //cout << var.sequenceName << "\t" << var.position << "\t" << abba << "\t" << baba << "\t" << A << B << C << D << endl;
+      // above is alternate print to check that we are getting observed
+      // ABBA or BABA patterns
     }
     return 0;		    
 }
