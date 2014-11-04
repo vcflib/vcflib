@@ -2282,8 +2282,8 @@ vector<Variant*> Variant::matchingHaplotypes() {
 
         // add the line names in order
         // the order is used when outputting as a string
-        this->header_line_names_ordered.push_back("##fileFormat");
-        this->header_line_names_ordered.push_back("##fileDate");
+        this->header_line_names_ordered.push_back("##fileformat");
+        this->header_line_names_ordered.push_back("##filedate");
         this->header_line_names_ordered.push_back("##source");
         this->header_line_names_ordered.push_back("##reference");
         this->header_line_names_ordered.push_back( "##contig");
