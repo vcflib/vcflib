@@ -160,6 +160,7 @@ libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(L
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
+	rm libvcflib.a
 	cd tabixpp && make clean
 	cd smithwaterman && make clean
 	cd fastahack && make clean
