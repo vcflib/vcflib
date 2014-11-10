@@ -68,6 +68,11 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfgeno2alleles.cpp \
 			  src/vcfindex.cpp \
 			  src/vcf2dag.cpp \
+			  src/vcfsample2info.cpp \
+			  src/vcfqual2info.cpp \
+			  src/vcfinfo2qual.cpp \
+			  src/vcfglbound.cpp \
+			  src/vcfinfosummarize.cpp
 
 #BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
@@ -96,7 +101,7 @@ INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -g -O0
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
@@ -145,6 +150,9 @@ $(SHORTBINS):
 
 $(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
 	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) $(FILEVERCMP) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+
+libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
+	ar rvs libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

@@ -54,32 +54,35 @@ int main(int argc, char** argv) {
     // records from the VCF files, which are provided in order of desired merge
 
     map<int, pair<VariantCallFile*, Variant > > variantFiles;
-    map<string, map<long int, map<int, string> > > linesByPrecedence;
+    map<string, map<long int, map<string, map<int, string> > > > linesByPrecedence;
     int i = optind;
 
-    if (optind < argc - 1) {
+    if (!(optind < argc - 1)) {
+        cerr << "more than one input file must be specified" << endl;
+        exit(1);
+    }
+
 	while (i < argc) {
 	    int index = i++;
 	    VariantCallFile*& variantFile = variantFiles[index].first;
 	    Variant& var = variantFiles[index].second;
 	    string inputFilename = argv[optind++];
 	    variantFile = new VariantCallFile;
-	    variantFile->open(inputFilename);
-	    var.setVariantCallFile(variantFile);
-	    if (!variantFile->is_open()) {
-		cout << "could not open VCF file" << endl;
-		exit(1);
-	    } else {
-		if (variantFile->getNextVariant(var)) {
-		    linesByPrecedence[var.sequenceName][var.position][index] = variantFile->line;
-		}
-	    }
-	}
-    } else {
-        cerr << "no input files specified" << endl;
-        exit(1);
+        try {
+            if (!variantFile->open(inputFilename)) {
+                cerr << "vcfoverlay could not open VCF file " << inputFilename << endl;
+                --index;
+            } else {
+                var.setVariantCallFile(variantFile);
+                while (variantFile->getNextVariant(var)) {
+                    linesByPrecedence[var.sequenceName][var.position][var.vrepr()][index] = variantFile->line;
+                }
+            }
+        } catch (...) {
+            cerr << "vcfoverlay encountered errors when opening " << inputFilename << endl;
+        }
     }
-
+    
     cout << variantFiles.begin()->second.first->header << endl;
 
     while (!linesByPrecedence.empty()) {
@@ -88,21 +91,12 @@ int main(int argc, char** argv) {
         // get the next variant from that file, put it back into the map
         const string& lowestChrom = linesByPrecedence.begin()->first;
         const long int lowestPosition = linesByPrecedence.begin()->second.begin()->first;
-        map<int, string>& lowestLine = linesByPrecedence.begin()->second.begin()->second;
-        cout << lowestLine.begin()->second << endl;
-        
-	for (map<int, string>::iterator g = lowestLine.begin(); g != lowestLine.end(); ++g) {
-	    int index = g->first;
-	    VariantCallFile& variantFile = *variantFiles[index].first;
-	    Variant& var = variantFiles[index].second;
-	    if (!variantFile.getNextVariant(var)) {
-		variantFiles.erase(index);
-	    } else {
-		linesByPrecedence[var.sequenceName][var.position][index] = variantFile.line;
-	    }
-	}
-	
+        map<string, map<int, string> >& pos = linesByPrecedence.begin()->second.begin()->second;
+        for (map<string, map<int, string> >::iterator m = pos.begin(); m != pos.end(); ++m) {
+            cout << m->second.begin()->second << endl;
+        }
         linesByPrecedence[lowestChrom].erase(lowestPosition);
+        
         if (linesByPrecedence[lowestChrom].empty()) {
             linesByPrecedence.erase(lowestChrom);
         }

@@ -12,6 +12,7 @@ void printSummary(char** argv) {
          << "    -f, --info-filter     specifies a filter to apply to the info fields of records," << endl
          << "                          removes alleles which do not pass the filter" << endl
          << "    -g, --genotype-filter specifies a filter to apply to the genotype fields of records" << endl
+         << "    -k, --keep-info       used in conjunction with '-g', keeps variant info, but removes genotype" << endl
          << "    -s, --filter-sites    filter entire records, not just alleles" << endl
          << "    -t, --tag-pass        tag vcf records as positively filtered with this tag, print all records" << endl
          << "    -F, --tag-fail        tag vcf records as negatively filtered with this tag, print all records" << endl
@@ -33,7 +34,7 @@ void printSummary(char** argv) {
          << endl
          << "Any number of filters may be specified.  They are combined via logical AND" << endl
          << "unless --or is specified on the command line.  Obtain logical negation through" << endl
-         << "the use of parentheses, e.g. ! \"( DP = 10 )\"" << endl
+         << "the use of parentheses, e.g. \"! ( DP = 10 )\"" << endl
          << endl
          << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
          << "though it does not appear in the INFO fields." << endl
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
     bool invert = false;
     bool logicalOr = false;
     bool filterSites = false;
+    bool keepInfo = false;
     vector<string> infofilterStrs;
     vector<VariantFilter> infofilters;
     vector<string> genofilterStrs;
@@ -101,13 +103,14 @@ int main(int argc, char** argv) {
                 {"invert", no_argument, 0, 'v'},
                 {"or", no_argument, 0, 'o'},
                 {"region", required_argument, 0, 'r'},
+                {"keep-info", no_argument, 0, 'k'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvAsof:g:t:F:r:a:",
+        c = getopt_long (argc, argv, "hvAsof:g:kt:F:r:a:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -172,6 +175,10 @@ int main(int argc, char** argv) {
         case 'r':
             regions.push_back(optarg);
             break;
+
+        case 'k':
+        	keepInfo = true;
+        	break;
           
         case '?':
             /* getopt_long already printed an error message. */
@@ -183,6 +190,12 @@ int main(int argc, char** argv) {
             abort ();
         }
     }
+
+    if (genofilterStrs.size() == 0 && keepInfo) {
+		cout << "argument '-k' (--keep-info) requires a Genotype filter: ('-g')" << endl
+			<< "i.e.: -g \"GT = 1|1\" -k" << endl;
+		exit(1);
+	}
 
     filterSpec = filterSpec.substr(1); // strip leading " "
 
@@ -261,7 +274,7 @@ int main(int argc, char** argv) {
         while (variantFile.getNextVariant(var)) {
             if (!genofilters.empty()) {
                 for (vector<VariantFilter>::iterator f = genofilters.begin(); f != genofilters.end(); ++f) {
-                    f->removeFilteredGenotypes(var);
+					f->removeFilteredGenotypes(var, keepInfo);
                 }
             }
             if (!infofilters.empty()) {

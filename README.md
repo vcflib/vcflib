@@ -218,6 +218,12 @@ reflect positional change.
     
 ### vcfcombine
 
+    usage: vcfcombine [vcf file] [vcf file] ...
+
+    options:
+        -h --help           This text.
+        -r --region REGION  A region specifier of the form chrN:x-y to bound the merge
+
 Combines VCF files positionally, combining samples when sites and alleles are identical.
 Any number of VCF files may be combined.  The INFO field and other columns are taken from
 one of the files which are combined when records in multiple files match.  Alleles must

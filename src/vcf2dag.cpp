@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
             sequenceName = var.sequenceName;
         } else if (sequenceName != var.sequenceName) {
             // emit last record from previous chrom
-            // these should be refactored....
+            // these should be refactored.....
             Variant refvar(variantFile);
             if (var.position - last_end > 0) {
                 refvar.ref = reference.getSubSequence(sequenceName, last_end - 1, var.position - last_end);

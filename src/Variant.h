@@ -59,6 +59,8 @@ public:
     Tabix* tabixFile;
 
     bool usingTabix;
+    string vcf_header;
+
 
     string header;
     string line; // the current line
@@ -144,6 +146,7 @@ VariantCallFile(void) : usingTabix(false), parseSamples(true), justSetRegion(fal
 
     bool setRegion(string region);
     bool setRegion(string seq, long int start, long int end = 0);
+    vector<string> getHeaderLinesFromFile();
 
 private:
     bool firstRecord;
@@ -157,11 +160,19 @@ private:
 class VariantAllele {
     friend ostream& operator<<(ostream& out, VariantAllele& var);
     friend bool operator<(const VariantAllele& a, const VariantAllele& b);
+    friend VariantAllele operator+(const VariantAllele& a, const VariantAllele& b);
 public:
     string ref;
     string alt;
     string repr;
     long position;
+    /* // TODO
+    bool isSNP(void);
+    bool isMNP(void);
+    bool isInsertion(void);
+    bool isDeletion(void);
+    bool isIndel(void);
+    */
     VariantAllele(string r, string a, long p)
         : ref(r), alt(a), position(p)
     {
@@ -429,7 +440,7 @@ public:
     VariantFilter(string filterspec, VariantFilterType filtertype, map<string, VariantFieldType>& variables);
     bool passes(Variant& var, string& sample); // all alts pass
     bool passes(Variant& var, string& sample, string& allele);
-    void removeFilteredGenotypes(Variant& var);
+    void removeFilteredGenotypes(Variant& var, bool keepInfo);
 
 };
 
@@ -443,6 +454,8 @@ vector<int> decomposePhasedGenotype(const string& genotype);
 map<int, int> decomposeGenotype(const string& genotype);
 
 string genotypeToString(const map<int, int>& genotype);
+
+string phasedGenotypeToString(const vector<int>& genotype);
 
 bool isHet(const map<int, int>& genotype);
 
@@ -484,11 +497,70 @@ bool isEmptyCigarElement(const pair<int, string>& elem);
 // for sorting, generating maps ordered by chromosome name
 class ChromNameCompare {
 public:
-    bool operator()(const string& a, const string& b) {
+    bool operator()(const string& a, const string& b) const {
         return (filevercmp(a.c_str(), b.c_str()) < 0);
     }
 };
 
+class VCFHeader
+{
+public:
+    VCFHeader();
+    ~VCFHeader() {}
+
+    /*
+     * Adds header_column to this->header_columns if
+     * it doesn't already exits.
+     */
+    void addHeaderColumn(const string& header_column);
+
+    /*
+     * Adds meta_line to either header_lines or header_lists.
+     *
+     * We parse out the ##_type_ from meta_line
+     * - If the meta_line ##_type_ is a key in header_lines then meta_line is added to header_lines
+     * - If the meta_line ##_type_ is a key in header_lists then meta_line is added to header_lists[##_type_] vector<string>
+     *    Unless that header_lists[##_type_] vector already contains the ID that is in meta_line, in that case it is not added
+     */
+    void addMetaInformationLine(const string& meta_line);
+
+    /*
+     * Converts header_lines, header_lists and header_columns to a proper VCF header
+     */
+    string getHeaderString();
+
+private:
+    VCFHeader(const VCFHeader& vcfHeader); // Do not implement the copy constructor, there is no reason to add this functionality
+    VCFHeader& operator=(const VCFHeader& vcfHeader); // Do not implement operator=, there is no reason to add this functionality
+
+    /*
+     * This is a helper function that determines if the ID substring contained in meta_line
+     * exists as a ID substring within the vector<string> meta_lines. Returns true if
+     * the ID exists within the vector and false otherwise.
+     */
+    bool metaInfoIdExistsInVector(const string& meta_line, vector<string>& meta_lines);
+
+    /*
+     * header_line_names_ordered contains all the header lines that
+     * are available and in the expected order for a valid VCF file
+     */
+    vector<string> header_line_names_ordered;
+    /*
+     * header_list_names_ordered contains all the header lists that
+     * are available and in the expected order for a valid VCF file
+     */
+    vector<string> header_list_names_ordered;
+
+    /*
+     * header_columns is set by the constructor to contain the 8 manditory VCF fields.
+     * Also, unique header_columns for each of the vcf files are added as well.
+     * Duplicates are not allowed, to prevent duplicates use addHeaderColumn when adding header columns
+     */
+    vector<string> header_columns;
+    map<string, string> header_lines; // contains all the ##_types_ as keys, the value is either empty or a VCF file has set it
+    map< string, vector<string> > header_lists; // contains all the ##_types_ as keys, the value is a vector of ##_type_ (since there can be duplicate #INFO for example, duplicate ids are not allowed)
+
+};
 
 } // end namespace VCF
 
