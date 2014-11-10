@@ -88,7 +88,7 @@ REPEATS = smithwaterman/Repeats.o
 
 INDELALLELE = smithwaterman/IndelAllele.o
 
-DISORDER = smithwaterman/disorder.c
+DISORDER = smithwaterman/disorder.o
 
 LEFTALIGN = smithwaterman/LeftAlign.o
 
@@ -96,12 +96,14 @@ FSOM = fsom/fsom.o
 
 FILEVERCMP = filevercmp/filevercmp.o
 
-INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
+INCLUDES = -I. -L. -Ltabixpp/
+LDFLAGS = -lvcflib -ltabix -lz -lm
+
 
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -g -O0
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
@@ -148,11 +150,12 @@ $(FILEVERCMP):
 $(SHORTBINS):
 	$(MAKE) bin/$@
 
-$(BINS): $(BIN_SOURCES) $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
-	$(CXX) $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FASTAHACK) $(FSOM) $(FILEVERCMP) tabixpp/tabix.o tabixpp/bgzf.o src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
+	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
-libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
-	ar rvs libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP)
+libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FSOM) $(FILEVERCMP) $(TABIX)
+	ar rvs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FSOM) $(FILEVERCMP) $(TABIX) tabixpp/bgzf.o tabixpp/index.o tabixpp/knetfile.o tabixpp/kstring.o
+
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
