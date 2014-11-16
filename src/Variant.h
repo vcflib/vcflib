@@ -62,6 +62,7 @@ public:
     string vcf_header;
 
 
+    string filename; // the name used to open the file, if opened with a name
     string header;
     string line; // the current line
     string fileformat;
@@ -79,42 +80,47 @@ public:
 
     void updateSamples(vector<string>& newSampleNames);
     string headerWithSampleNames(vector<string>& newSamples); // non-destructive, for output
-    void addHeaderLine(string line);
-    void removeInfoHeaderLine(string line);
-    void removeGenoHeaderLine(string line);
+    void addHeaderLine(string ln);
+    void removeHeaderLines(string pfx);
+    void removeInfoHeaderLine(string tag);
+    void removeGenoHeaderLine(string tag);
     vector<string> infoIds(void);
     vector<string> formatIds(void);
 
-    bool open(string& filename) {
-        vector<string> filenameParts = split(filename, ".");
-        if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
-            return openTabix(filename);
+    bool open(string& fn) {
+        vector<string> fnParts = split(fn, ".");
+        if (fnParts.back() == "gz" || fnParts.back() == "bgz") {
+            return openTabix(fn);
         } else {
-            return openFile(filename);
+            return openFile(fn);
         }
     }
 
-    bool openFile(string& filename) {
+    bool openFile(string& fn) {
+        filename = fn;
         file = &_file;
-        _file.open(filename.c_str(), ifstream::in);
+        _file.open(fn.c_str(), ifstream::in);
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
-    bool openTabix(string& filename) {
+    bool openTabix(string& fn) {
+        filename = fn;
         usingTabix = true;
-        tabixFile = new Tabix(filename);
+        tabixFile = new Tabix(fn);
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
     bool open(istream& stream) {
+        filename = "*stream*";
         file = &stream;
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
     bool open(ifstream& stream) {
+        filename = "*stream*";
         file = &stream;
         parsedHeader = parseHeader();
         return parsedHeader;
@@ -222,10 +228,10 @@ public:
     // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec
     string filter;
     double quality;
-    VariantFieldType infoType(string& key);
+    VariantFieldType infoType(const string& key);
     map<string, vector<string> > info;  // vector<string> allows for lists by Genotypes or Alternates
     map<string, bool> infoFlags;
-    VariantFieldType formatType(string& key);
+    VariantFieldType formatType(const string& key) const;
     vector<string> format;
     map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
     vector<string> sampleNames;
@@ -252,25 +258,25 @@ public:
     void setVariantCallFile(VariantCallFile* v);
 
     void parse(string& line, bool parseSamples = true);
-    void addFilter(string& tag);
-    bool getValueBool(string& key, string& sample, int index = INDEX_NONE);
-    double getValueFloat(string& key, string& sample, int index = INDEX_NONE);
-    string getValueString(string& key, string& sample, int index = INDEX_NONE);
-    bool getSampleValueBool(string& key, string& sample, int index = INDEX_NONE);
-    double getSampleValueFloat(string& key, string& sample, int index = INDEX_NONE);
-    string getSampleValueString(string& key, string& sample, int index = INDEX_NONE);
-    bool getInfoValueBool(string& key, int index = INDEX_NONE);
-    double getInfoValueFloat(string& key, int index = INDEX_NONE);
-    string getInfoValueString(string& key, int index = INDEX_NONE);
-    void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
-    void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
-    int getAltAlleleIndex(string& allele);
+    void addFilter(const string& tag);
+    bool getValueBool(const string& key, const string& sample, int index = INDEX_NONE) const;
+    double getValueFloat(const string& key, const string& sample, int index = INDEX_NONE) const;
+    string getValueString(const string& key, const string& sample, int index = INDEX_NONE) const;
+    bool getSampleValueBool(const string& key, const string& sample, int index = INDEX_NONE) const;
+    double getSampleValueFloat(const string& key, const string& sample, int index = INDEX_NONE) const;
+    string getSampleValueString(const string& key, const string& sample, int index = INDEX_NONE) const;
+    bool getInfoValueBool(const string& key, int index = INDEX_NONE) const;
+    double getInfoValueFloat(const string& key, int index = INDEX_NONE) const;
+    string getInfoValueString(const string& key, int index = INDEX_NONE) const;
+    void printAlt(ostream& out) const;      // print a comma-sep list of alternate alleles to an ostream
+    void printAlleles(ostream& out) const;  // print a comma-sep list of *all* alleles to an ostream
+    int getAltAlleleIndex(const string& allele) const;
     void updateAlleleIndexes(void);
-    void addFormatField(string& key);
+    void addFormatField(const string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
-    int getNumSamples(void);
-    int getNumValidGenotypes(void);
+    int getNumSamples(void) const;
+    int getNumValidGenotypes(void) const;
     string getGenotype(string& sample);
     bool isPhased(void);
     // TODO

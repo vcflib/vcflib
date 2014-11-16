@@ -3,6 +3,7 @@
 .*swp
 .nfs*
 *.o
+smithwaterman
 BedReader.cpp
 Fasta.cpp
 Fasta.h
@@ -105,3 +106,7 @@ vcfevenregions
 vcfgenosummarize
 vcfgenosamplenames
 vcf2fasta
+vcfcombine
+vcfgeno2alleles
+vcfindex
+vcfleftalign
