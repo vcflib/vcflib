@@ -105,3 +105,14 @@ vcfevenregions
 vcfgenosummarize
 vcfgenosamplenames
 vcf2fasta
+bin/vcf2dag
+bin/vcfcombine
+bin/vcfgeno2alleles
+bin/vcfglbound
+bin/vcfindex
+bin/vcfinfo2qual
+bin/vcfinfosummarize
+bin/vcfleftalign
+bin/vcfqual2info
+bin/vcfsample2info
+libvcflib.a
