@@ -295,7 +295,7 @@ given window size to the left, right, and center  of the record.
 
     Any number of filters may be specified.  They are combined via logical AND
     unless --or is specified on the command line.  Obtain logical negation through
-    the use of parentheses, e.g. ! "( DP = 10 )"
+    the use of parentheses, e.g. "! ( DP = 10 )"
 
     For convenience, you can specify "QUAL" to refer to the quality of the site, even
     though it does not appear in the INFO fields.
