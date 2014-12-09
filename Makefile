@@ -157,6 +157,9 @@ libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(L
 	ar rvs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FSOM) $(FILEVERCMP) $(TABIX) tabixpp/bgzf.o tabixpp/index.o tabixpp/knetfile.o tabixpp/kstring.o
 
 
+test: $(BINS)
+	@prove -Itests/lib -w tests/*.t
+
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
@@ -165,4 +168,4 @@ clean:
 	cd smithwaterman && make clean
 	cd fastahack && make clean
 
-.PHONY: clean all
+.PHONY: clean all test

@@ -1259,7 +1259,7 @@ bool VariantCallFile::parseHeader(string& hs) {
 
 bool VariantCallFile::getNextVariant(Variant& var) {
         if (firstRecord && !justSetRegion) {
-            if (!line.empty()) {
+            if (!line.empty() && line.substr(0,1) != "#") {
                 var.parse(line, parseSamples);
                 firstRecord = false;
                 _done = false;
@@ -1269,7 +1269,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
             }
         }
         if (usingTabix) {
-            if (justSetRegion && !line.empty()) {
+            if (justSetRegion && !line.empty() && line.substr(0,1) != "#") {
                 if (firstRecord) {
                     firstRecord = false;
                 }
