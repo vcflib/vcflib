@@ -156,7 +156,7 @@ $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(D
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX)
-	ar rvs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FSOM) $(FILEVERCMP) $(TABIX) tabixpp/bgzf.o tabixpp/index.o tabixpp/knetfile.o tabixpp/kstring.o
+	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX) tabixpp/bgzf.o tabixpp/index.o tabixpp/knetfile.o tabixpp/kstring.o
 
 
 test: $(BINS)
