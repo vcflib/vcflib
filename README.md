@@ -1,5 +1,6 @@
 # vcflib
 ### a C++ library for parsing and manipulating VCF files.
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### author: Erik Garrison <erik.garrison@bc.edu>
 

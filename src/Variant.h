@@ -557,8 +557,27 @@ private:
      * Duplicates are not allowed, to prevent duplicates use addHeaderColumn when adding header columns
      */
     vector<string> header_columns;
-    map<string, string> header_lines; // contains all the ##_types_ as keys, the value is either empty or a VCF file has set it
-    map< string, vector<string> > header_lists; // contains all the ##_types_ as keys, the value is a vector of ##_type_ (since there can be duplicate #INFO for example, duplicate ids are not allowed)
+
+    /* 
+     * the maps we're going to be using will be case-insensitive
+     * so that "fileFormat" and "fileformat" hash to the same item.
+     */
+    struct stringcasecmp : binary_function<string, string, bool> {
+        struct charcasecmp : public std::binary_function<unsigned char, unsigned char, bool> {
+            bool operator() (const unsigned char& c1, const unsigned char& c2) const {
+                return tolower (c1) < tolower (c2); 
+            }
+        };
+        bool operator() (const std::string & s1, const std::string & s2) const {
+            return std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(), charcasecmp());
+        }
+    };
+
+    // contains all the ##_types_ as keys, the value is either empty or a VCF file has set it
+    map<string, string, stringcasecmp> header_lines; 
+
+    // contains all the ##_types_ as keys, the value is a vector of ##_type_ (since there can be duplicate #INFO for example, duplicate ids are not allowed)
+    map<string, vector<string>, stringcasecmp> header_lists; 
 
 };
 
