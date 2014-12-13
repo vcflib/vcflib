@@ -105,6 +105,8 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
       double nrefB = 0;
       double naltB = 0;
 
+      // hashing haplotypes into maps for both chr1 and chr2 target[][1 & 2]
+
       for(int i = 0; i < target.size(); i++){
 	targetH[ haplotypes[target[i]][0].substr(start, (end - start)) ]++;
 	targetH[ haplotypes[target[i]][1].substr(start, (end - start)) ]++;
@@ -113,7 +115,10 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 	backgroundH[ haplotypes[background[i]][0].substr(start, (end - start)) ]++;
 	backgroundH[ haplotypes[background[i]][0].substr(start, (end - start)) ]++;
       }
+
+      // interating over the target populations haplotypes
       for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
+	// grabbing the core SNP (*th).first.substr((end-start)/2, 1) == "1"
 	if( (*th).first.substr((end-start)/2, 1) == "1"){     
 	   sumaT += r8_choose(th->second, 2);  
 	   naltT += th->second;
@@ -123,7 +128,10 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 	  nrefT += th->second;
 	}
       }
+
+      // integrating over the background populations haplotypes
       for( map<string, int>::iterator bh = backgroundH.begin(); bh != backgroundH.end(); bh++){
+	// grabbing the core SNP (*bh).first.substr((end-start)/2, 1) == "1"
         if( (*bh).first.substr((end - start)/2 , 1) == "1"){
 	  sumaB += r8_choose(bh->second, 2);
 	  naltB += bh->second;
@@ -414,13 +422,13 @@ int main(int argc, char** argv) {
       populationTotal->loadPop(total,           var.sequenceName, var.position);
       
       
-      if(populationTotal->af > 0.95 || populationTotal->af < 0.05){
-	
-	delete populationTarget;
-	delete populationBackground;
-	delete populationTotal;
-	continue;
-      }
+//      if(populationTotal->af > 0.99 || populationTotal->af < 0.01){
+//	
+//	delete populationTarget;
+//	delete populationBackground;
+//	delete populationTotal;
+//	continue;
+//      }
 
       afs.push_back(populationTotal->af);
       positions.push_back(var.position);

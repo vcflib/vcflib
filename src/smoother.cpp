@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
   acceptableFormats["xpEHH"] = 1;
   acceptableFormats["iHS"]   = 1;
   acceptableFormats["cqf"]   = 1;
+  acceptableFormats["deltaAf"]   = 1;
 
   opts opt;
   opt.size = 5000;
@@ -184,8 +185,13 @@ int main(int argc, char** argv) {
     printHelp();
     return 1;
   }
-  
-  if(opt.format == "pFst"){
+
+  if(opt.format == "deltaAf"){
+    opt.seqid = 0;
+    opt.pos   = 1;
+    opt.value = 4;
+  }
+  else if(opt.format == "pFst"){
     opt.seqid = 0;
     opt.pos   = 1;
     opt.value = 2;
