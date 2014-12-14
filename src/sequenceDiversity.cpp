@@ -42,8 +42,9 @@ void printHelp(void){
   cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
-  cerr << "INFO: optional; r,region     -- argument: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
-  cerr << "INFO: optional; w,window     -- argument: the number of SNPs per window; default is 20                                               " << endl; 
+  cerr << "INFO: optional: a,af         -- sites less than af  are filtered out; default is 0                                          " << endl;      
+  cerr << "INFO: optional: r,region     -- argument: a tabix compliant region : \"seqid:0-100\" or \"seqid\"                                    " << endl; 
+  cerr << "INFO: optional: w,window     -- argument: the number of SNPs per window; default is 20                                               " << endl; 
   cerr << endl;
  
   printVersion();
@@ -77,6 +78,8 @@ double pi(map<string, int> & hapCounts, int nHaps, double * pi, double * eHH){
   for(map<string, int>::iterator firstSeq = hapCounts.begin(); firstSeq != hapCounts.end(); firstSeq++){
     
     nchooseSum += r8_choose(firstSeq->second, 2);
+
+    //    cout << firstSeq->first << " " << firstSeq->second << endl;
 
     for(map<string, int>::iterator secondSeq = hapCounts.begin(); secondSeq != hapCounts.end(); secondSeq++){
       if(firstSeq->first == secondSeq->first){
@@ -193,6 +196,9 @@ int main(int argc, char** argv) {
 
   int windowSize = 20;
 
+  // allele frequency to filter out
+  double af_filt = 0;
+
   string type = "NA";
 
     const struct option longopts[] = 
@@ -205,6 +211,7 @@ int main(int argc, char** argv) {
 	{"type"        , 1, 0, 'y'},
 	{"window"      , 1, 0, 'w'},
 	{"external"    , 1, 0, 'e'},
+	{"af"          , 1, 0, 'a'},
 	{"derived"     , 1, 0, 'd'},
 	{0,0,0,0}
       };
@@ -229,6 +236,12 @@ int main(int argc, char** argv) {
 	  case 'y':
 	    {
 	      type = optarg;
+	      break;
+	    }
+	  case 'a':
+	    {
+	      af_filt = atof(optarg);
+	      cerr << "INFO: filtering out allele frequencies less than: " << af_filt << endl;
 	      break;
 	    }
 	  case 't':
@@ -416,6 +429,14 @@ int main(int argc, char** argv) {
       populationBackground->loadPop(background, var.sequenceName, var.position);
 	
       populationTotal->loadPop(total,           var.sequenceName, var.position);
+
+      if(populationTotal->af < af_filt){
+	
+	delete populationTarget;
+	delete populationBackground;
+	delete populationTotal;
+	continue;
+      }
       
       targetAFS.push_back(populationTarget->af);
       backgroundAFS.push_back(populationBackground->af);
