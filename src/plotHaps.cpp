@@ -357,9 +357,6 @@ int main(int argc, char** argv) {
       
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
-      if(populationTarget->af == 1 || populationTarget->af == 0){
-	continue;
-      }
       positions.push_back(var.position);
       afs.push_back(populationTarget->af);
       loadPhased(haplotypes, populationTarget, populationTarget->gts.size()); 
