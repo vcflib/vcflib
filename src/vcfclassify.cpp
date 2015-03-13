@@ -5,7 +5,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 bool isTransition(string& ref, string& alt) {
     if (((ref == "A" && alt == "G") || (ref == "G" && alt == "A")) ||

@@ -1,7 +1,7 @@
 #include "Variant.h"
 #include <utility>
 
-namespace vcf {
+namespace vcflib {
 
 void Variant::parse(string& line, bool parseSamples) {
 

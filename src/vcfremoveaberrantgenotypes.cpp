@@ -5,7 +5,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 void stripAberrant(Variant& var) {
     map<string, map<string, vector<string> > >::iterator s = var.samples.begin();

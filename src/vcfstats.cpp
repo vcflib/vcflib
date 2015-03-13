@@ -4,7 +4,7 @@
 #include <getopt.h>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 bool isTransition(const string& ref, const string& alt) {
     if (((ref == "A" && alt == "G") || (ref == "G" && alt == "A")) ||

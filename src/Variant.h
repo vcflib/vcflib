@@ -27,7 +27,7 @@ extern "C" {
 
 using namespace std;
 
-namespace vcf {
+namespace vcflib {
 
 class Variant;
 

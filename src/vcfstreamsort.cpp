@@ -4,7 +4,7 @@
 #include "convert.h"
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 bool listContains(list<string>& l, string& v) {
     for (list<string>::iterator i = l.begin(); i != l.end(); ++i) {

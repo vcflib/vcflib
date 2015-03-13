@@ -5,7 +5,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 void annotateWithBlankGenotypes(Variant& var, string& annotationTag) {
 

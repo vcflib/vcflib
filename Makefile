@@ -81,25 +81,17 @@ BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
 SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
 TABIX = tabixpp/tabix.o
-
 FASTAHACK = fastahack/Fasta.o
-
 SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o 
-
 REPEATS = smithwaterman/Repeats.o
-
 INDELALLELE = smithwaterman/IndelAllele.o
-
 DISORDER = smithwaterman/disorder.o
-
 LEFTALIGN = smithwaterman/LeftAlign.o
-
 FSOM = fsom/fsom.o
-
 FILEVERCMP = filevercmp/filevercmp.o
 
-INCLUDES = -I. -L. -Ltabixpp/
-LDFLAGS = -lvcflib -ltabix -lz -lm
+INCLUDES = -I. -Itabixpp/htslib/ -L. -Ltabixpp/ -Ltabixpp/htslib/
+LDFLAGS = -lvcflib -ltabix -lhts -lpthread -lz -lm
 
 
 all: $(OBJECTS) $(BINS)
@@ -156,7 +148,7 @@ $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(D
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX)
-	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX) tabixpp/bgzf.o tabixpp/index.o tabixpp/knetfile.o tabixpp/kstring.o
+	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
 
 
 test: $(BINS)

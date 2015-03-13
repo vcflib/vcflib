@@ -10,7 +10,7 @@
 #include <cmath>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 double mean(const vector<double>& data) {
     double total = 0;

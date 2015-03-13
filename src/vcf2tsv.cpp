@@ -2,7 +2,7 @@
 #include <getopt.h>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [-n null_string] [-g]" << " [vcf file]" << endl

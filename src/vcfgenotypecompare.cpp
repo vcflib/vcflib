@@ -5,7 +5,7 @@
 #include <sstream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 // TODO fix this for multi-allelic!!!!
 string genotypeSpec(map<int, int>& genotype) {

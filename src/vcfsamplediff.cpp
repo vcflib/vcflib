@@ -6,7 +6,7 @@
 #include <getopt.h>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 bool samplesDiffer(vector<string>& samples, Variant& var) {
 

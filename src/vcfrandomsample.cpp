@@ -7,7 +7,7 @@
 #include "convert.h"
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 
 void printSummary(char** argv) {

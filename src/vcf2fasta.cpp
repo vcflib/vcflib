@@ -9,7 +9,7 @@
 #include <fstream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 #define ALLELE_NULL -1
 

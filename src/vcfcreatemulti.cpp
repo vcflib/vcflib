@@ -5,7 +5,7 @@
 #include <getopt.h>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 
 double convertStrDbl(const string& s) {

@@ -5,7 +5,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 int countAlts(Variant& var, int alleleIndex) {
     int alts = 0;

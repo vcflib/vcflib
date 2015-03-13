@@ -4,7 +4,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 template<class T>
 vector<T> intersection(vector<T>& a, vector<T>& b) {

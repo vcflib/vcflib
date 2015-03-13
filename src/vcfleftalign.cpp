@@ -9,7 +9,7 @@
 #include <cmath>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 
 // Attempts to left-realign all the indels represented by the alignment cigar.

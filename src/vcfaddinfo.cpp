@@ -5,7 +5,7 @@
 #include <set>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 // adds non-overlapping info fields from varB to varA
 void addInfo(Variant& varA, Variant& varB) {

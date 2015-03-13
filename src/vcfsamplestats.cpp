@@ -4,7 +4,7 @@
 #include <iostream>
 #include <getopt.h>
 
-using namespace vcf;
+using namespace vcflib;
 
 
 void printSummary(char** argv) {

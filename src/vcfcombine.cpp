@@ -4,7 +4,7 @@
 
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [vcf file] [vcf file] ..." << endl
