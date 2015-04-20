@@ -148,7 +148,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
       ehhsat += ehhAT;
       ehhsab += ehhAB;
     } 
-    if(isnan(ehhsat) || isnan(ehhsab)){
+    if(std::isnan(ehhsat) || std::isnan(ehhsab)){
       continue;
     }
     cout << seqid << "\t" << pos[snp] << "\t" << afs[snp] << "\t" << ehhsat << "\t" << ehhsab << "\t" << log(ehhsat/ehhsab) << endl;

@@ -222,14 +222,14 @@ double FullProb(pop & target, pop & back, vector<double>& p)
   double afpriorT = log( r8_normal_pdf (target.af, 0.05, p[0]));
   double afpriorB = log( r8_normal_pdf (back.af,   0.05, p[1]));
   
-  if(isinf(afprior) || isnan(afprior)){
+  if(std::isinf(afprior) || std::isnan(afprior)){
     return -100000;
   }
 
   double ptaf = log( r8_beta_pdf(alpha, beta, p[0]) );
   double pbaf = log( r8_beta_pdf(alpha, beta, p[1]) );
 
-  if( isinf(ptaf) || isnan(ptaf) || isinf(pbaf) || isnan(pbaf) ){
+  if( std::isinf(ptaf) || std::isnan(ptaf) || std::isinf(pbaf) || std::isnan(pbaf) ){
     return -100000;
   }
 
