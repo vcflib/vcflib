@@ -159,7 +159,13 @@ int parse = parseOpts(argc, argv);
    while(getline(gpat, line)){
      vector<string> region = split(line, "\t");
      // will change for other output
-     data.push_back(atof(region[4].c_str()));
+     double fst = atof(region[4].c_str());
+
+     if(fst < 0){
+       fst = 0;
+     }
+
+     data.push_back(fst);
    }
  }
  else{
@@ -180,6 +186,11 @@ int parse = parseOpts(argc, argv);
      vector<string> region = split(line, "\t");
 
      double value = atof(region[4].c_str());
+     
+     if(value < 0){
+       value = 0;
+     }
+     
 
      double suc   = 0;
      double per   = 0;
@@ -191,7 +202,7 @@ int parse = parseOpts(argc, argv);
        
        int r = rand() % datas;
 
-       if(value > data[r]){
+       if(value < data[r]){
 	 suc += 1;
        }
      }
