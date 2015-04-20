@@ -73,28 +73,33 @@ void calc(string haplotypes[][2], int nhaps, vector<double> afs, vector<long int
 
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
+    int breakflag = 1;
+    int count     = 0;
+
     double ehhA = 1;
     double ehhR = 1;
 
-    double iHSA = 1;
-    double iHSR = 1;
+    double iHSA = 0;
+    double iHSR = 0;
 
     int start = snp;
     int end   = snp;
     int core  = snp; 
 
-    while( ehhA > 0.05 && ehhR > 0.05 ) {
+    while( breakflag ) {
      
-      start -= 1;
-      end   += 1;
-      
+      if(count > 0){
+	start -= 1;
+	end   += 1;
+      }
       if(start == -1){
 	break;
       }
       if(end == haplotypes[0][0].length() - 1){
 	break;
       }
-      
+      count += 1;
+
       map<string , int> targetH;
 
       double sumrT = 0;
@@ -106,26 +111,38 @@ void calc(string haplotypes[][2], int nhaps, vector<double> afs, vector<long int
 	targetH[ haplotypes[i][0].substr(start, (end - start)) ]++;
 	targetH[ haplotypes[i][1].substr(start, (end - start)) ]++;
       }     
-      for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
+      for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){        
 	if( (*th).first.substr((end-start)/2, 1) == "1"){     
-	   sumaT += r8_choose(th->second, 2);  
-	   naltT += th->second;
+	  sumaT += r8_choose(th->second, 2);  
+	  naltT += th->second;
 	}
 	else{
 	  sumrT += r8_choose(th->second, 2);  
 	  nrefT += th->second;
 	}
       }
+      cerr << pos[snp] << " " << naltT  << " " << nrefT << endl; 
+      
+      double ehhAC = sumaT / (r8_choose(naltT, 2));
+      double ehhRC = sumrT / (r8_choose(nrefT, 2));
 
-      ehhA = sumaT / (r8_choose(naltT, 2));
-      ehhR = sumrT / (r8_choose(nrefT, 2));
+      if(count == 1){
+	ehhA = ehhAC;
+	ehhR = ehhRC;
+	continue;
+      }
 
-      iHSA += ehhA;
-      iHSR += ehhR;
+      iHSA += (ehhA + ehhAC) / 2;
+      iHSR += (ehhR + ehhRC) / 2;
+
+      ehhA = ehhAC;
+      ehhR = ehhRC;
+
+      if(ehhA < 0.05 && ehhR < 0.05){
+	breakflag = 0;
+      }
     } 
-    if(isnan(iHSA) || isnan(iHSR)){
-      continue;
-    }
+
     cout << seqid << "\t" << pos[snp] << "\t" << afs[snp] << "\t" << iHSA << "\t" << iHSR << "\t" << log(iHSA/iHSR) << endl;
   }   
 }
@@ -380,7 +397,7 @@ int main(int argc, char** argv) {
 
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
-      if(populationTarget->af == 1 || populationTarget->af == 0){
+      if(populationTarget->af > 0.95 || populationTarget->af < 0.05){
 	delete populationTarget;
 	continue;
       }
