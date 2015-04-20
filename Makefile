@@ -32,7 +32,6 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/plotHaps.cpp \
 			  src/abba-baba.cpp \
 			  src/permuteGPAT++.cpp \
-			  src/wham-burden.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \
