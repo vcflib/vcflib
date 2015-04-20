@@ -19,6 +19,7 @@ OBJECTS= $(SOURCES:.cpp=.o)
 
 BIN_SOURCES = src/vcfecho.cpp \
 			  src/dumpContigsFromHeader.cpp \
+			  src/iHS.cpp \
 			  src/bFst.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
@@ -26,11 +27,12 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/sequenceDiversity.cpp \
 			  src/pFst.cpp \
 			  src/xpEHH.cpp \
-			  src/iHS.cpp \
 			  src/smoother.cpp \
 			  src/LD.cpp \
 			  src/plotHaps.cpp \
 			  src/abba-baba.cpp \
+			  src/permuteGPAT++.cpp \
+			  src/wham-burden.cpp \
 #			  src/vcfaltcount.cpp \
 #			  src/vcfhetcount.cpp \
 #			  src/vcfhethomratio.cpp \
@@ -120,7 +122,7 @@ INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
 all: $(OBJECTS) $(BINS)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
