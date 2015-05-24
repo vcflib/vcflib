@@ -62,6 +62,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfgenosummarize.cpp \
 			  src/vcfgenosamplenames.cpp \
 			  src/vcfgeno2haplo.cpp \
+			  src/vcfgenoexpandnull.cpp \
 			  src/vcfleftalign.cpp \
 			  src/vcfcombine.cpp \
 			  src/vcfgeno2alleles.cpp \

@@ -76,19 +76,14 @@ void Variant::parse(string& line, bool parseSamples) {
             }
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
-            if (samplefields.size() != format.size()) {
-                // ignore this case... malformed (or 'null') sample specs are caught above
-                // /*
-                // cerr << "inconsistent number of fields for sample " << name << endl
-                //      << "format is " << join(format, ":") << endl
-                //      << "sample is " << *sample << endl;
-                // exit(1);
-                // *
-            }
-            else {
-                for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-                    samples[name][*f] = split(*i, ','); ++i;
+            for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
+                // trailing fields may be dropped according to vcf4.2 spec, so allow that
+                if( i != samplefields.end() ){
+                    samples[name][*f] = split(*i, ',');
+                }else{
+                    samples[name][*f].push_back(".");
                 }
+                ++i;
             }
         }
         if (sampleName != sampleNames.end()) {
