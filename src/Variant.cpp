@@ -80,10 +80,10 @@ void Variant::parse(string& line, bool parseSamples) {
                 // trailing fields may be dropped according to vcf4.2 spec, so allow that
                 if( i != samplefields.end() ){
                     samples[name][*f] = split(*i, ',');
+                    ++i;
                 }else{
                     samples[name][*f].push_back(".");
                 }
-                ++i;
             }
         }
         if (sampleName != sampleNames.end()) {
