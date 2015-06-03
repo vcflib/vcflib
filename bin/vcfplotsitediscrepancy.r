@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --vanilla --slave
+#!/usr/bin/env Rscript --vanilla --slave
 
 # get the input VCF tabular format, assert that sites must have AC > 0
 vcf <- subset(read.table(pipe('cat /dev/stdin'), header=T), AC > 0)
