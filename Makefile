@@ -91,7 +91,7 @@ FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
 INCLUDES = -I. -Itabixpp/htslib/ -L. -Ltabixpp/ -Ltabixpp/htslib/
-LDFLAGS = -lvcflib -ltabix -lhts -lpthread -lz -lm
+LDFLAGS = -lvcflib -lhts -lpthread -lz -lm
 
 
 all: $(OBJECTS) $(BINS)
