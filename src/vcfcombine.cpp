@@ -98,6 +98,10 @@ int main(int argc, char** argv) {
         string inputFilename = argv[i];
         vcf = new VariantCallFile;
         vcf->open(inputFilename);
+        if (!vcf->is_open()) {
+            cerr << "could not open \"" << inputFilename << "\" exiting" << endl;
+            return 1;
+        }
         if (!region.empty()) {
             if (!vcf->setRegion(region)) {
                 cerr << "could not set region on " << inputFilename << endl;

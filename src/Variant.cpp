@@ -1175,6 +1175,7 @@ bool VariantCallFile::parseHeader(void) {
 
 bool VariantCallFile::parseHeader(string& hs) {
 
+    if (hs.empty()) return false;
     if (hs.substr(hs.size() - 1, 1) == "\n") {
 	hs.erase(hs.size() - 1, 1); // remove trailing newline
     }
