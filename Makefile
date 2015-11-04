@@ -6,6 +6,12 @@ SOURCES = src/Variant.cpp \
 		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
+BIN_DIR:=bin
+LIB_DIR:=lib
+SRC_DIR=src
+INC_DIR:=include
+OBJ_DIR:=obj
+
 # TODO
 #vcfstats.cpp
 
@@ -147,19 +153,30 @@ $(SHORTBINS):
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP)
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
-libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX)
+libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
+	cp libvcflib.a $(LIB_DIR)
 
 
 test: $(BINS)
 	@prove -Itests/lib -w tests/*.t
 
+pre:
+	mkdir -p $(BIN_DIR)
+	mkdir -p $(LIB_DIR)
+	mkdir -p $(INC_DIR)
+	mkdir -p $(OBJ_DIR)
+
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
 	rm -f libvcflib.a
+	rm -rf $(BIN_DIR)
+	rm -rf $(LIB_DIR)
+	rm -rf $(INC_DIR)
+	rm -rf $(OBJ_DIR)
 	cd tabixpp && make clean
 	cd smithwaterman && make clean
 	cd fastahack && make clean
 
-.PHONY: clean all test
+.PHONY: clean all test pre
