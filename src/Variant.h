@@ -15,14 +15,14 @@
 #include <set>
 #include "split.h"
 #include "join.h"
-#include "tabixpp/tabix.hpp"
-#include "smithwaterman/SmithWatermanGotoh.h"
-#include "smithwaterman/disorder.h"
+#include "tabix.hpp"
+#include "SmithWatermanGotoh.h"
+#include "disorder.h"
 #include "ssw_cpp.h"
 #include "convert.h"
-#include "multichoose/multichoose.h"
+#include "multichoose.h"
 extern "C" {
-    #include "filevercmp/filevercmp.h"
+    #include "filevercmp.h"
 }
 
 using namespace std;

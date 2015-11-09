@@ -6,6 +6,7 @@ SOURCES = src/Variant.cpp \
 		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
+VCF_LIB_LOCAL:=$(shell pwd)
 BIN_DIR:=bin
 LIB_DIR:=lib
 SRC_DIR=src
@@ -96,8 +97,8 @@ LEFTALIGN = smithwaterman/LeftAlign.o
 FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
-INCLUDES = -I. -Itabixpp/htslib/ -L. -Ltabixpp/ -Ltabixpp/htslib/
-LDFLAGS = -lvcflib -lhts -lpthread -lz -lm
+INCLUDES = -Itabixpp/htslib -I$(INC_DIR) -L. -Ltabixpp/htslib
+LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm
 
 
 all: $(OBJECTS) $(BINS)
@@ -121,14 +122,20 @@ profiling:
 gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
-$(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX)
-	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX) multichoose pre $(SMITHWATERMAN) $(FILEVERCMP)
+	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && cp src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
-$(TABIX):
-	cd tabixpp && $(MAKE)
+multichoose: pre
+	cd multichoose && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
-$(SMITHWATERMAN):
-	cd smithwaterman && $(MAKE)
+intervaltree: pre
+	cd intervaltree && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+
+$(TABIX): pre
+	cd tabixpp && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+
+$(SMITHWATERMAN): pre
+	cd smithwaterman && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
 $(DISORDER): $(SMITHWATERMAN)
 
@@ -138,19 +145,19 @@ $(LEFTALIGN): $(SMITHWATERMAN)
 
 $(INDELALLELE): $(SMITHWATERMAN)
 
-$(FASTAHACK):
-	cd fastahack && $(MAKE)
+$(FASTAHACK): pre
+	cd fastahack && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
 #$(FSOM):
 #	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
 
-$(FILEVERCMP):
-	cd filevercmp && make
+$(FILEVERCMP): pre
+	cd filevercmp && make && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
-$(SHORTBINS):
+$(SHORTBINS): pre
 	$(MAKE) bin/$@
 
-$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP)
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) pre intervaltree
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
@@ -162,10 +169,10 @@ test: $(BINS)
 	@prove -Itests/lib -w tests/*.t
 
 pre:
-	mkdir -p $(BIN_DIR)
-	mkdir -p $(LIB_DIR)
-	mkdir -p $(INC_DIR)
-	mkdir -p $(OBJ_DIR)
+	if [ ! -d $(BIN_DIR) ]; then mkdir -p $(BIN_DIR); fi
+	if [ ! -d $(LIB_DIR) ]; then mkdir -p $(LIB_DIR); fi
+	if [ ! -d $(INC_DIR) ]; then mkdir -p $(INC_DIR); fi
+	if [ ! -d $(OBJ_DIR) ]; then mkdir -p $(OBJ_DIR); fi
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

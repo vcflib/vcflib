@@ -1,6 +1,6 @@
 #include "Variant.h"
 #include "split.h"
-#include "fastahack/Fasta.h"
+#include "Fasta.h"
 #include <getopt.h>
 #include <algorithm>
 #include <numeric>
