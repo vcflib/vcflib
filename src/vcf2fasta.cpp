@@ -4,7 +4,7 @@
 #include "split.h"
 #include <set>
 #include <getopt.h>
-#include "fastahack/Fasta.h"
+#include "Fasta.h"
 #include <iostream>
 #include <fstream>
 

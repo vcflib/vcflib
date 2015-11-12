@@ -1,3 +1,0 @@
-#!/bin/bash
-
-head -1000 $1 | grep "^#"; cat $@ | grep -v "^#" | sort -k1,1d -k2,2n

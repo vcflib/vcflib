@@ -116,3 +116,7 @@ bin/vcfleftalign
 bin/vcfqual2info
 bin/vcfsample2info
 libvcflib.a
+lib/
+bin/
+obj/
+include/
