@@ -122,9 +122,9 @@ profiling:
 gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
-SUBMODULES ?= $(TABIX) multichoose $(SMITHWATERMAN) $(FILEVERCMP)
+SUBMOD_OBJS ?= $(TABIX) multichoose $(SMITHWATERMAN) $(FILEVERCMP)
 
-$(OBJECTS): $(SOURCES) $(HEADERS) pre $(SUBMODULES)
+$(OBJECTS): $(SOURCES) $(HEADERS) pre $(SUBMOD_OBJS)
 	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && cp src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 multichoose: pre
@@ -159,7 +159,9 @@ $(FILEVERCMP): pre
 $(SHORTBINS): pre
 	$(MAKE) bin/$@
 
-$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) pre intervaltree
+SUBMOD_BINS ?= $(SMITHWATERMAN) $(FASTAHACK) $(FILEVERCMP) intervaltree
+
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) pre $(SUBMOD_BINS)
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
