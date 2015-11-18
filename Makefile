@@ -13,72 +13,74 @@ SRC_DIR=src
 INC_DIR:=include
 OBJ_DIR:=obj
 
+MAKE ?=		make
+
 # TODO
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
-			  src/vcfaltcount.cpp \
-			  src/vcfhetcount.cpp \
-			  src/vcfhethomratio.cpp \
-			  src/vcffilter.cpp \
-			  src/vcf2tsv.cpp \
-			  src/vcfgenotypes.cpp \
-			  src/vcfannotategenotypes.cpp \
-			  src/vcfcommonsamples.cpp \
-			  src/vcfremovesamples.cpp \
-			  src/vcfkeepsamples.cpp \
-			  src/vcfsamplenames.cpp \
-			  src/vcfgenotypecompare.cpp \
-			  src/vcffixup.cpp \
-			  src/vcfclassify.cpp \
-			  src/vcfsamplediff.cpp \
-			  src/vcfremoveaberrantgenotypes.cpp \
-			  src/vcfrandom.cpp \
-			  src/vcfparsealts.cpp \
-			  src/vcfstats.cpp \
-			  src/vcfflatten.cpp \
-			  src/vcfprimers.cpp \
-			  src/vcfnumalt.cpp \
-			  src/vcfcleancomplex.cpp \
-			  src/vcfintersect.cpp \
-			  src/vcfannotate.cpp \
-			  src/vcfallelicprimitives.cpp \
-			  src/vcfoverlay.cpp \
-			  src/vcfaddinfo.cpp \
-			  src/vcfkeepinfo.cpp \
-			  src/vcfkeepgeno.cpp \
-			  src/vcfafpath.cpp \
-			  src/vcfcountalleles.cpp \
-			  src/vcflength.cpp \
-			  src/vcfdistance.cpp \
-			  src/vcfrandomsample.cpp \
-			  src/vcfentropy.cpp \
-			  src/vcfglxgt.cpp \
-			  src/vcfroc.cpp \
-			  src/vcfcheck.cpp \
-			  src/vcfstreamsort.cpp \
-			  src/vcfuniq.cpp \
-			  src/vcfuniqalleles.cpp \
-			  src/vcfremap.cpp \
-			  src/vcf2fasta.cpp \
-			  src/vcfsitesummarize.cpp \
-			  src/vcfbreakmulti.cpp \
-			  src/vcfcreatemulti.cpp \
-			  src/vcfevenregions.cpp \
-			  src/vcfcat.cpp \
-			  src/vcfgenosummarize.cpp \
-			  src/vcfgenosamplenames.cpp \
-			  src/vcfgeno2haplo.cpp \
-			  src/vcfleftalign.cpp \
-			  src/vcfcombine.cpp \
-			  src/vcfgeno2alleles.cpp \
-			  src/vcfindex.cpp \
-			  src/vcf2dag.cpp \
-			  src/vcfsample2info.cpp \
-			  src/vcfqual2info.cpp \
-			  src/vcfinfo2qual.cpp \
-			  src/vcfglbound.cpp \
-			  src/vcfinfosummarize.cpp
+		src/vcfaltcount.cpp \
+		src/vcfhetcount.cpp \
+		src/vcfhethomratio.cpp \
+		src/vcffilter.cpp \
+		src/vcf2tsv.cpp \
+		src/vcfgenotypes.cpp \
+		src/vcfannotategenotypes.cpp \
+		src/vcfcommonsamples.cpp \
+		src/vcfremovesamples.cpp \
+		src/vcfkeepsamples.cpp \
+		src/vcfsamplenames.cpp \
+		src/vcfgenotypecompare.cpp \
+		src/vcffixup.cpp \
+		src/vcfclassify.cpp \
+		src/vcfsamplediff.cpp \
+		src/vcfremoveaberrantgenotypes.cpp \
+		src/vcfrandom.cpp \
+		src/vcfparsealts.cpp \
+		src/vcfstats.cpp \
+		src/vcfflatten.cpp \
+		src/vcfprimers.cpp \
+		src/vcfnumalt.cpp \
+		src/vcfcleancomplex.cpp \
+		src/vcfintersect.cpp \
+		src/vcfannotate.cpp \
+		src/vcfallelicprimitives.cpp \
+		src/vcfoverlay.cpp \
+		src/vcfaddinfo.cpp \
+		src/vcfkeepinfo.cpp \
+		src/vcfkeepgeno.cpp \
+		src/vcfafpath.cpp \
+		src/vcfcountalleles.cpp \
+		src/vcflength.cpp \
+		src/vcfdistance.cpp \
+		src/vcfrandomsample.cpp \
+		src/vcfentropy.cpp \
+		src/vcfglxgt.cpp \
+		src/vcfroc.cpp \
+		src/vcfcheck.cpp \
+		src/vcfstreamsort.cpp \
+		src/vcfuniq.cpp \
+		src/vcfuniqalleles.cpp \
+		src/vcfremap.cpp \
+		src/vcf2fasta.cpp \
+		src/vcfsitesummarize.cpp \
+		src/vcfbreakmulti.cpp \
+		src/vcfcreatemulti.cpp \
+		src/vcfevenregions.cpp \
+		src/vcfcat.cpp \
+		src/vcfgenosummarize.cpp \
+		src/vcfgenosamplenames.cpp \
+		src/vcfgeno2haplo.cpp \
+		src/vcfleftalign.cpp \
+		src/vcfcombine.cpp \
+		src/vcfgeno2alleles.cpp \
+		src/vcfindex.cpp \
+		src/vcf2dag.cpp \
+		src/vcfsample2info.cpp \
+		src/vcfqual2info.cpp \
+		src/vcfinfo2qual.cpp \
+		src/vcfglbound.cpp \
+		src/vcfinfosummarize.cpp
 
 # when we can figure out how to build on mac
 # src/vcfsom.cpp
@@ -87,29 +89,33 @@ BIN_SOURCES = src/vcfecho.cpp \
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
 SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
+# Use ?= to allow overriding submodule install locations from the env
+# or command-line
+SW_PATH ?=	smithwaterman
+TABIX_PATH ?=	tabixpp
+HTS_PATH ?=	$(TABIX_PATH)/htslib
+
+# FIXME: Replace each of these with a library, like SMITHWATERMAN
+# and allow overriding the prefix
+SMITHWATERMAN ?= $(SW_PATH)/libsw.a
 TABIX = tabixpp/tabix.o
 FASTAHACK = fastahack/Fasta.o
-
-SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
-REPEATS = smithwaterman/Repeats.o
-INDELALLELE = smithwaterman/IndelAllele.o
-DISORDER = smithwaterman/disorder.o
-LEFTALIGN = smithwaterman/LeftAlign.o
-
 FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
-INCLUDES = -Itabixpp/htslib -I$(INC_DIR) -L. -Ltabixpp/htslib
-LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm
-
+INCLUDES =	-I$(HTS_PATH) -I$(INC_DIR)
+LDFLAGS =	-L$(LIB_DIR) -lvcflib \
+		-L$(SW_PATH) -lsw \
+		-L$(HTS_PATH) -lhts \
+		-lpthread -lz -lm
 
 all: $(OBJECTS) $(BINS)
 
-CXX ?= g++
-CXXFLAGS ?= -O3
-CXXFLAGS += -D_FILE_OFFSET_BITS=64
-#CXXFLAGS = -O2
-#CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
+CXX ?=		g++
+CXXFLAGS ?=	-O3
+#CXXFLAGS ?=	-O2
+CXXFLAGS +=	-D_FILE_OFFSET_BITS=64
+#CXXFLAGS +=	-pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
 SSW = src/ssw.o src/ssw_cpp.o
 
@@ -128,7 +134,7 @@ gprof:
 SUBMOD_OBJS ?= $(TABIX) multichoose $(SMITHWATERMAN) $(FILEVERCMP)
 
 $(OBJECTS): $(SOURCES) $(HEADERS) pre $(SUBMOD_OBJS)
-	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && cp src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS) $(LDFLAGS) && cp src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 multichoose: pre
 	cd multichoose && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
@@ -142,14 +148,6 @@ $(TABIX): pre
 $(SMITHWATERMAN): pre
 	cd smithwaterman && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
-$(DISORDER): $(SMITHWATERMAN)
-
-$(REPEATS): $(SMITHWATERMAN)
-
-$(LEFTALIGN): $(SMITHWATERMAN)
-
-$(INDELALLELE): $(SMITHWATERMAN)
-
 $(FASTAHACK): pre
 	cd fastahack && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp Fasta.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
@@ -157,17 +155,17 @@ $(FASTAHACK): pre
 #	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
 
 $(FILEVERCMP): pre
-	cd filevercmp && make && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd filevercmp && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(SHORTBINS): pre
 	$(MAKE) bin/$@
 
 SUBMOD_BINS ?= $(SMITHWATERMAN) $(FASTAHACK) $(FILEVERCMP) intervaltree
 
-$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) pre $(SUBMOD_BINS)
-	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW) pre $(SUBMOD_BINS)
+	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
-libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
+libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
 	cp libvcflib.a $(LIB_DIR)
 
@@ -189,8 +187,8 @@ clean:
 	rm -rf $(LIB_DIR)
 	rm -rf $(INC_DIR)
 	rm -rf $(OBJ_DIR)
-	cd tabixpp && make clean
-	cd smithwaterman && make clean
-	cd fastahack && make clean
+	cd tabixpp && $(MAKE) clean
+	cd smithwaterman && $(MAKE) clean
+	cd fastahack && $(MAKE) clean
 
 .PHONY: clean all test pre
