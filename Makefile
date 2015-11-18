@@ -95,14 +95,16 @@ SW_PATH ?=	smithwaterman
 TABIX_PATH ?=	tabixpp
 HTS_PATH ?=	$(TABIX_PATH)/htslib
 FH_PATH ?=	fastahack
+FSOM_PATH ?=	fsom
+FVC_PATH ?=	filevercmp
 
 # FIXME: Replace each of these with a library, like SMITHWATERMAN
 # and allow overriding the prefix
 SMITHWATERMAN ?=	$(SW_PATH)/libsw.a
 TABIX ?=		$(TABIX_PATH)/libtabix.a
 FASTAHACK ?=		$(FH_PATH)/libfastahack.a
-FSOM =			fsom/fsom.o
-FILEVERCMP =		filevercmp/filevercmp.o
+FSOM ?=			$(FSOM_PATH)/libfsom.a
+FILEVERCMP ?=		$(FVC_PATH)/libfilevercmp.a
 
 INCLUDES =	-I$(HTS_PATH) -I$(INC_DIR)
 LDFLAGS =	-L$(LIB_DIR) -lvcflib \
@@ -110,6 +112,7 @@ LDFLAGS =	-L$(LIB_DIR) -lvcflib \
 		-L$(TABIX_PATH) -ltabix \
 		-L$(HTS_PATH) -lhts \
 		-L$(FH_PATH) -lfastahack \
+		-L$(FVC_PATH) -lfilevercmp \
 		-lpthread -lz -lm
 
 all: $(OBJECTS) $(BINS)
@@ -168,8 +171,8 @@ SUBMOD_BINS ?= $(SMITHWATERMAN) $(FASTAHACK) $(FILEVERCMP) intervaltree
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW) pre $(SUBMOD_BINS)
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
-libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(SSW) $(FILEVERCMP) pre
-	ar rs libvcflib.a $(OBJECTS) $(SSW) $(FILEVERCMP)
+libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(SSW) pre
+	ar rs libvcflib.a $(OBJECTS) $(SSW)
 	cp libvcflib.a $(LIB_DIR)
 
 
