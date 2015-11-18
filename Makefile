@@ -90,7 +90,10 @@ BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
 SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
 # Use ?= to allow overriding submodule install locations from the env
-# or command-line
+# or command-line.  Package managers should set these to ${PREFIX}/lib
+# so that the libs installed by submodule packages are found and this
+# Makefile doesn't try to build them.
+
 SW_PATH ?=	smithwaterman
 TABIX_PATH ?=	tabixpp
 HTS_PATH ?=	$(TABIX_PATH)/htslib
@@ -98,8 +101,6 @@ FH_PATH ?=	fastahack
 FSOM_PATH ?=	fsom
 FVC_PATH ?=	filevercmp
 
-# FIXME: Replace each of these with a library, like SMITHWATERMAN
-# and allow overriding the prefix
 SMITHWATERMAN ?=	$(SW_PATH)/libsw.a
 TABIX ?=		$(TABIX_PATH)/libtabix.a
 FASTAHACK ?=		$(FH_PATH)/libfastahack.a
