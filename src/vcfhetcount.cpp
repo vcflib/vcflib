@@ -2,6 +2,7 @@
 #include "split.h"
 #include <string>
 #include <iostream>
+#include <getopt.h>
 
 using namespace std;
 using namespace vcflib;

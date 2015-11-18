@@ -89,11 +89,13 @@ SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
 TABIX = tabixpp/tabix.o
 FASTAHACK = fastahack/Fasta.o
+
 SMITHWATERMAN = smithwaterman/SmithWatermanGotoh.o
 REPEATS = smithwaterman/Repeats.o
 INDELALLELE = smithwaterman/IndelAllele.o
 DISORDER = smithwaterman/disorder.o
 LEFTALIGN = smithwaterman/LeftAlign.o
+
 FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
@@ -103,8 +105,9 @@ LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm
 
 all: $(OBJECTS) $(BINS)
 
-CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
+CXX ?= g++
+CXXFLAGS ?= -O3
+CXXFLAGS += -D_FILE_OFFSET_BITS=64
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
