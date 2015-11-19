@@ -99,19 +99,9 @@ LOCALBASE ?=	/usr/local
 LIB_PATH ?=	${LOCALBASE}/lib
 INCLUDE_PATH ?=	${LOCALBASE}/include
 
-SMITHWATERMAN ?=	$(SW_PATH)/libsw.a
-TABIX ?=		$(TABIX_PATH)/libtabix.a
-FASTAHACK ?=		$(FH_PATH)/libfastahack.a
-FSOM ?=			$(FSOM_PATH)/libfsom.a
-FILEVERCMP ?=		$(FVC_PATH)/libfilevercmp.a
-
-INCLUDES =	-I$(HTS_PATH) -I$(INC_DIR)
+INCLUDES =	-I$(INCLUDE_PATH) -I$(INC_DIR)
 LDFLAGS =	-L$(LIB_DIR) -lvcflib \
-		-L$(SW_PATH) -lsw \
-		-L$(TABIX_PATH) -ltabix \
-		-L$(HTS_PATH) -lhts \
-		-L$(FH_PATH) -lfastahack \
-		-L$(FVC_PATH) -lfilevercmp \
+		-L$(LIB_PATH) -lsw -ltabix -lhts -lfastahack -lfilevercmp \
 		-lpthread -lz -lm
 
 all: $(OBJECTS) $(BINS)
