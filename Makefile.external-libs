@@ -140,4 +140,7 @@ clean:
 	cd smithwaterman && $(MAKE) clean
 	cd fastahack && $(MAKE) clean
 
-.PHONY: clean all test
+pre:
+	mkdir -p $(BIN_DIR)
+
+.PHONY: clean all test pre
