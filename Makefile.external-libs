@@ -81,7 +81,7 @@ BIN_SOURCES =	src/vcfecho.cpp \
 # when we can figure out how to build on mac
 # src/vcfsom.cpp
 
-BINS =		$(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
+BINS =		$(addprefix $(BIN_DIR)/,$(notdir $(BIN_SOURCES:.cpp=)))
 SHORTBINS =	$(notdir $(BIN_SOURCES:.cpp=))
 
 # Use ?= to allow overriding from the env or command-line.
@@ -121,9 +121,9 @@ $(OBJECTS): $(SOURCES) $(HEADERS)
 	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
 $(SHORTBINS):
-	$(MAKE) bin/$@
+	$(MAKE) $(BIN_DIR)/$@
 
-$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW)
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW) pre
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(SSW)
@@ -136,6 +136,7 @@ clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
 	rm -f libvcflib.a
+	rm -rf $(BIN_DIR)
 	cd tabixpp && $(MAKE) clean
 	cd smithwaterman && $(MAKE) clean
 	cd fastahack && $(MAKE) clean
