@@ -1,9 +1,11 @@
-#OBJ_DIR = ./
+
 HEADERS = src/Variant.h \
-		  src/split.h \
-		  src/join.h
+	  src/split.h \
+	  src/join.h
+
 SOURCES = src/Variant.cpp \
-		  src/split.cpp
+	  src/split.cpp
+
 OBJECTS= $(SOURCES:.cpp=.o)
 
 VCF_LIB_LOCAL:=$(shell pwd)
@@ -18,7 +20,7 @@ MAKE ?=		make
 # TODO
 #vcfstats.cpp
 
-BIN_SOURCES = src/vcfecho.cpp \
+BIN_SOURCES =	src/vcfecho.cpp \
 		src/vcfaltcount.cpp \
 		src/vcfhetcount.cpp \
 		src/vcfhethomratio.cpp \
@@ -85,7 +87,6 @@ BIN_SOURCES = src/vcfecho.cpp \
 # when we can figure out how to build on mac
 # src/vcfsom.cpp
 
-#BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
 SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
@@ -94,12 +95,9 @@ SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 # so that the libs installed by submodule packages are found and this
 # Makefile doesn't try to build them.
 
-SW_PATH ?=	smithwaterman
-TABIX_PATH ?=	tabixpp
-HTS_PATH ?=	$(TABIX_PATH)/htslib
-FH_PATH ?=	fastahack
-FSOM_PATH ?=	fsom
-FVC_PATH ?=	filevercmp
+LOCALBASE ?=	/usr/local
+LIB_PATH ?=	${LOCALBASE}/lib
+INCLUDE_PATH ?=	${LOCALBASE}/include
 
 SMITHWATERMAN ?=	$(SW_PATH)/libsw.a
 TABIX ?=		$(TABIX_PATH)/libtabix.a
@@ -138,44 +136,18 @@ profiling:
 gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
-SUBMOD_OBJS ?= $(TABIX) multichoose $(SMITHWATERMAN) $(FILEVERCMP)
-
-$(OBJECTS): $(SOURCES) $(HEADERS) pre $(SUBMOD_OBJS)
-	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS) $(LDFLAGS) && cp src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
-
-multichoose: pre
-	cd multichoose && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
-
-intervaltree: pre
-	cd intervaltree && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
-
-$(TABIX): pre
-	cd tabixpp && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
-
-$(SMITHWATERMAN): pre
-	cd smithwaterman && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
-
-$(FASTAHACK): pre
-	cd fastahack && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp Fasta.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
-
-#$(FSOM):
-#	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
-
-$(FILEVERCMP): pre
-	cd filevercmp && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
+$(OBJECTS): $(SOURCES) $(HEADERS) pre
+	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
 $(SHORTBINS): pre
 	$(MAKE) bin/$@
 
-SUBMOD_BINS ?= $(SMITHWATERMAN) $(FASTAHACK) $(FILEVERCMP) intervaltree
-
-$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW) pre $(SUBMOD_BINS)
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW) pre
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(SSW) pre
 	ar rs libvcflib.a $(OBJECTS) $(SSW)
 	cp libvcflib.a $(LIB_DIR)
-
 
 test: $(BINS)
 	@prove -Itests/lib -w tests/*.t
