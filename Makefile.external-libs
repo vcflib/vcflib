@@ -6,16 +6,9 @@ HEADERS = src/Variant.h \
 SOURCES = src/Variant.cpp \
 	  src/split.cpp
 
-OBJECTS= $(SOURCES:.cpp=.o)
+OBJECTS =	$(SOURCES:.cpp=.o)
 
-VCF_LIB_LOCAL:=$(shell pwd)
-BIN_DIR:=bin
-LIB_DIR:=lib
-SRC_DIR=src
-INC_DIR:=include
-OBJ_DIR:=obj
-
-MAKE ?=		make
+VCF_LIB_LOCAL :=	$(shell pwd)
 
 # TODO
 #vcfstats.cpp
@@ -87,35 +80,32 @@ BIN_SOURCES =	src/vcfecho.cpp \
 # when we can figure out how to build on mac
 # src/vcfsom.cpp
 
-BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
-SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
+BINS =		$(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
+SHORTBINS =	$(notdir $(BIN_SOURCES:.cpp=))
 
-# Use ?= to allow overriding submodule install locations from the env
-# or command-line.  Package managers should set these to ${PREFIX}/lib
-# so that the libs installed by submodule packages are found and this
-# Makefile doesn't try to build them.
+# Use ?= to allow overriding from the env or command-line.
 
+MAKE ?=		make
 LOCALBASE ?=	/usr/local
 LIB_PATH ?=	${LOCALBASE}/lib
 INCLUDE_PATH ?=	${LOCALBASE}/include
 
-INCLUDES =	-I$(INCLUDE_PATH) -I$(INC_DIR)
-LDFLAGS =	-L$(LIB_DIR) -lvcflib \
+CXX ?=		c++
+CXXFLAGS ?=	-O3
+CXXFLAGS +=	-D_FILE_OFFSET_BITS=64
+#CXXFLAGS +=	-pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
+
+SSW =		src/ssw.o src/ssw_cpp.o
+
+INCLUDES =	-I$(INCLUDE_PATH)
+LDFLAGS =	-L. -lvcflib \
 		-L$(LIB_PATH) -lsw -ltabix -lhts -lfastahack -lfilevercmp \
 		-lpthread -lz -lm
 
 all: $(OBJECTS) $(BINS)
 
-CXX ?=		g++
-CXXFLAGS ?=	-O3
-#CXXFLAGS ?=	-O2
-CXXFLAGS +=	-D_FILE_OFFSET_BITS=64
-#CXXFLAGS +=	-pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
-
-SSW = src/ssw.o src/ssw_cpp.o
-
-ssw.o: src/ssw.h
-ssw_cpp.o:src/ssw_cpp.h
+ssw.o:		src/ssw.h
+ssw_cpp.o:	src/ssw_cpp.h
 
 openmp:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -fopenmp -D HAS_OPENMP"
@@ -126,38 +116,27 @@ profiling:
 gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
-$(OBJECTS): $(SOURCES) $(HEADERS) pre
+$(OBJECTS): $(SOURCES) $(HEADERS)
 	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
-$(SHORTBINS): pre
+$(SHORTBINS):
 	$(MAKE) bin/$@
 
-$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW) pre
+$(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SSW)
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
 
-libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(SSW) pre
+libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(SSW)
 	ar rs libvcflib.a $(OBJECTS) $(SSW)
-	cp libvcflib.a $(LIB_DIR)
 
 test: $(BINS)
 	@prove -Itests/lib -w tests/*.t
-
-pre:
-	if [ ! -d $(BIN_DIR) ]; then mkdir -p $(BIN_DIR); fi
-	if [ ! -d $(LIB_DIR) ]; then mkdir -p $(LIB_DIR); fi
-	if [ ! -d $(INC_DIR) ]; then mkdir -p $(INC_DIR); fi
-	if [ ! -d $(OBJ_DIR) ]; then mkdir -p $(OBJ_DIR); fi
 
 clean:
 	rm -f $(BINS) $(OBJECTS)
 	rm -f ssw_cpp.o ssw.o
 	rm -f libvcflib.a
-	rm -rf $(BIN_DIR)
-	rm -rf $(LIB_DIR)
-	rm -rf $(INC_DIR)
-	rm -rf $(OBJ_DIR)
 	cd tabixpp && $(MAKE) clean
 	cd smithwaterman && $(MAKE) clean
 	cd fastahack && $(MAKE) clean
 
-.PHONY: clean all test pre
+.PHONY: clean all test
