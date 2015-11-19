@@ -7,6 +7,7 @@ SOURCES = src/Variant.cpp \
 	  src/split.cpp
 
 OBJECTS =	$(SOURCES:.cpp=.o)
+BIN_DIR =	bin
 
 VCF_LIB_LOCAL :=	$(shell pwd)
 
