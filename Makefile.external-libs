@@ -21,8 +21,10 @@ LOCALBASE ?=	/usr/local
 LIB_PATH ?=	${LOCALBASE}/lib
 INCLUDE_PATH ?=	${LOCALBASE}/include
 
+CC ?=		cc
 CXX ?=		c++
 CXXFLAGS ?=	-O3
+CFLAGS +=	-D_FILE_OFFSET_BITS=64 -fPIC
 CXXFLAGS +=	-D_FILE_OFFSET_BITS=64 -fPIC
 #CXXFLAGS +=	-pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
