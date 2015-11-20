@@ -73,14 +73,14 @@ $(SLIB): $(OBJECTS) $(SSW)
 
 install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/bin
-	$(MKDIR) $(DESTDIR)$(PREFIX)/include/smithwaterman
+	$(MKDIR) $(DESTDIR)$(PREFIX)/include/vcflib
 	$(MKDIR) $(DESTDIR)$(PREFIX)/lib
 	$(INSTALL) bin/* $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) src/*.h $(DESTDIR)$(PREFIX)/include/smithwaterman
+	$(INSTALL) src/*.h $(DESTDIR)$(PREFIX)/include/vcflib
 	$(INSTALL) $(LIB) $(SLIB) $(DESTDIR)$(PREFIX)/lib
 
 install-strip: install
-	$(STRIP) $(DESTDIR)$(PREFIX)/bin/$(BIN) $(DESTDIR)$(PREFIX)/lib/$(SLIB)
+	$(STRIP) $(DESTDIR)$(PREFIX)/bin/* $(DESTDIR)$(PREFIX)/lib/$(SLIB)
 
 test: $(BINS)
 	@prove -Itests/lib -w tests/*.t
