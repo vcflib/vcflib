@@ -10,7 +10,8 @@ OBJECTS =	$(SOURCES:.cpp=.o)
 BIN_DIR =	bin
 
 LIB =		libvcflib.a
-SLIB =		libvcflib.so
+SOVERSION =	1
+SLIB =		libvcflib.so.$(SOVERSION)
 
 include Makefile.common
 
@@ -69,7 +70,7 @@ $(LIB): $(OBJECTS) $(SSW)
 	ar rs $(LIB) $(OBJECTS) $(SSW)
 
 $(SLIB): $(OBJECTS) $(SSW)
-	$(CXX) -shared -Wl,-soname,$(SLIB).1 -o $(SLIB) $(OBJECTS) $(SSW)
+	$(CXX) -shared -Wl,-soname,$(SLIB) -o $(SLIB) $(OBJECTS) $(SSW)
 
 install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/bin
