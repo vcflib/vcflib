@@ -20,7 +20,6 @@ include Makefile.common
 MAKE ?=		make
 LOCALBASE ?=	/usr/local
 LIB_PATH ?=	${LOCALBASE}/lib
-INCLUDE_PATH ?=	${LOCALBASE}/include
 
 CC ?=		cc
 CXX ?=		c++
@@ -38,7 +37,11 @@ AR ?=		ar
 
 SSW =		src/ssw.o src/ssw_cpp.o
 
-INCLUDES =	-I$(INCLUDE_PATH)
+INCLUDES =	-I${LOCALBASE}/include \
+		-I${LOCALBASE}/include/smithwaterman \
+		-I${LOCALBASE}/include/multichoose \
+		-I${LOCALBASE}/include/fastahack \
+		-I${LOCALBASE}/include/intervaltree
 LDFLAGS =	-L. -lvcflib \
 		-L$(LIB_PATH) -lsw -ltabix -lhts -lfastahack -lfilevercmp \
 		-lpthread -lz -lm
@@ -58,7 +61,7 @@ gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
 $(OBJECTS): $(SOURCES) $(HEADERS)
-	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(CXXFLAGS)
 
 $(SHORTBINS):
 	$(MAKE) $(BIN_DIR)/$@
@@ -91,9 +94,6 @@ clean:
 	rm -f ssw_cpp.o ssw.o
 	rm -f $(LIB)
 	rm -rf $(BIN_DIR)
-	cd tabixpp && $(MAKE) clean
-	cd smithwaterman && $(MAKE) clean
-	cd fastahack && $(MAKE) clean
 
 pre:
 	mkdir -p $(BIN_DIR)
