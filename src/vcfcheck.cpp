@@ -2,6 +2,7 @@
 #include "split.h"
 #include "Fasta.h"
 #include <getopt.h>
+#include <string.h>
 
 using namespace std;
 using namespace vcflib;
@@ -13,6 +14,7 @@ void printSummary(char** argv) {
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
          << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
+         << "    -i, --ignore-case      Ignore case differences between FASTA reference and vcf" << endl
          << endl
          << "Verifies that the VCF REF field matches the reference as described." << endl
          << endl;
@@ -26,6 +28,7 @@ int main(int argc, char** argv) {
     string fastaRef;
     bool keepFailures = false;
     bool excludeFailures = false;
+    bool ignoreCase = false;
 
     if (argc == 1)
         printSummary(argv);
@@ -39,13 +42,14 @@ int main(int argc, char** argv) {
                 {"fasta-reference",  required_argument, 0, 'f'},
                 {"exclude-failures",  no_argument, 0, 'x'},
                 {"keep-failures",  no_argument, 0, 'k'},
+                {"ignore-case",  no_argument, 0, 'i'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hxkf:",
+        c = getopt_long (argc, argv, "hxkif:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -76,6 +80,10 @@ int main(int argc, char** argv) {
             keepFailures = true;
             break;
  
+        case 'i':
+            ignoreCase = true;
+            break;
+
         case 'h':
             printSummary(argv);
             exit(0);
@@ -121,7 +129,18 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         int refstart = var.position - 1; // convert to 0-based
         string matchedRef = ref.getSubSequence(var.sequenceName, refstart, var.ref.size());
-        if (var.ref != matchedRef) {
+
+        bool isRefMatch = false;
+        if (ignoreCase)
+        {
+            isRefMatch = (0 == strcasecmp(var.ref.c_str(),matchedRef.c_str()));
+        }
+        else
+        {
+            isRefMatch = (0 == strcmp(var.ref.c_str(),matchedRef.c_str()));
+        }
+
+        if (! isRefMatch) {
             if (keepFailures) {
                 cout << var << endl;
             } else if (!excludeFailures) {
