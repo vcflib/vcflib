@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
                         if (vals.size() == var.alt.size()) { // allele count for info
                             val = vals.at(var.altAlleleIndexes[*a]);
                         } else if (vals.size() == 1) { // site-wise count
-                            val = vals.front();
+                            val = "PER-SITE-TOKEN"; //vals.front();
                         } // don't handle other multiples... how would we do this without going crazy?
                         if (!val.empty()) {
                             alleleInfos[*va][key] = val;
@@ -318,8 +318,12 @@ int main(int argc, char** argv) {
                 for (map<string, vector<string> >::iterator infoit = var.info.begin();
                      infoit != var.info.end(); ++infoit) {
                     string key = infoit->first;
-                    if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
-                        v.info[key].push_back(alleleInfos[*a][key]);
+                    if ( key != "AF" && key != "AC" && key != "TYPE" && key != "LEN" ) { // don't clobber previous
+                        if ( alleleInfos[*a][key] == "PER-SITE-TOKEN" ) { // just use previous
+                            v.info[key] = var.info[key];
+                        }else{
+                            v.info[key].push_back(alleleInfos[*a][key]);
+                        }
                     }
                 }
             }
