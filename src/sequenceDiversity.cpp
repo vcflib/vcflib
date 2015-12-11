@@ -27,7 +27,7 @@ void printHelp(void){
   cerr << "      The sequenceDiversity program calculates two popular metrics of  haplotype diversity: pi and                                  " << endl;
   cerr << "      extended haplotype homozygoisty (eHH).  Pi is calculated using the Nei and Li 1979 formulation.                               " << endl;
   cerr << "      eHH a convenient way to think about haplotype diversity.  When eHH = 0 all haplotypes in the window                           " << endl;
-  cerr << "      are unique and when eHH = 1 all haplotypes in the window are identical. The window size is 20 SNPs.                           " << endl;
+  cerr << "      are unique and when eHH = 1 all haplotypes in the window are identical.                           " << endl;
 
   cerr << endl;
   cerr << "Output : 5 columns:"           << endl;
@@ -69,36 +69,52 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-double pi(map<string, int> & hapCounts, int nHaps, double * pi, double * eHH){
-
-  double sum = 0;
+double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH){
 
   double nchooseSum = 0;
+  // summing over all possible haplotypes
+  for(std::map<string, int>::iterator it = hapWin.begin(); 
+      it != hapWin.end(); it++){
 
-  for(map<string, int>::iterator firstSeq = hapCounts.begin(); firstSeq != hapCounts.end(); firstSeq++){
+    nchooseSum += r8_choose(it->second, 2);
     
-    nchooseSum += r8_choose(firstSeq->second, 2);
+  }
 
-    //    cout << firstSeq->first << " " << firstSeq->second << endl;
+  
+  double piSum = 0;
 
-    for(map<string, int>::iterator secondSeq = hapCounts.begin(); secondSeq != hapCounts.end(); secondSeq++){
-      if(firstSeq->first == secondSeq->first){
-	continue;
-      }
-      
-      double seqDiff = 0;
-      
-      for(int i = 0; i < (firstSeq->first).length(); i++){
-	if((firstSeq->first).substr(i, 1) == (secondSeq->first).substr(i, 1)){
-	  seqDiff += 1;
+  // all unique pairwise 
+  for(std::map<string, int>::iterator it = hapWin.begin();
+      it != hapWin.end(); it++){
+    
+    // advancing it
+
+    std::map<string, int>::iterator iz = it;
+    iz++;
+
+    for(;iz != hapWin.end(); iz++){
+
+      // different bases
+      int ndiff = 0;
+
+      for(int i = 0; i < it->first.size();i++){
+	
+	if(it->first[i] != iz->first[i]){
+	  ndiff += 1;
 	}
       }
-      sum += ((double(firstSeq->second) / nHaps ) *  (double(secondSeq->second) / nHaps ) * seqDiff); 
+      
+      double f1 = double(it->second)/double(nHaps);
+      double f2 = double(iz->second)/double(nHaps);
+      
+      piSum += f1*f2*double(ndiff);
+
     }
-    hapCounts.erase(firstSeq->first);
   }
-  
-  *pi  = sum;
+
+
+
+  *pi  = piSum;
   *eHH = nchooseSum / r8_choose(nHaps, 2);
   
 }
@@ -130,7 +146,9 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
     }
     
     double piEst;
-    double eHH;
+    double eHH = 0;
+
+    // target haplotype are the counts of the unique haplotypes
 
     pi(targetHaplotypes, target.size()*2, &piEst, &eHH); 
 

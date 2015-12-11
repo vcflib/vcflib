@@ -12,13 +12,10 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include "gpatInfo.hpp"
 
 using namespace std;
 using namespace vcf;
-
-void printVersion(void){
-  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg & EJ Osborne; email : zev.kronenberg@utah.edu " << endl;
-}
 
 void printHelp(void){
   cerr << endl << endl;

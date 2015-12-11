@@ -8,10 +8,12 @@
 #include "split.h"
 #include <stdio.h> 
 #include <stdlib.h>
+#include "gpatInfo.hpp"
 
 using namespace std;
 
 struct opts{
+  bool     truncate;
   string   format;
   long int step;
   long int size;
@@ -25,11 +27,7 @@ struct score{
   double score;
 };
 
-void printVersion(void){
-  cerr << endl ;
-  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg & EJ Osborne; email : zev.kronenberg@utah.edu "  << endl;
-  cerr << endl << endl;
-}
+
 
 void printHelp(void){
   cerr << endl << endl;
@@ -55,6 +53,7 @@ void printHelp(void){
   cerr << "                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba                   " << endl;
   cerr << "INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)" << endl;
   cerr << "INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)      " << endl;
+  cerr << "INFO: optional: t,truncate -- flag    : end last window at last position (zero based)      " << endl;
   printVersion();
   cerr << endl << endl;
 }
@@ -98,7 +97,7 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
   long int end   = windowSize;
 
   list<score> windowDat;
-
+  
   file.clear();
     
   file.seekg(offset);
@@ -106,7 +105,7 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
   vector<string> sline;
 
   while(getline(file, line)){
-    
+
     sline = split(line, '\t');     
     score current ;
     if(seqid != sline[opt.seqid]){
@@ -119,15 +118,16 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
 
       double reportValue ;
 
-
       if(opt. format == "abba-baba"){
 	reportValue = dStatistic(windowDat);
       }
       else{
 	reportValue = windowAvg(windowDat);
       }
-
-      cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << reportValue << endl;
+      // nan
+      if( reportValue == reportValue){
+	cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << reportValue << endl;
+      }
     }
     while(end < current.position){
       start += opt.step;
@@ -140,7 +140,13 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
   }
   // add function for D-stat if abba-baba
   double finalMean = windowAvg(windowDat);
-  cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << finalMean << endl;
+  
+  if(opt.truncate && (finalMean == finalMean) ){
+    cout << seqid << "\t" << start << "\t" << windowDat.back().position - 1 << "\t" << windowDat.size()  << "\t" << finalMean << endl;
+  }
+  else if(finalMean == finalMean){
+    cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << finalMean << endl;
+  }
   cerr << "INFO: smoother finished : " << seqid << endl;
 }
 
@@ -156,11 +162,11 @@ int main(int argc, char** argv) {
   acceptableFormats["deltaAf"]   = 1;
   acceptableFormats["abba-baba"]   = 1;
 
-
   opts opt;
-  opt.size = 5000;
-  opt.step = 1000;
-  opt.format = "NA";
+  opt.size     = 5000;
+  opt.step     = 1000;
+  opt.format   = "NA";
+  opt.truncate = false;
 
   string filename = "NA";
 
@@ -172,6 +178,7 @@ int main(int argc, char** argv) {
       {"window"    , 1, 0, 'w'},
       {"step"      , 1, 0, 's'},
       {"format"    , 1, 0, 'o'},
+      {"truncate"  , 0, 0, 't'},
       {0,0,0,0}
     };
 
@@ -179,30 +186,47 @@ int main(int argc, char** argv) {
   int iarg=0;
 
   while(iarg != -1){
-    iarg = getopt_long(argc, argv, "f:w:s:o:vh", longopts, &index);
+    iarg = getopt_long(argc, argv, "f:w:s:o:vht", longopts, &index);
     switch(iarg){
+    case 't':
+      {
+	opt.truncate = true;
+	break;
+      }
     case 'h':
-      printHelp();
-      return 0;
+      {
+	printHelp();
+	return 0;
+      }
     case 'v':
-      printVersion();
-      return 0;
+      {
+	printVersion();
+	return 0;
+      }
     case 'f':
-      filename = optarg;
-      cerr << "INFO: file : " << filename << endl;
-      break;
+      {
+	filename = optarg;
+	cerr << "INFO: file : " << filename << endl;
+	break;
+      }
     case 's':
-      opt.step = atol(optarg);
-      cerr << "INFO: step size : " << optarg << endl;
-      break;
+      {
+	opt.step = atol(optarg);
+	cerr << "INFO: step size : " << optarg << endl;
+	break;
+      }
     case 'w':
-      opt.size = atol(optarg);
-      cerr << "INFO: step size : " << optarg << endl;
-      break;
+      {
+	opt.size = atol(optarg);
+	cerr << "INFO: step size : " << optarg << endl;
+	break;
+      }
     case 'o':
-      opt.format = optarg;
-      cerr << "INFO: specified input format : " << optarg << endl;
-      break;
+      {
+	opt.format = optarg;
+	cerr << "INFO: specified input format : " << optarg << endl;
+	break;
+      }
     }
   }
   if(filename == "NA"){
@@ -276,9 +300,11 @@ int main(int argc, char** argv) {
       vector<string> sline = split(line, '\t');
       if(sline[opt.seqid] != currentSeqid){
 	
-	int bline = ifs.tellg() ;
-	//	bline -=  - ( line.size() +1 );
+	long int bline = ifs.tellg() ;
+	bline -=  ( line.size() +1 );
 	
+	//	std::cerr << "INFO: seqid: " << sline[opt.seqid] << " tellg: " << bline << std::endl;
+
 	map<string, streampos>::iterator it;
 
 	if(seqidIndex.find(sline[opt.seqid]) != seqidIndex.end() ){

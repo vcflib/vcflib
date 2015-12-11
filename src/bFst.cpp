@@ -10,6 +10,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include "gpatInfo.hpp"
 
 using namespace std;
 using namespace vcf;
@@ -414,12 +415,12 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: required: f,file a     -- a proper formatted VCF file.  the FORMAT field MUST contain \"PL\"" << endl; 
 	    cerr << "INFO: required: d,deltaaf    -- skip sites were the difference in allele frequency is less than deltaaf" << endl;
 	    cerr << endl; 
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
+	    printVersion();
 	    cerr << endl << endl;
 	    return 0;
 
 	  case 'v':
-	    cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu "  << endl;
+	    printVersion();
 	    return 0;
 
 	  case 't':

@@ -12,13 +12,11 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include "gpatInfo.hpp"
 
 using namespace std;
 using namespace vcf;
 
-void printVersion(void){
-  cerr << "INFO: version 1.0.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
-}
 
 void printHelp(void){
 
@@ -248,6 +246,7 @@ int main(int argc, char** argv) {
 	 //cerr << "     9. target Fis                   "    << endl;
 
 	if(populationTarget->af == -1){
+	  delete populationTarget;
 	  continue;
 	}
 
