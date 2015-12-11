@@ -261,6 +261,8 @@ int main(int argc, char** argv) {
 	     << populationTarget->nhoma << "\t"
 	     << populationTarget->fis   << endl;
 
+	delete populationTarget;
+
     }
     return 0;		    
 }
