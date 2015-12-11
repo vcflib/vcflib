@@ -12,13 +12,11 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include "gpatInfo.hpp"
 
 using namespace std;
 using namespace vcf;
-void printVersion(void){
-	    cerr << "INFO: version 1.1.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
-	    exit(1);
-}
+
 
 void printHelp(void){
   cerr << endl << endl;
@@ -69,60 +67,48 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH){
+double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wlen){
 
   double nchooseSum = 0;
   // summing over all possible haplotypes
   for(std::map<string, int>::iterator it = hapWin.begin(); 
       it != hapWin.end(); it++){
-
     nchooseSum += r8_choose(it->second, 2);
-    
   }
 
   
   double piSum = 0;
-
   // all unique pairwise 
   for(std::map<string, int>::iterator it = hapWin.begin();
       it != hapWin.end(); it++){
     
     // advancing it
-
     std::map<string, int>::iterator iz = it;
     iz++;
-
     for(;iz != hapWin.end(); iz++){
-
       // different bases
       int ndiff = 0;
-
       for(int i = 0; i < it->first.size();i++){
-	
 	if(it->first[i] != iz->first[i]){
 	  ndiff += 1;
 	}
       }
-      
       double f1 = double(it->second)/double(nHaps);
       double f2 = double(iz->second)/double(nHaps);
+      double perBaseDiff = double(ndiff)/double(wlen);
       
-      piSum += f1*f2*double(ndiff);
-
+      piSum += f1*f2*perBaseDiff;
     }
   }
-
-
+  
 
   *pi  = piSum;
-  *eHH = nchooseSum / r8_choose(nHaps, 2);
-  
+  *eHH = nchooseSum / r8_choose(nHaps, 2);  
 }
 
 
 //calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
 void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
-
 
   if(haplotypes[0][0].length() < (window-1) ){
     return;
@@ -132,6 +118,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
     
     map <string, int> targetHaplotypes;
    
+
     for(int targetIndex = 0; targetIndex < target.size(); targetIndex++ ){
       
       string haplotypeA;
@@ -150,7 +137,9 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 
     // target haplotype are the counts of the unique haplotypes
 
-    pi(targetHaplotypes, target.size()*2, &piEst, &eHH); 
+    int wlen = pos[snpA + window] - pos[snpA];
+
+    pi(targetHaplotypes, target.size()*2, &piEst, &eHH, wlen); 
 
     cout << seqid << "\t" << pos[snpA] << "\t" << pos[snpA + window] << "\t" << piEst << "\t" << eHH << endl;
    
@@ -246,10 +235,12 @@ int main(int argc, char** argv) {
 	  case 'h':
 	    {
 	      printHelp();
+	      break;
 	    }
 	  case 'v':
 	    {
 	      printVersion();
+	      break;
 	    }
 	  case 'y':
 	    {
