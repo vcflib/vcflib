@@ -19,80 +19,79 @@ OBJECTS= $(SOURCES:.cpp=.o)
 
 BIN_SOURCES = src/vcfecho.cpp \
 			  src/dumpContigsFromHeader.cpp \
-			  src/iHS.cpp \
 			  src/bFst.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
+			  src/segmentFst.cpp \
+			  src/genotypeSummary.cpp \
 			  src/sequenceDiversity.cpp \
 			  src/pFst.cpp \
-			  src/xpEHH.cpp \
 			  src/smoother.cpp \
 			  src/LD.cpp \
 			  src/plotHaps.cpp \
 			  src/abba-baba.cpp \
 			  src/permuteGPAT++.cpp \
-#			  src/vcfaltcount.cpp \
-#			  src/vcfhetcount.cpp \
-#			  src/vcfhethomratio.cpp \
-#			  src/strat.cpp \
-#			  src/vcffilter.cpp \
-#			  src/vcf2tsv.cpp \
-#			  src/vcfgenotypes.cpp \
-#			  src/vcfannotategenotypes.cpp \
-#			  src/vcfcommonsamples.cpp \
-#			  src/vcfremovesamples.cpp \
-#			  src/vcfkeepsamples.cpp \
-#			  src/vcfsamplenames.cpp \
-#			  src/vcfgenotypecompare.cpp \
-#			  src/vcffixup.cpp \
-#			  src/vcfclassify.cpp \
-#			  src/vcfsamplediff.cpp \
-#			  src/vcfremoveaberrantgenotypes.cpp \
-#			  src/vcfrandom.cpp \
-#			  src/vcfparsealts.cpp \
-#			  src/vcfstats.cpp \
-#			  src/vcfflatten.cpp \
-#			  src/vcfprimers.cpp \
-#			  src/vcfnumalt.cpp \
-#			  src/vcfcleancomplex.cpp \
-#			  src/vcfintersect.cpp \
-#			  src/vcfannotate.cpp \
-#			  src/vcfallelicprimitives.cpp \
-#			  src/vcfoverlay.cpp \
-#			  src/vcfaddinfo.cpp \
-#			  src/vcfkeepinfo.cpp \
-#			  src/vcfkeepgeno.cpp \
-#			  src/vcfafpath.cpp \
-#			  src/vcfcountalleles.cpp \
-#			  src/vcflength.cpp \
-#			  src/vcfdistance.cpp \
-#			  src/vcfrandomsample.cpp \
-#			  src/vcfentropy.cpp \
-#			  src/vcfglxgt.cpp \
-#			  src/vcfroc.cpp \
-#			  src/vcfsom.cpp \
-#			  src/vcfcheck.cpp \
-#			  src/vcfstreamsort.cpp \
-#			  src/vcfuniq.cpp \
-#			  src/vcfuniqalleles.cpp \
-#			  src/vcfremap.cpp \
-#			  src/vcf2fasta.cpp \
-#			  src/vcfsitesummarize.cpp \
-#			  src/vcfbreakmulti.cpp \
-#			  src/vcfcreatemulti.cpp \
-#			  src/vcfevenregions.cpp \
-#			  src/vcfcat.cpp \
-#			  src/vcfgenosummarize.cpp \
-#			  src/vcfgenosamplenames.cpp \
-#			  src/vcfgeno2haplo.cpp \
-#			  src/vcfleftalign.cpp \
-#			  src/vcfcombine.cpp \
-#			  src/vcfgeno2alleles.cpp \
-#			  src/vcfindex.cpp \
-#			  src/vcfsample2info.cpp \
-#			  src/vcfqual2info.cpp \
-#			  src/vcfglbound.cpp \
+			  src/vcfaltcount.cpp \
+			  src/vcfhetcount.cpp \
+			  src/vcfhethomratio.cpp \
+			  src/vcffilter.cpp \
+			  src/vcf2tsv.cpp \
+			  src/vcfgenotypes.cpp \
+			  src/vcfannotategenotypes.cpp \
+			  src/vcfcommonsamples.cpp \
+			  src/vcfremovesamples.cpp \
+			  src/vcfkeepsamples.cpp \
+			  src/vcfsamplenames.cpp \
+			  src/vcfgenotypecompare.cpp \
+			  src/vcffixup.cpp \
+			  src/vcfclassify.cpp \
+			  src/vcfsamplediff.cpp \
+			  src/vcfremoveaberrantgenotypes.cpp \
+			  src/vcfrandom.cpp \
+			  src/vcfparsealts.cpp \
+			  src/vcfstats.cpp \
+			  src/vcfflatten.cpp \
+			  src/vcfprimers.cpp \
+			  src/vcfnumalt.cpp \
+			  src/vcfcleancomplex.cpp \
+			  src/vcfintersect.cpp \
+			  src/vcfannotate.cpp \
+			  src/vcfallelicprimitives.cpp \
+			  src/vcfoverlay.cpp \
+			  src/vcfaddinfo.cpp \
+			  src/vcfkeepinfo.cpp \
+			  src/vcfkeepgeno.cpp \
+			  src/vcfafpath.cpp \
+			  src/vcfcountalleles.cpp \
+			  src/vcflength.cpp \
+			  src/vcfdistance.cpp \
+			  src/vcfrandomsample.cpp \
+			  src/vcfentropy.cpp \
+			  src/vcfglxgt.cpp \
+			  src/vcfroc.cpp \
+			  src/vcfsom.cpp \
+			  src/vcfcheck.cpp \
+			  src/vcfstreamsort.cpp \
+			  src/vcfuniq.cpp \
+			  src/vcfuniqalleles.cpp \
+			  src/vcfremap.cpp \
+			  src/vcf2fasta.cpp \
+			  src/vcfsitesummarize.cpp \
+			  src/vcfbreakmulti.cpp \
+			  src/vcfcreatemulti.cpp \
+			  src/vcfevenregions.cpp \
+			  src/vcfcat.cpp \
+			  src/vcfgenosummarize.cpp \
+			  src/vcfgenosamplenames.cpp \
+			  src/vcfgeno2haplo.cpp \
+			  src/vcfleftalign.cpp \
+			  src/vcfcombine.cpp \
+			  src/vcfgeno2alleles.cpp \
+			  src/vcfindex.cpp \
+			  src/vcfsample2info.cpp \
+			  src/vcfqual2info.cpp \
+			  src/vcfglbound.cpp \
 
 #BINS = $(BIN_SOURCES:.cpp=)
 BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
@@ -120,8 +119,11 @@ INCLUDES = -I. -L. -Ltabixpp/ -ltabix -lz -lm
 
 all: $(OBJECTS) $(BINS)
 
+
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
+
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x -DVERSION=\"$(GIT_VERSION)\"
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 

@@ -1,4 +1,4 @@
-# vcflib
+# vcflib [![Build Status](https://travis-ci.org/zeeev/vcflib.svg?branch=master)](https://travis-ci.org/zeeev/vcflib)
 ### a C++ library for parsing and manipulating VCF files.
 
 #### author: Erik Garrison <erik.garrison@bc.edu>
@@ -647,3 +647,19 @@ as the previous record.
 
 For each record, remove any duplicate alternate alleles that may have resulted from merging
 separate VCF files.
+
+## GPAT++ 
+
+The application of population genomics to non-model organisms is greatly facilitated by the low cost of next generation sequencing (NGS). Barriers, however, exist for using NGS data for population level analyses. Traditional population genetic metrics, such as Fst, are not robust to the genotyping errors inherent in noisy NGS data. Additionally, many older software tools were never designed to handle the volume of data produced by NGS pipelines. To overcome these limitations we have developed a flexible software library designed specifically for large and noisy NGS datasets. The Genotype Phenotype Association Toolkit (GPAT++) implements both traditional and novel population genetic methods in a single user-friendly framework. GPAT consists of a suite of command-line tools and a Perl API that programmers can use to develop new applications. To date GPAT++ has been used successfully to identity genotype-phenotype associations in several real-world datasets including: domestic pigeons, Pox virus and pine rust fungus. GPAT++ is open source and freely available for academic use.
+
+### Functions
+ - [X] Basic population stats (Af, Pi, eHH, oHet, genotypeCounts)
+ - [X] Several flavors of Fst
+ - [X] Linkage 
+ - [X] Association testing (genotypic and pooled data)
+ - [X] Haplotype methods (hapLrt)
+ - [X] Smoothing 
+ - [X] Permutation
+ - [X] Plotting 
+ 
+### Documentation is underway
