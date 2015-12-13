@@ -1,8 +1,16 @@
 #OBJ_DIR = ./
 HEADERS = src/Variant.h \
 		  src/split.h \
+		  src/pdflib.hpp \
+		  src/var.hpp \
+                  src/cdflib.hpp \
+		  src/rnglib.hpp \
 		  src/join.h
 SOURCES = src/Variant.cpp \
+		  src/rnglib.cpp \
+		  src/var.cpp \
+		  src/pdflib.cpp \
+		  src/cdflib.cpp \
 		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
@@ -17,6 +25,20 @@ OBJ_DIR:=obj
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
+			  src/dumpContigsFromHeader.cpp \
+			  src/bFst.cpp \
+			  src/hapLrt.cpp \
+			  src/popStats.cpp \
+			  src/wcFst.cpp \
+			  src/segmentFst.cpp \
+			  src/genotypeSummary.cpp \
+			  src/sequenceDiversity.cpp \
+			  src/pFst.cpp \
+			  src/smoother.cpp \
+			  src/LD.cpp \
+			  src/plotHaps.cpp \
+			  src/abba-baba.cpp \
+			  src/permuteGPAT++.cpp \
 			  src/vcfaltcount.cpp \
 			  src/vcfhetcount.cpp \
 			  src/vcfhethomratio.cpp \
@@ -103,8 +125,11 @@ LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm
 
 all: $(OBJECTS) $(BINS)
 
+
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
+
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x -DVERSION=\"$(GIT_VERSION)\"
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
@@ -173,6 +198,12 @@ pre:
 	if [ ! -d $(LIB_DIR) ]; then mkdir -p $(LIB_DIR); fi
 	if [ ! -d $(INC_DIR) ]; then mkdir -p $(INC_DIR); fi
 	if [ ! -d $(OBJ_DIR) ]; then mkdir -p $(OBJ_DIR); fi
+
+
+pull:
+	git pull
+
+update: pull all
 
 clean:
 	rm -f $(BINS) $(OBJECTS)

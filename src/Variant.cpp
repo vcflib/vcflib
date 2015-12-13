@@ -70,13 +70,24 @@ void Variant::parse(string& line, bool parseSamples) {
         vector<string>::iterator sample = fields.begin() + 9;
         for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
             string& name = *sampleName;
-            if (*sample == "." || *sample == "./.") {
-                samples.erase(name);
-                continue;
-            }
+
+	    // saving nocalls for downstream uses
+
+//             if (*sample == "." || *sample == "./.") {
+//                 samples.erase(name);
+//                 continue;
+//             }
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
             if (samplefields.size() != format.size()) {
+
+	      // pushing the missing genotype back onto the genotype vector
+
+	      vector<string> missing;
+              missing.push_back("./.");
+
+              samples[name]["GT"] = missing;
+
                 // ignore this case... malformed (or 'null') sample specs are caught above
                 // /*
                 // cerr << "inconsistent number of fields for sample " << name << endl
