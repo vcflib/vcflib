@@ -14,7 +14,7 @@
 #include <getopt.h>
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 void printVersion(void){
 
 	    exit(1);

@@ -13,7 +13,7 @@
 #include "gpatInfo.hpp"
 
 using namespace std;
-using namespace vcf;
+using namespace vcflib;
 
 struct pop{
 
