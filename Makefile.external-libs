@@ -42,7 +42,7 @@ INCLUDES =	-I${LOCALBASE}/include \
 		-I${LOCALBASE}/include/multichoose \
 		-I${LOCALBASE}/include/fastahack \
 		-I${LOCALBASE}/include/intervaltree
-LDFLAGS =	-L. -lvcflib \
+LDFLAGS +=	-L. -lvcflib \
 		-L$(LIB_PATH) -lsw -ltabix -lhts -lfastahack -lfilevercmp \
 		-lpthread -lz -lm
 
