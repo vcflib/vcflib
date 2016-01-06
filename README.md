@@ -1,11 +1,11 @@
-# vcflib [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
-### a C++ library for parsing and manipulating VCF files.
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# vcflib 
+### A C++ library for parsing and manipulating VCF files.
 
 #### author: Erik Garrison <erik.garrison@bc.edu>
 
 #### license: MIT
 
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
 ---
 
 ## overview
