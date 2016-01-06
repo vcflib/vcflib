@@ -7,4 +7,4 @@ before_install:
  - sudo apt-get install build-essential
 os:
  - linux
-script: make
+script:  make
