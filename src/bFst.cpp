@@ -488,7 +488,7 @@ int main(int argc, char** argv) {
     }
     if(ib.size() < 2){
       cerr << endl;
-      cerr << "FATAL: target not specified or less than two indviduals"<< endl;
+      cerr << "FATAL: target not specified or less than two individuals"<< endl;
       cerr << "INFO:  please use bFst --help                          " << endl;
       cerr << endl;
     }

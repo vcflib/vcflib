@@ -26,8 +26,8 @@ void printHelp(void){
   cerr << "INFO: LD --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf -e -d -r                                           " << endl;
   cerr << endl;
   
-  cerr << "INFO: required: t,target     -- argument: a zero base comma seperated list of target individuals corrisponding to VCF columns        " << endl;
-  cerr << "INFO: required: b,background -- argument: a zero base comma seperated list of background individuals corrisponding to VCF columns    " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        " << endl;
+  cerr << "INFO: required: b,background -- argument: a zero base comma separated list of background individuals corresponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
   cerr << "INFO: optional: w,window     -- argument: window size to average LD; default is 1000                                                 " << endl;
@@ -245,7 +245,7 @@ int main(int argc, char** argv) {
 	  case 'e':
 	    {
 	      external = 1;
-	      cerr << "INFO: using background group\'s allele frequecy" << endl;
+	      cerr << "INFO: using background group\'s allele frequency" << endl;
 	      break;
 	    }
 	  case 'd':
