@@ -7,7 +7,7 @@ This program was created by:  Zev N. Kronenberg
 
 Contact: zev.kronenber@gmail.com
 
-Organization: Unviersity of Utah
+Organization: University of Utah
     School of Medicine
     Salt Lake City, Utah
 

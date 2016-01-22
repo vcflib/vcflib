@@ -116,7 +116,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 	backgroundH[ haplotypes[background[i]][0].substr(start, (end - start)) ]++;
       }
 
-      // interating over the target populations haplotypes
+      // iterating over the target populations haplotypes
       for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
 	// grabbing the core SNP (*th).first.substr((end-start)/2, 1) == "1"
 	if( (*th).first.substr((end-start)/2, 1) == "1"){     
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   

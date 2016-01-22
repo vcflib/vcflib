@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   
@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
 	// average sample frequency
 	double pbar = (populationTarget->af + populationBackground->af) / 2;
 
-	// sample variance of allele A frequences over the population 
+	// sample variance of allele A frequencies over the population 
 	
 	double s2 = 0;
 	s2 += ((populationTarget->ngeno * pow(populationTarget->af - pbar, 2))/nbar);

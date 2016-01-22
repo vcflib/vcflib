@@ -59,7 +59,7 @@ void parseRegion(
     }
 }
 
-// stores the posiitional information of a bed target entry
+// stores the positional information of a bed target entry
 class BedTarget {
 
 public:
