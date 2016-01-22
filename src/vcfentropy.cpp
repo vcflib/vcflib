@@ -13,7 +13,7 @@ void printSummary(char** argv) {
          << "    -f, --fasta-reference  FASTA reference file to use to obtain flanking sequences" << endl
          << "    -w, --window-size      Size of the window over which to calculate entropy" << endl
          << endl
-         << "Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight," << endl
+         << "Annotates the output VCF file with, for each record, EntropyLeft, EntropyRight," << endl
          << "EntropyCenter, which are the entropies of the sequence of the given window size to the" << endl
          << "left, right, and center  of the record.  Also adds EntropyRef and EntropyAlt for each alt." << endl
          << endl;

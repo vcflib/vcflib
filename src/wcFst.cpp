@@ -36,8 +36,8 @@ void printHelp(void){
 
   cerr << "INFO: usage:  wcFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL                  " << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
-  cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corresponding to VCF columns        " << endl;
+  cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corresponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: proper formatted VCF                                                                        " << endl;
   cerr << "INFO: required, y,type       -- argument: genotype likelihood format; genotype : GL,PL,GP                                             " << endl;
   cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   " << endl;

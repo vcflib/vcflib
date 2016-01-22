@@ -21,9 +21,9 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     abba-baba calculates the tree pattern for four indviduals.                         " << endl;
+  cerr << "     abba-baba calculates the tree pattern for four individuals.                         " << endl;
   cerr << "     This tool assumes reference is ancestral and ignores non abba-baba sites.          " << endl;
-  cerr << "     The output is a boolian value: 1 = true , 0 = false for abba and baba.             " << endl;
+  cerr << "     The output is a boolean value: 1 = true , 0 = false for abba and baba.             " << endl;
   cerr << "     the tree argument should be specified from the most basal taxa to the most derived." << endl;
   cerr <<  endl;
   cerr << "     Example:" << endl;
@@ -47,9 +47,9 @@ void printHelp(void){
 
   cerr << "INFO: usage:  abba-baba --tree 0,1,2,3 --file my.vcf --type PL" << endl;
   cerr << endl;
-  cerr << "INFO: required: t,tree       -- a zero based comma seperated list of target individuals corrisponding to VCF columns" << endl;
+  cerr << "INFO: required: t,tree       -- a zero based comma separated list of target individuals corresponding to VCF columns" << endl;
   cerr << "INFO: required: f,file       -- a properly formatted VCF.                                                           " << endl;
-  cerr << "INFO: required: y,type       -- genotype likelihood format ; genotypes: GP,GL or PL;                                " << endl;
+  cerr << "INFO: required: y,type       -- genotype likelihood format ; genotypes: GP, GL or PL;                                " << endl;
   cerr << endl;
 
   printVersion() ;
@@ -123,7 +123,7 @@ void loadIndices(vector<int> & tree, string set){
   vector<string>  indviduals = split(set, ",");
 
   if(indviduals.size() < 4){
-    cerr << "FATAL: the abba-baba requires four indviduals provided to the tree option" << endl;
+    cerr << "FATAL: the abba-baba requires four individuals provided to the tree option" << endl;
     exit(1);
   }
   for( vector<string>::iterator it = indviduals.begin(); it != indviduals.end(); it++){

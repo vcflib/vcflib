@@ -18,7 +18,7 @@ void printSummary(char** argv) {
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl
          << "    -R, --region REGION       use 1-based tabix-style region (e.g. chrZ:10-20), multiples allowed" << endl
          << "    -S, --start-only          don't use the reference length information in the record to determine" << endl
-         << "                              overlap status, just use the start posiion" << endl
+         << "                              overlap status, just use the start position" << endl
          << "    -v, --invert              invert the selection, printing only records which would" << endl
          << "                                not have been printed out" << endl
          << "    -i, --intersect-vcf FILE  use this VCF for set intersection generation" << endl
@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
     FastaReference reference;
     if (unioning || intersecting) {
         if (fastaFileName.empty()) {
-            cerr << "a reference is required for haplotype-based intersection and unioniong" << endl;
+            cerr << "a reference is required for haplotype-based intersection and unioning" << endl;
             exit(1);
         }
         reference.open(fastaFileName);

@@ -210,7 +210,7 @@ alignment_end* sw_sse2_byte (const int8_t* ref,
 			vH = _mm_load_si128(pvHLoad + j);
 		}
 
-		/* Lazy_F loop: has been revised to disallow adjecent insertion and then deletion, so don't update E(i, j), learn from SWPS3 */
+		/* Lazy_F loop: has been revised to disallow adjacent insertion and then deletion, so don't update E(i, j), learn from SWPS3 */
         /* reset pointers to the start of the saved data */
         j = 0;
         vH = _mm_load_si128 (pvHStore + j);

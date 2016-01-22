@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine(line);
 
     line = "##INFO=<ID=" + otherGenoTag
-        + ".site.call_concordance,Number=1,Type=Integer,Description=\"Estimated call concorndance rate of "
+        + ".site.call_concordance,Number=1,Type=Integer,Description=\"Estimated call concordance rate of "
         + otherGenoTag + " genotypes between " + otherGenoTag + " and GT\">";
     variantFile.addHeaderLine(line);
 
