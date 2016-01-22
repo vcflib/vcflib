@@ -79,7 +79,7 @@ class Aligner {
 	  const uint8_t& gap_extending_penalty);
   
   // =========
-  // @function Construct an Aligner by the specific matrixs.
+  // @function Construct an Aligner by the specific matrices.
   // =========
   Aligner(const int8_t* score_matrix, 
           const int&    score_matrix_size,
@@ -118,7 +118,7 @@ class Aligner {
   };
 
   // =========
-  // @function Align the query againt the reference that is set by 
+  // @function Align the query against the reference that is set by 
   //             SetReferenceSequence.
   // @param    query     The query sequence.
   // @param    filter    The filter for the alignment.
@@ -128,7 +128,7 @@ class Aligner {
   bool Align(const char* query, const Filter& filter, Alignment* alignment) const;
 
   // =========
-  // @function Align the query againt the reference.
+  // @function Align the query against the reference.
   //           [NOTICE] The reference won't replace the reference 
   //                      set by SetReferenceSequence.
   // @param    query     The query sequence.
@@ -154,7 +154,7 @@ class Aligner {
   bool ReBuild(void);
 
   // =========
-  // @function Rebuild the aligner's ability by the specific matrixs.
+  // @function Rebuild the aligner's ability by the specific matrices.
   //           [NOTICE] If the aligner is not cleaned, rebuilding will fail.
   // @return   True: succeed; false: fail.
   // =========
@@ -165,7 +165,7 @@ class Aligner {
 	  const uint8_t& gap_extending_penalty);
   
   // =========
-  // @function Construct an Aligner by the specific matrixs.
+  // @function Construct an Aligner by the specific matrices.
   //           [NOTICE] If the aligner is not cleaned, rebuilding will fail.
   // @return   True: succeed; false: fail.
   // =========

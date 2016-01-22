@@ -2282,7 +2282,7 @@ vector<Variant*> Variant::matchingHaplotypes() {
     VCFHeader::VCFHeader()
     {
 
-        // add manditory fields
+        // add mandatory fields
         this->header_columns.push_back("#CHROM");
         this->header_columns.push_back("POS");
         this->header_columns.push_back("ID");
@@ -2336,13 +2336,13 @@ vector<Variant*> Variant::matchingHaplotypes() {
         unsigned int meta_line_index = meta_line.find("=", 0);
         string meta_line_prefix = meta_line.substr(0, meta_line_index);
 
-        // check if the meta_line_prefix is in the header_lines, if so add it to the appropirate list
+        // check if the meta_line_prefix is in the header_lines, if so add it to the appropriate list
         if (this->header_lines.find(meta_line_prefix) != header_lines.end()) // the meta_line is a header line so replace what was there
         {
             this->header_lines[meta_line_prefix] = meta_line;
         }
         else if (header_lists.find(meta_line_prefix) != header_lists.end() &&
-            !metaInfoIdExistsInVector(meta_line, this->header_lists[meta_line_prefix])) // check if the metalineprefix is in the headerLists, if so add it to the appropirate list
+            !metaInfoIdExistsInVector(meta_line, this->header_lists[meta_line_prefix])) // check if the metalineprefix is in the headerLists, if so add it to the appropriate list
         {
             this->header_lists[meta_line_prefix].push_back(meta_line);
         }

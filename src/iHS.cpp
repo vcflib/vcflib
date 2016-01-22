@@ -38,7 +38,7 @@ void printHelp(void){
 
   cerr << "INFO: iHS  --target 0,1,2,3,4,5,6,7 --file my.phased.vcf  --region chr1:1-1000 " << endl << endl;
  
-  cerr << "INFO: required: t,target  -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns " << endl;
+  cerr << "INFO: required: t,target  -- argument: a zero base comma separated list of target individuals corresponding to VCF columns " << endl;
   cerr << "INFO: required: f,file    -- argument: proper formatted and phased VCF.                                                    " << endl;
   cerr << "INFO: required: y,type    -- argument: genotype likelihood format: PL,GL,GP                                                " << endl;
   cerr << "INFO: optional: r,region  -- argument: a tabix compliant genomic range : \"seqid:start-end\" or \"seqid\"                  " << endl; 
@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   

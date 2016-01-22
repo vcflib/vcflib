@@ -294,7 +294,7 @@ void updateGenotypes(pop & target, pop & background, vector<double>& parameters,
   double llB = FullProb(target, background, parameters);
   
   if(tbindex == 0){
-    //udate target                                                                                                  
+    //update target                                                                                                  
     target.geno_index[gindex] = newGindex;
       }
   else{
@@ -352,7 +352,7 @@ int main(int argc, char** argv) {
   
   VariantCallFile variantFile ;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   
@@ -410,8 +410,8 @@ int main(int argc, char** argv) {
 
 	    cerr << "INFO: usage:  bFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1" << endl;
 	    cerr << endl;
-	    cerr << "INFO: required: t,target     -- a zero bases comma separated list of target individuals corrisponding to VCF columns" << endl;
-	    cerr << "INFO: required: b,background -- a zero bases comma separated list of background individuals corrisponding to VCF columns" << endl;
+	    cerr << "INFO: required: t,target     -- a zero bases comma separated list of target individuals corresponding to VCF columns" << endl;
+	    cerr << "INFO: required: b,background -- a zero bases comma separated list of background individuals corresponding to VCF columns" << endl;
 	    cerr << "INFO: required: f,file a     -- a proper formatted VCF file.  the FORMAT field MUST contain \"PL\"" << endl; 
 	    cerr << "INFO: required: d,deltaaf    -- skip sites were the difference in allele frequency is less than deltaaf" << endl;
 	    cerr << endl; 
@@ -488,7 +488,7 @@ int main(int argc, char** argv) {
     }
     if(ib.size() < 2){
       cerr << endl;
-      cerr << "FATAL: target not specified or less than two indviduals"<< endl;
+      cerr << "FATAL: target not specified or less than two individuals"<< endl;
       cerr << "INFO:  please use bFst --help                          " << endl;
       cerr << endl;
     }

@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   
@@ -296,7 +296,7 @@ int main(int argc, char** argv) {
 	    countData[i]->nalt += 1;
 	  }
 	  else{
-	    std::cerr << "FATAL: unkown genotype index" << std::endl;
+	    std::cerr << "FATAL: unknown genotype index" << std::endl;
 	    exit(1);
 	  }
 	}

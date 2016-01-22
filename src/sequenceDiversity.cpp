@@ -23,7 +23,7 @@ void printHelp(void){
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
   cerr << "      The sequenceDiversity program calculates two popular metrics of  haplotype diversity: pi and                                  " << endl;
-  cerr << "      extended haplotype homozygoisty (eHH).  Pi is calculated using the Nei and Li 1979 formulation.                               " << endl;
+  cerr << "      extended haplotype homozygosity (eHH).  Pi is calculated using the Nei and Li 1979 formulation.                               " << endl;
   cerr << "      eHH a convenient way to think about haplotype diversity.  When eHH = 0 all haplotypes in the window                           " << endl;
   cerr << "      are unique and when eHH = 1 all haplotypes in the window are identical.                           " << endl;
 
@@ -37,7 +37,7 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf                                                                      " << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
   cerr << "INFO: optional: a,af         -- sites less than af  are filtered out; default is 0                                          " << endl;      
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> targetIndex, backgroundIndex;
   
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
     while(iarg != -1)
       {
 	iarg = getopt_long(argc, argv, "w:y:r:t:b:f:edhv", longopts, &findex);
-	
+
 	switch (iarg)
 	  {
 	  case 'h':
@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
 	  case 'e':
 	    {
 	      external = 1;
-	      cerr << "INFO: using background group\'s allele frequecy" << endl;
+	      cerr << "INFO: using background group\'s allele frequency" << endl;
 	      break;
 	    }
 	  case 'd':

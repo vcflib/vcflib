@@ -90,9 +90,9 @@ void init_destroy (s_profile* p);
   					will return the best alignment beginning position and cigar; bit 8: when setted as 1, (whatever bit 5, 6 or 7 is
  					setted) the function will always return the best alignment beginning position and cigar
 	@param	filters	score filter: when bit 7 of flag is setted as 1 and bit 8 is setted as 0, filters will be used (Please check the
- 					decription of the flag parameter for detailed usage.)
+ 					description of the flag parameter for detailed usage.)
 	@param	filterd	distance filter: when bit 6 of flag is setted as 1 and bit 8 is setted as 0, filterd will be used (Please check 
-					the decription of the flag parameter for detailed usage.)
+					the description of the flag parameter for detailed usage.)
 	@param	maskLen	The distance between the optimal and suboptimal alignment ending position >= maskLen. We suggest to use 
 					readLen/2, if you don't have special concerns. Note: maskLen has to be >= 15, otherwise this function will NOT 
 					return the suboptimal alignment information. Detailed description of maskLen: After locating the optimal

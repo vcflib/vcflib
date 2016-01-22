@@ -25,13 +25,13 @@ void printHelp(void){
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
   cerr << "     xpEHH estimates haplotype decay between the target and background populations.  Haplotypes are integrated                        " << endl;
-  cerr << "     until EHH in the target and background is less than 0.05. The score is the itegrated EHH (target) / integrated EHH (background). " << endl;
-  cerr << "     xpEHH does NOT integrate over genetic distance, as genetic maps are not availible for most non-model organisms.                  " << endl;
+  cerr << "     until EHH in the target and background is less than 0.05. The score is the integrated EHH (target) / integrated EHH (background). " << endl;
+  cerr << "     xpEHH does NOT integrate over genetic distance, as genetic maps are not available for most non-model organisms.                  " << endl;
 
   cerr << "Output : 4 columns :      " << endl;
   cerr << "     1. seqid             " << endl;
   cerr << "     2. position          " << endl;
-  cerr << "     3. alllele frequency " << endl;
+  cerr << "     3. allele frequency " << endl;
   cerr << "     4. EHH-alt           " << endl;
   cerr << "     5. EHH-ref           " << endl;
   cerr << "     6. xpEHH             " << endl << endl;
@@ -39,8 +39,8 @@ void printHelp(void){
   cerr << "INFO: xpEHH  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf                                                " << endl;
   cerr << endl;
 
-  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
-  cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corresponding to VCF columns        " << endl;
+  cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corresponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                        " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                   " << endl;
   cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   " << endl;
@@ -116,7 +116,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 	backgroundH[ haplotypes[background[i]][0].substr(start, (end - start)) ]++;
       }
 
-      // interating over the target populations haplotypes
+      // iterating over the target populations haplotypes
       for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
 	// grabbing the core SNP (*th).first.substr((end-start)/2, 1) == "1"
 	if( (*th).first.substr((end-start)/2, 1) == "1"){     
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   

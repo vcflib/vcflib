@@ -7,7 +7,7 @@ This program was created by:  Zev N. Kronenberg
 
 Contact: zev.kronenber@gmail.com
 
-Organization: Unviersity of Utah
+Organization: University of Utah
     School of Medicine
     Salt Lake City, Utah
 
@@ -155,7 +155,7 @@ void process(vector<int> & pos, vector<double> & value, vector<string> & seqid)
 
   double high = globalOpts.cut;
 
-  cerr << "95th qunatile: " << high << " " << endl;
+  cerr << "95th quantile: " << high << " " << endl;
   
   for(int i = 1; i < 10000; i = (i*2)){
     if(i >= value.size()){

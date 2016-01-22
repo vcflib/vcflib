@@ -767,8 +767,8 @@ int main(int argc, char** argv) {
         // build a new vcf record for that position
         // unless we are already at the position !
         // take everything which is unique to that allele (records) and append it to the new record
-        // then handle genotypes; determine the mapping between alleleic primitives and convert to phased haplotypes
-        // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indecies corresponding to it
+        // then handle genotypes; determine the mapping between allelic primitives and convert to phased haplotypes
+        // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indices corresponding to it
 
         
 

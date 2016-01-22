@@ -195,10 +195,10 @@ public:
     string ref;
     vector<string> alt;      // a list of all the alternate alleles present at this locus
     vector<string> alleles;  // a list all alleles (ref + alt) at this locus
-                             // the indicies are organized such that the genotype codes (0,1,2,.etc.)
-                             // correspond to the correct offest into the allelese vector.
+                             // the indices are organized such that the genotype codes (0,1,2,.etc.)
+                             // correspond to the correct offset into the alleles vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
-    string vrepr(void);  // a comparable record of the variantion described by the record
+    string vrepr(void);  // a comparable record of the variation described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
@@ -552,7 +552,7 @@ private:
     vector<string> header_list_names_ordered;
 
     /*
-     * header_columns is set by the constructor to contain the 8 manditory VCF fields.
+     * header_columns is set by the constructor to contain the 8 mandatory VCF fields.
      * Also, unique header_columns for each of the vcf files are added as well.
      * Duplicates are not allowed, to prevent duplicates use addHeaderColumn when adding header columns
      */

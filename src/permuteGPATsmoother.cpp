@@ -6,7 +6,7 @@ This program was created by:  Zev N. Kronenberg
 
 Contact: zev.kronenber@gmail.com
 
-Organization: Unviersity of Utah
+Organization: University of Utah
     School of Medicine
     Salt Lake City, Utah
 
@@ -169,7 +169,7 @@ int parse = parseOpts(argc, argv);
    }
  }
  else{
-   cerr << "FATAL: coult not open file: " << globalOpts.file << endl;
+   cerr << "FATAL: could not open file: " << globalOpts.file << endl;
    exit(1);
  }
 
@@ -214,7 +214,7 @@ int parse = parseOpts(argc, argv);
    
  }
  else{
-   cerr << "FATAL: coult not open file: " << globalOpts.file << endl;
+   cerr << "FATAL: could not open file: " << globalOpts.file << endl;
    exit(1);
  }
 

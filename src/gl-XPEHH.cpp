@@ -430,7 +430,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
+  // zero based index for the target and background individuals 
   
   map<int, int> it, ib;
   
@@ -474,9 +474,9 @@ int main(int argc, char** argv) {
 	    cerr << "INFO: help" << endl;
 	    cerr << "INFO: description:" << endl;
             cerr << "     gl-XPEHH estimates haplotype decay between the target and background populations.  SNVs are integrated                           " << endl;
-	    cerr << "     until EHH in the target and background is less than 0.05. The score is the itegrated EHH (target) / integrated EHH (background). " << endl;
-	    cerr << "     gl-XPEHH does NOT integrate over genetic distance, as genetic maps are not availible for most non-model organisms. 		   " << endl;
-	    cerr << "     gl-XPEHH phases genotypes, imuputes missing genotypes, and changes poor quality genotypes. Phasing is done in a sliding window   " << endl;
+	    cerr << "     until EHH in the target and background is less than 0.05. The score is the integrated EHH (target) / integrated EHH (background). " << endl;
+	    cerr << "     gl-XPEHH does NOT integrate over genetic distance, as genetic maps are not available for most non-model organisms. 		   " << endl;
+	    cerr << "     gl-XPEHH phases genotypes, imputes missing genotypes, and changes poor quality genotypes. Phasing is done in a sliding window   " << endl;
 	    cerr << "     with a stochastic search, therefore, every time gl-XPEHH is run it will generate slightly different results.                     " << endl;
 
 	    cerr << "Output : 4 columns :     "    << endl;
@@ -487,9 +487,9 @@ int main(int argc, char** argv) {
 
 	    cerr << "INFO: gl-XPEHH  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --ancestral 0        " << endl;
 	    cerr << endl;
-	    cerr << "INFO: required: r,region     -- a genomice range to calculate gl-XPEHH on in the format : \"seqid:start-end]\" or \"seqid\" " << endl;
-	    cerr << "INFO: required: t,target     -- a zero base comma seperated list of target individuals corrisponding to VCF columns        " << endl;
-	    cerr << "INFO: required: b,background -- a zero base comma seperated list of background individuals corrisponding to VCF columns    " << endl;
+	    cerr << "INFO: required: r,region     -- a genomic range to calculate gl-XPEHH on in the format : \"seqid:start-end]\" or \"seqid\" " << endl;
+	    cerr << "INFO: required: t,target     -- a zero base comma separated list of target individuals corresponding to VCF columns        " << endl;
+	    cerr << "INFO: required: b,background -- a zero base comma separated list of background individuals corresponding to VCF columns    " << endl;
 	    cerr << "INFO: required: f,file a     -- proper formatted VCF.  the FORMAT field MUST contain \"PL\" if option phased == 0           " << endl; 
 	    cerr << "INFO: optional: m,mutation   -- which state is derived in vcf [0,1] default is 1                                            " << endl;
 	    cerr << "INFO: optional: p,phased     -- phasing flag [0,1] 0 = phase vcf, 1 = vcf is already phased                                 " << endl;
