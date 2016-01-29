@@ -15,10 +15,10 @@ void printVersion(void){
   std::cerr << "-Contact       : zev.kronenberg [at] gmail.com " << std::endl;
   std::cerr << "-Notes         : If you find a bug, please open a report on github!" << std::endl;
   std::cerr << "-Support       : Please post questions to biostars.org             " << std::endl;
-  std::cerr << "-Contributers  :                                                   " << std::endl;
+  std::cerr << "-Contribution  :                                                   " << std::endl;
   std::cerr << "                 Zev Kronenberg (UW Genome Sciences)               " << std::endl;
   std::cerr << "                 Mark Yandell   (UU Human genetics)                " << std::endl;
-  std::cerr << "                 Mike Shario    (UU Biology)                       " << std::endl;
+  std::cerr << "                 Mike Shapiro   (UU Biology)                       " << std::endl;
   std::cerr << "                 EJ Osborne     (UU Human genetics)                " << std::endl;
   std::cerr << "                 Brett Kennedy  (UU Human genetics)                " << std::endl;
   std::cerr << "                 Daniel Ence    (UU Human genetics)                " << std::endl;

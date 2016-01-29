@@ -76,7 +76,6 @@ double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int w
     nchooseSum += r8_choose(it->second, 2);
   }
 
-  
   double piSum = 0;
   // all unique pairwise 
   for(std::map<string, int>::iterator it = hapWin.begin();
@@ -228,7 +227,7 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "w:y:r:t:b:f:edhv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "a:w:y:r:t:b:f:edhv", longopts, &findex);
 	
 	switch (iarg)
 	  {

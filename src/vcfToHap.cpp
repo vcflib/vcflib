@@ -50,9 +50,7 @@ void printHelp(void){
   cerr << "     3. target allele frequency       "    << endl;
   cerr << "     4. integrated EHH (alternative)  "    << endl;
   cerr << "     5. integrated EHH (reference)    "    << endl;
-  cerr << "     6. iHS ln(iEHHalt/iEHHref)       "    << endl  << endl;
-  cerr << "     7. != 0 integration failure                    "    << endl  << endl;
-  cerr << "     8. != 0 integration failure                    "    << endl  << endl;
+  cerr << "     6. iHS ln(iEHHalt/iEHHref)      "    << endl  << endl;
 
   cerr << "Usage:" << endl;
 
@@ -124,9 +122,13 @@ void loadGeneticMap(int start, int end){
 	continue;
       }
      
+
+
       int diff     = abs(pos - lastpos);
       double vdiff = abs(lastvalue - cm );
       double chunk = vdiff/double(diff);
+
+      //      std::cerr << "INFO: " << diff << " " << vdiff << endl;
 
       double running = lastvalue;
 
@@ -168,216 +170,6 @@ void loadIndices(map<int, int> & index, string set){
   
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
-  }
-}
-
-void countHaps(int nhaps, map<string, int> & targetH, 
-	       string haplotypes[][2], int start, int end){
-
-  for(int i = 0; i < nhaps; i++){
-    
-    std::string h1 =  haplotypes[i][0].substr(start, (end - start)) ;
-    std::string h2 =  haplotypes[i][1].substr(start, (end - start)) ;
-
-    if(targetH.find(h1)  == targetH.end()){
-      targetH[h1] = 1;
-    }
-    else{
-      targetH[h1]++;
-    }
-    if(targetH.find(h2)  == targetH.end()){
-      targetH[h2] = 1;
-    }
-    else{
-      targetH[h2]++;
-    }
-  }
-}
-
-void computeNs(map<string, int> & targetH, int start, 
-	       int end, double * sumT, char ref, bool dir){
-  
-  for( map<string, int>::iterator th = targetH.begin(); 
-       th != targetH.end(); th++){
-    
-    if(th->second < 2){
-      continue;
-    }
-
-
-    // end is extending ; check first base
-    if(dir){
-      if( th->first[0] == ref){	
-
-	//	std::cerr << "count dat: " << th->first << " " << th->second << " " << ref << " " << dir << endl;
-
-	
-	*sumT += r8_choose(th->second, 2);
-      }
-    }
-    
-    // start is extending ; check last base
-    else{
-
-      int last = th->first.size() -1;
-      if( th->first[last] == ref ){
-	//	std::cerr << "count dat:" << th->first << " " << th->second << " " << ref << " " << dir << endl;
-
-
-      	*sumT += r8_choose(th->second, 2);
-      }
-    }
-  }
-}
-
-bool calcEhh(string haplotypes[][2], int start, 
-	     int end, char ref, int nhaps, 
-	     double * ehh, double  div, bool dir){
-
-  double sum = 0 ;
-  map<string , int> refH;  
-   
-  countHaps(nhaps, refH, haplotypes, start, end);
-  computeNs(refH, start, end, &sum, ref, dir   );
-
-  double internalEHH = sum / (r8_choose(div, 2));
-
-  if(internalEHH > 1){
-    std::cerr << "FATAL: internal error." << std::endl;
-    exit(1);
-  }
-
-  *ehh = internalEHH;
-
-  return true;
-}
-
-int integrate(string haplotypes[][2], 
-	      vector<long int> & pos,
-	      bool         direction,
-	      int               maxl, 
-	      int                snp, 
-	      char               ref,
-	      int              nhaps, 
-	      double *           iHH,
-	      double           denom ){
-  
-  double ehh = 1;
-
-  int start = snp;
-  int end   = snp;
-
-  // controls the substring madness
-  if(!direction){
-    start += 1;
-    end += 1;
-  }
-
-  while(ehh > 0.05){
-    if(direction){
-      end += 1;
-    }
-    else{
-      start -= 1;
-    }
-    if(start < 0){
-      return 1;
-    }
-    if(end > maxl){
-      return 1;
-    }
-    double ehhRT = 0;
-    if(!calcEhh(haplotypes, 
-		start, end, 
-		ref, nhaps, 
-		&ehhRT, denom, 
-		direction)){
-      return 1;
-    }
-
-    if(ehhRT <= 0.05){
-      return 0;
-    }
-
-    double delta_gDist = 0.001;
-
-    bool veryLongGap = false ;
-    double dist      =     0 ;
-
-    if(direction){
-      gDist(pos[end-1], pos[end], &delta_gDist); 
-      dist = abs(pos[end-1] - pos[end]);
-    }
-    else{
-      gDist(pos[start + 1], pos[start], &delta_gDist);
-      dist = abs(pos[end-1] - pos[end]);
-   
-    }
-
-    if(dist > 10000){
-      return 1;
-    }
-    double correction = 1;
-    if(dist > 5000){
-      correction = 5000 / dist;
-    }
-
-    *iHH += ((ehh + ehhRT)/2)*delta_gDist*correction;
-    ehh = ehhRT;
-
-  }
-
-  return 10;
-}
-
-void calc(string haplotypes[][2], int nhaps, 
-	  vector<double> & afs, vector<long int> & pos, 
-	  vector<int> & target, vector<int> & background, string seqid){
-
-  int maxl = haplotypes[0][0].length();
-
-#pragma omp parallel for schedule(dynamic, 20)
-  for(int snp = 0; snp < maxl; snp++){
-
-    double ihhR     = 0;
-    double ihhA     = 0;
-
-    map<string , int> refH;
-
-    countHaps(nhaps, refH, haplotypes, snp, snp+1);
-    
-
-    double denomP1 = double(refH["0"]);
-    double denomP2 = double(refH["1"]);
-
-    int refFail = 0;
-    int altFail = 0;
-      
-
-    refFail += integrate(haplotypes, pos, true,  maxl, snp, '0', nhaps, &ihhR, denomP1);
-    
-    refFail += integrate(haplotypes, pos, false, maxl, snp, '0', nhaps, &ihhR,  denomP1);
-
-    altFail += integrate(haplotypes, pos, true, maxl, snp,  '1', nhaps, &ihhA, denomP2);
-
-    altFail += integrate(haplotypes, pos, false, maxl, snp,  '1', nhaps, &ihhA, denomP2);
-
-    if(ihhR == 0 || ihhA == 0){
-      continue;
-    }
-
-     
-    omp_set_lock(&lock);
-    cout << seqid 
-	 << "\t" << pos[snp] 
-	 << "\t" << afs[snp] 
-	 << "\t" << ihhR 
-	 << "\t" << ihhA 
-	 << "\t" << log(ihhA/ihhR) 
-	 << "\t" << refFail 
-	 << "\t" << altFail << std::endl;
-   
-    omp_unset_lock(&lock);
   }
 }
 
@@ -529,8 +321,8 @@ int main(int argc, char** argv) {
       exit(1);
     }
     if(! variantFile.setRegion(globalOpts.region)){
-      cerr <<"WARNING: unable to set region" << endl;
-      exit(0);
+      cerr <<"FATAL: unable to set region" << endl;
+      exit(1);
     }
 
     if (!variantFile.is_open()) {
@@ -610,9 +402,7 @@ int main(int argc, char** argv) {
 
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
-      if(populationTarget->af <= globalOpts.af 
-	 || populationTarget->nref < 2 
-	 || populationTarget->nalt < 2){
+      if(populationTarget->af <= globalOpts.af || populationTarget->af >= (1-globalOpts.af) ){
 	delete populationTarget;
 	continue;
       }
@@ -629,9 +419,35 @@ int main(int argc, char** argv) {
       loadGeneticMap(positions.front(), positions.back());
       cerr << "INFO: finished loading genetics map" << endl;
     }
+    
+    if(positions.size() != haplotypes[0][0].size()){
+      std::cerr << "FATAL: there are " << positions.size() << " and " << haplotypes[0][0].size() << " haplotype SNPs" << endl;
+      exit(1);
+    }
 
-    calc(haplotypes, target_h.size(), afs, positions, 
-	 target_h, background_h, globalOpts.seqid);
+
+    for(int i = 0; i < positions.size(); i++){
+      cerr.precision(8);
+
+      std::cerr << "rs" << i << " " << positions[i] << " " << globalOpts.geneticMap[positions[i]] << " " << "A T" << endl;
+    }
+    
+    for(int i = 0; i < target_h.size() ; i++){
+      cout << haplotypes[i][0][0] ;
+      for(int j = 1; j < haplotypes[i][1].size(); j++){
+	cout << " " << haplotypes[i][0][j] ;
+      }
+      cout << endl;
+      cout << haplotypes[i][1][0] ;
+      for(int j = 1; j < haplotypes[i][1].size(); j++){
+        cout << " " << haplotypes[i][1][j] ;
+      }
+      cout << endl;
+      
+    }
+
+
+
     clearHaplotypes(haplotypes, target_h.size());
 
     exit(0);		    

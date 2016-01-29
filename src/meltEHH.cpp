@@ -22,6 +22,7 @@ omp_lock_t lock;
 
 struct opts{
   int         threads             ;
+  int         pos                 ;
   std::string filename            ;
   std::string mapFile             ;
   std::string seqid               ;
@@ -41,35 +42,30 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     iHS calculates the integrated ratio of haplotype decay between the reference and non-reference allele. " << endl;
+  cerr << "     meltEHH provides the data to plot EHH curves. " << endl;
   
 
   cerr << "Output : 4 columns :                  "    << endl;
   cerr << "     1. seqid                         "    << endl;
   cerr << "     2. position                      "    << endl;
-  cerr << "     3. target allele frequency       "    << endl;
-  cerr << "     4. integrated EHH (alternative)  "    << endl;
-  cerr << "     5. integrated EHH (reference)    "    << endl;
-  cerr << "     6. iHS ln(iEHHalt/iEHHref)       "    << endl  << endl;
-  cerr << "     7. != 0 integration failure                    "    << endl  << endl;
-  cerr << "     8. != 0 integration failure                    "    << endl  << endl;
+  cerr << "     3. EHH                           "    << endl;
+  cerr << "     4. ref or alt [0 == ref]         "    << endl;
 
   cerr << "Usage:" << endl;
 
-  cerr << "      iHS  --target 0,1,2,3,4,5,6,7 --file my.phased.vcf  \\" << endl; 
+  cerr << "      meltEHH --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf  \\" << endl; 
   cerr << "           --region chr1:1-1000 > STDOUT 2> STDERR          " << endl << endl;
 
   cerr << "Params:" << endl;
-  cerr << "       required: t,target  <STRING>  A zero base comma separated list of target" << endl;
+  cerr << "       required: t,target   <STRING>  A zero base comma separated list of target" << endl;
   cerr << "                                     individuals corrisponding to VCF columns  " << endl;
-  cerr << "       required: r,region  <STRING>  A tabix compliant genomic range           " << endl;
+  cerr << "       required: r,region   <STRING>  A tabix compliant genomic range           " << endl;
   cerr << "                                     format: \"seqid:start-end\" or \"seqid\"  " << endl; 
-  cerr << "       required: f,file    <STRING>  Proper formatted and phased VCF.          " << endl;
-  cerr << "       required: y,type    <STRING>  Genotype likelihood format: GT,PL,GL,GP   " << endl;
-  cerr << "       optional: a,af      <DOUBLE>  Alterantive alleles with frquences less   " << endl; 
+  cerr << "       required: f,file     <STRING>  Proper formatted and phased VCF.          " << endl;
+  cerr << "       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP   " << endl;
+  cerr << "       required: p,position <INT>     Variant position to melt.                 " << endl;
+  cerr << "       optional: a,af       <DOUBLE>  Alterantive alleles with frquences less   " << endl; 
   cerr << "                                     than [0.05] are skipped.                  " << endl;
-  cerr << "       optional: x,threads <INT>     Number of CPUS [1].                       " << endl;
-  cerr << "       recommended: g,gen <STRING>   A PLINK formatted map file.               " << endl;
   cerr << endl;
  
   printVersion();
@@ -273,7 +269,7 @@ int integrate(string haplotypes[][2],
     end += 1;
   }
 
-  while(ehh > 0.05){
+  while(ehh > 0.01){
     if(direction){
       end += 1;
     }
@@ -295,34 +291,28 @@ int integrate(string haplotypes[][2],
       return 1;
     }
 
-    if(ehhRT <= 0.05){
+    if(ehhRT <= 0.01){
       return 0;
     }
 
     double delta_gDist = 0.001;
 
-    bool veryLongGap = false ;
-    double dist      =     0 ;
-
     if(direction){
-      gDist(pos[end-1], pos[end], &delta_gDist); 
-      dist = abs(pos[end-1] - pos[end]);
+      gDist(pos[end-1], pos[end], &delta_gDist);
     }
     else{
       gDist(pos[start + 1], pos[start], &delta_gDist);
-      dist = abs(pos[end-1] - pos[end]);
-   
+    }
+    *iHH += ((ehh + ehhRT)/2)*delta_gDist;
+    
+    if(direction){
+    std::cout << pos[end] << "\t" << ehh << "\t" << ref << "\t" << direction << std::endl;
+    }
+    else{
+    std::cout << pos[start] << "\t" << ehh << "\t" << ref << "\t" << direction << std::endl;
     }
 
-    if(dist > 10000){
-      return 1;
-    }
-    double correction = 1;
-    if(dist > 5000){
-      correction = 5000 / dist;
-    }
 
-    *iHH += ((ehh + ehhRT)/2)*delta_gDist*correction;
     ehh = ehhRT;
 
   }
@@ -336,8 +326,13 @@ void calc(string haplotypes[][2], int nhaps,
 
   int maxl = haplotypes[0][0].length();
 
-#pragma omp parallel for schedule(dynamic, 20)
+
   for(int snp = 0; snp < maxl; snp++){
+
+    if(pos[snp] != globalOpts.pos ){
+      continue;
+    }
+    
 
     double ihhR     = 0;
     double ihhA     = 0;
@@ -353,6 +348,9 @@ void calc(string haplotypes[][2], int nhaps,
     int refFail = 0;
     int altFail = 0;
       
+    std::cout << pos[snp] << "\t" << "1" << "\t" << "0" << "\t" << "0" << std::endl;
+
+
 
     refFail += integrate(haplotypes, pos, true,  maxl, snp, '0', nhaps, &ihhR, denomP1);
     
@@ -362,22 +360,6 @@ void calc(string haplotypes[][2], int nhaps,
 
     altFail += integrate(haplotypes, pos, false, maxl, snp,  '1', nhaps, &ihhA, denomP2);
 
-    if(ihhR == 0 || ihhA == 0){
-      continue;
-    }
-
-     
-    omp_set_lock(&lock);
-    cout << seqid 
-	 << "\t" << pos[snp] 
-	 << "\t" << afs[snp] 
-	 << "\t" << ihhR 
-	 << "\t" << ihhA 
-	 << "\t" << log(ihhA/ihhR) 
-	 << "\t" << refFail 
-	 << "\t" << altFail << std::endl;
-   
-    omp_unset_lock(&lock);
   }
 }
 
@@ -414,6 +396,7 @@ int main(int argc, char** argv) {
 	{"type"      , 1, 0, 'y'},
 	{"threads"   , 1, 0, 'x'},
 	{"af"        , 1, 0, 'a'},
+	{"pos"       , 1, 0, 'p'},
 	{0,0,0,0}
       };
 
@@ -422,10 +405,16 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "a:x:g:y:r:d:t:b:f:hv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "a:x:g:y:r:d:t:b:f:p:hv", longopts, &findex);
 	
 	switch (iarg)
 	  {
+	  case 'p':
+	    {
+	      globalOpts.pos = atoi(optarg);
+	      break;
+	    }
+
 	  case 'a':
 	    {
 	      globalOpts.af = atof(optarg);
@@ -529,8 +518,8 @@ int main(int argc, char** argv) {
       exit(1);
     }
     if(! variantFile.setRegion(globalOpts.region)){
-      cerr <<"WARNING: unable to set region" << endl;
-      exit(0);
+      cerr <<"FATAL: unable to set region" << endl;
+      exit(1);
     }
 
     if (!variantFile.is_open()) {

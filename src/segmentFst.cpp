@@ -130,95 +130,103 @@ return 1;
  Function returns:
 
 */
+
+bool growWindow(vector<double> & values, 
+		int * begin            , 
+		int * end              , 
+		int * nhigh            , 
+		int * nlow             ,
+		double * hSum          ,
+		double * lSum           ){
+
+  *begin -= 1;
+  *end   += 1;
+
+  if(*begin < 0){
+    return false;
+  }
+  if(*end >= values.size()){
+    return false;
+  }
+
+  for(int index = *begin; index <= *end; index++){
+    if(values[index] > globalOpts.cut){
+      *nhigh += 1;
+      *hSum += values[index];
+    }
+    else{
+      *nlow += 1;
+      *lSum += values[index];
+    }
+  }
+  if((*nhigh)*2 < (*nlow)){
+    return false;
+  }
+  return true;
+}
+
+//------------------------------- SUBROUTINE --------------------------------
+/*
+ Function input  : takes the sorted Fst scores, positions, and seqids
+
+ Function does   : segments and prints bed
+
+ Function returns:
+
+*/
+
+
 void process(vector<int> & pos, vector<double> & value, vector<string> & seqid)
 {
-  if(value.size() < 10){
-    return;
-  }
-
-  vector<int> yes;
-
-  vector<double> sortedVs;
   
-  for(int i = 0; i < value.size(); i++){
-    yes.push_back(0);
-    sortedVs.push_back(value[i]);
-  }
 
-  sort(sortedVs.begin(), sortedVs.end());
-  
-  int n = value.size()-1;
+  // i is the index of the outter loop/aka variant sites.
+  // always start the seed with 9 SNPs the window grows to 10 in "growWindow"
+  for(int i = 9; i < value.size()-9; i++){
 
-  while( (double(n) / double(value.size())) > 0.99){
-    n-=1;
-  }
+    int begin = i -9;
+    int end   = i +9;
+    
+    int nHigh = 0;
+    int nLow  = 0;
+    
+    double HighSum = 0;
+    double LowSum  = 0;
 
-  double high = globalOpts.cut;
-
-  cerr << "95th qunatile: " << high << " " << endl;
-  
-  for(int i = 1; i < 10000; i = (i*2)){
-    if(i >= value.size()){
-      break;
+    bool anyGroth = false;
+    
+    while(growWindow(value, &begin, &end, 
+		     &nHigh, &nLow, &HighSum, &LowSum)){
+      anyGroth = true;
     }
-    for(int j= 0 ; j < value.size() -i ; j++){
-      
-      int nbelow = 0;
-      int nabove = 0;
-      
-      for(int z = j; z < i+j; z++){
-	if(value[z] > high){
-	  nabove +=1;
-	}
-	else{
-	  nbelow += 1;
-	}
+    // the current window had an extention
+    if(anyGroth){
+    // reset the index beyond current window
+      i = end + 1;
+
+      if(begin < 0){
+	begin = 0;
       }
-      if((2*nabove) > nbelow){
-	for(int fl = j; fl < i+j; fl++){
-	  yes[fl] += 1;
-	}
-      }
-    }
-  }
-  
-  for(int y = 0; y < yes.size(); y++){
-    int begin = y;
-    int end   = y;
-    if(yes[y] > 0){
-      while(yes[y] > 0){
-	end = y;
-	y  += 1;
+      if(end >= value.size()){
+	end = (value.size() - 1);
       }
 
-      double fstSumHigh = 0;
-      double nHigh  = 0;
-      double fstSum = 0;
-      double n      = 0;
-      for(int t = begin; t <= end; t++){
-	
-	if(value[t] > high){
-	  nHigh += 1;
-	  fstSumHigh += value[t];
-	}
-	
-	n += 1;
-	fstSum += value[t];
-      }
+      double avgFstHigh = HighSum / double(nHigh);
+      double avgFst     = (HighSum + LowSum) / (double(nHigh)+double(nLow));
 
-      double avgFst = (fstSum / n);
-      double avgFstHigh = fstSumHigh / nHigh;
 
-      cout << seqid[begin] << "\t" 
-	   << pos[begin] -1 << "\t" 
-	   << pos[end] - 1  << "\t" 
-	   << avgFst << "\t"
-	   << avgFstHigh << "\t"
-	   << n << "\t"
-	   << nHigh << "\t"
-	   << (pos[end] - pos[begin]) 
-	   << endl;
-    }
+
+      cout << seqid[begin]   << "\t"
+           << pos[begin]  -1 << "\t"
+           << pos[end]    -1 << "\t"
+           << avgFst         << "\t"
+           << avgFstHigh     << "\t"
+           << nHigh + nLow   << "\t"
+           << nHigh          << "\t"
+           << (pos[end] - pos[begin])
+           << endl;      
+
+    } 
   }
 }
 
@@ -232,7 +240,8 @@ int main( int argc, char** argv)
   globalOpts.cut = 0.8;
   int parse = parseOpts(argc, argv);
 
-  string last = "NA";
+  string last;
+  int lastPos = 0;
 
   vector<string> seqid;
   vector<int>      pos;
@@ -251,7 +260,7 @@ int main( int argc, char** argv)
 	{
 	  vector<string> lineDat = split(line, '\t');
 	  if(lineDat.size() != 5){
-	    cerr << "FATAL: not valid input" << endl;
+	    cerr << "FATAL: not valid wcFst input" << endl;
 	    exit(1);
 	  }
 	  if(last.compare(lineDat[0]) != 0){
@@ -260,19 +269,27 @@ int main( int argc, char** argv)
 	    pos.clear();
 	    value.clear();
 	    seqid.clear();
+	    lastPos = 0;
 	  }
 	  else{
-	    // WARNING must have af greater than 0.05 <- real variant ....
-
-	    if(atof(lineDat[2].c_str()) > 0.05 || atof(lineDat[3].c_str()) > 0.05){
-	      seqid.push_back(lineDat[0]);
-	      pos.push_back(atoi(lineDat[1].c_str()));
-	      value.push_back(atof(lineDat[4].c_str()));	  
+	    if(atoi(lineDat[1].c_str()) < lastPos){
+	      cerr << "FATAL: wcFst input must be sorted by position." << endl;
+	      exit(1);
 	    }
+	    lastPos = atoi(lineDat[1].c_str());
+	    seqid.push_back(lineDat[0]);
+	    pos.push_back(atoi(lineDat[1].c_str()));
+	    value.push_back(atof(lineDat[4].c_str()));	  
 	  }
 	}
+
+      std::cerr << "INFO: about to segment: " << pos.size() << " scores." << std::endl;
       process(pos, value, seqid);
       myfile.close();
     }
+  else{
+    cerr << "FATAL: could not open file: " << globalOpts.file << endl;
+    exit(1);
+  }
   return 0;
 }
