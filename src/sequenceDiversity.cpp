@@ -50,7 +50,7 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string haplotypes[][2], int ntarget){
+void clearHaplotypes(string **haplotypes, int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
@@ -67,7 +67,7 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wlen){
+void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wlen){
 
   double nchooseSum = 0;
   // summing over all possible haplotypes
@@ -108,7 +108,7 @@ double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int w
 
 
 //calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
+void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
 
   if(haplotypes[0][0].length() < (window-1) ){
     return;
@@ -147,7 +147,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
 
 }
 
-void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
+void loadPhased(string **haplotypes, genotype * pop, int ntarget){
   
   int indIndex = 0;
 
@@ -363,7 +363,10 @@ int main(int argc, char** argv) {
     vector<double>   targetAFS;
     vector<double>   backgroundAFS;
 
-    string haplotypes [nsamples][2];    
+    string **haplotypes = new string*[nsamples];
+	for (int i = 0; i < nsamples; i++) {
+	  haplotypes[i] = new string[2];
+	}
     
     string currentSeqid = "NA";
     

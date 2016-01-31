@@ -50,7 +50,7 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string haplotypes[][2], int ntarget){
+void clearHaplotypes(string **haplotypes, int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
@@ -68,7 +68,7 @@ void loadIndices(map<int, int> & index, string set){
 }
 
 //changed (carson) --> void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]), int maxI){
-void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]){
+void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]){
   int gmax = group.size();
   int smax = haplotypes[0][0].length();
   int matrix[gmax*2][gmax*2];
@@ -226,7 +226,7 @@ double var(int dat[], int n, double mean){
   
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background,  vector<int> total,  string seqid){
+void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background,  vector<int> total,  string seqid){
 
   //moved (carson)
   int tl = 2*target.size();
@@ -290,7 +290,7 @@ void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double
   }
 }
 
-void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
+void loadPhased(string **haplotypes, genotype * pop, int ntarget){
   
   int indIndex = 0;
 
@@ -496,7 +496,11 @@ int main(int argc, char** argv) {
     vector<long int> positions;
     vector<double>   afs;
 
-    string haplotypes [nsamples][2];    
+    //string haplotypes [nsamples][2];    
+	string **haplotypes = new string*[nsamples];
+	for (int i = 0; i < nsamples; i++) {
+	  haplotypes[i] = new string[2];
+	}
     
     string currentSeqid = "NA";
 

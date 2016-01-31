@@ -40,7 +40,7 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string haplotypes[][2], int ntarget){
+void clearHaplotypes(string **haplotypes, int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
@@ -57,7 +57,7 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<double> afs, vector<long int> pos, vector<int> & target, vector<int> & background, string seqid){
+void calc(string **haplotypes, int nhaps, vector<double> afs, vector<long int> pos, vector<int> & target, vector<int> & background, string seqid){
 
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
@@ -115,7 +115,7 @@ void calc(string haplotypes[][2], int nhaps, vector<double> afs, vector<long int
   }   
 }
 
-double EHH(string haplotypes[][2], int nhaps){
+double EHH(string **haplotypes, int nhaps){
 
   map<string , int> hapcounts;
 
@@ -138,7 +138,7 @@ double EHH(string haplotypes[][2], int nhaps){
 
 }
 
-void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
+void loadPhased(string **haplotypes, genotype * pop, int ntarget){
   
   int indIndex = 0;
 
@@ -151,7 +151,7 @@ void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
   }
 }
 
-void printHaplotypes(string haps[][2], vector<int> target, vector<long int> pos){
+void printHaplotypes(string **haps, vector<int> target, vector<long int> pos){
   for(int snp = 0; snp < haps[0][1].length(); snp++){
     cout << pos[snp] << "\t" ;
     for(int ind = 0; ind < target.size(); ind++){
@@ -309,7 +309,10 @@ int main(int argc, char** argv) {
     
     vector<double> afs;
 
-    string haplotypes [target_h.size()][2];    
+    string **haplotypes = new string*[target_h.size()];
+	for (int i = 0; i < target_h.size(); i++) {
+	  haplotypes[i] = new string[2];
+	}
     
     string currentSeqid = "NA";
     
