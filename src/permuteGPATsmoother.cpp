@@ -47,6 +47,7 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "gpatInfo.hpp"
 
 struct options{
   std::string file;
@@ -127,8 +128,8 @@ void printHelp()
   cerr << "INFO: number:  n   -- argument: the number of permutations to run for each value [1000]" << endl;
   cerr << "INFO: success: s   -- argument: stop permutations after \'s\' successes [1]"             << endl;
 
-
   cerr << endl;
+  printVersion();
 
 }
 
@@ -210,8 +211,7 @@ int parse = parseOpts(argc, argv);
        pv = suc / per;
      }
      cout << line << "\t" << suc << "\t" << per << "\t" << pv << endl;
-   }
-   
+   }   
  }
  else{
    cerr << "FATAL: coult not open file: " << globalOpts.file << endl;
