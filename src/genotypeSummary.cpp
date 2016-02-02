@@ -33,8 +33,7 @@ void printHelp(void){
   cerr << "INFO: description:" << endl;
   cerr << "      Summarizes genotype counts for bi-allelic SNVs and indel " << endl;
 
-  cerr << "Output : 9 columns :                 "    << endl;
-  cerr << "     9. target Fis                   "    << endl;
+  cerr << "INFO: output: table of genotype counts for each individual." << endl;
 
 
   cerr << "INFO: usage:  genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp                                                               " << endl;
