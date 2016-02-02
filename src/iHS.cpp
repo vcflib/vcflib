@@ -61,12 +61,12 @@ void printHelp(void){
 
   cerr << "Params:" << endl;
   cerr << "       required: t,target  <STRING>  A zero base comma separated list of target" << endl;
-  cerr << "                                     individuals corrisponding to VCF columns  " << endl;
+  cerr << "                                     individuals corresponding  to VCF columns  " << endl;
   cerr << "       required: r,region  <STRING>  A tabix compliant genomic range           " << endl;
   cerr << "                                     format: \"seqid:start-end\" or \"seqid\"  " << endl; 
   cerr << "       required: f,file    <STRING>  Proper formatted and phased VCF.          " << endl;
   cerr << "       required: y,type    <STRING>  Genotype likelihood format: GT,PL,GL,GP   " << endl;
-  cerr << "       optional: a,af      <DOUBLE>  Alterantive alleles with frquences less   " << endl; 
+  cerr << "       optional: a,af      <DOUBLE>  Alternative  alleles with frequencies less   " << endl; 
   cerr << "                                     than [0.05] are skipped.                  " << endl;
   cerr << "       optional: x,threads <INT>     Number of CPUS [1].                       " << endl;
   cerr << "       recommended: g,gen <STRING>   A PLINK formatted map file.               " << endl;
