@@ -692,3 +692,28 @@ INFO: required, y,type       -- argument: genotype likelihood format; genotype :
 INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end
 INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero
 ```
+### popStats
+Calculates basic population statistics at bi-allelic sites. The allele frequency is the number of non-reference alleles divided by the total number of alleles.  The expected hetrozygosity is 2*p*q, where p is the non-reference allele frequency and q is 1-p.  The observed heterozgosity is the fraction of 0/1 genotypes out of all genotypes.  The inbreeding coefficent, Fis, is the relative heterozygosity of each individual vs. compared to the target group. 
+
+```
+INFO: help
+INFO: description:
+      General population genetic statistics for each SNP
+
+Output : 9 columns :
+     1. seqid
+     2. position
+     3. target allele frequency
+     4. expected heterozygosity
+     5. observed heterozygosity
+     6. number of hets
+     7. number of homozygous ref
+     8. number of homozygous alt
+     9. target Fis
+INFO: usage:  popStat --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf
+
+INFO: required: t,target     -- a zero based comma separated list of target individuals corresponding to VCF columns
+INFO: required: f,file       -- proper formatted VCF
+INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
+INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
+```
