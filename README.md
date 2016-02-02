@@ -703,6 +703,32 @@ INFO: required, y,type       -- argument: genotype likelihood format; genotype :
 INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end
 INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero
 ```
+
+### segmentFst
+
+This program provides a way to find continious regions with high Fst values.  It takes the output of wcFst and produces a BED file.  These high Fst region can be permutated with 'permuteGPATwindow'.
+
+```
+INFO: help
+INFO: description:
+      Creates genomic segments (bed file) for regions with high wcFst
+Output : 8 columns :
+     1. Seqid
+     2. Start (zero based)
+     3. End   (zero based)
+     4. Average Fst
+     5. Average high Fst (Fst > -s)
+     6. N Fst values in segment
+     7. N high fst values in segment
+     8. Segment length
+INFO: usage:  segmentFst -s 0.7 -f wcFst.output.txt
+
+INFO: required: -f            -- Output from wcFst
+INFO: optional: -s            -- High Fst cutoff [0.8] 
+
+```
+
+
 ### popStats
 Calculates basic population statistics at bi-allelic sites. The allele frequency is the number of non-reference alleles divided by the total number of alleles.  The expected hetrozygosity is 2*p*q, where p is the non-reference allele frequency and q is 1-p.  The observed heterozgosity is the fraction of 0/1 genotypes out of all genotypes.  The inbreeding coefficent, Fis, is the relative heterozygosity of each individual vs. compared to the target group. 
 
