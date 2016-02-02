@@ -30,7 +30,6 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
-			  src/iHS.cpp \
 			  src/segmentFst.cpp \
 			  src/genotypeSummary.cpp \
 			  src/sequenceDiversity.cpp \
@@ -40,9 +39,6 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/plotHaps.cpp \
 			  src/abba-baba.cpp \
 			  src/permuteGPAT++.cpp \
-			  src/permuteGPATwindow.cpp \
-			  src/normalize-iHS.cpp \
-			  src/meltEHH.cpp \
 			  src/vcfaltcount.cpp \
 			  src/vcfhetcount.cpp \
 			  src/vcfhethomratio.cpp \
@@ -124,7 +120,7 @@ FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
 INCLUDES = -Itabixpp/htslib -I$(INC_DIR) -L. -Ltabixpp/htslib
-LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm -fopenmp
+LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm
 
 
 all: $(OBJECTS) $(BINS)
