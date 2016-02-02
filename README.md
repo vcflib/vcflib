@@ -795,6 +795,36 @@ INFO: optional: w,window     -- argument: the number of SNPs per window; default
 
 ```
 
+###meltEHH
+
+The program 'meltEHH' produces the data to generate the following plot:
+
+
+
+```
+INFO: help
+INFO: description:
+     meltEHH provides the data to plot EHH curves.
+Output : 4 columns :
+     1. seqid
+     2. position
+     3. EHH
+     4. ref or alt [0 == ref]
+Usage:
+      meltEHH --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf  \
+           --region chr1:1-1000 > STDOUT 2> STDERR
+
+Params:
+       required: t,target   <STRING>  A zero base comma separated list of target
+                                     individuals corresponding to VCF columns
+       required: r,region   <STRING>  A tabix compliant genomic range
+                                     format: "seqid:start-end" or "seqid"
+       required: f,file     <STRING>  Proper formatted and phased VCF.
+       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP
+       required: p,position <INT>     Variant position to melt.
+       optional: a,af       <DOUBLE>  Alternative alleles with frequencies less
+                                     than [0.05] are skipped.
+```
 ### iHS
 
 iHS calculates the integrated haplotype score which measures the relative decay of extended haplotype homozygosity (EHH) for the reference and alternative alleles at a site (see: voight et al. 2006, Spiech & Hernandez 2014).  Our code is highly concordant with both implementations mentioned. However, we do not set an upper limit to the allele frequency.  iHS can be run without a genetic map, in which case the change in EHH is integrated over a constant.  Human genetic maps for GRCh36 and GRCh37 (hg18 & hg19) can be found at: http://bochet.gcc.biostat.washington.edu/beagle/genetic_maps/ . iHS by default interpolates SNV positions to genetic position (you don't need a genetic position for every VCF entry in the map file).
