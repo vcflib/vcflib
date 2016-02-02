@@ -799,7 +799,7 @@ INFO: optional: w,window     -- argument: the number of SNPs per window; default
 
 The program 'meltEHH' produces the data to generate the following plot:
 
-
+<img src="https://github.com/vcflib/vcflib/blob/master/examples/example-ehh.png?raw=true" alt="" width=200>
 
 ```
 INFO: help
