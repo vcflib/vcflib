@@ -764,6 +764,37 @@ INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
 INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
 INFO: optional, s,snp        -- Only count SNPs
 ```
+### EHH and PI
+
+The 'sequenceDiversity' program calculates extended haplotype homozygosity and pi within a fixed-width sliding window.  This requires phased data.
+
+```
+INFO: help
+INFO: description:
+      The sequenceDiversity program calculates two popular metrics of  haplotype diversity: pi and
+      extended haplotype homozygoisty (eHH).  Pi is calculated using the Nei and Li 1979 formulation.
+      eHH a convenient way to think about haplotype diversity.  When eHH = 0 all haplotypes in the window
+      are unique and when eHH = 1 all haplotypes in the window are identical.
+
+Output : 5 columns:
+         1.  seqid
+         2.  start of window
+         3.  end of window
+         4.  pi
+         5.  eHH
+
+
+INFO: usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf
+
+INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns
+INFO: required: f,file       -- argument: a properly formatted phased VCF file
+INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP
+INFO: optional: a,af         -- sites less than af  are filtered out; default is 0
+INFO: optional: r,region     -- argument: a tabix compliant region : "seqid:0-100" or "seqid"
+INFO: optional: w,window     -- argument: the number of SNPs per window; default is 20
+
+```
+
 ### iHS
 
 iHS calculates the integrated haplotype score which measures the relative decay of extended haplotype homozygosity (EHH) for the reference and alternative alleles at a site (see: voight et al. 2006, Spiech & Hernandez 2014).  Our code is highly concordant with both implementations mentioned. However, we do not set an upper limit to the allele frequency.  iHS can be run without a genetic map, in which case the change in EHH is integrated over a constant.  Human genetic maps for GRCh36 and GRCh37 (hg18 & hg19) can be found at: http://bochet.gcc.biostat.washington.edu/beagle/genetic_maps/ . iHS by default interpolates SNV positions to genetic position (you don't need a genetic position for every VCF entry in the map file).
