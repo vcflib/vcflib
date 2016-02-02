@@ -50,7 +50,7 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string **haplotypes, int ntarget){
+void clearHaplotypes(string haplotypes[][2], int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
@@ -67,7 +67,7 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wlen){
+double pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wlen){
 
   double nchooseSum = 0;
   // summing over all possible haplotypes
@@ -76,6 +76,7 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
     nchooseSum += r8_choose(it->second, 2);
   }
 
+  
   double piSum = 0;
   // all unique pairwise 
   for(std::map<string, int>::iterator it = hapWin.begin();
@@ -107,7 +108,7 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
 
 
 //calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
-void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
+void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
 
   if(haplotypes[0][0].length() < (window-1) ){
     return;
@@ -146,7 +147,7 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> t
 
 }
 
-void loadPhased(string **haplotypes, genotype * pop, int ntarget){
+void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
   
   int indIndex = 0;
 
@@ -227,7 +228,7 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "a:w:y:r:t:b:f:edhv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "w:y:r:t:b:f:edhv", longopts, &findex);
 	
 	switch (iarg)
 	  {
@@ -362,10 +363,7 @@ int main(int argc, char** argv) {
     vector<double>   targetAFS;
     vector<double>   backgroundAFS;
 
-    string **haplotypes = new string*[nsamples];
-	for (int i = 0; i < nsamples; i++) {
-	  haplotypes[i] = new string[2];
-	}
+    string haplotypes [nsamples][2];    
     
     string currentSeqid = "NA";
     

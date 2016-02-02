@@ -12,37 +12,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
-#include "gpatInfo.hpp"
-// maaas speed
-#include <omp.h>
-// print lock
-omp_lock_t lock;
-
-
-
-struct opts{
-  int         threads             ;
-  std::string filename            ;
-  std::string mapFile             ;
-  std::string seqid               ;
-  std::string geneticMapFile      ;
-  std::string type                ;
-  std::string region              ;
-  std::map<int, double> geneticMap;
-  double      af                  ;
-
-}globalOpts;
-
 
 using namespace std;
-using namespace vcflib;
+using namespace vcf;
+void printVersion(void){
+	    cerr << "INFO: version 1.1.0 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu " << endl;
+	    exit(1);
+
+}
 
 void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
   cerr << "     iHS calculates the integrated ratio of haplotype decay between the reference and non-reference allele. " << endl;
-  
+  cerr << "     This implementation of iHS integrates over a SNP index, NOT a physical distance or genetic distance.   " << endl << endl;
 
   cerr << "Output : 4 columns :                  "    << endl;
   cerr << "     1. seqid                         "    << endl;
@@ -50,26 +34,14 @@ void printHelp(void){
   cerr << "     3. target allele frequency       "    << endl;
   cerr << "     4. integrated EHH (alternative)  "    << endl;
   cerr << "     5. integrated EHH (reference)    "    << endl;
-  cerr << "     6. iHS ln(iEHHalt/iEHHref)       "    << endl  << endl;
-  cerr << "     7. != 0 integration failure                    "    << endl  << endl;
-  cerr << "     8. != 0 integration failure                    "    << endl  << endl;
+  cerr << "     6. iHS log(iEHHalt/iEHHref)      "    << endl  << endl;
 
-  cerr << "Usage:" << endl;
-
-  cerr << "      iHS  --target 0,1,2,3,4,5,6,7 --file my.phased.vcf  \\" << endl; 
-  cerr << "           --region chr1:1-1000 > STDOUT 2> STDERR          " << endl << endl;
-
-  cerr << "Params:" << endl;
-  cerr << "       required: t,target  <STRING>  A zero base comma separated list of target" << endl;
-  cerr << "                                     individuals corrisponding to VCF columns  " << endl;
-  cerr << "       required: r,region  <STRING>  A tabix compliant genomic range           " << endl;
-  cerr << "                                     format: \"seqid:start-end\" or \"seqid\"  " << endl; 
-  cerr << "       required: f,file    <STRING>  Proper formatted and phased VCF.          " << endl;
-  cerr << "       required: y,type    <STRING>  Genotype likelihood format: GT,PL,GL,GP   " << endl;
-  cerr << "       optional: a,af      <DOUBLE>  Alterantive alleles with frquences less   " << endl; 
-  cerr << "                                     than [0.05] are skipped.                  " << endl;
-  cerr << "       optional: x,threads <INT>     Number of CPUS [1].                       " << endl;
-  cerr << "       recommended: g,gen <STRING>   A PLINK formatted map file.               " << endl;
+  cerr << "INFO: iHS  --target 0,1,2,3,4,5,6,7 --file my.phased.vcf  --region chr1:1-1000 " << endl << endl;
+ 
+  cerr << "INFO: required: t,target  -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns " << endl;
+  cerr << "INFO: required: f,file    -- argument: proper formatted and phased VCF.                                                    " << endl;
+  cerr << "INFO: required: y,type    -- argument: genotype likelihood format: PL,GL,GP                                                " << endl;
+  cerr << "INFO: optional: r,region  -- argument: a tabix compliant genomic range : \"seqid:start-end\" or \"seqid\"                  " << endl; 
   cerr << endl;
  
   printVersion();
@@ -77,84 +49,7 @@ void printHelp(void){
   exit(1);
 }
 
-
-bool gDist(int start, int end, double * gd){
-  
-  if(globalOpts.geneticMap.find(start) == globalOpts.geneticMap.end()){
-    return false;
-  }
-  if(globalOpts.geneticMap.find(end) == globalOpts.geneticMap.end()){
-    return false;
-  }
-  *gd = abs(globalOpts.geneticMap[start] - globalOpts.geneticMap[end]);
-  return true;
-}
-
-void loadGeneticMap(int start, int end){
-
-  if(globalOpts.geneticMapFile.empty()){
-    std::cerr << "WARNING: No genetic map." << std::endl;
-    std::cerr << "WARNING: A constant genetic distance is being used: 0.001." << std::endl;
-    return;
-  }
-
-  ifstream featureFile (globalOpts.geneticMapFile.c_str());
- 
-  string line;
-
-  int lastpos      = 0;
-  double lastvalue = 0;
-
-  if(featureFile.is_open()){
-
-    while(getline(featureFile, line)){
-
-      vector<string> region = split(line, "\t");
-
-      if(region.front() != globalOpts.seqid){
-	std::cerr << "WARNING: seqid MisMatch: " << region.front() << " " << globalOpts.seqid << std::endl;
-	continue;
-      }
-
-      int   pos = atoi(region[3].c_str()) ;
-      double cm = atof(region[2].c_str()) ;
-
-      if(lastpos == 0 && start > pos){
-	lastpos = pos;
-	continue;
-      }
-     
-      int diff     = abs(pos - lastpos);
-      double vdiff = abs(lastvalue - cm );
-      double chunk = vdiff/double(diff);
-
-      double running = lastvalue;
-
-      for(int i = lastpos; i < pos; i++){
-	globalOpts.geneticMap[i] = running;
-	running += chunk;
-      }
-
-      if(pos > end){
-	break;
-      }
-
-
-      lastpos = pos;
-      lastvalue = cm;
-    }
-  }
-
-  featureFile.close();
-
-  if(globalOpts.geneticMap.size() < 1){
-    std::cerr << "FATAL: Problem loading genetic map" << std::endl;
-    exit(1);
-  }
-}
-
-
-void clearHaplotypes(string **haplotypes, int ntarget){
+void clearHaplotypes(string haplotypes[][2], int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
@@ -171,217 +66,111 @@ void loadIndices(map<int, int> & index, string set){
   }
 }
 
-void countHaps(int nhaps, map<string, int> & targetH, 
-	       string **haplotypes, int start, int end){
+void calc(string haplotypes[][2], int nhaps, vector<double> afs, vector<long int> pos, vector<int> & target, vector<int> & background, string seqid){
+
+   //cerr << "about to calc" << endl;
+   //cerr << "nhap:        " << nhaps << endl;
+
+  for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
+    
+    int breakflag = 1;
+    int count     = 0;
+
+    double ehhA = 1;
+    double ehhR = 1;
+
+    double iHSA = 0;
+    double iHSR = 0;
+
+    int start = snp;
+    int end   = snp;
+    int core  = snp; 
+
+    while( breakflag ) {
+     
+      if(count > 0){
+	start -= 1;
+	end   += 1;
+      }
+      if(start == -1){
+	break;
+      }
+      if(end == haplotypes[0][0].length() - 1){
+	break;
+      }
+      count += 1;
+
+      map<string , int> targetH;
+
+      double sumrT = 0;
+      double sumaT = 0;
+      double nrefT = 0;
+      double naltT = 0;
+
+      for(int i = 0; i < nhaps; i++){
+	targetH[ haplotypes[i][0].substr(start, (end - start)) ]++;
+	targetH[ haplotypes[i][1].substr(start, (end - start)) ]++;
+      }     
+      for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){        
+	if( (*th).first.substr((end-start)/2, 1) == "1"){     
+	  sumaT += r8_choose(th->second, 2);  
+	  naltT += th->second;
+	}
+	else{
+	  sumrT += r8_choose(th->second, 2);  
+	  nrefT += th->second;
+	}
+      }
+      cerr << pos[snp] << " " << naltT  << " " << nrefT << endl; 
+      
+      double ehhAC = sumaT / (r8_choose(naltT, 2));
+      double ehhRC = sumrT / (r8_choose(nrefT, 2));
+
+      if(count == 1){
+	ehhA = ehhAC;
+	ehhR = ehhRC;
+	continue;
+      }
+
+      iHSA += (ehhA + ehhAC) / 2;
+      iHSR += (ehhR + ehhRC) / 2;
+
+      ehhA = ehhAC;
+      ehhR = ehhRC;
+
+      if(ehhA < 0.05 && ehhR < 0.05){
+	breakflag = 0;
+      }
+    } 
+
+    cout << seqid << "\t" << pos[snp] << "\t" << afs[snp] << "\t" << iHSA << "\t" << iHSR << "\t" << log(iHSA/iHSR) << endl;
+  }   
+}
+
+double EHH(string haplotypes[][2], int nhaps){
+
+  map<string , int> hapcounts;
 
   for(int i = 0; i < nhaps; i++){
-    
-    std::string h1 =  haplotypes[i][0].substr(start, (end - start)) ;
-    std::string h2 =  haplotypes[i][1].substr(start, (end - start)) ;
-
-    if(targetH.find(h1)  == targetH.end()){
-      targetH[h1] = 1;
-    }
-    else{
-      targetH[h1]++;
-    }
-    if(targetH.find(h2)  == targetH.end()){
-      targetH[h2] = 1;
-    }
-    else{
-      targetH[h2]++;
-    }
+    hapcounts[ haplotypes[i][0] ]++;
+    hapcounts[ haplotypes[i][1] ]++;
   }
-}
 
-void computeNs(map<string, int> & targetH, int start, 
-	       int end, double * sumT, char ref, bool dir){
+  double sum = 0;
+  double nh  = 0;
+
+  for( map<string, int>::iterator it = hapcounts.begin(); it != hapcounts.end(); it++){
+    nh  += it->second; 
+    sum += r8_choose(it->second, 2);
+  }
+
+  double max = (sum /  r8_choose(nh, 2));
   
-  for( map<string, int>::iterator th = targetH.begin(); 
-       th != targetH.end(); th++){
-    
-    if(th->second < 2){
-      continue;
-    }
+  return max;
 
-
-    // end is extending ; check first base
-    if(dir){
-      if( th->first[0] == ref){	
-
-	//	std::cerr << "count dat: " << th->first << " " << th->second << " " << ref << " " << dir << endl;
-
-	
-	*sumT += r8_choose(th->second, 2);
-      }
-    }
-    
-    // start is extending ; check last base
-    else{
-
-      int last = th->first.size() -1;
-      if( th->first[last] == ref ){
-	//	std::cerr << "count dat:" << th->first << " " << th->second << " " << ref << " " << dir << endl;
-
-
-      	*sumT += r8_choose(th->second, 2);
-      }
-    }
-  }
 }
 
-bool calcEhh(string **haplotypes, int start, 
-	     int end, char ref, int nhaps, 
-	     double * ehh, double  div, bool dir){
-
-  double sum = 0 ;
-  map<string , int> refH;  
-   
-  countHaps(nhaps, refH, haplotypes, start, end);
-  computeNs(refH, start, end, &sum, ref, dir   );
-
-  double internalEHH = sum / (r8_choose(div, 2));
-
-  if(internalEHH > 1){
-    std::cerr << "FATAL: internal error." << std::endl;
-    exit(1);
-  }
-
-  *ehh = internalEHH;
-
-  return true;
-}
-
-int integrate(string **haplotypes   , 
-	      vector<long int> & pos,
-	      bool         direction,
-	      int               maxl, 
-	      int                snp, 
-	      char               ref,
-	      int              nhaps, 
-	      double *           iHH,
-	      double           denom ){
-  
-  double ehh = 1;
-
-  int start = snp;
-  int end   = snp;
-
-  // controls the substring madness
-  if(!direction){
-    start += 1;
-    end += 1;
-  }
-
-  while(ehh > 0.05){
-    if(direction){
-      end += 1;
-    }
-    else{
-      start -= 1;
-    }
-    if(start < 0){
-      return 1;
-    }
-    if(end > maxl){
-      return 1;
-    }
-    double ehhRT = 0;
-    if(!calcEhh(haplotypes, 
-		start, end, 
-		ref, nhaps, 
-		&ehhRT, denom, 
-		direction)){
-      return 1;
-    }
-
-    if(ehhRT <= 0.05){
-      return 0;
-    }
-
-    double delta_gDist = 0.001;
-
-    bool veryLongGap = false ;
-    double dist      =     0 ;
-
-    if(direction){
-      gDist(pos[end-1], pos[end], &delta_gDist); 
-      dist = abs(pos[end-1] - pos[end]);
-    }
-    else{
-      gDist(pos[start + 1], pos[start], &delta_gDist);
-      dist = abs(pos[end-1] - pos[end]);
-   
-    }
-
-    if(dist > 10000){
-      return 1;
-    }
-    double correction = 1;
-    if(dist > 5000){
-      correction = 5000 / dist;
-    }
-
-    *iHH += ((ehh + ehhRT)/2)*delta_gDist*correction;
-    ehh = ehhRT;
-
-  }
-
-  return 10;
-}
-
-void calc(string **haplotypes, int nhaps, 
-	  vector<double> & afs, vector<long int> & pos, 
-	  vector<int> & target, vector<int> & background, string seqid){
-
-  int maxl = haplotypes[0][0].length();
-
-#pragma omp parallel for schedule(dynamic, 20)
-  for(int snp = 0; snp < maxl; snp++){
-
-    double ihhR     = 0;
-    double ihhA     = 0;
-
-    map<string , int> refH;
-
-    countHaps(nhaps, refH, haplotypes, snp, snp+1);
-    
-
-    double denomP1 = double(refH["0"]);
-    double denomP2 = double(refH["1"]);
-
-    int refFail = 0;
-    int altFail = 0;
-      
-
-    refFail += integrate(haplotypes, pos, true,  maxl, snp, '0', nhaps, &ihhR, denomP1);
-    
-    refFail += integrate(haplotypes, pos, false, maxl, snp, '0', nhaps, &ihhR,  denomP1);
-
-    altFail += integrate(haplotypes, pos, true, maxl, snp,  '1', nhaps, &ihhA, denomP2);
-
-    altFail += integrate(haplotypes, pos, false, maxl, snp,  '1', nhaps, &ihhA, denomP2);
-
-    if(ihhR == 0 || ihhA == 0){
-      continue;
-    }
-
-     
-    omp_set_lock(&lock);
-    cout << seqid 
-	 << "\t" << pos[snp] 
-	 << "\t" << afs[snp] 
-	 << "\t" << ihhR 
-	 << "\t" << ihhA 
-	 << "\t" << log(ihhA/ihhR) 
-	 << "\t" << refFail 
-	 << "\t" << altFail << std::endl;
-   
-    omp_unset_lock(&lock);
-  }
-}
-
-void loadPhased(string **haplotypes, genotype * pop, int ntarget){
+void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
   
   int indIndex = 0;
 
@@ -396,13 +185,39 @@ void loadPhased(string **haplotypes, genotype * pop, int ntarget){
 
 int main(int argc, char** argv) {
 
-  globalOpts.threads = 1   ;
-  globalOpts.af      = 0.05;
+  // set the random seed for MCMC
+
+  srand((unsigned)time(NULL));
+
+  // the filename
+
+  string filename = "NA";
+
+  // set region to scaffold
+
+  string region = "NA"; 
+
+  // using vcflib; thanks to Erik Garrison 
+
+  VariantCallFile variantFile;
 
   // zero based index for the target and background indivudals 
   
   map<int, int> it, ib;
   
+  // deltaaf is the difference of allele frequency we bother to look at 
+
+  // ancestral state is set to zero by default
+
+
+  int counts = 0;
+  
+  // phased 
+
+  int phased = 0;
+
+  string type = "NA";
+
     const struct option longopts[] = 
       {
 	{"version"   , 0, 0, 'v'},
@@ -410,10 +225,7 @@ int main(int argc, char** argv) {
         {"file"      , 1, 0, 'f'},
 	{"target"    , 1, 0, 't'},
 	{"region"    , 1, 0, 'r'},
-	{"gen"       , 1, 0, 'g'},
 	{"type"      , 1, 0, 'y'},
-	{"threads"   , 1, 0, 'x'},
-	{"af"        , 1, 0, 'a'},
 	{0,0,0,0}
       };
 
@@ -422,65 +234,34 @@ int main(int argc, char** argv) {
 
     while(iarg != -1)
       {
-	iarg = getopt_long(argc, argv, "a:x:g:y:r:d:t:b:f:hv", longopts, &findex);
+	iarg = getopt_long(argc, argv, "y:r:d:t:b:f:hv", longopts, &findex);
 	
 	switch (iarg)
 	  {
-	  case 'a':
-	    {
-	      globalOpts.af = atof(optarg);
-	      break;
-	    }
-	  case 'x':
-	    {
-	      globalOpts.threads = atoi(optarg);
-	      break;
-	    }
-	  case 'g':
-	    {
-	      globalOpts.geneticMapFile = optarg;
-	      break;
-	    }
 	  case 'h':
-	    {
-	      printHelp();
-	      break;
-	    }
+	    printHelp();
 	  case 'v':
-	    {
-	      printVersion();
-	      break;
-	    }
+	    printVersion();
 	  case 'y':
-	    {
-	      globalOpts.type = optarg;
-	      break;
-	    }
+	    type = optarg;
+	    break;
 	  case 't':
-	    {
-	      loadIndices(it, optarg);
-	      cerr << "INFO: there are " << it.size() << " individuals in the target" << endl;
-	      cerr << "INFO: target ids: " << optarg << endl;
-	      break;
-	    }
+	    loadIndices(it, optarg);
+	    cerr << "INFO: there are " << it.size() << " individuals in the target" << endl;
+	    cerr << "INFO: target ids: " << optarg << endl;
+	    break;
 	  case 'f':
-	    {
-	      cerr << "INFO: file: " << optarg  <<  endl;
-	      globalOpts.filename = optarg;
-	      break;
-	    }
+	    cerr << "INFO: file: " << optarg  <<  endl;
+	    filename = optarg;
+	    break;
 	  case 'r':
-	    {
-	      cerr << "INFO: set seqid region to : " << optarg << endl;
-	      globalOpts.region = optarg; 
-	      break;
-	    default:
-	      break;
-	    }
+            cerr << "INFO: set seqid region to : " << optarg << endl;
+	    region = optarg; 
+	    break;
+	  default:
+	    break;
 	  }
       }
-
-  omp_set_num_threads(globalOpts.threads);
 
     map<string, int> okayGenotypeLikelihoods;
     okayGenotypeLikelihoods["PL"] = 1;
@@ -489,59 +270,50 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["GT"] = 1;
     
 
-    // add an option for dumping
-
-//    for(std::map<int, double>::iterator gm = geneticMap.begin(); gm != geneticMap.end(); gm++){
-//      cerr << "pos: " << gm->first << " cm: " << gm->second << endl; 
-//    }
-
-    if(globalOpts.type.empty()){
+    if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
       printHelp();
-      exit(1);
+      return 1;
     }
-    if(okayGenotypeLikelihoods.find(globalOpts.type) == okayGenotypeLikelihoods.end()){
+    if(okayGenotypeLikelihoods.find(type) == okayGenotypeLikelihoods.end()){
       cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL or GL" << endl;
       printHelp();
-      exit(1);
+      return 1;
     }
 
-    if(globalOpts.filename.empty()){
+    if(filename == "NA"){
       cerr << "FATAL: did not specify a file" << endl;
       printHelp();
-      exit(1);
+      return(1);
     }
 
     if(it.size() < 2){
       cerr << "FATAL: target option is required -- or -- less than two individuals in target\n";
       printHelp();
-      exit(1);
+      return(1);
     }
 
-    // using vcflib; thanksErik 
-
-    VariantCallFile variantFile;
-
-    variantFile.open(globalOpts.filename);
+    variantFile.open(filename);
     
-    if(globalOpts.region.empty()){
-      cerr << "FATAL: region required" << endl;
-      exit(1);
-    }
-    if(! variantFile.setRegion(globalOpts.region)){
-      cerr <<"WARNING: unable to set region" << endl;
-      exit(0);
+    if(region != "NA"){
+      if(! variantFile.setRegion(region)){
+	cerr <<"FATAL: unable to set region" << endl;
+	return 1;
+      }
     }
 
+    
     if (!variantFile.is_open()) {
-      exit(1);
+        return 1;
     }
     
-    Variant var( variantFile );
+    Variant var(variantFile);
+
     vector<int> target_h, background_h;
 
+
     int index   = 0; 
-    int indexi  = 0;
+    int  indexi = 0;
 
 
     vector<string> samples = variantFile.sampleNames;
@@ -558,29 +330,40 @@ int main(int argc, char** argv) {
       index++;
     }
     
-   
+    
+    // cerr << "n in target : " << target_h.size() << endl;
+
     vector<long int> positions;
     
     vector<double> afs;
-    
-    string **haplotypes = new string*[target_h.size()];
-    for (int i = 0; i < target_h.size(); i++) {
-      haplotypes[i] = new string[2];
-    }
 
+    string haplotypes [target_h.size()][2];    
+    
+    string currentSeqid = "NA";
+    
+    // cerr << "about to loop variants" << endl;
 
     while (variantFile.getNextVariant(var)) {
 
-      globalOpts.seqid = var.sequenceName;
-
       if(!var.isPhased()){
 	cerr << "FATAL: Found an unphased variant. All genotypes must be phased!" << endl;
-	exit(1);
+	return(1);
       }
 
-      if(var.alleles.size() > 2){
+      if(var.alt.size() > 1){
 	continue;
       }
+
+      if(currentSeqid != var.sequenceName){
+	if(haplotypes[0][0].length() > 10){
+	  calc(haplotypes, target_h.size(), afs, positions, target_h, background_h, currentSeqid);
+	}
+	clearHaplotypes(haplotypes, target_h.size());
+	positions.clear();
+	currentSeqid = var.sequenceName;
+	afs.clear();
+      }
+
 
       vector < map< string, vector<string> > > target, background, total;
       
@@ -597,25 +380,24 @@ int main(int argc, char** argv) {
       }
       
       genotype * populationTarget    ;
+
       
-      if(globalOpts.type == "PL"){
+      if(type == "PL"){
 	populationTarget     = new pl();
       }
-      if(globalOpts.type == "GL"){
+      if(type == "GL"){
 	populationTarget     = new gl();
       }
-      if(globalOpts.type == "GP"){
+      if(type == "GP"){
 	populationTarget     = new gp();
       }
-      if(globalOpts.type == "GT"){
+      if(type == "GT"){
 	populationTarget     = new gt();
       }
 
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
-      if(populationTarget->af <= globalOpts.af 
-	 || populationTarget->nref < 2 
-	 || populationTarget->nalt < 2){
+      if(populationTarget->af > 0.95 || populationTarget->af < 0.05){
 	delete populationTarget;
 	continue;
       }
@@ -626,17 +408,8 @@ int main(int argc, char** argv) {
       populationTarget = NULL;
       delete populationTarget;
     }
-
-    if(!globalOpts.geneticMapFile.empty()){
-      cerr << "INFO: loading genetics map" << endl;
-      loadGeneticMap(positions.front(), positions.back());
-      cerr << "INFO: finished loading genetics map" << endl;
-    }
-
-    calc(haplotypes, target_h.size(), afs, positions, 
-	 target_h, background_h, globalOpts.seqid);
-    clearHaplotypes(haplotypes, target_h.size());
-
-    exit(0);		    
-
+    
+    calc(haplotypes, target_h.size(), afs, positions, target_h, background_h, currentSeqid);
+    
+    return 0;		    
 }
