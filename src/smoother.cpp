@@ -38,7 +38,7 @@ void printHelp(void){
   cerr << "      Smoother slides over genomic positions not the SNP indices. In other words  " << endl;
   cerr << "      the number of scores within a window will not be constant. The last         " << endl;
   cerr << "      window for each seqid can be smaller than the defined window size.          " << endl;
-  cerr << "      Smoother automatically analyses different seqids seperately.                " << endl;
+  cerr << "      Smoother automatically analyses different seqids separately.                " << endl;
 
   cerr << "Output : 4 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;
@@ -49,8 +49,8 @@ void printHelp(void){
   cerr << "INFO: usage: smoother --format pFst --file GPA.output.txt" << endl;
   cerr << endl;
   cerr << "INFO: required: f,file     -- argument: a file created by GPAT++                           " << endl;
-  cerr << "INFO: required: o,format   -- argument: format of input file, case sensative               " << endl;
-  cerr << "                              availible format options:                                    " << endl;
+  cerr << "INFO: required: o,format   -- argument: format of input file, case sensitive               " << endl;
+  cerr << "                              available format options:                                    " << endl;
   cerr << "                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba                   " << endl;
   cerr << "INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)" << endl;
   cerr << "INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)      " << endl;
