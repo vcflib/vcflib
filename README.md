@@ -770,9 +770,7 @@ Output : 4 columns :
      4. integrated EHH (alternative)
      5. integrated EHH (reference)
      6. iHS ln(iEHHalt/iEHHref)
-
      7. != 0 integration failure
-
      8. != 0 integration failure
 
 Usage:
