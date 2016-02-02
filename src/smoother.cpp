@@ -9,6 +9,7 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include "gpatInfo.hpp"
+#include <math.h> 
 
 using namespace std;
 
@@ -57,6 +58,21 @@ void printHelp(void){
   printVersion();
   cerr << endl << endl;
 }
+
+double ngreater(list<score> & rangeData, double val){
+
+  double n = 0;
+ 
+
+  for(list<score>::iterator it = rangeData.begin(); 
+      it != rangeData.end(); it++ ){
+    if(it->score >= val){
+      n += 1;
+    }   
+  }
+  return n;
+}
+
 
 double windowAvg(list<score> & rangeData){
 
@@ -113,12 +129,21 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
     }
     current.position = atol( sline[opt.pos].c_str() );
     current.score    = atof( sline[opt.value].c_str() );
+
+    if(opt.format == "iHS"){
+      current.score = fabs(current.score);
+    }
+
+
+
     // add in if abba-baba to process second score. 
+
+
     if(current.position > end){
 
       double reportValue ;
 
-      if(opt. format == "abba-baba"){
+      if(opt.format == "abba-baba"){
 	reportValue = dStatistic(windowDat);
       }
       else{
@@ -126,8 +151,14 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
       }
       // nan
       if( reportValue == reportValue){
-	cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << reportValue << endl;
+	cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << reportValue;
+	if(opt.format == "iHS"){
+	  std::cout << "\t" << ngreater(windowDat, 2.5) ;
+	}
+	std::cout << std::endl;
       }
+      
+           
     }
     while(end < current.position){
       start += opt.step;
@@ -142,10 +173,22 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
   double finalMean = windowAvg(windowDat);
   
   if(opt.truncate && (finalMean == finalMean) ){
-    cout << seqid << "\t" << start << "\t" << windowDat.back().position - 1 << "\t" << windowDat.size()  << "\t" << finalMean << endl;
+    cout << seqid << "\t" << start << "\t" << windowDat.back().position - 1 << "\t" << windowDat.size()  << "\t" << finalMean;
+  
+    if(opt.format == "iHS"){
+      std::cout << "\t" << ngreater(windowDat, 2.5) ;
+    }
+    std::cout << std::endl;
+
   }
   else if(finalMean == finalMean){
-    cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << finalMean << endl;
+    cout << seqid << "\t" << start << "\t" << end << "\t" << windowDat.size() << "\t" << finalMean;
+
+    if(opt.format == "iHS"){
+      std::cout << "\t" << ngreater(windowDat, 2.5) ;
+    }
+    std::cout << std::endl;
+
   }
   cerr << "INFO: smoother finished : " << seqid << endl;
 }
@@ -278,7 +321,7 @@ int main(int argc, char** argv) {
   else if(opt.format == "iHS"){
     opt.seqid = 0;
     opt.pos   = 1;
-    opt.value = 5;
+    opt.value = 6;
   }
 
   else{
