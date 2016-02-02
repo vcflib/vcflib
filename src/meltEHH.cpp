@@ -150,7 +150,7 @@ void loadGeneticMap(int start, int end){
 }
 
 
-void clearHaplotypes(string haplotypes[][2], int ntarget){
+void clearHaplotypes(string **haplotypes, int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
@@ -168,7 +168,7 @@ void loadIndices(map<int, int> & index, string set){
 }
 
 void countHaps(int nhaps, map<string, int> & targetH, 
-	       string haplotypes[][2], int start, int end){
+	       string **haplotypes, int start, int end){
 
   for(int i = 0; i < nhaps; i++){
     
@@ -226,7 +226,7 @@ void computeNs(map<string, int> & targetH, int start,
   }
 }
 
-bool calcEhh(string haplotypes[][2], int start, 
+bool calcEhh(string **haplotypes, int start, 
 	     int end, char ref, int nhaps, 
 	     double * ehh, double  div, bool dir){
 
@@ -248,7 +248,7 @@ bool calcEhh(string haplotypes[][2], int start,
   return true;
 }
 
-int integrate(string haplotypes[][2], 
+int integrate(string **   haplotypes, 
 	      vector<long int> & pos,
 	      bool         direction,
 	      int               maxl, 
@@ -320,7 +320,7 @@ int integrate(string haplotypes[][2],
   return 10;
 }
 
-void calc(string haplotypes[][2], int nhaps, 
+void calc(string ** haplotypes, int nhaps, 
 	  vector<double> & afs, vector<long int> & pos, 
 	  vector<int> & target, vector<int> & background, string seqid){
 
@@ -363,7 +363,7 @@ void calc(string haplotypes[][2], int nhaps,
   }
 }
 
-void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
+void loadPhased(string **haplotypes, genotype * pop, int ntarget){
   
   int indIndex = 0;
 
@@ -552,7 +552,10 @@ int main(int argc, char** argv) {
     
     vector<double> afs;
 
-    string haplotypes [target_h.size()][2];    
+    string **haplotypes = new string*[target_h.size()];
+    for (int i = 0; i < target_h.size(); i++) {
+      haplotypes[i] = new string[2];
+    }
     
 
     while (variantFile.getNextVariant(var)) {
