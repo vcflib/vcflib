@@ -888,3 +888,30 @@ Params:
        recommended: g,gen <STRING>   A PLINK formatted map file.
 
 ```
+### smoother
+```
+A method for window smoothing many of the GPAT++ formats.
+
+INFO: help
+INFO: description:
+      Smoother averages a set of scores over a sliding genomic window.
+      Smoother slides over genomic positions not the SNP indices. In other words
+      the number of scores within a window will not be constant. The last
+      window for each seqid can be smaller than the defined window size.
+      Smoother automatically analyses different seqids separately.
+Output : 4 columns :
+     1. seqid
+     2. window start
+     2. window end
+     3. averaged score
+
+INFO: usage: smoother --format pFst --file GPA.output.txt
+
+INFO: required: f,file     -- argument: a file created by GPAT++
+INFO: required: o,format   -- argument: format of input file, case sensitive
+                              available format options:
+                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba
+INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)
+INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)
+INFO: optional: t,truncate -- flag    : end last window at last position (zero based) last window at last position (zero based)
+```
