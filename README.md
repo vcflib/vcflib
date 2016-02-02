@@ -669,10 +669,10 @@ The application of population genomics to non-model organisms is greatly facilit
 2. All GPAT++ tools group individuals using a zero-based comma separated index (e.g. 0,1,2 ; first three individuals in VCF)
 3. Some GPAT++ tools (haplotype methods) require a region.
 4. What is the genotype likelihood format?  When in doubt use GT! Only a few GPAT++ tools make use of the genotype likelihoods.
-*  GT: The genotype is correct
-*  GL: Genotype likelihood (Freebayes)
-*  GP: Genotype probability (Beagle)
-*  PL: Scaled genotype likelihood (GATK)
+ GT: The genotype is correct
+ GL: Genotype likelihood (Freebayes)
+ GP: Genotype probability (Beagle)
+ PL: Scaled genotype likelihood (GATK)
  
 ### wcFst
 
