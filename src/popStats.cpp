@@ -39,7 +39,7 @@ void printHelp(void){
 
   cerr << "INFO: usage:  popStat --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf                                                                " << endl;
   cerr << endl;
-  cerr << "INFO: required: t,target     -- a zero based comma seperated list of target individuals corresponding to VCF columns        " << endl;
+  cerr << "INFO: required: t,target     -- a zero based comma separated list of target individuals corresponding to VCF columns        " << endl;
   cerr << "INFO: required: f,file       -- proper formatted VCF                                                                        " << endl;
   cerr << "INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP                                             " << endl;
   cerr << "INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1                                              " << endl;

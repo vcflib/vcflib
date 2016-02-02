@@ -39,7 +39,7 @@ void printHelp(void){
   cerr << "INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        " << endl;
   cerr << "INFO: required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: proper formatted VCF                                                                        " << endl;
-  cerr << "INFO: required, y,type       -- argument: genotype likelihood format; genotype : GL,PL,GP                                             " << endl;
+  cerr << "INFO: required, y,type       -- argument: genotype likelihood format; genotype : GT,GL,PL,GP                                             " << endl;
   cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   " << endl;
   cerr << "INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
 
