@@ -663,7 +663,8 @@ The application of population genomics to non-model organisms is greatly facilit
  - [X] Permutation
  - [X] Plotting 
  
-### Documentation & basic usage
+### Documentation , basic usage, FAQ
+
 
 1. Most GPAT++ tools write to both STDERR and STDOUT.
 2. All GPAT++ tools group individuals using a zero-based comma separated index (e.g. 0,1,2 ; first three individuals in VCF)
@@ -673,6 +674,7 @@ The application of population genomics to non-model organisms is greatly facilit
  GL: Genotype likelihood (Freebayes)
  GP: Genotype probability (Beagle)
  PL: Scaled genotype likelihood (GATK)
+5. pFst is the only tool that will work on pooled data.
  
 ### wcFst
 
@@ -725,4 +727,29 @@ INFO: required: t,target     -- a zero based comma separated list of target indi
 INFO: required: f,file       -- proper formatted VCF
 INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
 INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
+```
+
+### pFst
+
+pFst is a likelihood ratio test (LRT) quantifying allele frequency differences between populations.  The LRT by default uses the binomial distribution.  If Genotype likelihoods are provided it uses a modified binomial that weights each allele count by its certainty.  If type is set to 'PO' the LRT uses a beta distribution to fit the allele frequency spectrum of the target and background.  PO requires the AD and DP genotype fields and requires at least two pools for the target and background.  The p-value calculated in pFst is based on the chi-squared distribution with one degree of freedom. 
+
+```
+INFO: help
+INFO: description:
+     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations.
+
+Output : 3 columns :
+     1. seqid
+     2. position
+     3. pFst probability
+
+INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
+
+INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corresponding to VCF columns
+INFO: required: b,background -- argument: a zero based comma separated list of background individuals corresponding to VCF columns
+INFO: required: f,file       -- argument: a properly formatted VCF.
+INFO: required: y,type       -- argument: genotype likelihood format ; genotypes: GP, GL or PL; pooled: PO
+INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero
+INFO: optional: r,region     -- argument: a tabix compliant genomic range : seqid or seqid:start-end
+INFO: optional: c,counts     -- switch  : use genotype counts rather than genotype likelihoods to estimate parameters, default false
 ```
