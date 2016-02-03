@@ -32,6 +32,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/wcFst.cpp \
 			  src/iHS.cpp \
 			  src/segmentFst.cpp \
+			  src/segmentIhs.cpp \
 			  src/genotypeSummary.cpp \
 			  src/sequenceDiversity.cpp \
 			  src/pFst.cpp \
@@ -40,7 +41,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/plotHaps.cpp \
 			  src/abba-baba.cpp \
 			  src/permuteGPAT++.cpp \
-			  src/permuteGPATwindow.cpp \
+			  src/permuteSmooth.cpp \
 			  src/normalize-iHS.cpp \
 			  src/meltEHH.cpp \
 			  src/vcfaltcount.cpp \
