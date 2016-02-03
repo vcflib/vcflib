@@ -362,7 +362,7 @@ void calc(string **haplotypes, int nhaps,
 
     altFail += integrate(haplotypes, pos, false, maxl, snp,  '1', nhaps, &ihhA, denomP2);
 
-    if(ihhR == 0 || ihhA == 0){
+    if(ihhR < 0.0001 || ihhA < 0.0001){
       continue;
     }
 
