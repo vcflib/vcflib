@@ -159,25 +159,30 @@
 % Please capitalize all terms in the title except conjunctions, prepositions, and articles.
 \begin{flushleft}
 {\Large
-\textbf\newline{VCFLIB: an ensemble of methods for variant analysis and population genetics }
+\textbf\newline{VCFLIB: an ensemble of methods for variant manipulation and population genetics }
 }
 \newline
 % Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
 \\
 Zev N. Kronenberg\textsuperscript{1,\Yinyang},
 Erik Garrison\textsuperscript{2,\Yinyang},
-Mark Yandell\textsuperscript{2,\ddag},
-Gabor Marth\textsuperscript{2,\ddag},
-Richard Durbin\textsuperscript{2},
-Evan E. Eichler\textsuperscript{3,*},
+Mark Yandell\textsuperscript{3,4},
+Mike Shapiro\textsuperscript{5,3},
+Gabor Marth\textsuperscript{3,4},
+Richard Durbin\textsuperscript{1},
+Evan E. Eichler\textsuperscript{1,*},
 with the VCFLIB Consortium\textsuperscript{\textpilcrow}
 \\
 \bigskip
-\bf{1} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\bf{1} Department of Genome Sciences, University of Washington, Seattle, WA, USA
 \\
-\bf{2} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\bf{2} Wellcome Trust Sanger Institute, Cambridge, UK
 \\
-\bf{3} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\bf{3} Department of Human Genetics, University of Utah, Salt Lake City, UT, USA
+\\
+\bf{4} Ustar Center for Genetic Discovery, University of Utah, Salt Lake City, UT, USA
+
+\bf{5} Department of Biology, University of Utah, Salt Lake City, UT, USA
 \\
 \bigskip
 
@@ -204,7 +209,7 @@ with the VCFLIB Consortium\textsuperscript{\textpilcrow}
 \textpilcrow Membership list can be found in the Acknowledgments section.
 
 % Use the asterisk to denote corresponding authorship and provide email address in note below.
-* CorrespondingAuthor@institute.edu
+* zevk@uw.edu
 
 \end{flushleft}
 % Please keep the abstract below 300 words
@@ -212,18 +217,17 @@ with the VCFLIB Consortium\textsuperscript{\textpilcrow}
 
 
 
-% Please keep the Author Summary between 150 and 200 words
-% Use first person. PLOS ONE authors please skip this step. 
-% Author Summary not valid for PLOS ONE submissions.   
-\section*{Author Summary}
-
 
 \linenumbers
 
 \section*{Introduction}
-The Variant Call Format (VCF) is a common representation for genetic variation within a population[cite].  The VCF specification has been adopted by large Consortia like The 1000 Genomes Project, ExAC and GoNL[cite].  While the VCF is commonly used,  there are many intricacies of the specification that can hinder novice practitioners.  For example,  computing the allele frequency for a subset of individuals requires subdividing the samples and parsing each genotype field.  Additionally, there are only a handful of robust population genetic tools that accept VCF format[cite].
 
-Here we describe an ensemble of methods, under the umbrella of VCFLIB, that were designed to facilitate rapid variant analysis and basic population genetic analyses. 
+Genetic variation is commonly represented in the Variant Call Format (VCF)\cite{vcftools}.  VCF files are flat-text, human-readable, and provide a flexible way to annotate genetic information.  When compressed, VCF files can be indexed and queried by genomic position. One or more genomes can be defined in the VCF genotype fields, which is important for population-level sequencing experiments. For these reasons, VCF has been widely adopted for large-scale genetic studies including the The 1000 Genomes Project \cite{1kg}, ExAC \cite{exac}, GoNL \cite{gonl}.
+
+To the uninitiated, the VCF format, while easy to comprehend can be difficult to parse and manipulate. There is an ongoing need for methods that can facilitate rapid genetic analyses of VCF data.  VCFLIB, VCFTools\cite{vcftools}, GATK,  and BioConductor are few software packages that are commonly used, each fulfilling a niche. 
+
+This article is milepost for VCFLIB development and showcases the population genetic analyses that can be done with the toolkit. In the Design and implementation section we described the three attributes of VCFLIB: a C++ library, an ensemble of programs for modifying VCF files, and a toolkit for population genetics (The Genotype Phenotype Association Toolkit: GPAT). In the results section we apply VCFLIB to the 1000 Genomes Project data to quantify patterns of genetic variation within and between populations.  Lastly, we briefly discuss our goals for future VCFLIB development.
+
 
 %\begin{equation}\label{eq:schemeP} 
 %D_{coll} = \frac{D_f+\frac{[S]^2}{K_D S_T} D_S} {1+\frac{[S]^2}{K_D S_T}}, 
@@ -233,98 +237,142 @@ Here we describe an ensemble of methods, under the umbrella of VCFLIB, that were
 % You may title this section "Methods" or "Models". 
 % "Models" is not a valid title for PLoS ONE authors. However, PLoS ONE
 % authors may use "Analysis" 
-\section*{Materials and Methods}
-\subsection*{Etiam eget sapien nibh.}
+\section*{Design and Implementation}
 
-% For figure citations, please use "Fig." instead of "Figure".
-Nulla mi mi, Fig.~\ref{fig1} venenatis sed ipsum varius, volutpat euismod diam. Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at justo vitae nulla elementum commodo eu id massa. In vitae diam ac augue semper tincidunt eu ut eros. Fusce fringilla erat porttitor lectus cursus, \nameref{S1_Video} vel sagittis arcu lobortis. Aliquam in enim semper, aliquam massa id, cursus neque. Praesent faucibus semper libero.
+
+
+\subsection*{The VCFLIB library}
+
+ERIK G.
+
+
+\subsection*{The Genotype Phenotype Association Toolkit (GPAT)}
+
+The genotype-phenotype association toolkit was originally designed to map the genetic basis of phenotypic variation, but it has grown into a fully functional population genetic toolkit.  The GPAT association test, pFst, has been successfully used to identify genetic variants associated with phenotypic variation in domestic pigeons
+ \cite{color},  and \textit{Tetrahymena}\cite{tet}.  GPAT's descriptive statistics have also been applied to human\cite{iron} and pigeon\cite{pigeon} populations.
+
+
+
+
+\paragraph*{Fst methods} \mbox{} \\
+
+Weir and Cockerhams estimator of F\textsubscript{ST} is implemented in GPAT`s ``wcFst" \cite{fst}.  To reduce spurious F\textsubscript{ST} signals, sites with less than five individuals in either population are not scored.  Values of F\textsubscript{ST} will range from slightly negative to one; negative values can be treated as zero. 
+
+An independent bayesian method of F\textsubscript{ST} is provided in GPAT \cite{bfst}.  The method, implemented in ``bFst" provides a way to add confidence intervals to  F\textsubscript{ST} point estimates.  The posterior distribution is calculated using MCMC over 50,000 iterations per site.  For this reason, ``bFst" is only well suited for small genomic regions.
+
+
+Demining the start and end of a Fst peak, genomic island, is a subjective and difficult task.  To standardize this procedure ``segmentFst" was implemented in GPAT.  The heuristic scans the output of ``wcFst" with a ten SNV window measuring the number of Fst values that are above a user-defined threshold.  If the low-high Fst ratio is above two the window is recursively extended.  This heuristic, unlike a sliding window, does not suffer from the goldilocks principle.
+ 
+Permutation provides a way to measure the empirical probability of a genomic island.  The average F\textsubscript{ST} from a window defined by ?smoother? or ``segmentFst" can be quantified against other contiguous windows with the same number SNVs using ``permuteGPATwindow."  The program adds the number of permutations and the number of matched windows with a higher average F\subscript{ST} value.
+
+\paragraph*{$\Delta$ allele frequency (AF) and association testing} \mbox{} \\
+
+For simple phenotypic traits quantifying the $\Delta$ allele frequency between individuals with the phenotype and those without can be sufficient for genotype-phenotype association.  A likelihood test for $\Delta$ AF is implemented in ``pFst" for both pooled and genotypic data Eq~(\ref{eq:pFst}).   In Eq~(\ref{eq:pFst}), \textit{B} represented the binomial distribution parameterized by the number of trials \textit{n}, the number of successes \textit{n} and the probability of success, \textit{p}.  The \textit{D} statistic is chi-squared distributed with one degree of freedom.
+
+\begin{equation}\label{eq:pFst} 
+D=-2* ln (\frac{ B(n_c,k_c,p_c) }{ B(n_t,k_t,p_t)*B(n_b,k_b,p_b)  })
+\end{equation}
+
+
+
+For ``pFst", \textit{n} corresponds to the number of callable alleles, \textit{k} is the number on non-reference alleles, and \textit{p} is the bounded allele frequency (0.00001-0.99999).  The subscripts denotes the group membership for the target (\textit{t}), background (\textit{b}) and both combined (\textit{c}).  If genotype likehoods are provided pFst weights each allele proportionally to the genotype likelihood, rather than their direct count.   For pooled datasets, with more than one biological replicate in the target and background, the model substitutes the binomial distribution for the beta.  The methods of moments used to estimate $\alpha$, and $\beta$, the two parameters of the beta distribution.  The likelihood ratio-test implemented in ``pFst" has been described several times\cite{kim,heng}, but few practical implementations exist.  
+
+\paragraph*{Haplotype methods (for phased variants) }\mbox{} \\
+
+GPAT provides several methods for quantifying haplotype structure at a locus.  The extended haplotype homozygosity score measures the haplotypic diversity; a value of zero means all haplotypes are unique and a value of one means all haplotypes are identical. The ``sequenceDiversity" program quantifies Eq~(\ref{eq:EHH}) across a fixed number of SNVs (user defined), where \textit{n} is the number of chromosomes (2x the number of genotypes), \textit{i} is the index for each unique haplotype in a fixed window and \textit{x\textsubscript{i}} is the number of \textit{i} haplotypes.  
+
+
+\begin{equation}\label{eq:EHH} 
+EHH=\frac{\sum_{i} \binom{x_i}{2}}{\binom{n}{2}}
+\end{equation}
+
+\begin{equation}\label{eq:EHHC} 
+EHH_c=\frac{\sum_{ic} \binom{x_i_c}{2}}{\binom{n_c}{2}}
+\end{equation}
+
+
+The integrated haplotype score (iHS) measures the relative decay of \textit{EHH\textsubscript{c}} between the alternative and reference core haplotypes,  Eq~(\ref{eq:iHS}).  At a single SNV (core haplotype), \textit{EHH\textsubscript{c}} equals one and \textit{n\textsubscript{c}} is the number of reference or alternative alleles.  The trapezoid rule is used to integrate  \textit{EHH\textsubscript{c}} with respect to genetic distance.  GPAT's implementation of iHS uses Plink formatted genetic maps(cite).  If no genetic map is provided a fixed value will be assumed.  GPAT also provides a tool ( ``normalize-iHS") to normalize iHS by mean and standard deviation, binned by allele frequency.  Comparison of GPAT iHS and other tools can be seen in Fig S1\cite{selscan}\cite{voight}.
+
+\begin{equation}\label{eq:iHS} 
+iHS = ln(\frac{\int \textrm{\textit{EHH}}_a}{ \int \textrm{EHH}_r } )
+\end{equation}
+
+
 
 \begin{figure}[h]
-\caption{{\bf Figure Title first bold sentence Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}
-Figure Caption Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. A: Lorem ipsum dolor sit amet. B: Consectetur adipiscing elit.}
+
+%\includegraphics[width=0.95\textwidth]{Fig1}
+\caption{{\bf Using VCFLIB to find population stratified loci in the One Thousand Genomes Project data.} The Fst scatter plots (A-C) show genomic position on the x-axis and Weir and Cockerham's Fst on the y-axis.  The vertical bands delineate regions of high Fst defined by segmentFst.  The color of the bands denotes the empirical significance of the region compared to the rest of the genome determined with permuteSmooth.  A: EDAR is outlier in the CEU-CHB comparison because EDAR is under selection in CHB.  B: OCA2 and HERC2 are outliers in the CEU-CHB comparison because they are under selection in CEU.  The segmentation of the region is broken by segmental duplications between ~28-29 Mb.  C: KCNQ5 is an outlier in the CEU-YRI comparison.  D:  KCNQ5 shows decreased heterozygosity at it's 3' (~73.9Mb) end in CEU (red) compared with YRI (blue).  E: The GPAT workflows used for the Fst analyses. }
 \label{fig1}
 \end{figure}
 
-\begin{enumerate}
-\item{react}
-\item{diffuse free particles}
-\item{increment time by dt and go to 1}
-\end{enumerate}
+
+\begin{figure}[h]
+
+%\includegraphics[width=0.95\textwidth]{Fig2}
+\caption{{\bf Using VCFLIB to identify patterns of haplotype diversity consistent with natural selection.} A: The GPAT 
+workflows used for the haplotype analysis. B: Genome-wide iHS Manhattan plot for Norther Europeans (CEU).  The x-axis is an index and the y-axis is the average absolute iHS within a 100Kbs sliding window.  The repeating color palette delineates chromosomes.  Several iHS peaks are annotated with the closes gene or a dash if there was not a gene nearby. The window that overlaps lactase has the highest genome-wide average iHS.  C: The lactase haplotypes present in CEU and YRI.  Each row is a single haplotype and each column is a position where there is a non-reference allele (red).  Fewer unique haplotypes can be seen in CEU compared to YRI.   The trapezoid denotes where the haplotppe plots are in relation to lactase. D:  The Extended Haplotype Homozygosity (EHH) decay for rs3754686(A/G).  The position is shown on the x-axis and EHH for the derived (orange) and ancestral allele (green) is shown on the y-axis. 
+
+}
+\label{fig2}
+\end{figure}
+
+
+
+
+
 
 % Results and Discussion can be combined.
 \section*{Results}
-Nulla mi mi, venenatis sed ipsum varius, Table~\ref{table1} volutpat euismod diam. Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at justo vitae nulla elementum commodo eu id massa. In vitae diam ac augue semper tincidunt eu ut eros. Fusce fringilla erat porttitor lectus cursus, vel sagittis arcu lobortis. Aliquam in enim semper, aliquam massa id, cursus neque. Praesent faucibus semper libero.
+
+As a demonstration of the power and flexibility of VCFLIB we performed genome-wide selection scans on the Phase III One Thousand Genomes Project data.  To discover genes that may have been targets of natural selection we applied within and between population metrics.  We measured population stratification between Northern Europeans (CEU), Southern Han Chinese (CHB), and Yoruba (YRI) using Weir and Cockerham's Fst.  To detect within-population selection we applied the integrated haplotype score (iHS).  These analyses serve as a good control for VCFLIB methods as many studies have perviously identified genes under selection in CEU, CHB, and YRI.  The VCLIB workflows used are shown in Fig. 1A and Fig. 2E.
+
+The three pairwise Fst analyses resulted in over 30 million scored genomic positions, which is prohibitively large for manual outlier detection.  We applied our segmentation algorithm (implemented in segmentFst) to grow regions that had 10 Fst values greater than 0.6.  To control for the number of observations in each region and to determine empirical outliers we ran a permutation test for one million iterations (implemented in permuteSmooth)(supporting table XXX).   There were 3,790, 1,826, and 665 regions with high Fst values for the CHB-YRI, CEU-YRI and CEU-CHB comparisons.  These regions overlapped XXX genes in CEU-CHB, XXX genes in CEU-YRI, and XXX genes in CHB-YRI.  Classic examples of stratified loci including \textit{EDAR} and \textit{OCA2/HERC2} can be seen in Fig. 1A-B [cite,cite].  
 
 
-\begin{table}[!ht]
-\begin{adjustwidth}{-2.25in}{0in} % Comment out/remove adjustwidth environment if table fits in text column.
-\caption{
-{\bf Table caption Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}}
-\begin{tabular}{|l|l|l|l|l|l|l|l|}
-\hline
-\multicolumn{4}{|l|}{\bf Heading1} & \multicolumn{4}{|l|}{\bf Heading2}\\ \hline
-$cell1 row1$ & cell2 row 1 & cell3 row 1 & cell4 row 1 & cell5 row 1 & cell6 row 1 & cell7 row 1 & cell8 row 1\\ \hline
-$cell1 row2$ & cell2 row 2 & cell3 row 2 & cell4 row 2 & cell5 row 2 & cell6 row 2 & cell7 row 2 & cell8 row 2\\ \hline
-$cell1 row3$ & cell2 row 3 & cell3 row 3 & cell4 row 3 & cell5 row 3 & cell6 row 3 & cell7 row 3 & cell8 row 3\\ \hline
-\end{tabular}
-\begin{flushleft} Table notes Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed.
-\end{flushleft}
-\label{table1}
-\end{adjustwidth}
-\end{table}
+Segmentation of iHS data resulted in 1500, 1600, and 1937 regions in CHB, CEU, and YRI (segmentation threshold :  3).  For all three analyses a total of 1,885 unique genes were discovered.  In the CEU population lactase (\textit{LCT}) was amounts the highest scored regions shown in Fig. 2B.  The haplotype diversity around \textit{LCT} is noticeably different (Fig. 2C-D). 
 
 
+\section*{Availability and Future Directions}
 
-\subsection*{\lorem\ and \ipsum\ Nunc blandit a tortor.}
+VCFLIB is publicly available at (\url{https://github.com/ekg/vcflib}{VCFLIB}) and additional documentation can be found at \url{https://github.com/zeeev/vcflib/wiki}.  
 
-Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque. Quisque augue sem, tincidunt sit amet feugiat eget, ullamcorper sed velit. Sed non aliquet felis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris commodo justo ac dui pretium imperdiet. Sed suscipit iaculis mi at feugiat. 
+Areas of continued development include extending documentation, unit testing,  support for new VCF specifications, and additional population genetic metrics.
 
-\subsection*{Sed ac quam id nisi malesuada congue.}
 
-Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam. Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at justo vitae nulla elementum commodo eu id massa. In vitae diam ac augue semper tincidunt eu ut eros. Fusce fringilla erat porttitor lectus cursus, vel sagittis arcu lobortis. Aliquam in enim semper, aliquam massa id, cursus neque. Praesent faucibus semper libero.
-
-% Please do not create a heading level below \subsection. For 3rd level headings, use \paragraph{}. 
-\subsection*{Subsection 1}
-Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam. Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at justo vitae nulla elementum commodo eu id massa. In vitae diam ac augue semper tincidunt eu ut eros. Fusce fringilla erat porttitor lectus cursus, vel sagittis arcu lobortis. Aliquam in enim semper, aliquam massa id, cursus neque. Praesent faucibus semper libero.
-
-\subsection*{Subsection 2}
-\paragraph{3rd Level Heading.} Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam. Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at justo vitae nulla elementum commodo eu id massa. In vitae diam ac augue semper tincidunt eu ut eros. Fusce fringilla erat porttitor lectus cursus, vel sagittis arcu lobortis. Aliquam in enim semper, aliquam massa id, cursus neque. Praesent faucibus semper libero.
-
-\section*{Discussion}
-Nulla mi mi, venenatis sed ipsum varius, Table~\ref{table1} volutpat euismod diam. Proin rutrum vel massa non gravida. Quisque tempor sem et dignissim rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at justo vitae nulla elementum commodo eu id massa. In vitae diam ac augue semper tincidunt eu ut eros. Fusce fringilla erat porttitor lectus cursus, vel sagittis arcu lobortis. Aliquam in enim semper, aliquam massa id, cursus neque. Praesent faucibus semper libero.
-
-\subsection*{\lorem\ and \ipsum\ Nunc blandit a tortor.}
-
-CO\textsubscript{2} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque. Quisque augue sem, tincidunt sit amet feugiat eget, ullamcorper sed velit. 
-
-Sed non aliquet felis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris commodo justo ac dui pretium imperdiet. Sed suscipit iaculis mi at feugiat. Ut neque ipsum, luctus id lacus ut, laoreet scelerisque urna. Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed. Nam condimentum sem eget mollis euismod. Nullam dui urna, gravida venenatis dui et, tincidunt sodales ex. Nunc est dui, sodales sed mauris nec, auctor sagittis leo. Aliquam tincidunt, ex in facilisis elementum, libero lectus luctus est, non vulputate nisl augue at dolor. For more information, see \nameref{S1_Text}.
 
 \section*{Supporting Information}
 
 % Include only the SI item label in the subsection heading. Use the \nameref{label} command to cite SI items in the text.
-\subsection*{S1 Video}
-\label{S1_Video}
-{\bf Bold the first sentence.}  Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\subsection*{S1 Snakemake}
+\label{S1_snakemake}
+{\bf Fst analyses.}  The snakemake file for the CEU-CHB Fst analysis.  
 
-\subsection*{S1 Text}
-\label{S1_Text}
-{\bf Lorem Ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+\subsection*{S2 Snakemake}
+\label{S2_snakemake}
+{\bf iHS analyses.}  An archive of the snakemake file, the config file and region file used to run the CEU iHS analyses.
 
 \subsection*{S1 Fig}
 \label{S1_Fig}
-{\bf Lorem Ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
-
-\subsection*{S2 Fig}
-\label{S2_Fig}
-{\bf Lorem Ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+{\bf Comparison of iHS methods.}  Scatter plots comparing VCFLIB's implementation of iHS to SELSCAN or Prichard's iHS. The iHS data are from a two megabase window around \textit{LCT} in CEU.
 
 \subsection*{S1 Table}
 \label{S1_Table}
-{\bf Lorem Ipsum.} Maecenas convallis mauris sit amet sem ultrices gravida. Etiam eget sapien nibh. Sed ac ipsum eget enim egestas ullamcorper nec euismod ligula. Curabitur fringilla pulvinar lectus consectetur pellentesque.
+{\bf Regions with high Fst values.} The CEU-YRI, CEU-CHB, and CHB-YRI regions are in three different excel sheets.  The region in GRCh37 coordinates, the average Fst values, and the empirical significance are listed as column headers.
 
 \section*{Acknowledgments}
-Cras egestas velit mauris, eu mollis turpis pellentesque sit amet. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam id pretium nisi. Sed ac quam id nisi malesuada congue. Sed interdum aliquet augue, at pellentesque quam rhoncus vitae.
 
+We would like to thank the countless number of people who have contributed suggestions, created bug reports, and modified the VCFLIB codebase.  
+
+\subsection*{The VCFLIB Consortium}
+\newline
+\newline
+EJ Osborne\textsuperscript{1},
+Brett Kennedy\textsuperscript{1},
+Daniel Ence\textsuperscript{1},
+Travis Collier\textsuperscript{1},
+EJ Osborne\textsuperscript{1},
+...
 \nolinenumbers
 
 %\section*{References}
@@ -341,11 +389,47 @@ Cras egestas velit mauris, eu mollis turpis pellentesque sit amet. Interdum et m
 % here.
 % 
 \begin{thebibliography}{10}
-\bibitem{bib1}
-Devaraju P, Gulati R, Antony PT, Mithun CB, Negi VS. Susceptibility to SLE in South Indian Tamils may be influenced by genetic selection pressure on TLR2 and TLR9 genes. Mol Immunol. 2014 Nov 22. pii: S0161-5890(14)00313-7. doi: 10.1016/j.molimm.2014.11.005
+\bibitem{1kg}
+Sudmant, Peter H., et al. ``An integrated map of structural variation in 2,504 human genomes." Nature 526.7571 (2015): 75-81.
 
-\bibitem{bib2}
-Huynen MMTE, Martens P, Hilderlink HBM. The health impacts of globalisation: a conceptual framework. Global Health. 2005;1: 14. Available: http://www.globalizationandhealth.com/content/1/1/14.
+\bibitem{gonl}
+Genome of the Netherlands Consortium. ``Whole-genome sequence variation, population structure and demographic history of the Dutch population." Nature Genetics 46.8 (2014): 818-825.
+
+\bibitem{vcftools}
+Danecek, Petr, et al. ``The variant call format and VCFtools." Bioinformatics 27.15 (2011): 2156-2158.
+
+\bibitem{exac}
+Exome Aggregation Consortium (ExAC), Cambridge, MA, http://exac.broadinstitute.org/, Feb 2016.
+
+\bibitem{selscan}
+Szpiech, Zachary A., and Ryan D. Hernandez. ``selscan: an efficient multithreaded program to perform EHH-based scans for positive selection." Molecular biology and evolution 31.10 (2014): 2824-2827.
+
+\bibitem{voight}
+Voight, Benjamin F., et al. ``A map of recent positive selection in the human genome." PLoS Biol 4.3 (2006): e72.
+
+\bibitem{pigeon}
+Shapiro, Michael D., et al. ``Genomic diversity and evolution of the head crest in the rock pigeon." Science 339.6123 (2013): 1063-1067.
+
+\bibitem{tet}
+Galati, Domenico F., et al. ``DisAp-dependent striated fiber elongation is required to organize ciliary arrays." The Journal of cell biology 207.6 (2014): 705-715.
+
+\bibterm{bfst}
+Holsinger, Kent E., Paul O. Lewis, and Dipak K. Dey. ``A Bayesian approach to inferring population structure from dominant markers." Molecular Ecology 11.7 (2002): 1157-1164.
+
+\bibitem{fst}
+Weir, Bruce S., and C. Clark Cockerham. ``Estimating F-statistics for the analysis of population structure." evolution (1984): 1358-1370.
+
+\bibitem{kim}
+Kim, Su Yeon, et al. ``Design of association studies with pooled or un?pooled next?generation sequencing data." Genetic epidemiology 34.5 (2010): 479-491.
+
+\bibitem{heng}
+Li, Heng. ``A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data." Bioinformatics 27.21 (2011): 2987-2993.
+
+\bibitem{color}
+Domyan, Eric T., et al. "Epistatic and combinatorial effects of pigmentary gene mutations in the domestic pigeon." Current Biology 24.4 (2014): 459-464.
+
+\bibitem{iron}
+Barber, Matthew F., and Nels C. Elde. "Escape from bacterial iron piracy through rapid evolution of transferrin." Science 346.6215 (2014): 1362-1366.
 
 \end{thebibliography}
 

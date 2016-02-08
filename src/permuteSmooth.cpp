@@ -107,9 +107,9 @@ void printHelp()
   cerr << "INFO: usage:  permuteSmooth -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1 "<< endl;
   cerr << endl;
   cerr << "Required:" << endl;
-  cerr << "      file:     f   -- argument: original wcFst/iHS data        "<< endl;
-  cerr << "      smoothed: s   -- argument: smoothed wcFst/iHS data        "<< endl;
-  cerr << "      format:   y   -- argument: [swcFst, segwcFst, segIhs] "<< endl;
+  cerr << "      file:     f   -- argument: original wcFst data     "<< endl;
+  cerr << "      smoothed: s   -- argument: smoothed wcFst data     "<< endl;
+  cerr << "      format:   y   -- argument: [swcFst, segwcFst]      "<< endl;
   cerr << "Optional:" << endl;
   cerr << "      number:   n   -- argument: the number of permutations to run for each value [1000]" << endl;
   cerr << "      success:  u   -- argument: stop permutations after \'s\' successes [1]"             << endl;
@@ -160,11 +160,6 @@ int parseOpts(int argc, char** argv)
 	  globalOpts.nIndex     = 3;
 	  globalOpts.valueIndex = 4;
 	}
-        if(globalOpts.format == "segIhs"){
-          globalOpts.chrIndex   = 0;
-          globalOpts.valueIndex = 3;
-          globalOpts.nIndex     = 5;
-        }
 	if(globalOpts.format == "segwcFst"){
 	  globalOpts.chrIndex   = 0;
 	  globalOpts.valueIndex = 3;
@@ -175,7 +170,7 @@ int parseOpts(int argc, char** argv)
     case 'n':
       {
 	globalOpts.npermutation = atof(((string)optarg).c_str());
-	cerr << "INFO: permuteRegions will do N permutations: " << globalOpts.npermutation << endl;
+	cerr << "INFO: permuteGPAT++ will do N permutations: " << globalOpts.npermutation << endl;
 	break;
       }
     case 's':
@@ -187,7 +182,7 @@ int parseOpts(int argc, char** argv)
     case 'u':
       {
 	globalOpts.nsuc = atof(((string)optarg).c_str());
-	cerr << "INFO: permuteRegions will stop permutations after N successes: " << globalOpts.nsuc << endl;
+	cerr << "INFO: permuteGPAT++ will stop permutations after N successes: " << globalOpts.nsuc << endl;
 	break;
 	}
     case '?':
@@ -212,14 +207,18 @@ int parseOpts(int argc, char** argv)
 
 */
 
-bool getContiguousWindow(vector<score *> & data, vector<double> & load, int n){
+bool getContiguousWindow(vector<score *> & data, 
+			 vector<double> & load, 
+			 int n, int * nfail){
   int r = rand() % data.size();    
 
   if(r+n >= data.size()){
+    *nfail+=1;
     return false;
   }
 
   if(data[r]->seqid != data[r+n]->seqid){
+    *nfail+=1;
     return false;
   }
   
@@ -254,7 +253,7 @@ double mean(vector<double> & data){
 
 */
 
-void permute(double s, int n, vector<score *> & data, 
+bool permute(double s, int n, vector<score *> & data, 
 	     double * nRep, double *nSuc, double * ePv){
  
   
@@ -267,8 +266,14 @@ void permute(double s, int n, vector<score *> & data,
     std::vector<double> scores;
 
     bool getWindow = false;
+
+    int nfail = 0;
+
     while(!getWindow){
-      getWindow = getContiguousWindow(data, scores, n);
+      if(nfail > globalOpts.npermutation){
+	return false;
+      }
+      getWindow = getContiguousWindow(data, scores, n, &nfail);
     }
 
     double ns = mean(scores);
@@ -280,6 +285,8 @@ void permute(double s, int n, vector<score *> & data,
   if(*nSuc > 0){
     *ePv = *nSuc / *nRep;
   }
+
+  return true;
 }
 
 //-------------------------------    MAIN     --------------------------------
@@ -293,7 +300,6 @@ srand (time(NULL));
 
  FORMATS["swcFst"]   = 1;
  FORMATS["segwcFst"] = 1;
- FORMATS["segIhs"] = 1;
 
  globalOpts.threads = 1;
 
@@ -334,13 +340,6 @@ int parse = parseOpts(argc, argv);
        if(value < 0 ){
 	 value = 0;
        }
-     }
-     if(globalOpts.format == "segIhs"){
-       if(region.size() != 9){
-	 cerr << "FATAL: wrong number of columns in normalized iHS input" << endl;
-	 exit(1);
-       }
-       value = abs(atof(region[6].c_str()));
      }
 
      score * sp;
@@ -389,16 +388,27 @@ int parse = parseOpts(argc, argv);
 
 #pragma omp parallel for schedule(dynamic, 20)
  for(int i = 0; i < sData.size(); i++){
-   permute(sData[i]->score, sData[i]->n, 
+   bool per = permute(sData[i]->score, sData[i]->n, 
 	   data, &sData[i]->nPer, 
 	   &sData[i]->nSuc, &sData[i]->ePv);
    
+
+   if(per){
    omp_set_lock(&lock);
    cout << sData[i]->line 
 	<< "\t" << sData[i]->nSuc
 	<< "\t" << sData[i]->nPer 
 	<< "\t" << sData[i]->ePv << endl;
    omp_unset_lock(&lock);
+   }
+   else{
+     omp_set_lock(&lock);
+     cout << sData[i]->line
+	  << "\t" << "NA"
+	  << "\t" << "NA"
+	  << "\t" << "NA" << endl;
+     omp_unset_lock(&lock);
+   }
  }
 
  for(vector<score*>::iterator itz = data.begin(); 
