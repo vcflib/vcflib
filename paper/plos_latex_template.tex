@@ -240,12 +240,13 @@ This article is a milepost for VCFLIB development and showcases the population-l
 % authors may use "Analysis" 
 \section*{Design and Implementation}
 
-
+We implemented VCFLIB to provide a C++ interface to the data in VCF files. As we used VCF in our research, we implemented transformations and statistical functions based on genomic information in the library so that they could be used by other research. The architecture of the library is flat, with handful of core classes defining a basic interface to the textual data in VCF files and their records, and a wide array of command line utilities implementing particular operations based around VCF files. This core library has been used in other C++ software projects as a way to coordinate the input and output of genomic information in the VCF format. The suite of VCFLIB tools have been important for the development of a number of genomics resources, including the final release of the 1000 Genomes Project and the NIST Genome in a Bottle reference standard (cites).
 
 \subsection*{The VCFLIB library}
 
-\subsection*{VCFLIB programs}
+The core library describes a class to manage the reading of VCF files (vcflib::VariantCallFile), and another to describe the information contained in a single VCF record (a vcflib::Variant). To operate on a VCF file, we open an input file and iterate over the records in using the same kind of iterator pattern popular in other bioinformatic APIs like BamTools \cite{bamtools} and the GATK. Once the library parses the input VCF record, users of the API can navigate the hierarchy of information in the record through interfaces to the fixed fields (CHROM, POS, ID, QUAL, FILTER, INFO) and sample-related fields (FORMAT, and samples). The core library implements functions for accessing and modifying data in these fields; interpreting the alleles and genotypes in record; filtering sites, alleles, and genotypes via a domain specific filtering boolean language; and reading and writing VCF streams. Additional functions are provided through independent executables based on common functions in the VCFLIB API.
 
+\subsection*{VCFLIB programs}
 
 
 \subsection*{The Genotype Phenotype Association Toolkit (GPAT)}
