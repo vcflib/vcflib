@@ -25,6 +25,19 @@ It is both:
 The API itself provides a quick and extremely permissive method to read and write VCF files.
 Extensions and applications of the library provided in the included utilities (*.cpp) comprise the vast bulk of the library's utility for most users.
 
+## download and install 
+
+1. Under the repository name, click to copy the clone URL for the repository. ![](https://help.github.com/assets/images/help/repository/clone-repo-clone-url-button.png)
+
+2. Go to the location where you want the cloned directory to be made:  `cd <PathWhereIWantToCloneVcflib>`
+
+3. Type `git clone`, and then paste the URL you copied in Step 1.
+
+4. Enter the cloned directory and type `make` to compile the programs
+
+5. Once make is finished the executables are ready in the folder `<PathWhereIWantToCloneVcflib>/vcflib/bin/`. Set this path as an  environment variable in the .bashrc file to access executables form everywhere on your proile OR call the executables from the path where they are. 
+
+
 ## usage
 
 vcflib provides a variety of functions for VCF manipulation:
