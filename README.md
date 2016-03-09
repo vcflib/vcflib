@@ -31,7 +31,7 @@ Extensions and applications of the library provided in the included utilities (*
 
 2. Go to the location where you want the cloned directory to be made:  `cd <PathWhereIWantToCloneVcflib>`
 
-3. Type `git clone`, and then paste the URL you copied in Step 1.
+3. Type `git clone --recursive`, and then paste the URL you copied in Step 1.
 
 4. Enter the cloned directory and type `make` to compile the programs
 
