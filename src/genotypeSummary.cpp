@@ -83,6 +83,8 @@ int main(int argc, char** argv) {
 
   string filename;
 
+  // open standardout 
+
   // set region to scaffold
 
   string region = "NA";
@@ -188,10 +190,24 @@ int main(int argc, char** argv) {
       printHelp();
     }
 
-    if(!variantFile.open(filename)){
-      cerr << "FATAL: could not open file for reading" << endl;
-      printHelp();
+    bool is_open; 
+
+    if (filename == "-") {
+
+        is_open=variantFile.open(std::cin);
+
+    } else {
+
+    	is_open=variantFile.open(filename); 
+	
+     }
+    
+    if (!is_open)  {
+          cerr << "FATAL: could not open file for reading" << endl;
+          printHelp();
+
     }
+
 
     if(region != "NA"){
       if(! variantFile.setRegion(region)){
@@ -229,6 +245,12 @@ int main(int argc, char** argv) {
     int nsamples = samples.size();
 
     vector<indv *> countData;
+    vector<string > countDataSampleName;
+
+    for ( map<int ,int>::iterator x=it.begin(); x!=it.end(); ++x) {
+
+        countDataSampleName.push_back(samples[x->first] ); 
+    }
 
 
     for(int i = 0; i < it.size(); i++){
@@ -240,6 +262,7 @@ int main(int argc, char** argv) {
       dip->nocall = 0;
 
       countData.push_back(dip);
+
     }
 
 
@@ -287,8 +310,8 @@ int main(int argc, char** argv) {
 
 	for(int nsamp = 0; nsamp < nsamples; nsamp++){
 
-	  map<string, vector<string> > sample = var.samples[ samples[nsamp]];
-	      if(it.find(index) != it.end() ){
+	    if(it.find(index) != it.end() ){
+	        const map<string, vector<string> >& sample = var.samples[ samples[nsamp]];
 		target.push_back(sample);
 	    }
 	    index += 1;
@@ -349,12 +372,12 @@ cerr << var << endl;
         std::cout << "#sample-id\tn-nocall\tn-hom-ancestral\tn-het\tn-hom-derived" << std::endl;
     }
     for(int i = 0; i < countData.size(); i++){
-      std::cout << samples[i]
-		<< "\t" << countData[i]->nocall
-		<< "\t" << countData[i]->nhom
-		<< "\t" << countData[i]->nhet
-		<< "\t" << countData[i]->nalt
-		<< std::endl;
+        std::cout << countDataSampleName[i]
+                  << "\t" << countData[i]->nocall
+                  << "\t" << countData[i]->nhom
+                  << "\t" << countData[i]->nhet
+                  << "\t" << countData[i]->nalt
+                  << std::endl;
     }
 
 
