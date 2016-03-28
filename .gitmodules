@@ -19,3 +19,6 @@
 [submodule "filevercmp"]
 	path = filevercmp
 	url = https://github.com/ekg/filevercmp.git
+[submodule "googletest"]
+	path = googletest
+	url = https://github.com/google/googletest.git
