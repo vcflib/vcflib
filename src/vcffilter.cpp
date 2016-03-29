@@ -191,6 +191,11 @@ int main(int argc, char** argv) {
         }
     }
 
+    if(filterSpec.empty()){
+      cout << "Argument -g or -f is required" << endl;
+      exit(1);
+    }
+
     if (genofilterStrs.size() == 0 && keepInfo) {
 		cout << "argument '-k' (--keep-info) requires a Genotype filter: ('-g')" << endl
 			<< "i.e.: -g \"GT = 1|1\" -k" << endl;
