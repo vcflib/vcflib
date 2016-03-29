@@ -1,5 +1,7 @@
 #include "Variant.h"
 #include <getopt.h>
+#include "gpatInfo.hpp"
+
 
 using namespace std;
 using namespace vcflib;
@@ -10,7 +12,8 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl 
          << "    -h, --help       this dialog" << endl
-         << endl
+	 << "    -v, --version    prints version" << endl
+	 << endl
          << "Overlays records in the input vcf files in the order in which they appear." << endl;
     exit(0);
 }
@@ -22,32 +25,40 @@ int main(int argc, char** argv) {
 
     int c;
     while (true) {
-        static struct option long_options[] =
-            {
-                {"help", no_argument, 0, 'h'},
-                {0, 0, 0, 0}
-            };
-        int option_index = 0;
-
-        c = getopt_long (argc, argv, "h",
-                         long_options, &option_index);
-
-        if (c == -1)
-            break;
-
-        switch (c) {
-            case 'h':
-                printSummary(argv);
-                break;
-
-            case '?':
-                printSummary(argv);
-                exit(1);
-                break;
-
-            default:
-                abort ();
-        }
+      static struct option long_options[] =
+	{
+	  {"help", no_argument, 0, 'h'},
+	  {"version", no_argument, 0, 'v'},
+	  {0, 0, 0, 0}
+	};
+      int option_index = 0;
+      
+      c = getopt_long (argc, argv, "hv",
+		       long_options, &option_index);
+      
+      if (c == -1){
+	break;
+      }
+      switch (c) {
+      case 'h':
+	{
+	  printSummary(argv);
+	  break;
+	}
+      case 'v':
+	{
+	  printBasicVersion();
+	  exit(0);
+	} 
+      case '?':
+	{
+	  printSummary(argv);
+	  exit(1);
+	  break;
+	}
+      default:
+	abort ();
+      }
     }
 
     // idea here is to shadow-merge

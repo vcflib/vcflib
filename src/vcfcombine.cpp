@@ -1,7 +1,7 @@
 #include "Variant.h"
 #include <getopt.h>
 #include <utility>
-
+#include "gpatInfo.hpp"
 
 using namespace std;
 using namespace vcflib;
@@ -17,7 +17,8 @@ void printSummary(char** argv) {
          << endl
          << "options:" << endl
          << "    -h --help           This text." << endl
-         << "    -r --region REGION  A region specifier of the form chrN:x-y to bound the merge" << endl;
+	 << "    -v --version        Print version." << endl
+	 << "    -r --region REGION  A region specifier of the form chrN:x-y to bound the merge" << endl;
     exit(1);
 }
 
@@ -35,34 +36,42 @@ int main(int argc, char** argv) {
         {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
-            {"help", no_argument, 0, 'h'},
-            {"region", required_argument, 0, 'r'},
+            {"help"   , no_argument      , 0, 'h'},
+	    {"version", no_argument      , 0, 'v'},
+            {"region" , required_argument, 0, 'r'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hr:",
+        c = getopt_long (argc, argv, "vhr:",
                          long_options, &option_index);
 
         if (c == -1)
             break;
 
         switch (c) {
-
+	case 'v':
+	  {
+	    printBasicVersion();
+	    exit(0);
+	  }
         case 'h':
+	  {
             printSummary(argv);
             break;
-
+	  }
         case 'r':
+	  {
             region = optarg;
             break;
-
+	  }
         case '?':
+	  {
             printSummary(argv);
             exit(1);
             break;
-
+	  }
         default:
             abort ();
         }

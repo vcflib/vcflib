@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include <getopt.h>
 #include "Fasta.h"
+#include "gpatInfo.hpp"
 #include <algorithm>
 #include <list>
 #include <set>
@@ -13,7 +14,9 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
          << "options:" << endl 
-         << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
+	 << "    -h, --help              Print this message" << endl
+	 << "    -v, --version           Print version" << endl
+	 << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
          << "    -w, --window-size N     Merge variants at most this many bp apart (default 30)" << endl
          << "    -o, --only-variants     Don't output the entire haplotype, just concatenate" << endl
          << "                            REF/ALT strings (delimited by \":\")" << endl
@@ -57,41 +60,51 @@ int main(int argc, char** argv) {
                 {"help", no_argument, 0, 'h'},
                 {"window-size", required_argument, 0, 'w'},
                 {"reference", required_argument, 0, 'r'},
+		{"version", no_argument, 0, 'v'},
                 {"only-variants", no_argument, 0, 'o'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "how:r:",
+        c = getopt_long (argc, argv, "hvow:r:",
                          long_options, &option_index);
-
-        if (c == -1)
-            break;
-
+	
+        if (c == -1){
+	  break;
+	}
         switch (c) {
-
+	case 'v':
+	  {
+	    printBasicVersion();
+	    exit(0);
+	  }  
         case 'o':
+	  {
             onlyVariants = true;
             break;
-
-	    case 'w':
-            windowsize = atoi(optarg);
+	  }
+	case 'w':
+	  {
+	    windowsize = atoi(optarg);
             break;
-
-	    case 'r':
-            fastaFileName = string(optarg);
+	  }
+	case 'r':
+	  {
+	    fastaFileName = string(optarg);
             break;
-
+	  }
         case 'h':
+	  {
             printSummary(argv);
             break;
-
+	  }
         case '?':
+	  {
             printSummary(argv);
             exit(1);
             break;
-
+	  }
         default:
             abort ();
         }

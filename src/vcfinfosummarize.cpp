@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "split.h"
 #include "Fasta.h"
+#include "gpatInfo.hpp"
 #include <getopt.h>
 #include <algorithm>
 #include <numeric>
@@ -18,6 +19,8 @@ void printSummary(char** argv) {
          << "    -m, --median        Use the median" << endl
          << "    -n, --min           Use the min" << endl
          << "    -x, --max           Use the max" << endl
+	 << "    -h, --help          Print this message" << endl
+	 << "    -v, --version       Print version" << endl
          << endl
          << "Take annotations given in the per-sample fields and add the mean, median, min, or max" << endl
          << "to the site-level INFO." << endl
@@ -61,12 +64,13 @@ int main(int argc, char** argv) {
                 {"median", no_argument, 0, 'm'},
                 {"min", no_argument, 0, 'n'},
                 {"max", no_argument, 0, 'x'},
+		{"max", no_argument, 0, 'v'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hamnxf:i:",
+        c = getopt_long (argc, argv, "hamnxfv:i:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -84,35 +88,47 @@ int main(int argc, char** argv) {
                 printf (" with arg %s", optarg);
             printf ("\n");
             break;
-
+	    
+	case 'v':
+	  {
+	    printBasicVersion();
+	    exit(0);
+	  }
         case 'f':
+	  {
             sitewideField = optarg;
             break;
-
+	  }
         case 'i':
+	  {
             infoField = optarg;
             break;
- 
+	  }
         case 'a':
+	  {
             statType = MEAN;
             break;
-
+	  }
         case 'm':
+	  {
             statType = MEDIAN;
             break;
-
+	  }
         case 'n':
+	  {
             statType = MIN;
             break;
-
+	  }
         case 'x':
+	  {
             statType = MAX;
             break;
-
+	  }
         case 'h':
+	  {
             printSummary(argv);
             exit(0);
-
+	  }
         case '?':
             /* getopt_long already printed an error message. */
             printSummary(argv);

@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void printBasicVersion(void){
+  std::cout << "vcflib" << "\t" << VERSION << std::endl;
+}
 
 void printVersion(void){
 

@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include "split.h"
 #include "Fasta.h"
+#include "gpatInfo.hpp"
 #include <getopt.h>
 
 using namespace std;
@@ -13,6 +14,8 @@ void printSummary(char** argv) {
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
          << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
+	 << "    -h, --help       Print this message." << endl
+	 << "    -v, --version    Print version." << endl
          << endl
          << "Verifies that the VCF REF field matches the reference as described." << endl
          << endl;
@@ -39,13 +42,14 @@ int main(int argc, char** argv) {
                 {"fasta-reference",  required_argument, 0, 'f'},
                 {"exclude-failures",  no_argument, 0, 'x'},
                 {"keep-failures",  no_argument, 0, 'k'},
+                {"version",  no_argument, 0, 'v'},
                 //{"length",  no_argument, &printLength, true},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hxkf:",
+        c = getopt_long (argc, argv, "hvxkf:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -65,28 +69,38 @@ int main(int argc, char** argv) {
             break;
 
         case 'f':
+	  {
             fastaRef = optarg;
             break;
-
+	  }
+	case 'v':
+	  {
+	    printBasicVersion();
+	    exit(0);
+	  }
         case 'x':
+	  {
             excludeFailures = true;
             break;
-
+	  }
         case 'k':
+	  {
             keepFailures = true;
             break;
- 
+	  }
         case 'h':
+	  {
             printSummary(argv);
             exit(0);
             break;
-
+	  }
         case '?':
+	  {
             /* getopt_long already printed an error message. */
             printSummary(argv);
             exit(1);
             break;
- 
+	  }
         default:
             abort ();
         }
