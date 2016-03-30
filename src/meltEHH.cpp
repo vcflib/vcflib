@@ -14,10 +14,12 @@
 #include <getopt.h>
 #include "gpatInfo.hpp"
 // maaas speed
+
+#if defined HAS_OPENMP
 #include <omp.h>
 // print lock
 omp_lock_t lock;
-
+#endif 
 
 
 struct opts{
@@ -469,8 +471,10 @@ int main(int argc, char** argv) {
 	  }
       }
 
+#if defined HAS_OPENMP
   omp_set_num_threads(globalOpts.threads);
-
+#endif
+  
     map<string, int> okayGenotypeLikelihoods;
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;

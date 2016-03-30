@@ -14,10 +14,12 @@
 #include <getopt.h>
 #include "gpatInfo.hpp"
 // maaas speed
+
+#if defined HAS_OPENMP
 #include <omp.h>
 // print lock
 omp_lock_t lock;
-
+#endif
 
 
 struct opts{
@@ -336,7 +338,10 @@ void calc(string **haplotypes, int nhaps,
 
   int maxl = haplotypes[0][0].length();
 
+#if defined HAS_OPENMP
 #pragma omp parallel for schedule(dynamic, 20)
+#endif
+  
   for(int snp = 0; snp < maxl; snp++){
 
     double ihhR     = 0;
@@ -366,8 +371,9 @@ void calc(string **haplotypes, int nhaps,
       continue;
     }
 
-     
+#if defined HAS_OPENMP
     omp_set_lock(&lock);
+#endif
     cout << seqid 
 	 << "\t" << pos[snp] 
 	 << "\t" << afs[snp] 
@@ -376,8 +382,10 @@ void calc(string **haplotypes, int nhaps,
 	 << "\t" << log(ihhA/ihhR) 
 	 << "\t" << refFail 
 	 << "\t" << altFail << std::endl;
-   
+
+#if defined HAS_OPENMP  
     omp_unset_lock(&lock);
+#endif
   }
 }
 
@@ -479,9 +487,9 @@ int main(int argc, char** argv) {
 	    }
 	  }
       }
-
+#if defined HAS_OPENMP
   omp_set_num_threads(globalOpts.threads);
-
+#endif
     map<string, int> okayGenotypeLikelihoods;
     okayGenotypeLikelihoods["PL"] = 1;
     okayGenotypeLikelihoods["GL"] = 1;

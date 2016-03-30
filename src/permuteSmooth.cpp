@@ -50,9 +50,11 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include "gpatInfo.hpp"
 
+#if defined HAS_OPENMP
 #include <omp.h>
 // print lock
 omp_lock_t lock;
+#endif
 
 struct options{
   std::string file    ;
@@ -305,8 +307,9 @@ srand (time(NULL));
 
 int parse = parseOpts(argc, argv);
 
+ #if defined HAS_OPENMP
  omp_set_num_threads(globalOpts.threads);
-
+#endif
 
  if(globalOpts.file.compare("NA") == 0){
    cerr << "FATAL: no file was provided" << endl;
@@ -386,7 +389,10 @@ int parse = parseOpts(argc, argv);
 
  cerr << "INFO: Number of smoothed windows to permute : " << sData.size() << endl;
 
+#if defined HAS_OPENMP
 #pragma omp parallel for schedule(dynamic, 20)
+#endif
+ 
  for(int i = 0; i < sData.size(); i++){
    bool per = permute(sData[i]->score, sData[i]->n, 
 	   data, &sData[i]->nPer, 
@@ -394,20 +400,28 @@ int parse = parseOpts(argc, argv);
    
 
    if(per){
-   omp_set_lock(&lock);
+#if defined HAS_OPENMP
+     omp_set_lock(&lock);
+#endif 
    cout << sData[i]->line 
 	<< "\t" << sData[i]->nSuc
 	<< "\t" << sData[i]->nPer 
 	<< "\t" << sData[i]->ePv << endl;
+   #if defined HAS_OPENMP
    omp_unset_lock(&lock);
+   #endif
    }
    else{
+     #if defined HAS_OPENMP
      omp_set_lock(&lock);
+     #endif
      cout << sData[i]->line
 	  << "\t" << "NA"
 	  << "\t" << "NA"
 	  << "\t" << "NA" << endl;
+     #if defined HAS_OPENMP
      omp_unset_lock(&lock);
+     #endif
    }
  }
 
