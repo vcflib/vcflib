@@ -2,6 +2,7 @@
 
 #include "gtest/gtest.h"
 #include "variantTests.h"
+#include "variantFileTests.h"
 
 GTEST_API_ int main(int argc, char** argv)
 {
