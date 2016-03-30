@@ -33,7 +33,7 @@ Extensions and applications of the library provided in the included utilities (*
 
 3. Type `git clone --recursive`, and then paste the URL you copied in Step 1.
 
-4. Enter the cloned directory and type `make` to compile the programs.  If you want to use threading `make openmp`.  Only a few VCFLIB tools are threaded.
+4. Enter the cloned directory and type `make` to compile the programs.  If you want to use threading type `make openmp` instead of `make`.  Only a few VCFLIB tools are threaded.
 
 5. Once make is finished the executables are ready in the folder `<PathWhereIWantToCloneVcflib>/vcflib/bin/`. Set this path as an  environment variable in the .bashrc file to access executables form everywhere on your proile OR call the executables from the path where they are. 
 
