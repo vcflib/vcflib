@@ -134,7 +134,7 @@ all: $(OBJECTS) $(BINS)
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x -DVERSION=\"$(GIT_VERSION)\"
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x 
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
@@ -188,7 +188,7 @@ $(SHORTBINS): pre
 	$(MAKE) bin/$@
 
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) pre intervaltree
-	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) -DVERSION=\"$(GIT_VERSION)\"
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
