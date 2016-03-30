@@ -3,9 +3,12 @@ sudo: required
 compiler: 
  - gcc
 before_install:
- - sudo apt-get install g++
- - sudo apt-get install build-essential
- - git submodule update --init --recursive
+ - os: linux
+ sudo apt-get install g++
+ - os: linux
+ sudo apt-get install build-essential
+ - os: linux
+ git submodule update --init --recursive
 os:
  - linux
  - osx
