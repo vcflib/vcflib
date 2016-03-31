@@ -247,6 +247,10 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
         
     string genotype = (*targ_it)["GT"].front();
 
+    if(genotype == "./0" || genotype == "./1" || genotype == "."){
+      genotype = "./.";
+    }
+
     gts.push_back(genotype);
 
     vector<double> phreds;
@@ -265,12 +269,7 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
       phreds.push_back(pab - norm);
       phreds.push_back(pbb - norm);
 
-      
-       // cerr << exp(pa  - norm) << endl;
-       // cerr << exp(pab - norm) << endl;
-       // cerr << exp(pbb - norm) << endl;
-       // cerr << endl;
-
+    
       sum += exp(pa - norm);
       //      cerr << sum << endl;
       phredsCDF.push_back(sum);
@@ -294,10 +293,7 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, string s
     genoLikelihoods.push_back(phreds);
     genoLikelihoodsCDF.push_back(phredsCDF);
 
-    if(genotype == "./0" || genotype == "./1"){
-      genotype = "./.";
-    }
-
+    
     while(1){
       if(genotype == "./."){
         genoIndex.push_back(-1);
