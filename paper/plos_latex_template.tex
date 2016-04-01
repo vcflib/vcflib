@@ -216,7 +216,7 @@ Zev N. Kronenberg\textsuperscript{1,\Yinyang, *},
 % Please keep the abstract below 300 words
 \section*{Abstract}
 
-The Variant Call Format (VCF) is currency of genetic variation.  Thousands of genomes are being sequenced and distilled to VCF files each year. The ability to rapidly manipulate and calculate population-level statistics on VCF files remains a bottleneck in clinical and biological analyses.  In an effort to facilitate easy and rapid analysis of genetic variation we wrote VCFLIB.  While the library is well over five years old, novel methods and continued support make VCFLIB useful for large scale genomic projects.  Here we discus the latest additions to VCFLIB, focused on population genetics.  We provide a proof of utility by applying VCFLIB to the Phase III 1000 Genomes Project data to identify regions of the human genome that are stratified between human populations and show usual pattern of genetic variation.
+The Variant Call Format (VCF) is currency of genetic variation. Thousands of genomes are being sequenced and distilled to VCF files each year. The ability to rapidly manipulate and calculate population-level statistics on VCF files remains a bottleneck in clinical and biological analyses. In an effort to facilitate easy and rapid analysis of genetic variation we wrote VCFLIB. While the library is well over five years old, novel methods and continued support make VCFLIB useful for large-scale genomic projects. Here we discuss the basics functionality of VCFLIB and new population genetic metrics implemented.  To demonstrate the utility of VCFLIB we used it to identify genomic regions of unusual genetic diversity within and between populations in the 1000 genomes project.  Genes, previously shown to be targets of natural selection, like \textit{LCT} and \textit{EDAR} were amounts our top candidate regions. 
 
 \linenumbers
 
@@ -277,7 +277,7 @@ The empirical significance of the smoothed windows or segmented  F$_{ST}$ can be
 
 \paragraph*{$\Delta$ allele frequency (AF) and association tests} \mbox{} \\
 
-The difference in allele frequencies ($\Delta$) between two phenotypically distinct groups can be used to idnetify genetic variants associated with a trait of interest.  A likelihood test for $\Delta$ AF is implemented in ``pF$_{ST}$ " for both pooled and genotypic data Eq~(\ref{eq:pfst}).   In Eq~(\ref{eq:pfst }), \textit{B} represented the binomial distribution parameterized by the number of trials \textit{n}, the number of successes \textit{k} and the probability of success, \textit{p}.  The \textit{D} statistic is chi-squared distributed with one degree of freedom.
+The difference in allele frequencies ($\Delta$) between two phenotypically distinct groups can be used to identify genetic variants associated with a trait of interest.  A likelihood test for $\Delta$ AF is implemented in ``pF$_{ST}$ " for both pooled and genotypic data Eq~(\ref{eq:pfst}).   In Eq~(\ref{eq:pfst }), \textit{B} represented the binomial distribution parameterized by the number of trials \textit{n}, the number of successes \textit{k} and the probability of success, \textit{p}.  The \textit{D} statistic is chi-squared distributed with one degree of freedom.
 
 \begin{equation}\label{eq:pfst} 
 D=-2* ln (\frac{ B(n_c,k_c,p_c) }{ B(n_t,k_t,p_t)*B(n_b,k_b,p_b)  })
