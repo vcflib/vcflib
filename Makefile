@@ -27,6 +27,7 @@ OBJ_DIR:=obj
 BIN_SOURCES = src/vcfecho.cpp \
 			  src/dumpContigsFromHeader.cpp \
 			  src/bFst.cpp \
+			  src/pVst.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
