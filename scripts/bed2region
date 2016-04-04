@@ -1,0 +1,9 @@
+#!/usr/bin/env perl
+
+while (<STDIN>) {
+    $_ =~ /^(.+?)\s(.+?)\s(.+)\s*/;
+    $chrom = $1;
+    $pos = $2;
+    $end = $3;
+    print $chrom . ":" . $pos . "-" . $end . "\n";
+}

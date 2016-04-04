@@ -1,0 +1,18 @@
+#!/usr/bin/env perl
+
+my $seen_non_header = 0;
+
+while (<STDIN>) {
+    if (! $seen_non_header) {
+        if (/^#/) {
+        } else {
+            $seen_non_header = 1;
+        }
+        print;
+    } else {
+        if (! /^#/) {
+            print;
+        }
+    }
+
+}

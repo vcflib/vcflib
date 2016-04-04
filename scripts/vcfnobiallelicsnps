@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+#
+
+while (<STDIN>) {
+    if ($_ =~ /^#/) {
+        print;
+    } else {
+        $_ =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+        $chrom = $1;
+        $pos = $2;
+        $tag = $3;
+        $ref = $4;
+        $alts = $5;
+        $hasnonsnp = 0;
+        $biallelic = 1;
+        if ($alts =~ /,/) {
+            $biallelic = 0;
+        }
+        @alts = split(/,/, $alts);
+        foreach $alt (@alts) {
+            if (!(length($alt)==1 && length($alt) == length($ref))) {
+                $hasnonsnp = 1;
+            }
+        }
+        if ($hasnonsnp || !$biallelic) {
+            print;
+        }
+    }
+}

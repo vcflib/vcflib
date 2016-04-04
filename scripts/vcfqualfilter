@@ -1,0 +1,32 @@
+#!/usr/bin/env perl
+#
+#
+
+use Getopt::Long;
+my $cutoff = -1;
+my $max = -1;
+my $indel = 0;
+my $snp = 0;
+$result = GetOptions ("c|cutoff=i" => \$cutoff,
+                      "m|max=i" => \$max,
+                      "i|indel=i"   => \$indel,
+                      "s|snp=i"  => \$snp);
+
+
+while (<STDIN>) {
+    if ($_ =~ /^#/) {
+        print $_;
+        next;
+    }
+
+    if ($_ =~ /^(.*?\t){6}(.*?)\t/) {
+        $qual = $1;
+    }
+    if ($cutoff ne -1 and $qual >= $cutoff and ($max eq -1 or $qual <= $max)) {
+        print $_;
+    } elsif ($snp and $_ =~ "SNP" and $qual >= $snp) {
+        print $_;
+    } elsif ($indel and $_ =~ "INS\|DEL" and $qual >= $indel) {
+        print $_;
+    }
+}

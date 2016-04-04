@@ -1,0 +1,225 @@
+#!/usr/bin/env perl
+#
+
+use IPC::Open2;
+
+sub revcomplement {
+    $revcom = reverse shift;
+    $revcom =~ tr/ACGTacgt/TGCAtgca/;
+    return $revcom;
+}
+
+$reference = $ARGV[0];
+
+if ($reference) {
+    $pid = open2(\*FASTAHACK_OUT, \*FASTAHACK_IN, "fastahack -c $reference");
+}
+
+#print FASTAHACK_IN "1:10000\n";
+#$result = <FASTAHACK_OUT>;
+#print $result;
+
+
+#open(VCF, $file);
+
+$ts = 0;
+$tv = 0;
+$cpg = 0;
+$total = 0;
+$snp = 0;
+$mnp = 0;
+$mnplen = 0;
+%mnp = ();
+$ins = 0;
+$inslen = 0;
+%ins = ();
+$del = 0;
+$dellen = 0;
+%del = ();
+
+%dint = (); # di-nucleotide distribution
+
+while (<STDIN>) {
+    if ($_ =~ /^#/) {
+        next;
+    } else {
+        $_ =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+        $chrom = $1;
+        $pos = $2;
+        $tag = $3;
+        $ref = $4;
+        $alt = $5;
+        #print "chrom: $chrom, pos: $pos, ref: $ref, alt: $alt\n";
+    }
+
+    $diff = length($ref) - length($alt);
+
+    $is_snp = 0;
+    if ($_ =~ /SNP/) {
+        $is_snp = 1;
+        $snp += 1;
+        # get di-nt's
+        if ($reference) {
+            if ($_ =~ /^(\d+)\t(\d+)/) {
+                $seq = $1;
+                $start = $2;
+                $end = $2 + 1;
+                print FASTAHACK_IN "$seq:$start..$end\n";
+                $dibp = <FASTAHACK_OUT>;
+                chomp $dibp;
+                $dint{$dibp} += 1;
+            }
+        }
+    } elsif ($diff eq 0 and length($ref) eq 1) {
+        $snp += 1;
+        $is_snp = 1;
+    } elsif ($diff eq 0 and length($ref) gt 1) {
+        $mnp += 1;
+        $mnplen += length($ref);
+        $mnp{length($ref)} += 1;
+    }
+    if ($is_snp) {
+        if ((($ref eq "A" and $alt eq "G") or ($ref eq "G" and $alt eq "A"))
+                or
+            (($ref eq "C" and $alt eq "T") or ($ref eq "T" and $alt eq "C"))) {
+            $ts += 1;
+        } else {
+            $tv += 1;
+        }
+        if ($_ =~ /CpG/) { $cpg += 1; }
+    }
+
+    if ($diff lt 0) {
+        $len = abs($diff);
+        $ins += 1;
+        $inslen += $len;
+        $ins{$len} += 1;
+    }
+
+    if ($diff gt 0) {
+        $len = abs($diff);
+        $del += 1;
+        $dellen += $len;
+        $del{$len} += 1;
+    }
+    #elsif (length($ref) > 1 and $diff eq 0) {
+    #    print $_ . "\n";
+    #    $mnp += 1;
+    #    $mnplen += length($ref);
+    #    $mnp{length($ref)} += 1;
+    #}
+
+    $total += 1;
+}
+
+if ($total == 0) {
+    die "no VCF records read on stdin\n";
+}
+
+print "total variants:\t$total" . "\n";
+print "\n";
+if ($snp > 0) {
+    print "total snps:\t$snp\n";
+    print "transitions:\t$ts\n";
+    print "transversions:\t$tv\n";
+    if ($tv > 0) {
+        print "ts/tv ratio:\t" . ($ts / $tv) . "\n";
+    }
+    print "CpG sites:\t$cpg\n";
+    if ($cpg > 0) {
+        print "CpG/total snps:\t" . ($cpg / $snp) . "\n";
+    }
+}
+
+if (($ins + $del) > 0) {
+    print "\n";
+    print "total indels:\t" . ($ins + $del) . "\n";
+    print "insertions:\t$ins\t$inslen bp\n";
+    print "deletions:\t$del\t$dellen bp\n";
+
+    $max = 0;
+    while ( my ($size, $count) = each(%ins) ) {
+        if ($size > $max) { $max = $size; }
+    }
+    while ( my ($size, $count) = each(%del) ) {
+        if ($size > $max) { $max = $size; }
+    }
+
+    print "\n";
+
+    if ($inslen > 0 and $dellen > 0) {
+        $indel_length_ratio = $inslen / $dellen;
+        print "ins/del length ratio:\t$indel_length_ratio\n";
+        print "\n";
+        print "indel size frequency distribution\n";
+        print "size\tins\tdel\tins/del\tcurr/prev\n";
+
+        $last_delcount = 0;
+        $last_inscount = 0;
+        $last_ratio_del = 0;
+        $last_ratio_ins = 0;
+        for (1 .. $max) {
+            $inscount = $ins{$_};
+            $delcount = $del{$_};
+            if ($last_delcount != 0) {
+                $last_ratio_del = $delcount / $last_delcount;
+            }
+            if ($last_inscount != 0) {
+                $last_ratio_ins = $inscount / $last_inscount;
+            }
+            $last_delcount = $delcount;
+            $last_inscount = $inscount;
+            if ($inscount > 0 and $delcount > 0) {
+                $ratio = $inscount / $delcount;
+            } else {
+                $ratio = "";
+            }
+            print "$_\t$inscount\t$delcount\t"
+            . sprintf("%.3f", $ratio);
+            if ($last_ratio_ins != 0 or $last_ratio_del != 0) {
+                print "\t";
+                if ($last_ratio_ins != 0) {
+                    print sprintf("%.3f", $last_ratio_ins);
+                }
+                print "\t";
+                if ($last_ratio_del != 0) {
+                    print sprintf("%.3f", $last_ratio_del);
+                }
+                print "\n";
+            } else {
+                print "\n";
+            }
+        }
+        # FIXME
+        #print "\t\t\t\t" . sprintf("%.3f", $even_odd_ratio_sum_ins / $ins)
+        # . "\t" . sprintf("%.3f", $even_odd_ratio_sum_del / $del);
+    }
+}
+
+if ($mnplen > 0) {
+    print "\n";
+    print "total mnps:\t$mnp\n";
+    print "mnps length:\t$mnplen\n";
+    print "mnp size distribution\n";
+    $max = 0;
+    while ( my ($size, $count) = each(%mnp) ) {
+        if ($size > $max) { $max = $size; }
+    }
+    print "size\tcount\n";
+    for (2 .. $max) {
+        print $_ . "\t" . $mnp{$_} . "\n";
+    }
+}
+
+if ($reference) {
+
+    print "\n";
+
+    print "di-nucleotide distribution for SNPs\n";
+    print "di-nt\tcount\tcount/(total snps / 16)\n";
+    while ( my ($dibp, $count) = each(%dint) ) {
+        print "$dibp\t$count\t" . ($count / ($snp / 16)) . "\n";
+    }
+
+}
+

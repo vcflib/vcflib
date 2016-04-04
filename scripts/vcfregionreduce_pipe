@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ $# -ne 2 ];
+then
+    echo "Usage: $0 [region file] [directory]"
+    echo
+    echo "Generates \`basename directory\`.vcf.gz, which is the concatenation"
+    echo "of files in the directory named [directory]/[region1].vcf.gz,"
+    echo "[directory]/[region2].vcf.gz, etc. in the order in which they"
+    echo "occur in the region file."
+    echo
+    echo "A tabix index is subsequently generated."
+    exit 1
+fi
+
+regionfile=$1
+mergedir=$2
+mergename=$(basename $mergedir)
+vcfgenotypes=$mergename.vcf.gz
+#vcfsites=$mergename.sites.vcf.gz
+
+firstfile=$mergedir/$(head -1 $regionfile).vcf.gz
+files=$(for region in $(cat $regionfile); do echo $mergedir/$region.vcf.gz; done)
+
+zcat $firstfile | head -1000 | grep ^#
+for file in $files
+do
+    zcat $file | grep -v "^#"
+done
