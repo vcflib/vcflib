@@ -25,8 +25,11 @@ using namespace std;
 using namespace vcflib;
 
 struct copyNcounts{
-  std::string       seqid   ;
-  std::string       type    ;
+  std::string       seqid       ;
+  std::string       type        ;
+  std::string       targetV     ;
+  std::string       backgroundV ;
+
   std::stringstream results ;
   long int          pos     ;
   long int          end     ;
@@ -213,6 +216,8 @@ void calc(copyNcounts * d){
 	     << p ;
   
   
+
+
 }
 
 
@@ -240,12 +245,19 @@ void loadDat(copyNcounts * d,
 	= target.begin(); it!= target.end(); it++){
     d->target.push_back( atof((*it)[type].front().c_str()) );
     d->total.push_back(  atof((*it)[type].front().c_str()) );
-
+    
+    d->targetV += (*it)[type].front();
+    d->targetV += ",";
+    
   }
   for(vector < map< string, vector<string> > >::iterator it 
 	= background.begin(); it!= background.end(); it++){
-    d->background.push_back( atoi((*it)[type].front().c_str()) );
-    d->total.push_back( atoi((*it)[type].front().c_str()) );  
+    d->background.push_back( atof((*it)[type].front().c_str()) );
+    d->total.push_back( atof((*it)[type].front().c_str()) );  
+  
+    d->backgroundV += (*it)[type].front();
+    d->backgroundV += ",";
+
   }
 
 }
@@ -482,7 +494,7 @@ int main(int argc, char** argv) {
 	  calc(dataBin[i]);
 	}
 	for(int i = 0 ; i < dataBin.size(); i++){
-	  std::cout << dataBin[i]->results.str() << std::endl;
+	  std::cout << dataBin[i]->results.str() << "\t" << dataBin[i]->targetV << "\t" << dataBin[i]->backgroundV << std::endl;
 	  delete dataBin[i];
 	}
 	dataBin.clear();
