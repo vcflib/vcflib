@@ -164,10 +164,11 @@ add_dependencies(htslib htslib-build)
 find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 
+add_definitions(-DVERSION="${GIT_VERSION}")
+
 foreach(BIN ${BINS})
   add_executable(${BIN} src/${BIN}.cpp)
   target_link_libraries(${BIN} vcflib htslib ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
-  target_compile_definitions(${BIN} PRIVATE -DVERSION="${GIT_VERSION}")
 endforeach(BIN ${BINS})
 
 install(TARGETS ${BINS} RUNTIME DESTINATION bin)
