@@ -55,17 +55,34 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
             map<string, vector<string> >& other = o->second;
             string& otherGenotype = other["GT"].front();
             // XXX this must compare the genotypes in the two files
-            map<int, int> gtB = decomposeGenotype(otherGenotype);
-            map<int, int> gtnew;
-            for (map<int, int>::iterator g = gtB.begin(); g != gtB.end(); ++g) {
+           
+            if (otherGenotype.find("|") != string::npos) {
+              vector<int> gtB = decomposePhasedGenotype(otherGenotype);
+              vector<int> gtnew;
+              gtnew.reserve(gtB.size());
+
+              for (vector<int>::iterator g = gtB.begin(); g != gtB.end(); ++g) {
+                map<int, int>::iterator f = varBconvertToVarA.find(*g);
+                if (f != varBconvertToVarA.end()) {
+                  gtnew.push_back(*g);
+                } else {
+                  gtnew.push_back(NULL_ALLELE);
+                }
+              }
+              sample[annotationTag].push_back(phasedGenotypeToString(gtnew));
+            } else {
+              map<int, int> gtB = decomposeGenotype(otherGenotype);
+              map<int, int> gtnew;
+              for (map<int, int>::iterator g = gtB.begin(); g != gtB.end(); ++g) {
                 map<int, int>::iterator f = varBconvertToVarA.find(g->first);
                 if (f != varBconvertToVarA.end()) {
-                    gtnew[f->second] += g->second;
+                  gtnew[f->second] += g->second;
                 } else {
-                    gtnew[-1] += g->second;
+                  gtnew[NULL_ALLELE] += g->second;
                 }
+              }
+              sample[annotationTag].push_back(genotypeToString(gtnew));
             }
-            sample[annotationTag].push_back(genotypeToString(gtnew));
         }
     }
 }
