@@ -24,6 +24,7 @@ endif(GPROF)
 
 include_directories(include)
 include_directories(tabixpp)
+include_directories(tabixpp/htslib)
 include_directories(fastahack)
 include_directories(intervaltree)
 include_directories(smithwaterman)
