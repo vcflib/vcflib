@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(vcflib)
 
 option(OPENMP "Enable OpenMP" OFF)
@@ -6,6 +6,12 @@ option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 
 include(ExternalProject)
+include(FeatureSummary)
+
+find_package(ZLIB)
+set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
+find_package(Threads)
+set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -D_FILE_OFFSET_BITS=64")
 
@@ -162,9 +168,6 @@ set_property(TARGET htslib PROPERTY
   IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/tabixpp/htslib/libhts.a)
 add_dependencies(htslib htslib-build)
 
-find_package(ZLIB REQUIRED)
-find_package(Threads REQUIRED)
-
 add_definitions(-DVERSION="${GIT_VERSION}")
 
 foreach(BIN ${BINS})
@@ -185,3 +188,7 @@ file(GLOB INCLUDES
   filevercmp/*.h*)
 
 install(FILES ${INCLUDES} DESTINATION include)
+
+feature_summary(
+  FATAL_ON_MISSING_REQUIRED_PACKAGES 
+  WHAT REQUIRED_PACKAGES_NOT_FOUND)
