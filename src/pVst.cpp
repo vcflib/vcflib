@@ -29,6 +29,7 @@ struct copyNcounts{
   std::string       type        ;
   std::string       targetV     ;
   std::string       backgroundV ;
+  std::string       callers     ;
 
   std::stringstream results ;
   long int          pos     ;
@@ -443,6 +444,17 @@ int main(int argc, char** argv) {
       varDat->pos   = var.position    ;
       varDat->seqid = var.sequenceName;
       varDat->type  = var.alt.front() ;
+      
+      if(var.info.find("CALLERS") != var.info.end()){
+	stringstream caller;
+	for(std::vector<std::string>::iterator z = var.info["CALLERS"].begin();
+	    z != var.info["CALLERS"].end(); z++){
+	  caller << (*z);
+	  caller << ',';
+	}
+	
+	varDat->callers = caller.str();
+      }
 
       if(var.info.find("END") != var.info.end()){
 	varDat->end = atol(var.info["END"].front().c_str());
@@ -494,7 +506,16 @@ int main(int argc, char** argv) {
 	  calc(dataBin[i]);
 	}
 	for(int i = 0 ; i < dataBin.size(); i++){
-	  std::cout << dataBin[i]->results.str() << "\t" << dataBin[i]->targetV << "\t" << dataBin[i]->backgroundV << std::endl;
+	  std::cout << dataBin[i]->results.str() << "\t" << dataBin[i]->targetV << "\t" << dataBin[i]->backgroundV ;
+	  
+	  if(!dataBin[i]->callers.empty()){
+	    std::cout << "\t" << dataBin[i]->callers << std::endl;
+	  }
+	  else{
+	    std::cout << std::endl;
+	  }
+	  
+
 	  delete dataBin[i];
 	}
 	dataBin.clear();
