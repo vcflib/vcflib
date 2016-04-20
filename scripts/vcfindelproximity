@@ -1,0 +1,82 @@
+#!/usr/bin/env perl
+#
+
+
+
+# for line in the vcf
+# stuff the line into a queue
+# when you reach an indel
+# record the position
+# pop lines from the back of the queue until we are at the current position
+#
+
+my @lines;
+
+my $prox = $ARGV[0];
+
+my $lastchrom = "";
+my $indelpos = 0;
+
+while (<STDIN>) {
+
+    if ($_ =~ /^#/) {
+        print $_;
+        next;
+    }
+
+    $_ =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+    my $chrom = $1;
+    my $pos = $2;
+    my $tag = $3;
+    my $ref = $4;
+    my $alt = $5;
+    #print "chrom: $chrom, pos: $pos, ref: $ref, alt: $alt\n";
+
+    # if new chrom, print out everything from last one
+    if ($lastchrom == "") {
+        $lastchrom = $chrom;
+    }
+
+    if ($chrom != $lastchrom) {
+        while ($lines) {
+            print pop(@lines);
+        }
+    }
+
+    unshift(@lines, $_);
+
+    my $diff = length($ref) - length($alt);
+
+    if ($diff != 0) {
+        # insertion
+        if ($indelpos == 0) {
+            $indelpos = $pos;
+        }
+        $nextindelpos = $pos;
+        #print "last $indelpos next $nextindelpos\n";
+        while (@lines) {
+            my $line = pop(@lines);
+            $line =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+            my $c = $1;
+            my $p = $2;
+            my $t = $3;
+            my $r = $4;
+            my $a = $5;
+            # print indels
+            if (length($r) - length($a) != 0) {
+                print $line;
+            } else {
+            # print other events which are more than prox away from indels
+                if (abs($indelpos - $p) >= $prox and abs($nextindelpos - $p) >= $prox) {
+                    print $line;
+                }
+            }
+        }
+        $indelpos = $pos;
+    }
+}
+
+# flush lines end of file
+while ($lines) {
+    print pop(@lines);
+}

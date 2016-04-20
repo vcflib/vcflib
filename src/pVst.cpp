@@ -25,8 +25,12 @@ using namespace std;
 using namespace vcflib;
 
 struct copyNcounts{
-  std::string       seqid   ;
-  std::string       type    ;
+  std::string       seqid       ;
+  std::string       type        ;
+  std::string       targetV     ;
+  std::string       backgroundV ;
+  std::string       callers     ;
+
   std::stringstream results ;
   long int          pos     ;
   long int          end     ;
@@ -213,6 +217,8 @@ void calc(copyNcounts * d){
 	     << p ;
   
   
+
+
 }
 
 
@@ -240,12 +246,19 @@ void loadDat(copyNcounts * d,
 	= target.begin(); it!= target.end(); it++){
     d->target.push_back( atof((*it)[type].front().c_str()) );
     d->total.push_back(  atof((*it)[type].front().c_str()) );
-
+    
+    d->targetV += (*it)[type].front();
+    d->targetV += ",";
+    
   }
   for(vector < map< string, vector<string> > >::iterator it 
 	= background.begin(); it!= background.end(); it++){
-    d->background.push_back( atoi((*it)[type].front().c_str()) );
-    d->total.push_back( atoi((*it)[type].front().c_str()) );  
+    d->background.push_back( atof((*it)[type].front().c_str()) );
+    d->total.push_back( atof((*it)[type].front().c_str()) );  
+  
+    d->backgroundV += (*it)[type].front();
+    d->backgroundV += ",";
+
   }
 
 }
@@ -431,6 +444,17 @@ int main(int argc, char** argv) {
       varDat->pos   = var.position    ;
       varDat->seqid = var.sequenceName;
       varDat->type  = var.alt.front() ;
+      
+      if(var.info.find("CALLERS") != var.info.end()){
+	stringstream caller;
+	for(std::vector<std::string>::iterator z = var.info["CALLERS"].begin();
+	    z != var.info["CALLERS"].end(); z++){
+	  caller << (*z);
+	  caller << ',';
+	}
+	
+	varDat->callers = caller.str();
+      }
 
       if(var.info.find("END") != var.info.end()){
 	varDat->end = atol(var.info["END"].front().c_str());
@@ -482,7 +506,16 @@ int main(int argc, char** argv) {
 	  calc(dataBin[i]);
 	}
 	for(int i = 0 ; i < dataBin.size(); i++){
-	  std::cout << dataBin[i]->results.str() << std::endl;
+	  std::cout << dataBin[i]->results.str() << "\t" << dataBin[i]->targetV << "\t" << dataBin[i]->backgroundV ;
+	  
+	  if(!dataBin[i]->callers.empty()){
+	    std::cout << "\t" << dataBin[i]->callers << std::endl;
+	  }
+	  else{
+	    std::cout << std::endl;
+	  }
+	  
+
 	  delete dataBin[i];
 	}
 	dataBin.clear();

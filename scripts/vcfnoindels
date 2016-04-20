@@ -1,0 +1,25 @@
+#!/usr/bin/env perl
+#
+
+while (<STDIN>) {
+    if ($_ =~ /^#/) {
+        print;
+    } else {
+        $_ =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+        $chrom = $1;
+        $pos = $2;
+        $tag = $3;
+        $ref = $4;
+        $alts = $5;
+	$hasindel = 0;
+	@alts = split(/,/, $alts);
+	foreach $alt (@alts) {
+	    if (length($alt ) != length($ref)) {
+		$hasindel = 1;
+	    }
+        }
+	if (! $hasindel) {
+	    print;
+	}
+    }
+}

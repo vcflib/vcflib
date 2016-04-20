@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+#
+
+while (<STDIN>) {
+    if ($_ =~ /^#/) {
+        print;
+    } else {
+        $_ =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+        $chrom = $1;
+        $pos = $2;
+        $tag = $3;
+        $ref = $4;
+        $alt = $5;
+        if ($alt =~ /,/) {
+            print;
+        } else {
+            # remove anything which isn't multiallelic
+        }
+    }
+}

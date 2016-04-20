@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+#
+
+while (<STDIN>) {
+    if ($_ =~ /^#/) {
+        print;
+    } else {
+        $_ =~ /^(.+?)\t(.+?)\t(.+?)\t(.+?)\t(.+?)\t/;
+        $chrom = $1;
+        $pos = $2;
+        $tag = $3;
+        $ref = $4;
+        $alts = $5;
+        $hasJunk = 0;
+        @alts = split(/,/, $alts);
+
+        if (!($ref =~ /A|T|G|C/)) {
+            $hasJunk = 1;
+        }
+        foreach $alt (@alts) {
+            if (!($alt =~ /A|T|G|C/)) {
+                $hasJunk = 1;
+            }
+        }
+        if (!$hasJunk) {
+            print;
+        }
+    }
+}

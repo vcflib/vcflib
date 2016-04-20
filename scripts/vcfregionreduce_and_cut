@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ $# -ne 2 ];
+then
+    echo "Usage: $0 [region file] [directory]"
+    echo
+    echo "Generates \`basename directory\`.vcf.gz and \`basename directory\`.sites.vcf.gz"
+    echo "which are the concatenation of files in the directory named [directory]/[region1].vcf.gz,"
+    echo "[directory]/[region2].vcf.gz, etc. in the order in which they occur in the region file."
+    echo
+    echo "Tabix indexes are simultaneously generated."
+    exit 1
+fi
+
+regionfile=$1
+mergedir=$2
+mergename=$(basename $mergedir)
+vcfgenotypes=$mergename.vcf.gz
+vcfsites=$mergename.sites.vcf.gz
+
+regions=$(cat $regionfile)
+
+firstfile=$mergedir/$(echo $regions | cut -f 1 -d\  ).vcf.gz
+files=$(for region in $regions; do echo $mergedir/$region.vcf.gz; done)
+
+( zcat $firstfile | head -1000 | grep ^#
+for file in $files
+do
+    zcat $file | grep -v "^#"
+done ) | uniq | pee \
+        "bgzip >$vcfgenotypes && tabix -p vcf $vcfgenotypes" \
+        "cut -f -8 | bgzip >$vcfsites && tabix -p vcf $vcfsites"
