@@ -2,7 +2,7 @@
 
 if [ $# -ne 4 ];
 then
-echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf] [qual_info_name]'
+echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf] [qual_info_name] [work_dir]'
 echo overlays the files, using the QUAL and GT from the extension
 exit
 fi
@@ -11,8 +11,11 @@ ref=$1
 base_vcf=$2
 extend_vcf=$3
 qual_info_name=$4
+work=$5
 
-aux_vcf=$(basename $extend_vcf .vcf.gz).aug.vcf.gz
+mkdir -p $work
+
+aux_vcf=$work/$(basename $extend_vcf .vcf.gz).aug.vcf.gz
 vcfqual2info $qual_info_name $extend_vcf \
     | vcfkeepinfo - $qual_info_name \
     | vcfkeepgeno - GT \
@@ -29,4 +32,4 @@ vcfintersect -r $ref -u $base_vcf $aux_vcf \
     | vcfuniq \
     | grep -v "^#"
 
-rm -f $aux_vcf
+rm -f $aux_vcf*
