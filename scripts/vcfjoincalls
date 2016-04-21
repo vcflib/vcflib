@@ -1,21 +1,25 @@
 #!/bin/bash
 
-if [ $# -ne 3 ];
+if [ $# -ne 4 ];
 then
-echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf]'
-echo overlays the files, fixing up annotation so that the result is a merged vcf
+echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf] [qual_info_name]'
+echo overlays the files, using the QUAL and GT from the extension
 exit
 fi
 
 ref=$1
 base_vcf=$2
 extend_vcf=$3
+qual_info_name=$4
 
 augment_vcf=$(basename $3 .vcf.gz).aug.vcf.gz
 
 vcfintersect -l -v -r $ref -i $base_vcf $extend_vcf | bgziptabix $augment_vcf
-vcfaddinfo <(zcat $base_vcf $augment_vcf | vcffirstheader | vcfsort) \
-           $augment_vcf \
-    | vcfkeepgeno - GT \
 
-#rm -f $augment_vcf*
+( sort -r <(zcat $base_vcf | head -10000 | grep '^#' ) \
+       <(zcat $augment_vcf | head -10000 | grep "^#" | grep ID | grep $qual_info_name)
+  zcat $base_vcf $augment_vcf | grep -v "^#" ) \
+    | vcfstreamsort -w 10000000000 \
+    | vcfuniq
+
+rm -f $augment_vcf*
