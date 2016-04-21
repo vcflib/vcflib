@@ -106,6 +106,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/vcfqual2info.cpp \
 			  src/vcfinfo2qual.cpp \
 			  src/vcfglbound.cpp \
+			  src/vcfunphase.cpp \
 			  src/vcfinfosummarize.cpp
 
 # when we can figure out how to build on mac
