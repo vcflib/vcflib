@@ -41,19 +41,19 @@ int main(int argc, char** argv) {
             string& genotype = sample["GT"].front();
             string splitter = "/";
             if (genotype.find("/") == string::npos
-                && genotype.find("|") == string::npos) {
+                || genotype.find("|") == string::npos) {
                 // assume haploid
             } else {
                 splitter = "|";
             }
-            vector<string> gt = split(genotype, splitter);
+            vector<string> gt = split(genotype, "|/");
             // now let's flatten the genotype
             stringstream gts;
             for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {
                 if (g != gt.begin()) {
                     gts << splitter;
                 }
-                if (g->c_str() == ".") {
+                if (*g == ".") {
                     gts << 0;
                 } else {
                     gts << *g;

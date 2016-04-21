@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
             // now let's sort the genotype
             vector<int> gti;
             for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {
-                if (g->c_str() == ".") {
+                if (*g == ".") {
                     gti.push_back(-1);
                 } else {
                     gti.push_back(atoi(g->c_str()));
