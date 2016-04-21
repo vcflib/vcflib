@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
                 || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)
 				|| variantFileB.done())
             ) {
+            annotateWithBlankGenotypes(varA, annotag);
             cout << varA << endl;
             variantFileA.getNextVariant(varA);
         }
@@ -192,24 +193,30 @@ int main(int argc, char** argv) {
 	    
             for (map<pair<string, string>, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
                 Variant& varA = vs->second;
+                annotateWithBlankGenotypes(varA, annotag);
                 if (varsBParsed.find(make_pair(varA.ref, varA.alt.front())) != varsBParsed.end()) {
                     Variant& varB = varsBParsed[make_pair(varA.ref, varA.alt.front())]; // TODO cleanup
                     annotateWithGenotypes(varA, varB, annotag);
                     varA.infoFlags[annotag + ".has_variant"] = true;
-                } else {
-                    annotateWithBlankGenotypes(varA, annotag);
                 }
                 cout << varA << endl;
             }
 
         } else if (!varsA.empty() && !varsB.empty()) { // one line per multi-allelic
             Variant& varA = varsA.front();
+            annotateWithBlankGenotypes(varA, annotag);
             Variant& varB = varsB.front();
             annotateWithGenotypes(varA, varB, annotag);
             // XXX TODO, and also allow for records with multiple alts
             // XXX assume that if the other file has a corresponding record, some kind of variation was detected at the same site
             varA.infoFlags[annotag + ".has_variant"] = true;
             cout << varA << endl;
+        } else {
+            for (vector<Variant>::iterator v = varsA.begin(); v != varsA.end(); ++v) {
+                Variant& varA = *v;
+                annotateWithBlankGenotypes(varA, annotag);
+                cout << varA << endl;
+            }
         }
 
     } while (!variantFileA.done() || !variantFileB.done());
