@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 3 ];
+then
+echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf]'
+echo overlays the files, fixing up annotation so that the result is a merged vcf
+exit
+fi
+
+ref=$1
+base_vcf=$2
+extend_vcf=$3
+
+augment_vcf=$(basename $3 .vcf.gz).aug.vcf.gz
+
+vcfintersect -l -v -r $ref -i $base_vcf $extend_vcf | bgziptabix $augment_vcf
+vcfaddinfo <(zcat $base_vcf $augment_vcf | vcffirstheader | vcfsort) \
+           $augment_vcf \
+    | vcfkeepgeno - GT \
+
+#rm -f $augment_vcf*
