@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 4 ];
+if [ $# -ne 5 ];
 then
 echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf] [qual_info_name] [work_dir]'
 echo overlays the files, using the QUAL and GT from the extension
