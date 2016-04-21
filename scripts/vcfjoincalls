@@ -18,8 +18,9 @@ vcfqual2info $qual_info_name $extend_vcf \
     | vcfkeepgeno - GT \
     | bgziptabix $aux_vcf
 
+echo '##fileformat=VCFv4.3'
 sort -r \
-     <(zcat $base_vcf | head -1000 | grep "^#") \
+     <(zcat $base_vcf | head -1000 | grep "^#" | grep -v '^##fileformat') \
      <(zcat $aux_vcf | head -1000 | grep "^#" | grep $qual_info_name )
 
 vcfintersect -r $ref -u $base_vcf $aux_vcf \
