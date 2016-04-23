@@ -14,9 +14,9 @@ void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
          << "options:" << endl 
-	 << "    -h, --help              Print this message" << endl
-	 << "    -v, --version           Print version" << endl
-	 << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
+         << "    -h, --help              Print this message" << endl
+         << "    -v, --version           Print version" << endl
+         << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
          << "    -w, --window-size N     Merge variants at most this many bp apart (default 30)" << endl
          << "    -o, --only-variants     Don't output the entire haplotype, just concatenate" << endl
          << "                            REF/ALT strings (delimited by \":\")" << endl
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
                 {"help", no_argument, 0, 'h'},
                 {"window-size", required_argument, 0, 'w'},
                 {"reference", required_argument, 0, 'r'},
-		{"version", no_argument, 0, 'v'},
+                {"version", no_argument, 0, 'v'},
                 {"only-variants", no_argument, 0, 'o'},
                 {0, 0, 0, 0}
             };
@@ -71,40 +71,40 @@ int main(int argc, char** argv) {
                          long_options, &option_index);
 	
         if (c == -1){
-	  break;
-	}
+            break;
+        }
         switch (c) {
-	case 'v':
-	  {
-	    printBasicVersion();
-	    exit(0);
-	  }  
+        case 'v':
+        {
+            printBasicVersion();
+            exit(0);
+        }  
         case 'o':
-	  {
+        {
             onlyVariants = true;
             break;
-	  }
-	case 'w':
-	  {
-	    windowsize = atoi(optarg);
+        }
+        case 'w':
+        {
+            windowsize = atoi(optarg);
             break;
-	  }
-	case 'r':
-	  {
-	    fastaFileName = string(optarg);
+        }
+        case 'r':
+        {
+            fastaFileName = string(optarg);
             break;
-	  }
+        }
         case 'h':
-	  {
+        {
             printSummary(argv);
             break;
-	  }
+        }
         case '?':
-	  {
+        {
             printSummary(argv);
             exit(1);
             break;
-	  }
+        }
         default:
             abort ();
         }
@@ -179,6 +179,7 @@ int main(int argc, char** argv) {
                 cout << var << endl;
             } else if (cluster.size() == 1) {
                 cout << cluster.front() << endl;
+                cluster.clear();
                 cout << var << endl;
             } else {
                 haplotypeCluster = true;
@@ -188,12 +189,11 @@ int main(int argc, char** argv) {
         // we need to deal with the current cluster, as our next var is outside of bounds
         // process the last cluster if it's more than 1 var
         if (haplotypeCluster) {
-            /*            cerr << "cluster: ";
+            cerr << "cluster: ";
             for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {
                 cerr << " " << v->position;
             }
             cerr << endl;
-            */
 
             // generate haplotype alleles and genotypes!
             // get the reference sequence across the haplotype in question
