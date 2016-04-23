@@ -21,15 +21,15 @@ vcfqual2info $qual_info_name $extend_vcf \
     | vcfkeepgeno - GT \
     | bgziptabix $aux_vcf
 
-echo '##fileformat=VCFv4.3'
-sort -r \
-     <(zcat $base_vcf | head -1000 | grep "^#" | grep -v '^##fileformat') \
-     <(zcat $aux_vcf | head -1000 | grep "^#" | grep $qual_info_name )
-
-vcfintersect -r $ref -u $base_vcf $aux_vcf \
-    | vcfaddinfo - $aux_vcf \
-    | vcfstreamsort -w 10000000000 \
-    | vcfuniq \
-    | grep -v "^#"
+(
+    echo '##fileformat=VCFv4.1'
+    sort -r \
+         <(zcat $base_vcf | head -1000 | grep "^#" | grep -v '^##fileformat') \
+         <(zcat $aux_vcf | head -1000 | grep "^#" | grep $qual_info_name )
+    vcfintersect -r $ref -u $base_vcf $aux_vcf \
+        | vcfaddinfo - $aux_vcf \
+        | vcfstreamsort -w 10000000000 \
+        | vcfuniq \
+        | grep -v "^#" ) | vcffixup -
 
 rm -f $aux_vcf*
