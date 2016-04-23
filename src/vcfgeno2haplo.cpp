@@ -189,11 +189,13 @@ int main(int argc, char** argv) {
         // we need to deal with the current cluster, as our next var is outside of bounds
         // process the last cluster if it's more than 1 var
         if (haplotypeCluster) {
+            /*
             cerr << "cluster: ";
             for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {
                 cerr << " " << v->position;
             }
             cerr << endl;
+            */
 
             // generate haplotype alleles and genotypes!
             // get the reference sequence across the haplotype in question
