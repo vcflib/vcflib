@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ $# -ne 5 ];
+then
+echo usage: $0 '[ref_fasta] [base_vcf] [extension_vcf] [qual_info_name] [work_dir]'
+echo overlays the files, using the QUAL and GT from the extension
+exit
+fi
+
+ref=$1
+base_vcf=$2
+extend_vcf=$3
+qual_info_name=$4
+work=$5
+
+mkdir -p $work
+
+aux_vcf=$work/$(basename $extend_vcf .vcf.gz).aug.vcf.gz
+vcfqual2info $qual_info_name $extend_vcf \
+    | vcfkeepinfo - $qual_info_name \
+    | vcfkeepgeno - GT \
+    | vcfallelicprimitives -kg \
+    | vt normalize -r $ref -q - 2>/dev/null \
+    | bgziptabix $aux_vcf
+
+echo '##fileformat=VCFv4.1'
+sort -r \
+     <(zcat $base_vcf | head -1000 | grep "^#" | grep -v '^##fileformat') \
+     <(zcat $aux_vcf | head -1000 | grep "^#" | grep OLD_VARIANT ) \
+     <(zcat $aux_vcf | head -1000 | grep "^#" | grep $qual_info_name )
+vcfintersect -r $ref \
+             -u <(zcat $base_vcf \
+                  | vcfallelicprimitives -kg \
+                  | vt normalize -r $ref -q - 2>/dev/null ) \
+             $aux_vcf \
+    | vcfaddinfo - $aux_vcf \
+    | vcfstreamsort -w 10000000000 \
+    | vcfuniq \
+    | vcfgeno2haplo -r $ref -w 0 \
+    | vcffixup - \
+    | grep -v "^#"
+
+rm -f $aux_vcf*
