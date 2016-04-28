@@ -64,8 +64,8 @@ struct options{
   double nsuc         ;
   int threads         ;
   int chrIndex        ;
-  int nIndex          ; 
-  int valueIndex      ; 
+  int nIndex          ;
+  int valueIndex      ;
 }globalOpts;
 
 struct score{
@@ -76,7 +76,7 @@ struct score{
 
 struct smoothedInputData{
   std::string line;
-  double score ; 
+  double score ;
   double n     ;
   double nPer  ;
   double nSuc  ;
@@ -132,16 +132,17 @@ int parseOpts(int argc, char** argv)
 {
   int opt = 0;
   globalOpts.file = "NA";
-  
+
   globalOpts.nsuc         = 1;
   globalOpts.npermutation = 1000;
-  
+
   opt = getopt(argc, argv, optString);
   while(opt != -1){
     switch(opt){
     case 'x':
       {
-	globalOpts.threads = atoi(optarg);
+          globalOpts.threads = atoi(optarg);
+          break;
       }
     case 'f':
       {
@@ -166,7 +167,7 @@ int parseOpts(int argc, char** argv)
 	  globalOpts.chrIndex   = 0;
 	  globalOpts.valueIndex = 3;
 	  globalOpts.nIndex     = 5;
-	}	
+	}
 	break;
       }
     case 'n':
@@ -180,7 +181,7 @@ int parseOpts(int argc, char** argv)
 	globalOpts.smoothed = optarg;
 	cerr << "INFO: smoothed file: " << globalOpts.smoothed << endl;
 	break;
-      }	
+      }
     case 'u':
       {
 	globalOpts.nsuc = atof(((string)optarg).c_str());
@@ -192,8 +193,8 @@ int parseOpts(int argc, char** argv)
 	break;
       }
     }
-    
-    opt = getopt( argc, argv, optString ); 
+
+    opt = getopt( argc, argv, optString );
   }
   return 1;
 }
@@ -209,10 +210,10 @@ int parseOpts(int argc, char** argv)
 
 */
 
-bool getContiguousWindow(vector<score *> & data, 
-			 vector<double> & load, 
+bool getContiguousWindow(vector<score *> & data,
+			 vector<double> & load,
 			 int n, int * nfail){
-  int r = rand() % data.size();    
+  int r = rand() % data.size();
 
   if(r+n >= data.size()){
     *nfail+=1;
@@ -223,7 +224,7 @@ bool getContiguousWindow(vector<score *> & data,
     *nfail+=1;
     return false;
   }
-  
+
   for(int i = r; i < r+n; i++){
     load.push_back(data[i]->score);
   }
@@ -255,14 +256,14 @@ double mean(vector<double> & data){
 
 */
 
-bool permute(double s, int n, vector<score *> & data, 
+bool permute(double s, int n, vector<score *> & data,
 	     double * nRep, double *nSuc, double * ePv){
- 
-  
+
+
   *ePv = 1 / globalOpts.npermutation;
-  
+
   while(*nSuc < globalOpts.nsuc && *nRep < globalOpts.npermutation ){
-    *nRep += 1;    
+    *nRep += 1;
 
 
     std::vector<double> scores;
@@ -279,7 +280,7 @@ bool permute(double s, int n, vector<score *> & data,
     }
 
     double ns = mean(scores);
-    
+
     if(ns > s){
       *nSuc += 1;
     }
@@ -335,11 +336,11 @@ int parse = parseOpts(argc, argv);
      double value = atof(region[4].c_str());
 
      if(globalOpts.format == "swcFst" || globalOpts.format == "segwcFst"){
-       
+
        if(region.size() != 5){
 	 cerr << "FATAL: wrong number of columns in wcFst input" << endl;
 	 exit(1);
-       } 
+       }
        if(value < 0 ){
 	 value = 0;
        }
@@ -371,7 +372,7 @@ int parse = parseOpts(argc, argv);
 
  if(smoothedFile.is_open()){
    while(getline(smoothedFile, line)){
-   
+
      vector<string> region = split(line, "\t");
      smoothedInputData * sp = new smoothedInputData;
 
@@ -381,7 +382,7 @@ int parse = parseOpts(argc, argv);
      sp->nPer = 0;
      sp->nSuc = 0;
      sp->ePv  = 0;
-     
+
      sData.push_back(sp);
    }
  }
@@ -392,20 +393,20 @@ int parse = parseOpts(argc, argv);
 #if defined HAS_OPENMP
 #pragma omp parallel for schedule(dynamic, 20)
 #endif
- 
+
  for(int i = 0; i < sData.size(); i++){
-   bool per = permute(sData[i]->score, sData[i]->n, 
-	   data, &sData[i]->nPer, 
+   bool per = permute(sData[i]->score, sData[i]->n,
+	   data, &sData[i]->nPer,
 	   &sData[i]->nSuc, &sData[i]->ePv);
-   
+
 
    if(per){
 #if defined HAS_OPENMP
      omp_set_lock(&lock);
-#endif 
-   cout << sData[i]->line 
+#endif
+   cout << sData[i]->line
 	<< "\t" << sData[i]->nSuc
-	<< "\t" << sData[i]->nPer 
+	<< "\t" << sData[i]->nPer
 	<< "\t" << sData[i]->ePv << endl;
    #if defined HAS_OPENMP
    omp_unset_lock(&lock);
@@ -425,7 +426,7 @@ int parse = parseOpts(argc, argv);
    }
  }
 
- for(vector<score*>::iterator itz = data.begin(); 
+ for(vector<score*>::iterator itz = data.begin();
      itz != data.end(); itz++){
    delete *itz;
  }
