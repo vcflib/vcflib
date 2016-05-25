@@ -107,7 +107,7 @@ void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, vector<strin
     }
 }
 
-void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& outputPrefix, int defaultPloidy) {
+void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& outputPrefix, int defaultPloidy, string& nullAlleleString) {
     string lastSeq;
     long int lastPos=0, lastEnd=0;
     map<string, map<int, SampleFastaFile*> > outputs;
@@ -161,7 +161,18 @@ void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& 
             }
             int i = 0;
             for (vector<int>::iterator g = gt.begin(); g != gt.end(); ++g, ++i) {
-                outputs[sample].at(i)->write(ref5prime+var.alleles.at(*g));
+                // @TCC handle uncalled genotypes (*g == NULL_ALLELE)
+                if( *g == NULL_ALLELE ){
+                    if( nullAlleleString == "" ){
+                        cerr << "empty genotype call for sample " << *s << " at " << var.sequenceName << ":" << var.position << endl;
+                        cerr << "use -n option to set value to output for missing calls" << endl; 
+                        exit(1);
+                    }else{
+                        outputs[sample].at(i)->write(nullAlleleString);
+                    }
+                }else{
+                    outputs[sample].at(i)->write(ref5prime+var.alleles.at(*g));
+                }
             }
         }
         lastPos = var.position - 1;
@@ -187,6 +198,7 @@ int main(int argc, char** argv) {
     string fastaFileName;
     int defaultPloidy;
     string outputPrefix;
+    string nullAlleleString;
 
     int c;
     while (true) {
@@ -198,12 +210,13 @@ int main(int argc, char** argv) {
                 {"reference", required_argument, 0, 'f'},
                 {"prefix", required_argument, 0, 'p'},
                 {"default-ploidy", required_argument, 0, 'P'},
+                {"no-call-string", required_argument, 0, 'n'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hmf:p:P:",
+        c = getopt_long (argc, argv, "hmf:p:P:n:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -225,6 +238,10 @@ int main(int argc, char** argv) {
 
         case 'P':
             defaultPloidy = atoi(optarg);
+            break;
+
+	    case 'n':
+            nullAlleleString = optarg;
             break;
 
         case '?':
@@ -256,7 +273,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    vcf2fasta(variantFile, reference, outputPrefix, defaultPloidy);
+    vcf2fasta(variantFile, reference, outputPrefix, defaultPloidy, nullAlleleString);
 
     return 0;
 
