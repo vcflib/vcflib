@@ -31,6 +31,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
+			  src/pbs.cpp \
 			  src/iHS.cpp \
 			  src/segmentFst.cpp \
 			  src/segmentIhs.cpp \
@@ -131,13 +132,15 @@ INCLUDES = -Itabixpp/htslib -I$(INC_DIR) -L. -Ltabixpp/htslib
 LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm
 
 
-all: $(OBJECTS) $(BINS)
+all: $(OBJECTS) $(BINS) scriptToBin
 
+scriptToBin: $(BINS)
+	cp scripts/* bin
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
 CXX = g++
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x 
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
