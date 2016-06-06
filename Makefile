@@ -31,7 +31,6 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/hapLrt.cpp \
 			  src/popStats.cpp \
 			  src/wcFst.cpp \
-			  src/pbs.cpp \
 			  src/iHS.cpp \
 			  src/segmentFst.cpp \
 			  src/segmentIhs.cpp \
