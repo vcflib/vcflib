@@ -96,7 +96,7 @@ int parseOpts(int argc, char** argv)
       switch(opt){
       case 's':
 	{
-	  string op = optarg;    
+	  string op = optarg;
 	  globalOpts.cut = atof(op.c_str());
 	  break;
 	}
@@ -106,7 +106,7 @@ int parseOpts(int argc, char** argv)
 	  exit(1);
 	  break;
 	}
-	
+
       case 'f':
 	{
 	  globalOpts.file = optarg;
@@ -116,61 +116,53 @@ int parseOpts(int argc, char** argv)
 	{
 	  break;
 	}
-      }	
-	opt = getopt( argc, argv, optString ); 
+      }
+	opt = getopt( argc, argv, optString );
    }
 return 1;
 }
 //------------------------------- SUBROUTINE --------------------------------
 /*
- Function input  :
-
- Function does   :
-
- Function returns:
-
+ Function input  : The vector of values
+ Function does   : Finds the bounds of the window
+ Function returns: bool
 */
 
-bool growWindow(vector<double> & values, 
-		int * begin            , 
-		int * end              , 
-		int * nhigh            , 
-		int * nlow             ,
-		double * hSum          ,
-		double * lSum           ){
+bool findWindow(vector<double> & values,
+                int * begin            ,
+                int * end              ){
 
-  *begin -= 1;
-  *end   += 1;
+    *begin -= 1;
+    *end   += 1;
 
-  if(*begin < 0){
-    return false;
-  }
-  if(*end >= values.size()){
-    return false;
-  }
-
-  for(int index = *begin; index <= *end; index++){
-    if(values[index] > globalOpts.cut){
-      *nhigh += 1;
-      *hSum += values[index];
+    if(*begin < 0){
+        return false;
     }
-    else{
-      *nlow += 1;
-      *lSum += values[index];
+    if(*end >= values.size()){
+        return false;
     }
-  }
-  if((*nhigh)*2 < (*nlow)){
-    return false;
-  }
-  return true;
+
+    int tmpHigh = 0;
+    int tmpLow  = 0;
+
+    for(int index = *begin; index <= *end; index++){
+        if(values[index] > globalOpts.cut){
+            tmpHigh += 1;
+        }
+        else{
+            tmpLow += 1;
+        }
+    }
+    if((tmpHigh*2) < tmpLow){
+        return false;
+    }
+    return true;
 }
 
 //------------------------------- SUBROUTINE --------------------------------
 /*
  Function input  : takes the sorted Fst scores, positions, and seqids
-
  Function does   : segments and prints bed
-
  Function returns:
 
 */
@@ -178,7 +170,6 @@ bool growWindow(vector<double> & values,
 
 void process(vector<int> & pos, vector<double> & value, vector<string> & seqid)
 {
-  
 
   // i is the index of the outter loop/aka variant sites.
   // always start the seed with 9 SNPs the window grows to 10 in "growWindow"
@@ -186,34 +177,45 @@ void process(vector<int> & pos, vector<double> & value, vector<string> & seqid)
 
     int begin = i -9;
     int end   = i +9;
-    
-    int nHigh = 0;
-    int nLow  = 0;
-    
-    double HighSum = 0;
-    double LowSum  = 0;
 
     bool anyGroth = false;
-    
-    while(growWindow(value, &begin, &end, 
-		     &nHigh, &nLow, &HighSum, &LowSum)){
-      anyGroth = true;
+
+    while(findWindow(value, &begin, &end)){
+        anyGroth = true;
     }
     // the current window had an extention
     if(anyGroth){
-    // reset the index beyond current window
-      i = end + 1;
+        // reset the index beyond current window
 
-      if(begin < 0){
-	begin = 0;
-      }
-      if(end >= value.size()){
-	end = (value.size() - 1);
-      }
+        i = end + 1;
+
+        if(begin < 0){
+            begin = 0;
+        }
+        if(end >= value.size()){
+            end = (value.size() - 1);
+        }
+
+        int nHigh = 0;
+        int nLow  = 0;
+
+        double HighSum = 0;
+        double LowSum  = 0;
+
+        for(long int lb = begin ; lb <= end; lb++){
+            if( value[lb] >= globalOpts.cut ){
+                nHigh += 1;
+                HighSum += value[lb];
+            }
+            else{
+                nLow +=1;
+                LowSum += value[lb];
+            }
+        }
+
 
       double avgFstHigh = HighSum / double(nHigh);
       double avgFst     = (HighSum + LowSum) / (double(nHigh)+double(nLow));
-
 
 
       cout << seqid[begin]   << "\t"
@@ -224,9 +226,9 @@ void process(vector<int> & pos, vector<double> & value, vector<string> & seqid)
            << nHigh + nLow   << "\t"
            << nHigh          << "\t"
            << (pos[end] - pos[begin])
-           << endl;      
+           << endl;
 
-    } 
+    }
   }
 }
 
@@ -279,7 +281,7 @@ int main( int argc, char** argv)
 	    lastPos = atoi(lineDat[1].c_str());
 	    seqid.push_back(lineDat[0]);
 	    pos.push_back(atoi(lineDat[1].c_str()));
-	    value.push_back(atof(lineDat[4].c_str()));	  
+	    value.push_back(atof(lineDat[4].c_str()));
 	  }
 	}
 
