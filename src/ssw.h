@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <emmintrin.h>
+//#include <emmintrin.h>
 
 /*!	@typedef	structure of the query profile	*/
 struct _profile;
