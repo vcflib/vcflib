@@ -152,7 +152,7 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
                 (vm) = _mm_max_epu8((vm), _mm_srli_si128((vm), 4)); \
                 (vm) = _mm_max_epu8((vm), _mm_srli_si128((vm), 2)); \
                 (vm) = _mm_max_epu8((vm), _mm_srli_si128((vm), 1)); \
-                (m) = _mm_extract_epi16((vm), 0)
+                (m) = _mm_extract_epi16((vm), 0) & 0x00ff; \
         } while (0)
 #endif
 
