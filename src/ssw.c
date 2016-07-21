@@ -634,7 +634,7 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
 end:
 #ifdef __PPC64__
         vMaxScore = vec_max8sh(vMaxScore, vMaxColumn);
-        vTemp = vec_compareeq16sb(vMaxMark, vMaxScore); // No replacement function
+        vTemp = vec_compareeq8sh(vMaxMark, vMaxScore); // TODO No replacement function
         cmp = vec_extractupperbit16sb(vTemp);
 #else
         vMaxScore = _mm_max_epi16(vMaxScore, vMaxColumn);
