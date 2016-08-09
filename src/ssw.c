@@ -652,7 +652,11 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
         /* Lazy_F loop: has been revised to disallow adjecent insertion and then deletion, so don't update E(i, j), learn from SWPS3 */
         for (k = 0; LIKELY(k < 8); ++k) {
 #ifdef __PPC64__
+#ifdef __BIG_ENDIAN__
+            vF = vec_shiftleftbytes1q(vF, 2);
+#else
             vF = vec_shiftrightbytes1q(vF, 2);
+#endif
 #endif
 #ifdef __x86_64__
             vF = _mm_slli_si128 (vF, 2);
