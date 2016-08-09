@@ -37,7 +37,8 @@
 
 #ifdef __PPC64__
 #include "vec128int.h"
-#else
+#endif
+#ifdef __x86_64__
 #include <emmintrin.h>
 #endif
 #include <stdint.h>
@@ -146,7 +147,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
                 (vm) = vec_max16ub((vm), vec_shiftrightbytes1q((vm), 1)); \
                 (m) = vec_extract8sh((vm), 0) & 0x00ff; \
         } while (0)
-#else
+#endif
+#ifdef __x86_64__
 #define max16(m, vm) do { \
                 (vm) = _mm_max_epu8((vm), _mm_srli_si128((vm), 8)); \
                 (vm) = _mm_max_epu8((vm), _mm_srli_si128((vm), 4)); \
@@ -170,7 +172,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
     /* Define 16 byte 0 vector. */
 #ifdef __PPC64__
     __m128i vZero = vec_splat4sw(0);
-#else
+#endif
+#ifdef __x86_64__
     __m128i vZero = _mm_set1_epi32(0);
 #endif
 
@@ -182,19 +185,22 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
     int32_t i, j;
 #ifdef __PPC64__
     __m128i vGapO = vec_splat16sb(weight_gapO);
-#else
+#endif
+#ifdef __x86_64__
     /* 16 byte insertion begin vector */
     __m128i vGapO = _mm_set1_epi8(weight_gapO);
 #endif
 #ifdef __PPC64__
     __m128i vGapE = vec_splat16sb(weight_gapE);
-#else
+#endif
+#ifdef __x86_64__
     /* 16 byte insertion extension vector */
     __m128i vGapE = _mm_set1_epi8(weight_gapE);
 #endif
 #ifdef __PPC64__
     __m128i vBias = vec_splat16sb(bias);
-#else
+#endif
+#ifdef __x86_64__
     /* 16 byte bias vector */
     __m128i vBias = _mm_set1_epi8(bias);
 #endif
@@ -217,8 +223,13 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
 
         __m128i vH = pvHStore[segLen - 1];
 #ifdef __PPC64__
-        vH = vec_shiftleftbytes1q(vH, 1); // h=H(i-1,-1); << instead of >> because x64 is little-endian
+#ifdef __BIG_ENDIAN__
+        vH = vec_shiftrightbytes1q(vH, 1); // h=H(i-1,-1); << instead of >> because x64 is little-endian
 #else
+        vH = vec_shiftleftbytes1q(vH, 1); // h=H(i-1,-1); << instead of >> because x64 is little-endian
+#endif
+#endif
+#ifdef __x86_64__
         vH = _mm_slli_si128 (vH, 1); /* Shift the 128-bit value in vH left by 1 byte. */
 #endif
         const __m128i* vP = vProfile + ref[i] * segLen; /* Right part of the vProfile */
@@ -233,7 +244,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
 #ifdef __PPC64__
             vH = vec_addsaturating16ub(vH, vec_load1q(vP + j));
             vH = vec_subtractsaturating16ub(vH, vBias);
-#else
+#endif
+#ifdef __x86_64__
             vH = _mm_adds_epu8(vH, _mm_load_si128(vP + j));
             vH = _mm_subs_epu8(vH, vBias); /* vH will be always > 0 */
 #endif
@@ -242,7 +254,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
             vH = vec_max16ub(vH, e);
             vH = vec_max16ub(vH, vF);
             vMaxColumn = vec_max16ub(vMaxColumn, vH);
-#else
+#endif
+#ifdef __x86_64__
             /* Get max from vH, vE and vF. */
             e = _mm_load_si128(pvE + j);
             vH = _mm_max_epu8(vH, e);
@@ -251,7 +264,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
 #endif
 #ifdef __PPC64__
             vec_store1q(pvHStore + j, vH);
-#else
+#endif
+#ifdef __x86_64__
             /* Save vH values. */
             _mm_store_si128(pvHStore + j, vH);
 #endif
@@ -260,7 +274,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
             e = vec_subtractsaturating16ub(e, vGapE);
             e = vec_max16ub(e, vH);
             vec_store1q(pvE + j, e);
-#else
+#endif
+#ifdef __x86_64__
             /* Update vE value. */
             vH = _mm_subs_epu8(vH, vGapO); /* saturation arithmetic, result >= 0 */
             e = _mm_subs_epu8(e, vGapE);
@@ -270,14 +285,16 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
 #ifdef __PPC64__
             vF = vec_subtractsaturating16ub(vH, vGapE);
             vF = vec_max16ub(vF, vH);
-#else
+#endif
+#ifdef __x86_64__
             /* Update vF value. */
             vF = _mm_subs_epu8(vF, vGapE);
             vF = _mm_max_epu8(vF, vH);
 #endif
 #ifdef __PPC64__
             vH = vec_load1q(pvHLoad + j);
-#else
+#endif
+#ifdef __x86_64__
             /* Load the next vH. */
             vH = _mm_load_si128(pvHLoad + j);
 #endif
@@ -288,7 +305,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
         j = 0;
 #ifdef __PPC64__
         vH = vec_load1q (pvHStore + j);
-#else
+#endif
+#ifdef __x86_64__
         vH = _mm_load_si128 (pvHStore + j);
 #endif
 
@@ -296,12 +314,17 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
         /*  we are at the end, we need to shift the vF value over */
         /*  to the next column. */
 #ifdef __PPC64__
+#ifdef __BIG_ENDIAN__
+        vF = vec_shiftrightbytes1q (vF, 1);
+#else
         vF = vec_shiftleftbytes1q (vF, 1);
+#endif
         vTemp = vec_subtractsaturating16ub (vH, vGapO);
         vTemp = vec_subtractsaturating16ub (vF, vTemp);
         vTemp = vec_compareeq16sb (vTemp, vZero);
         cmp  = vec_extractupperbit16sb (vTemp);
-#else
+#endif
+#ifdef __x86_64__
         vF = _mm_slli_si128 (vF, 1);
         vTemp = _mm_subs_epu8 (vH, vGapO);
         vTemp = _mm_subs_epu8 (vF, vTemp);
@@ -316,7 +339,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
             vMaxColumn = vec_max16ub(vMaxColumn, vH);
             vec_store1q (pvHStore + j, vH);
             vF = vec_subtractsaturating16ub (vF, vGapE);
-#else
+#endif
+#ifdef __x86_64__
             vH = _mm_max_epu8 (vH, vF);
             vMaxColumn = _mm_max_epu8(vMaxColumn, vH);
             _mm_store_si128 (pvHStore + j, vH);
@@ -327,8 +351,13 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
             {
                 j = 0;
 #ifdef __PPC64__
-                vF = vec_shiftleftbytes1q (vF, 1);
+#ifdef __BIG_ENDIAN__
+                vF = vec_shiftrightbytes1q (vF, 1);
 #else
+                vF = vec_shiftleftbytes1q (vF, 1);
+#endif
+#endif
+#ifdef __x86_64__
                 vF = _mm_slli_si128 (vF, 1);
 #endif
             }
@@ -339,7 +368,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
             vTemp = vec_subtractsaturating16ub (vF, vTemp);
             vTemp = vec_compareeq16sb (vTemp, vZero);
             cmp  = vec_extractupperbit16sb (vTemp);
-#else
+#endif
+#ifdef __x86_64__
             vH = _mm_load_si128 (pvHStore + j);
 
             vTemp = _mm_subs_epu8 (vH, vGapO);
@@ -353,7 +383,8 @@ static alignment_end* sw_sse2_byte (const int8_t* ref,
         vMaxScore = vec_max16ub(vMaxScore, vMaxColumn);
         vTemp = vec_compareeq16sb(vMaxMark, vMaxScore);
         cmp = vec_extractupperbit16sb(vTemp);
-#else
+#endif
+#ifdef __x86_64__
         vMaxScore = _mm_max_epu8(vMaxScore, vMaxColumn);
         vTemp = _mm_cmpeq_epi8(vMaxMark, vMaxScore);
         cmp = _mm_movemask_epi8(vTemp);
@@ -466,7 +497,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
                     (vm) = vec_max8sh((vm), vec_shiftrightbytes1q((vm), 2)); \
                     (m) = vec_extract8sh((vm), 0) & 0x00ff; \
         } while (0)
-#else
+#endif
+#ifdef __x86_64__
 #define max8(m, vm) do { \
                     (vm) = _mm_max_epi16((vm), _mm_srli_si128((vm), 8)); \
                     (vm) = _mm_max_epi16((vm), _mm_srli_si128((vm), 4)); \
@@ -489,7 +521,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
     /* Define 16 byte 0 vector. */
 #ifdef __PPC64__
     __m128i vZero = vec_splat4sw(0);
-#else
+#endif
+#ifdef __x86_64__
     __m128i vZero = _mm_set1_epi32(0);
 #endif
 
@@ -502,14 +535,16 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
     /* 16 byte insertion begin vector */
 #ifdef __PPC64__
     __m128i vGapO = vec_splat8sh(weight_gapO);
-#else
+#endif
+#ifdef __x86_64__
     __m128i vGapO = _mm_set1_epi16(weight_gapO);
 #endif
 
     /* 16 byte insertion extension vector */
 #ifdef __PPC64__
     __m128i vGapE = vec_splat8sh(weight_gapE);
-#else
+#endif
+#ifdef __x86_64__
     __m128i vGapE = _mm_set1_epi16(weight_gapE);
 #endif
 
@@ -531,8 +566,13 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
                              */
         __m128i vH = pvHStore[segLen - 1];
 #ifdef __PPC64__
-        vH = vec_shiftleftbytes1q (vH, 2); /* Shift the 128-bit value in vH left by 2 byte. */
+#ifdef __BIG_ENDIAN__
+        vH = vec_shiftrightbytes1q (vH, 2); /* Shift the 128-bit value in vH left by 2 byte. */
 #else
+        vH = vec_shiftleftbytes1q (vH, 2); /* Shift the 128-bit value in vH left by 2 byte. */
+#endif
+#endif
+#ifdef __x86_64__
         vH = _mm_slli_si128 (vH, 2); /* Shift the 128-bit value in vH left by 2 byte. */
 #endif
 
@@ -549,7 +589,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
         for (j = 0; LIKELY(j < segLen); j ++) {
 #ifdef __PPC64__
             vH = vec_addsaturating8sh(vH, vec_load1q(vP + j));
-#else
+#endif
+#ifdef __x86_64__
             vH = _mm_adds_epi16(vH, _mm_load_si128(vP + j));
 #endif
 
@@ -559,7 +600,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
             vH = vec_max8sh(vH, e);
             vH = vec_max8sh(vH, vF);
             vMaxColumn = vec_max8sh(vMaxColumn, vH);
-#else
+#endif
+#ifdef __x86_64__
             e = _mm_load_si128(pvE + j);
             vH = _mm_max_epi16(vH, e);
             vH = _mm_max_epi16(vH, vF);
@@ -569,7 +611,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
             /* Save vH values. */
 #ifdef __PPC64__
             vec_store1q(pvHStore + j, vH);
-#else
+#endif
+#ifdef __x86_64__
             _mm_store_si128(pvHStore + j, vH);
 #endif
 
@@ -579,7 +622,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
             e = vec_subtractsaturating8uh(e, vGapE);
             e = vec_max8sh(e, vH);
             vec_store1q(pvE + j, e);
-#else
+#endif
+#ifdef __x86_64__
             vH = _mm_subs_epu16(vH, vGapO); /* saturation arithmetic, result >= 0 */
             e = _mm_subs_epu16(e, vGapE);
             e = _mm_max_epi16(e, vH);
@@ -590,7 +634,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
 #ifdef __PPC64__
             vF = vec_subtractsaturating8uh(vF, vGapE);
             vF = vec_max8sh(vF, vH);
-#else
+#endif
+#ifdef __x86_64__
             vF = _mm_subs_epu16(vF, vGapE);
             vF = _mm_max_epi16(vF, vH);
 #endif
@@ -598,7 +643,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
             /* Load the next vH. */
 #ifdef __PPC64__
             vH = vec_load1q(pvHLoad + j);
-#else
+#endif
+#ifdef __x86_64__
             vH = _mm_load_si128(pvHLoad + j);
 #endif
         }
@@ -607,7 +653,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
         for (k = 0; LIKELY(k < 8); ++k) {
 #ifdef __PPC64__
             vF = vec_shiftrightbytes1q(vF, 2);
-#else
+#endif
+#ifdef __x86_64__
             vF = _mm_slli_si128 (vF, 2);
 #endif
             for (j = 0; LIKELY(j < segLen); ++j) {
@@ -619,7 +666,8 @@ static alignment_end* sw_sse2_word (const int8_t* ref,
                 vH = vec_subtractsaturating8uh(vH, vGapO);
                 vF = vec_subtractsaturating8uh(vF, vGapE);
                 if (UNLIKELY(! vec_extractupperbit16sb(vec_comparegt8sh(vF, vH)))) goto end;
-#else
+#endif
+#ifdef __x86_64__
                 vH = _mm_load_si128(pvHStore + j);
                 vH = _mm_max_epi16(vH, vF);
                 vMaxColumn = _mm_max_epi16(vMaxColumn, vH); //newly added line
@@ -636,7 +684,8 @@ end:
         vMaxScore = vec_max8sh(vMaxScore, vMaxColumn);
         vTemp = vec_compareeq8sh(vMaxMark, vMaxScore); // TODO No replacement function
         cmp = vec_extractupperbit16sb(vTemp);
-#else
+#endif
+#ifdef __x86_64__
         vMaxScore = _mm_max_epi16(vMaxScore, vMaxColumn);
         vTemp = _mm_cmpeq_epi16(vMaxMark, vMaxScore);
         cmp = _mm_movemask_epi8(vTemp);
