@@ -159,6 +159,9 @@ VariantFieldType typeStrToVariantFieldType(string& typeStr) {
 VariantFieldType Variant::infoType(string& key) {
     map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
     if (s == vcf->infoTypes.end()) {
+        if (key == "FILTER") { // hack to use FILTER as an "info" field (why the hack?)
+            return FIELD_STRING;
+        }
         if (key == "QUAL") { // hack to use QUAL as an "info" field
             return FIELD_INTEGER;
         }
@@ -214,6 +217,9 @@ VariantFieldType Variant::infoType(string& key) {
     string Variant::getInfoValueString(string& key, int index) {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
+            if (key == "FILTER") {
+              return filter;
+            }
             cerr << "no info field " << key << endl;
             exit(1);
         } else {
@@ -625,6 +631,8 @@ VariantFieldType Variant::infoType(string& key) {
                 if (convert(tokenstr, number)) {
                     type = RuleToken::NUMBER;
                 } else if (tokenstr == "QUAL") {
+                    isVariable = true;
+                } else if (tokenstr == "FILTER") {
                     isVariable = true;
                 } else {
                     type = RuleToken::STRING_VARIABLE;
