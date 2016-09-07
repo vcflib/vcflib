@@ -247,12 +247,14 @@ int main(int argc, char** argv) {
                 }
             }
 
+            map<const vector<int>*, vector<string> > hapToSamples;
             set<vector<int> > uniqueHaplotypes;
             for (map<string, vector<vector<int> > >::iterator hs = sampleHaplotypes.begin();
                  hs != sampleHaplotypes.end(); ++hs) {
                 vector<vector<int> >& haps = hs->second;
                 for (vector<vector<int> >::iterator h = haps.begin(); h != haps.end(); ++h) {
                     uniqueHaplotypes.insert(*h);
+                    hapToSamples[&*uniqueHaplotypes.find(*h)].push_back(hs->first);
                 }
             }
 	    
@@ -300,6 +302,11 @@ int main(int argc, char** argv) {
                         if (vartoInsert.position < lastrefend) {
                             cerr << "impossible haplotype, overlapping alleles at " << vartoInsert.sequenceName << ":" << vartoInsert.position << endl;
                             impossibleHaplotype = true;
+                            // find the impossible haplotype samples
+                            cerr << "+haps " << vartoInsert.sequenceName << ":" << vartoInsert.position << " ";
+                            for (auto& sample : hapToSamples[&*u]) {
+                                cerr << sample << " ";
+                            } cerr << endl;
                             break;
                         } else {
                             //cerr << vartoInsert.position << " " << cluster.front().position + referenceInsertOffset << endl;
