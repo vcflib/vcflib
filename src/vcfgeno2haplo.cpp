@@ -301,9 +301,11 @@ int main(int argc, char** argv) {
                         string& alternate = vartoInsert.alleles.at(i);
                         if (vartoInsert.position < lastrefend) {
                             cerr << "impossible haplotype, overlapping alleles at " << vartoInsert.sequenceName << ":" << vartoInsert.position << endl;
+                            cerr << "+target " << vartoInsert.sequenceName << " " << vartoInsert.position << " " << vartoInsert.position + vartoInsert.ref.size() << endl;
+                            cerr << "+variant " << vartoInsert.sequenceName << ":" << vartoInsert.position << ":" << alternate << endl;
                             impossibleHaplotype = true;
                             // find the impossible haplotype samples
-                            cerr << "+haps " << vartoInsert.sequenceName << ":" << vartoInsert.position << " ";
+                            cerr << "+samples ";
                             for (auto& sample : hapToSamples[&*u]) {
                                 cerr << sample << " ";
                             } cerr << endl;
