@@ -51,7 +51,7 @@ void printHelp(void){
   cerr << "INFO: required: f,file     -- argument: a file created by GPAT++                           " << endl;
   cerr << "INFO: required: o,format   -- argument: format of input file, case sensitive               " << endl;
   cerr << "                              available format options:                                    " << endl;
-  cerr << "                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba                   " << endl;
+  cerr << "                                wcFst, pFst, bFst, iHS, xpEHH, abba-baba, col3             " << endl;
   cerr << "INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)" << endl;
   cerr << "INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)      " << endl;
   cerr << "INFO: optional: t,truncate -- flag    : end last window at last position (zero based)      " << endl;
@@ -197,6 +197,7 @@ int main(int argc, char** argv) {
   
   map<string, int> acceptableFormats;
   acceptableFormats["pFst"]  = 1;
+  acceptableFormats["col3"]  = 1;
   acceptableFormats["bFst"]  = 1;
   acceptableFormats["wcFst"] = 1;
   acceptableFormats["xpEHH"] = 1;
@@ -289,6 +290,11 @@ int main(int argc, char** argv) {
     opt.value = 4;
   }
   else if(opt.format == "abba-baba"){
+    opt.seqid = 0;
+    opt.pos   = 1;
+    opt.value = 2;
+  }
+  else if(opt.format == "col3"){
     opt.seqid = 0;
     opt.pos   = 1;
     opt.value = 2;
