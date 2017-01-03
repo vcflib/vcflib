@@ -8,11 +8,19 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
+    string tag;
     if (argc > 1) {
-        cerr << "usage: " << argv[0] << " <[vcf file]" << endl
-             << "adds a tag (BasesToClosestVariant) to each variant record which indicates" << endl
-             << "the distance to the nearest variant" << endl;
-        return 1;
+        tag = argv[1];
+        if (tag == "--help" || tag == "-h") {
+            cerr << "usage: " << argv[0] << " [customtagname] < [vcf file]" << endl
+                 << "adds a tag to each variant record which indicates the distance" << endl
+                 << "to the nearest variant." << endl
+                 << "(defaults to BasesToClosestVariant if no custom tag name is given." << endl;
+            return 1;
+        }
+    } else {
+        /* use default */
+        tag = "BasesToClosestVariant";
     }
 
     VariantCallFile variantFile;
@@ -30,12 +38,11 @@ int main(int argc, char** argv) {
     vars.push_back(&varA);
     vars.push_back(&varB);
     vars.push_back(&varC);
-    
+
     for (vector<Variant*>::iterator v = vars.begin(); v != vars.end(); ++v) {
         variantFile.getNextVariant(**v);
     }
 
-    string tag = "BasesToClosestVariant";
     string line = "##INFO=<ID=" + tag + ",Number=1,Type=Integer,Description=\"" \
         + "Number of bases to the closest variant in the file.\">";
     variantFile.addHeaderLine(line);
