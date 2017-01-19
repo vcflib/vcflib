@@ -3,7 +3,7 @@ sudo: required
 compiler: 
  - gcc
 before_install:
- - sudo apt-get install build-essential
+ - sudo apt-get install build-essential gcc-4.9 g++-4.9
  - git submodule update --init --recursive
 os:
  - linux
