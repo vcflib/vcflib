@@ -222,7 +222,7 @@ public:
 
     // Convert a structural variant the canonical VCF4.2 format using a reference.
     // returns true if the variant is canonicalized, false otherwise.
-    bool canonicalize_sv(FastaReference* ref, vector<FastaReference*> insertions, int interval_sz = -1);
+    bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, int interval_sz = -1);
 
     string originalLine; // the literal of the record, as read
     // TODO

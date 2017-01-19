@@ -109,7 +109,7 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
-bool Variant::canonicalize_sv(FastaReference* fasta_reference, vector<FastaReference*> insertions, int max_interval){
+bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, int max_interval){
     
             bool variant_acceptable = true;
             bool do_external_insertions = false;
@@ -173,7 +173,7 @@ bool Variant::canonicalize_sv(FastaReference* fasta_reference, vector<FastaRefer
                         }
 
                         if (a == "<INS>" || this->info["SVTYPE"][alt_pos] == "INS"){
-                            this->ref.assign(fasta_reference->getSubSequence(this->sequenceName, this->position, 1));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
                             if (this->alt[alt_pos] == "<INS>"){
                                 variant_acceptable = false;
                             }
@@ -181,11 +181,11 @@ bool Variant::canonicalize_sv(FastaReference* fasta_reference, vector<FastaRefer
                                 regex arrows("<|>");
                                 string var_name = regex_replace(this->alt[alt_pos], arrows, "");
                                 if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
-                                    this->ref.assign(fasta_reference->getSubSequence(this->sequenceName, this->position, 1 ));
+                                    this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1 ));
                                 #ifdef DEBUG
                                     cerr << "Replacing insertion with sequence of " << var_name << endl;
                                 #endif
-                                    this->alt[alt_pos] = fasta_reference->getSubSequence(this->sequenceName, this->position, 1) + insertion_fasta->getSequence(var_name);
+                                    this->alt[alt_pos] = fasta_reference.getSubSequence(this->sequenceName, this->position, 1) + insertion_fasta->getSequence(var_name);
                                     this->updateAlleleIndexes();
                                 }
                             }
@@ -199,9 +199,9 @@ bool Variant::canonicalize_sv(FastaReference* fasta_reference, vector<FastaRefer
                         else if (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL"){
 
 
-                            this->ref.assign(fasta_reference->getSubSequence(this->sequenceName, this->position, sv_len + 1 ));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len + 1 ));
 
-                            this->alt[alt_pos].assign(fasta_reference->getSubSequence(this->sequenceName, this->position, 1));
+                            this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
 
                             if (this->ref.size() != sv_len + 1){
                                 cerr << "Variant made is incorrect size" << endl;
@@ -213,8 +213,8 @@ bool Variant::canonicalize_sv(FastaReference* fasta_reference, vector<FastaRefer
 
                         }
                         else if (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV"){
-                            this->ref = fasta_reference->getSubSequence(this->sequenceName, this->position, sv_len);
-                            string alt_str(fasta_reference->getSubSequence(this->sequenceName, this->position, sv_len));
+                            this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len);
+                            string alt_str(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len));
                             reverse(alt_str.begin(), alt_str.end());
                             this->alt[alt_pos] = alt_str;
 
