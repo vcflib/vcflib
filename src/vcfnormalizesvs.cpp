@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
             };
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "r:i:",
+        c = getopt_long (argc, argv, "r:i:h",
                          long_options, &option_index);
         if (c == -1)
             break;
@@ -49,8 +49,14 @@ int main(int argc, char** argv) {
             print_help(argv);
             exit(1);
         default:
+            print_help(argv);
             abort();
         }
+    }
+
+    if (argc < 2){
+        print_help(argv);
+        exit(1);
     }
 
  
@@ -82,7 +88,6 @@ int main(int argc, char** argv) {
     Variant var;
     while (variantFile.getNextVariant(var)) {
         bool valid = var.canonicalize_sv(ref, insertions, max_interval);
-        //bool valid = canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, int interval_sz = -1);
         if (!valid){
             cerr << "Variant could not be normalized" << var << endl;
         }
