@@ -3,6 +3,8 @@
 
 namespace vcflib {
 
+
+
 void Variant::parse(string& line, bool parseSamples) {
 
     // clean up potentially variable data structures
@@ -112,7 +114,7 @@ void Variant::parse(string& line, bool parseSamples) {
 bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, int max_interval){
     
             bool variant_acceptable = true;
-            bool do_external_insertions = false;
+            bool do_external_insertions = !insertions.empty();
             size_t sv_len = 0;
             bool var_is_sv = false;
             FastaReference* insertion_fasta;
@@ -128,8 +130,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     };
 
 
-            if (insertions.size() == 1){
-                do_external_insertions = true;
+            if (do_external_insertions){
                 insertion_fasta = insertions[0];
 
             }
@@ -153,12 +154,12 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             // SVLEN is the difference in length between REF and ALT alleles.
 
 
-                            if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
+                        if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
                                         this->info["SVTYPE"][alt_pos] == "DEL" ||
                                         this->info["SVTYPE"][alt_pos] == "INS") || this->alt.size() > 1){
                                 variant_acceptable = false;
                                 break;                                                                                                                                  
-                            }
+                        }
 
                         if (this->info.find("SVLEN") != this->info.end()){
                             sv_len = (size_t) abs(stol(this->info["SVLEN"][alt_pos]));
@@ -172,7 +173,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             break;
                         }
 
-                        if (a == "<INS>" || this->info["SVTYPE"][alt_pos] == "INS"){
+                        if (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>"){
                             this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
                             if (this->alt[alt_pos] == "<INS>"){
                                 variant_acceptable = false;
