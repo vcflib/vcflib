@@ -1,28 +1,27 @@
 /*
- *  ssw.h
+ *  ssw.hpp
  *
  *  Created by Mengyao Zhao on 6/22/10.
  *  Copyright 2010 Boston College. All rights reserved.
- *	Version 0.1.4
  *	Last revision by Mengyao Zhao on 02/11/16.
+ *  Modified for inclusion in vcflib by Adam Novak on 2/14/17
  *
  */
 
-#ifndef SSW_H
-#define SSW_H
+#ifndef VCFLIB_SSW_H
+#define VCFLIB_SSW_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <emmintrin.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif	// __cplusplus
+namespace vcflib {
 
 #define MAPSTR "MIDNSHP=X"
 #ifndef BAM_CIGAR_SHIFT
 #define BAM_CIGAR_SHIFT 4
+#define BAM_CIGAR_SHIFT_DEFAULTED
 #endif
 
 
@@ -181,8 +180,13 @@ static inline uint32_t cigar_int_to_len (uint32_t cigar_int)
 {
 	return cigar_int >> BAM_CIGAR_SHIFT;
 }
-#ifdef __cplusplus
-}
-#endif	// __cplusplus
 
-#endif	// SSW_H
+// Clean up defines
+#undef MAPSTR
+#ifdef BAM_CIGAR_SHIFT_DEFAULTED
+#undef BAM_CIGAR_SHIFT
+#endif
+
+}
+
+#endif	// VCFLIB_SSW_H

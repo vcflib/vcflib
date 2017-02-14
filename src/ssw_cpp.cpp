@@ -1,9 +1,9 @@
-#include "ssw_cpp.h"
-#include "ssw.h"
+#include "ssw_cpp.hpp"
+#include "ssw.hpp"
 
 #include <sstream>
 
-namespace {
+namespace vcflib {
 
 static const int8_t kBaseTranslation[128] = {
     4, 4, 4, 4,  4, 4, 4, 4,  4, 4, 4, 4,  4, 4, 4, 4,
@@ -217,10 +217,6 @@ inline size_t SizeOfArray( const T(&)[ N ] )
 {
   return N;
 }
-
-} // namespace
-
-
 
 namespace StripedSmithWaterman {
 
@@ -475,3 +471,4 @@ void Aligner::ClearMatrices(void) {
   translation_matrix_ = NULL;
 }
 } // namespace StripedSmithWaterman
+} // namespace vcflib
