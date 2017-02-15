@@ -165,7 +165,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             sv_len = (size_t) abs(stol(this->info["SVLEN"][alt_pos]));
                         }
                         else if (this->info.find("END") != this->info.end()){
-                            sv_len = abs((size_t) stol(this->info["END"][alt_pos]) - (size_t) (this->position));
+                            sv_len = (size_t) abs(stol(this->info["END"][alt_pos]) - (this->position));
                         }
                         else{
                             // If we have neither, we'll ignore it.
