@@ -25,6 +25,7 @@ OBJ_DIR:=obj
 #vcfstats.cpp
 
 BIN_SOURCES = src/vcfecho.cpp \
+			  src/vcfnormalizesvs.cpp \
 			  src/dumpContigsFromHeader.cpp \
 			  src/bFst.cpp \
 			  src/pVst.cpp \
