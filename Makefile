@@ -146,8 +146,8 @@ CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x
 
 SSW = src/ssw.o src/ssw_cpp.o
 
-ssw.o: src/ssw.h
-ssw_cpp.o:src/ssw_cpp.h
+ssw.o: src/ssw.hpp
+ssw_cpp.o:src/ssw_cpp.hpp
 
 openmp:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -fopenmp -D HAS_OPENMP"

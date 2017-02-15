@@ -26,12 +26,12 @@
 /* Contact: Mengyao Zhao <zhangmp@bc.edu> */
 
 /*
- *  ssw.c
+ *  ssw.cpp
  *
  *  Created by Mengyao Zhao on 6/22/10.
  *  Copyright 2010 Boston College. All rights reserved.
- *	Version 0.1.4
  *	Last revision by Mengyao Zhao on 02/11/16.
+ *  Modified for inclusion in vcflib by Adam Novak on 2/14/17
  *
  */
 
@@ -41,7 +41,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "ssw.h"
+#include "ssw.hpp"
 
 #ifdef __GNUC__
 #define LIKELY(x) __builtin_expect((x),1)
@@ -63,6 +63,8 @@
   @discussion x will be modified.
  */
 #define kroundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x))
+
+namespace vcflib {
 
 typedef struct {
 	uint16_t score;
@@ -872,13 +874,6 @@ void align_destroy (s_align* a) {
 	free(a->cigar);
 	free(a);
 }
-/*
-inline char cigar_int_to_op(uint32_t cigar_int) {
-	return UNLIKELY((cigar_int & 0xfU) > 8) ? 'M': MAPSTR[cigar_int & 0xfU];
+
+
 }
-
-
-inline uint32_t cigar_int_to_len (uint32_t cigar_int)
-{
-	return cigar_int >> BAM_CIGAR_SHIFT;
-}*/
