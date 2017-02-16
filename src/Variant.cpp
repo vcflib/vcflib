@@ -111,13 +111,19 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
+bool Variant::is_sv(){
+    return this->info.find("SVTYPE") != this->info.end();
+}
+
 bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, int max_interval){
     
             bool variant_acceptable = true;
             bool do_external_insertions = !insertions.empty();
-            size_t sv_len = 0;
+            int32_t sv_len = 0;
             bool var_is_sv = false;
             FastaReference* insertion_fasta;
+
+
 
     std::function<bool(const string&)> allATGC = [](const string& s){
     for (string::const_iterator c = s.begin(); c != s.end(); ++c) {
@@ -128,6 +134,10 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     }
     return true;
     };
+
+        if (!this->is_sv()){
+            return true;
+        }
 
 
             if (do_external_insertions){
@@ -162,10 +172,10 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         }
 
                         if (this->info.find("SVLEN") != this->info.end()){
-                            sv_len = (size_t) abs(stol(this->info["SVLEN"][alt_pos]));
+                            sv_len = (int32_t) abs(stol(this->info["SVLEN"][alt_pos]));
                         }
                         else if (this->info.find("END") != this->info.end()){
-                            sv_len = abs((size_t) stol(this->info["END"][alt_pos]) - (size_t) (this->position));
+                            sv_len = abs((int32_t) stol(this->info["END"][alt_pos]) - (int32_t) (this->position));
                         }
                         else{
                             // If we have neither, we'll ignore it.
