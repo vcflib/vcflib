@@ -172,10 +172,13 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         }
 
                         if (this->info.find("SVLEN") != this->info.end()){
-                            sv_len = (int32_t) abs(stol(this->info["SVLEN"][alt_pos]));
+                            int32_t pre_abs = stoi(this->info["SVLEN"][alt_pos]); 
+                            sv_len = abs(pre_abs);
                         }
                         else if (this->info.find("END") != this->info.end()){
-                            sv_len = abs((int32_t) stol(this->info["END"][alt_pos]) - (int32_t) (this->position));
+                            int32_t pre_abs = stoi(this->info["END"][alt_pos]) - (this->position);
+                            sv_len = abs( pre_abs );
+
                         }
                         else{
                             // If we have neither, we'll ignore it.
@@ -189,8 +192,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 variant_acceptable = false;
                             }
                             else if (do_external_insertions){
-                                regex arrows("<|>");
-                                string var_name = regex_replace(this->alt[alt_pos], arrows, "");
+                                string var_name (alt[alt_pos], 1, alt[alt_pos].length());
                                 if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
                                     this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1 ));
                                 #ifdef DEBUG

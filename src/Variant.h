@@ -15,7 +15,6 @@
 #include <set>
 #include <functional>
 #include <cstdio>
-#include <regex>
 #include "split.h"
 #include "join.h"
 #include "tabix.hpp"
