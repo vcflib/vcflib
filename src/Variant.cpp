@@ -192,7 +192,14 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 variant_acceptable = false;
                             }
                             else if (do_external_insertions){
-                                string var_name (alt[alt_pos], 1, alt[alt_pos].length());
+                                string var_name;
+                                if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].length() - 1 ] == '>'){
+                                    string shortname (alt[alt_pos], 1, alt[alt_pos].length());
+                                    var_name = shortname;
+                                }
+                                else{
+                                    var_name = alt[alt_pos]; 
+                                }
                                 if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
                                     this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1 ));
                                 #ifdef DEBUG
