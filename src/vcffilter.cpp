@@ -8,7 +8,7 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "options:" << endl 
+         << "options:" << endl
          << "    -f, --info-filter     specifies a filter to apply to the info fields of records," << endl
          << "                          removes alleles which do not pass the filter" << endl
          << "    -g, --genotype-filter specifies a filter to apply to the genotype fields of records" << endl
@@ -42,10 +42,10 @@ void printSummary(char** argv) {
     exit(0);
 }
 
-bool passesFilters(Variant& var, 
-		   vector<VariantFilter>& filters, 
+bool passesFilters(Variant& var,
+		   vector<VariantFilter>& filters,
 		   bool logicalOr, string alt = "") {
-    for (vector<VariantFilter>::iterator f = filters.begin(); 
+    for (vector<VariantFilter>::iterator f = filters.begin();
 	 f != filters.end(); ++f) {
       string s = "";
       if (logicalOr) {
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
         /* Detect the end of the options. */
         if (c == -1)
             break;
- 
+
         switch (c)
         {
         case 0:
@@ -144,20 +144,20 @@ int main(int argc, char** argv) {
         case 'a':
             alleleTag = optarg;
             break;
- 
+
         case 'g':
             filterSpec += " genotypes filtered with: " + string(optarg);
             genofilterStrs.push_back(string(optarg));
             break;
- 
+
         case 't':
             tagPass = optarg;
             break;
- 
+
         case 'F':
             tagFail = optarg;
             break;
- 
+
         case 'A':
             replaceFilter = false;
             break;
@@ -182,13 +182,13 @@ int main(int argc, char** argv) {
         case 'k':
         	keepInfo = true;
         	break;
-          
+
         case '?':
             /* getopt_long already printed an error message. */
             printSummary(argv);
             exit(1);
             break;
- 
+
         default:
             abort ();
         }
@@ -220,35 +220,35 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    for (vector<string>::iterator f = infofilterStrs.begin(); 
+    for (vector<string>::iterator f = infofilterStrs.begin();
 	 f != infofilterStrs.end(); ++f) {
-      infofilters.push_back(VariantFilter(*f, VariantFilter::RECORD, 
+      infofilters.push_back(VariantFilter(*f, VariantFilter::RECORD,
 					  variantFile.infoTypes));
     }
-    
-    for (vector<string>::iterator f = genofilterStrs.begin(); 
+
+    for (vector<string>::iterator f = genofilterStrs.begin();
 	 f != genofilterStrs.end(); ++f) {
-        genofilters.push_back(VariantFilter(*f, VariantFilter::SAMPLE, 
+        genofilters.push_back(VariantFilter(*f, VariantFilter::SAMPLE,
 					    variantFile.formatTypes));
     }
 
     vector<string> headerlines = split(variantFile.header, "\n");
     variantFile.header.clear();
-    for (vector<string>::iterator l = headerlines.begin(); 
+    for (vector<string>::iterator l = headerlines.begin();
 	 l != headerlines.end(); ++l) {
-      if (!filterSpec.empty() 
-	  && (l->find("INFO") 
+      if (!filterSpec.empty()
+	  && (l->find("INFO")
 	      != string::npos || l + 1 == headerlines.end())) {
 	variantFile.header += "##filter=\"" + filterSpec + "\"\n";
 	filterSpec.clear();
       }
       variantFile.header += *l + ((l + 1 == headerlines.end()) ? "" : "\n");
     }
-    
+
     if (!tagPass.empty()) {
       variantFile.addHeaderLine("##FILTER=<ID="+ tagPass +",Description=\"Record passes the filters: " + filterSpec + ".\">");
     }
-    
+
     if (!tagFail.empty()) {
       variantFile.addHeaderLine("##FILTER=<ID="+ tagFail +",Description=\"Record fails the filters: " + filterSpec + ".\">");
     }
@@ -274,21 +274,21 @@ int main(int argc, char** argv) {
     if (filterSites) {
       variantFile.parseSamples = false;
     }
-    
+
     Variant var(variantFile);
-    
+
     vector<string>::iterator regionItr = regions.begin();
-    
+
     do {
       if (!inputFilename.empty() && !regions.empty()) {
 	string regionStr = *regionItr++;
 	variantFile.setRegion(regionStr);
       }
-      
+
       while (variantFile.getNextVariant(var)) {
 
 	if (!genofilters.empty()) {
-	  for (vector<VariantFilter>::iterator f 
+	  for (vector<VariantFilter>::iterator f
 		 = genofilters.begin(); f != genofilters.end(); ++f) {
 	    f->removeFilteredGenotypes(var, keepInfo);
 	  }
@@ -310,7 +310,7 @@ int main(int argc, char** argv) {
 		  }
 		} else {
 		  var.info[alleleTag].clear();
-		  for (vector<string>::iterator 
+		  for (vector<string>::iterator
 			 a = var.alt.begin(); a != var.alt.end(); ++a) {
 		    var.info[alleleTag].push_back(tagPass);
 		  }
@@ -333,7 +333,7 @@ int main(int argc, char** argv) {
 		  }
 		} else {
 		  var.info[alleleTag].clear();
-		  for (vector<string>::iterator 
+		  for (vector<string>::iterator
 			 a = var.alt.begin(); a != var.alt.end(); ++a) {
 		    var.info[alleleTag].push_back(tagFail);
 		  }
@@ -350,14 +350,14 @@ int main(int argc, char** argv) {
 	    vector<string> failingAlts;
 	    vector<string> passingAlts;
 	    vector<bool> passes;
-	    for (vector<string>::iterator a = var.alt.begin(); 
+	    for (vector<string>::iterator a = var.alt.begin();
 		 a != var.alt.end(); ++a) {
-	      if (!passesFilters(var, infofilters, logicalOr, *a)) {
-		failingAlts.push_back(*a);
-		passes.push_back(false);
-	      } else {
+	      if (invert xor passesFilters(var, infofilters, logicalOr, *a)) {
 		passingAlts.push_back(*a);
 		passes.push_back(true);
+	      } else {
+		failingAlts.push_back(*a);
+		passes.push_back(false);
 	      }
 	    }
 	    if (tagPass.empty()) { // if there is no specified tag, just remove the failing alts
@@ -390,7 +390,7 @@ int main(int argc, char** argv) {
 		}
 	      } else {
 		var.info[alleleTag].clear();
-		for (vector<bool>::iterator p = passes.begin(); 
+		for (vector<bool>::iterator p = passes.begin();
 		     p != passes.end(); ++p) {
 		  if (*p) {
 		    var.info[alleleTag].push_back(tagPass);
@@ -413,10 +413,10 @@ int main(int argc, char** argv) {
 	  }
 	}
       }
-      
+
     } while (regionItr != regions.end());
-    
+
     return 0;
-    
+
 }
 
