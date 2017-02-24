@@ -111,13 +111,19 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
+bool Variant::is_sv(){
+    return this->info.find("SVTYPE") != this->info.end();
+}
+
 bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, int max_interval){
     
             bool variant_acceptable = true;
             bool do_external_insertions = !insertions.empty();
-            size_t sv_len = 0;
+            int32_t sv_len = 0;
             bool var_is_sv = false;
             FastaReference* insertion_fasta;
+
+
 
     std::function<bool(const string&)> allATGC = [](const string& s){
     for (string::const_iterator c = s.begin(); c != s.end(); ++c) {
@@ -128,6 +134,10 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     }
     return true;
     };
+
+        if (!this->is_sv()){
+            return true;
+        }
 
 
             if (do_external_insertions){
@@ -162,10 +172,13 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         }
 
                         if (this->info.find("SVLEN") != this->info.end()){
-                            sv_len = (size_t) abs(stol(this->info["SVLEN"][alt_pos]));
+                            int32_t pre_abs = stoi(this->info["SVLEN"][alt_pos]); 
+                            sv_len = abs(pre_abs);
                         }
                         else if (this->info.find("END") != this->info.end()){
-                            sv_len = abs((size_t) stol(this->info["END"][alt_pos]) - (size_t) (this->position));
+                            int32_t pre_abs = stoi(this->info["END"][alt_pos]) - (this->position);
+                            sv_len = abs( pre_abs );
+
                         }
                         else{
                             // If we have neither, we'll ignore it.
@@ -179,8 +192,14 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 variant_acceptable = false;
                             }
                             else if (do_external_insertions){
-                                regex arrows("<|>");
-                                string var_name = regex_replace(this->alt[alt_pos], arrows, "");
+                                string var_name;
+                                if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].length() - 1 ] == '>'){
+                                    string shortname (alt[alt_pos], 1, alt[alt_pos].length());
+                                    var_name = shortname;
+                                }
+                                else{
+                                    var_name = alt[alt_pos]; 
+                                }
                                 if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
                                     this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1 ));
                                 #ifdef DEBUG
