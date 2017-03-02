@@ -1,6 +1,7 @@
 #include "Variant.h"
 #include <utility>
 
+
 namespace vcflib {
 
 
@@ -123,6 +124,14 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
             bool var_is_sv = false;
             FastaReference* insertion_fasta;
 
+#ifdef DEBUG
+            if (do_external_insertions){
+                insertion_fasta = insertions[0];
+                for (auto x : insertion_fasta->index->sequenceNames){
+                    cerr << x << endl;
+                }
+            }
+#endif
 
 
     std::function<bool(const string&)> allATGC = [](const string& s){
@@ -139,12 +148,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
             return true;
         }
 
-
-            if (do_external_insertions){
-                insertion_fasta = insertions[0];
-
-            }
-            
 
                 if (this->info.find("SVTYPE") != this->info.end() &&
                         !(this->info["SVTYPE"].empty())){
@@ -188,23 +191,27 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
                         if (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>"){
                             this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
-                            if (this->alt[alt_pos] == "<INS>"){
-                                variant_acceptable = false;
-                            }
-                            else if (do_external_insertions){
+                            //if (this->alt[alt_pos] == "<INS>"){
+                            //    variant_acceptable = false;
+                            //}
+                            if (do_external_insertions){
+                                insertion_fasta = insertions[0];
                                 string var_name;
-                                if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].length() - 1 ] == '>'){
-                                    string shortname (alt[alt_pos], 1, alt[alt_pos].length());
+                                if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].size() - 1 ] == '>'){
+                                    string shortname (alt[alt_pos], 1, alt[alt_pos].length() - 2 );
                                     var_name = shortname;
                                 }
                                 else{
                                     var_name = alt[alt_pos]; 
                                 }
+                                #ifdef DEBUG
+                                    cerr << "My variant name is: " << var_name << endl;
+                                #endif
                                 if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
                                     this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1 ));
-                                #ifdef DEBUG
-                                    cerr << "Replacing insertion with sequence of " << var_name << endl;
-                                #endif
+                                    #ifdef DEBUG
+                                        cerr << "Replacing insertion with sequence of " << var_name << endl;
+                                    #endif
                                     this->alt[alt_pos] = fasta_reference.getSubSequence(this->sequenceName, this->position, 1) + insertion_fasta->getSequence(var_name);
                                     this->updateAlleleIndexes();
                                 }
@@ -213,7 +220,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 // we don't have to do anything - our INS is already in the correct format!
                             }
                             else{
-
+                                variant_acceptable = false;
                             }
                         }
                         else if (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL"){
