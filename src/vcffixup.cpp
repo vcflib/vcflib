@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 
     // write the new header
     cout << variantFile.header << endl;
- 
+
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         stringstream ns;
@@ -105,7 +105,9 @@ int main(int argc, char** argv) {
             ac << altcount;
             var.info["AC"].push_back(ac.str());
             stringstream af;
-            af << (double) altcount / (double) allelecount;
+            double faf = (double) altcount / (double) allelecount;
+            if(faf != faf) faf = 0;
+            af << faf;
             var.info["AF"].push_back(af.str());
         }
         cout << var << endl;
