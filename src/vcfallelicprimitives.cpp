@@ -172,6 +172,11 @@ int main(int argc, char** argv) {
             continue;
         }
 
+        if (var.alt[0] == ".") { // if monomorphic reference
+            cout << var << endl;
+            continue;
+        }
+
         // collect variant allele indexed membership
         map<string, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {

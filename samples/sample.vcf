@@ -29,3 +29,4 @@
 20	1234567	microsat1	G	GA,GAC	50	PASS	NS=3;DP=9;AA=G;AN=6;AC=3,1	GT:GQ:DP	0/1:.:4	0/2:17:2	1/1:40:3
 20	1235237	.	T	.	.	.	.	GT	0/0	0|0	./.
 X	10	rsTest	AC	A,ATG	10	PASS	.	GT	0	0/1	0|2
+X	40	monomorphic_ref_mnp	GGG	.	 100	PASS	.	GT	0/0	0|0	./.
