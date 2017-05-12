@@ -221,8 +221,11 @@ public:
 
     // Convert a structural variant the canonical VCF4.2 format using a reference.
     // returns true if the variant is canonicalized, false otherwise.
-    bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, int interval_sz = -1);
-
+    bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
+    
+    pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
+    int64_t get_sv_end();
+    int64_t get_sv_len();
     bool is_sv();
 
     string originalLine; // the literal of the record, as read
