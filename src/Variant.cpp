@@ -183,7 +183,7 @@ int64_t Variant::get_sv_len(int pos){
             if (this->info.find("SVLEN") != this->info.end()){
                 int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
                 sv_len = abs(pre_abs);
-                this->info["END"][pos] = this->position + abs(sv_len);
+                this->info["END"][pos] = to_string(this->position + abs(sv_len));
             }
             else if (this->info.find("END") != this->info.end()){
                 int64_t pre_abs = stol(this->info["END"][pos]) - (this->position);
@@ -301,8 +301,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
 
                         sv_len = get_sv_len(alt_pos);
-                        get_sv_end(alt_pos);
-
 
 
                         /**if (this->info.find("SVLEN") != this->info.end()){
