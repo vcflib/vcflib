@@ -144,6 +144,23 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     return true;
     };
 
+
+    std::function<string(const string&)> revcomp = [](const string& s){
+
+        int len = s.length();
+        char* ret = new char[len];
+        char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
+                        85, 86, 87, 88, 89, 90};
+
+        for (int i = len - 1; i >=0; i--){
+            ret[ len - 1 - i ] = (char) rev_arr[ (int) s[i] - 65];
+        }
+
+        return string(ret, len);
+        
+
+    };
+
         if (!this->is_sv()){
             return true;
         }
@@ -242,7 +259,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         else if (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV"){
                             this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len);
                             string alt_str(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len));
-                            reverse(alt_str.begin(), alt_str.end());
+                            alt_str = revcomp(alt_str);
                             this->alt[alt_pos] = alt_str;
 
                             // add 3 bases padding to right side 
