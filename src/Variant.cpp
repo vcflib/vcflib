@@ -138,7 +138,7 @@ pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_refer
         string f_new_id;
         string s_new_id;
 
-        int64_t opos = get_sv_end();
+        int64_t opos = get_sv_end(1);
 
 
         f_new_ref = (fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
@@ -177,18 +177,21 @@ bool Variant::is_sv(){
     return this->info.find("SVTYPE") != this->info.end();
 }
 
-int64_t Variant::get_sv_len(){
+int64_t Variant::get_sv_len(int pos){
         int64_t sv_len;
         if (is_sv()){
             if (this->info.find("SVLEN") != this->info.end()){
-                int64_t pre_abs = stol(this->info["SVLEN"][0]); 
+                int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
                 sv_len = abs(pre_abs);
-                this->info["END"][0] = this->position + sv_len;
+                this->info["END"][pos] = this->position + abs(sv_len);
             }
             else if (this->info.find("END") != this->info.end()){
-                int64_t pre_abs = stol(this->info["END"][0]) - (this->position);
+                int64_t pre_abs = stol(this->info["END"][pos]) - (this->position);
                 sv_len = abs( pre_abs );
-                this->info["SVLEN"][0] = sv_len;
+                if (this->info["SVTYPE"][pos] == "DEL"){
+                    sv_len = -1 * sv_len;
+                }
+                this->info["SVLEN"][pos] = sv_len;
 
                 }
                 else{
@@ -204,14 +207,13 @@ int64_t Variant::get_sv_len(){
         }
 }
 
-int64_t Variant::get_sv_end(){
+int64_t Variant::get_sv_end(int pos){
     if (is_sv()){
-        int64_t slen = get_sv_len();
+        int64_t slen = get_sv_len(pos);
         if (this->info["SVTYPE"][0] == "DEL"){
             return (this->position - slen);
         }
         else{
-
             return (this->position + slen);
         }
     }
@@ -268,7 +270,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     };
 
         if (!this->is_sv()){
-            return true;
+            return false;
         }
 
 
@@ -297,7 +299,13 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 break;                                                                                                                                  
                         }
 
-                        if (this->info.find("SVLEN") != this->info.end()){
+
+                        sv_len = get_sv_len(alt_pos);
+                        get_sv_end(alt_pos);
+
+
+
+                        /**if (this->info.find("SVLEN") != this->info.end()){
                             int32_t pre_abs = stoi(this->info["SVLEN"][alt_pos]); 
                             sv_len = abs(pre_abs);
                             this->info["END"][alt_pos] = this->position + sv_len;
@@ -313,7 +321,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             variant_acceptable = false;
                             break;
                         }
-
+                        **/
                         if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
                             this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
                             //if (this->alt[alt_pos] == "<INS>"){
@@ -351,11 +359,11 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
 
 
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len + 1 ));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, (-1 * sv_len) + 1 ));
 
                             this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
 
-                            if (this->ref.size() != sv_len + 1){
+                            if (this->ref.size() != (-1 * sv_len) + 1){
                                 cerr << "Variant made is incorrect size" << endl;
                                 cerr << this->ref.size() - 1 << "\t" << sv_len << endl;
                                 cerr << this->ref[this->ref.size() - 1] << "\t" << endl;

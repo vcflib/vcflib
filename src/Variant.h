@@ -224,8 +224,8 @@ public:
     bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
     
     pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
-    int64_t get_sv_end();
-    int64_t get_sv_len();
+    int64_t get_sv_end(int pos);
+    int64_t get_sv_len(int pos);
     bool is_sv();
 
     string originalLine; // the literal of the record, as read
