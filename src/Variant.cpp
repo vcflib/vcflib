@@ -178,27 +178,35 @@ bool Variant::is_sv(){
 }
 
 int64_t Variant::get_sv_len(int pos){
-        int64_t sv_len;
+        int64_t sv_len = 0;
         if (is_sv()){
             if (this->info.find("SVLEN") != this->info.end()){
                 int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
                 sv_len = abs(pre_abs);
-                this->info["END"][pos] = to_string(this->position + abs(sv_len));
+
+                int64_t prestr = this->position + abs(sv_len);
+                
+                string xstr = to_string(prestr);
+                if (this->info.find("END") != this->info.end()){
+                    this->info["END"][pos].assign(xstr);
+                }
+                else{
+                    this->info["END"].push_back(xstr);
+                }
             }
             else if (this->info.find("END") != this->info.end()){
                 int64_t pre_abs = stol(this->info["END"][pos]) - (this->position);
                 sv_len = abs( pre_abs );
                 if (this->info["SVTYPE"][pos] == "DEL"){
-                    sv_len = -1 * sv_len;
+                    sv_len =  -1 * sv_len;
                 }
-                this->info["SVLEN"][pos] = sv_len;
+                this->info["SVLEN"][pos].assign(to_string(sv_len));
 
                 }
                 else{
                     cerr << "NO SV LENGTH INFO" << endl;
                     exit(1999);
                 }
-
             return sv_len;
         }
         else {
