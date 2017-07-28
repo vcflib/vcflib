@@ -112,16 +112,124 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
+pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_reference){
+
+    if (is_sv()){
+        Variant f;
+        Variant s;
+
+        // just copy our old variant to keep our evidence tags and such
+        f = *this;
+        s = *this;
+        // First variant gets our position
+        // The second goes at sv end
+        // We need to modify the ALT field
+        // and the SVTYPE
+        // and the name
+        // and the pair info field, if there
+        
+        int prefix = rand();
+        stringstream f_new_alt;
+        stringstream s_new_alt;
+
+        string f_new_ref;
+        string s_new_ref;
+
+        string f_new_id;
+        string s_new_id;
+
+        int64_t opos = get_sv_end(1);
+
+
+        f_new_ref = (fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
+        s_new_ref = (fasta_reference.getSubSequence(this->sequenceName, opos, 1));
+
+        if (this->info["SVTYPE"][0] == "DEL"){
+            f_new_alt << f_new_ref << "[" << this->sequenceName << ":" << opos << "[";  
+            s_new_alt << s_new_ref << "]" << this->sequenceName << ":" << opos << "]";
+        }
+        else if (this->info["SVTYPE"][0] == "INS"){
+            f_new_alt << "";
+            s_new_alt <<  "";
+        }
+        else if (this->info["SVTYPE"][0] == "INV"){
+            f_new_alt << "";
+            s_new_alt <<  "";
+        } 
+
+
+
+        return make_pair(f, s);
+    }
+
+    else if (this->info.find("SVTYPE") != this->info.end() &&
+               this->info["SVTYPE"][0] == "TRA"){
+
+    }
+    
+    else{
+        cerr << "ERROR: non-SV types cannot be converted to BND format" << endl;
+        exit(999);
+    }
+};
+
 bool Variant::is_sv(){
     return this->info.find("SVTYPE") != this->info.end();
 }
 
-bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, int max_interval){
+int64_t Variant::get_sv_len(int pos){
+        int64_t sv_len;
+        if (is_sv()){
+            if (this->info.find("SVLEN") != this->info.end()){
+                int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
+                sv_len = abs(pre_abs);
+                this->info["END"][pos] = to_string(this->position + abs(sv_len));
+            }
+            else if (this->info.find("END") != this->info.end()){
+                int64_t pre_abs = stol(this->info["END"][pos]) - (this->position);
+                sv_len = abs( pre_abs );
+                if (this->info["SVTYPE"][pos] == "DEL"){
+                    sv_len = -1 * sv_len;
+                }
+                this->info["SVLEN"][pos] = sv_len;
+
+                }
+                else{
+                    cerr << "NO SV LENGTH INFO" << endl;
+                    exit(1999);
+                }
+
+            return sv_len;
+        }
+        else {
+            cerr << "NOT A STRUCTURAL VARIANT" << endl;
+            exit(1872);
+        }
+}
+
+int64_t Variant::get_sv_end(int pos){
+    if (is_sv()){
+        int64_t slen = get_sv_len(pos);
+        if (this->info["SVTYPE"][0] == "DEL"){
+            return (this->position - slen);
+        }
+        else{
+            return (this->position + slen);
+        }
+    }
+    else{
+        cerr << "VARIANT MUST BE SV" << endl;
+        exit(99829);
+    }
+}
+
+bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int max_interval){
     
             bool variant_acceptable = true;
             bool do_external_insertions = !insertions.empty();
             int32_t sv_len = 0;
             bool var_is_sv = false;
+
             FastaReference* insertion_fasta;
 
 #ifdef DEBUG
@@ -144,8 +252,25 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     return true;
     };
 
+
+    std::function<string(const string&)> revcomp = [](const string& s){
+
+        int len = s.length();
+        char* ret = new char[len];
+        char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
+                        85, 86, 87, 88, 89, 90};
+
+        for (int i = len - 1; i >=0; i--){
+            ret[ len - 1 - i ] = (char) rev_arr[ (int) s[i] - 65];
+        }
+
+        return string(ret, len);
+        
+
+    };
+
         if (!this->is_sv()){
-            return true;
+            return false;
         }
 
 
@@ -174,13 +299,19 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 break;                                                                                                                                  
                         }
 
-                        if (this->info.find("SVLEN") != this->info.end()){
+
+                        sv_len = get_sv_len(alt_pos);
+
+
+                        /**if (this->info.find("SVLEN") != this->info.end()){
                             int32_t pre_abs = stoi(this->info["SVLEN"][alt_pos]); 
                             sv_len = abs(pre_abs);
+                            this->info["END"][alt_pos] = this->position + sv_len;
                         }
                         else if (this->info.find("END") != this->info.end()){
                             int32_t pre_abs = stoi(this->info["END"][alt_pos]) - (this->position);
                             sv_len = abs( pre_abs );
+                            this->info["SVLEN"][alt_pos] = sv_len;
 
                         }
                         else{
@@ -188,8 +319,8 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             variant_acceptable = false;
                             break;
                         }
-
-                        if (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>"){
+                        **/
+                        if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
                             this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
                             //if (this->alt[alt_pos] == "<INS>"){
                             //    variant_acceptable = false;
@@ -223,14 +354,14 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                 variant_acceptable = false;
                             }
                         }
-                        else if (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL"){
+                        else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
 
 
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len + 1 ));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, (-1 * sv_len) + 1 ));
 
                             this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
 
-                            if (this->ref.size() != sv_len + 1){
+                            if (this->ref.size() != (-1 * sv_len) + 1){
                                 cerr << "Variant made is incorrect size" << endl;
                                 cerr << this->ref.size() - 1 << "\t" << sv_len << endl;
                                 cerr << this->ref[this->ref.size() - 1] << "\t" << endl;
@@ -239,10 +370,10 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             this->updateAlleleIndexes();
 
                         }
-                        else if (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV"){
+                        else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV")){
                             this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len);
                             string alt_str(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len));
-                            reverse(alt_str.begin(), alt_str.end());
+                            alt_str = revcomp(alt_str);
                             this->alt[alt_pos] = alt_str;
 
                             // add 3 bases padding to right side 

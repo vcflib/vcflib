@@ -10,7 +10,7 @@ void print_help(char** argv){
         << "usage: " << argv[0] << " [OPTIONS] var.vcf" << endl
         << "Options: " << endl
         << "   -r / --reference <ref.fa>   FASTA-format reference genome from which to pull SV sequences." << endl
-        << "   -i / --inserions <ins.fa>   FASTA-format insertion sequences, with IDs matching the ALT allele tags in the vcf" << endl
+        << "   -i / --insertions <ins.fa>   FASTA-format insertion sequences, with IDs matching the ALT allele tags in the vcf" << endl
         << endl;
 }
 
@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
     string ref_file = "";
     vector<string> insertion_files;
     int max_interval = -1;
+    bool replace_sequences = true;
 
     int c = 0;
     while (true) {
@@ -28,16 +29,20 @@ int main(int argc, char** argv) {
                 {"insertions", no_argument, 0, 'i'},
                 {"help", no_argument, 0, 'h'},
                 {"reference", required_argument, 0, 'r'},
+                {"no-replace-sequences", no_argument, 0, 's'},
                 {0, 0, 0, 0}
             };
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "r:i:h",
+        c = getopt_long (argc, argv, "sr:i:h",
                          long_options, &option_index);
         if (c == -1)
             break;
         /* Detect the end of the options. */
         switch(c){
+        case 's':
+            replace_sequences = false;
+            break;
         case 'r':
             ref_file = optarg;
             break;
@@ -87,7 +92,7 @@ int main(int argc, char** argv) {
 
     Variant var;
     while (variantFile.getNextVariant(var)) {
-        bool valid = var.canonicalize_sv(ref, insertions, max_interval);
+        bool valid = var.canonicalize_sv(ref, insertions, replace_sequences, max_interval);
         if (!valid){
             cerr << "Variant could not be normalized" << var << endl;
         }
