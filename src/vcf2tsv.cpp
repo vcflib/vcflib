@@ -86,7 +86,7 @@ void loadInfoSS(std::stringstream & ss,
             loadGenoSS(ss, o, var, vcf, nullval, formatfields);
         }
         else{
-            ss << o.str() ;
+            ss << o.str() << std::endl;
         }
     }
 }
@@ -202,12 +202,7 @@ int main(int argc, char** argv) {
 
         loadInfoSS(outputRecord, keepFields, var, variantFile, nullval, formatfields, genotypes);
 
-        if(!genotypes){
-            std::cout << outputRecord.str() << std::endl;
-        }
-        else{
-            std::cout << outputRecord.str() ;
-        }
+        std::cout << outputRecord.str() ;
 
     }
     return 0;
