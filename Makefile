@@ -132,6 +132,7 @@ INCLUDES = -Itabixpp/htslib -I$(INC_DIR) -L. -Ltabixpp/htslib
 LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm -llzma -lbz2
 
 
+
 all: $(OBJECTS) $(BINS) scriptToBin
 
 scriptToBin: $(BINS)
