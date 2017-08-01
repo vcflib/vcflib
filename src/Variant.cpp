@@ -211,7 +211,7 @@ int64_t Variant::get_sv_end(int pos){
     if (is_sv()){
         int64_t slen = get_sv_len(pos);
         if (this->info["SVTYPE"][0] == "DEL"){
-            return (this->position - slen);
+            return (this->position + abs(slen));
         }
         else{
             return (this->position + slen);
@@ -357,11 +357,11 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
 
 
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, (-1 * sv_len) + 1 ));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, abs( sv_len) + 1 ));
 
                             this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
 
-                            if (this->ref.size() != (-1 * sv_len) + 1){
+                            if (this->ref.size() != abs(sv_len) + 1){
                                 cerr << "Variant made is incorrect size" << endl;
                                 cerr << this->ref.size() - 1 << "\t" << sv_len << endl;
                                 cerr << this->ref[this->ref.size() - 1] << "\t" << endl;
