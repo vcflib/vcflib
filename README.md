@@ -5,7 +5,7 @@
 
 #### license: MIT
 
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
+[![Gitter](https://badges.gitter.im/ekg/vcflib.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
 ---
 
 ## overview
