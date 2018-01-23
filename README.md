@@ -144,13 +144,13 @@ This makes installation easy, as users can add vcflib/bin to their path, or copy
 ### vcf2tsv
     
     usage: vcf2tsv [-n null_string] [-g] [vcf file]
-    Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
-    Specifying -g will output one line per sample with genotype information.
+Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
+Specifying -g will output one line per sample with genotype information.
     
 ### vcfaddinfo
     
     usage: vcfaddinfo <vcf file> <vcf file>
-    Adds info fields from the second file which are not present in the first vcf file.
+Adds info fields from the second file which are not present in the first vcf file.
     
     
 ### vcfafpath
@@ -167,11 +167,9 @@ Uses allele frequencies in the AF info column to estimate phylogeny at multialle
         -t, --tag-parsed FLAG   Tag records which are split apart of a complex allele
                                 with this flag
     
-    If multiple alleleic primitives (gaps or mismatches) are specified in
-    a single VCF record, split the record into multiple lines, but drop all
-    INFO fields.  "Pure" MNPs are split into multiple SNPs unless the -m
-    flag is provided.  Genotypes are phased where complex alleles have been
-    decomposed, provided genotypes in the input.
+If multiple alleleic primitives (gaps or mismatches) are specified in a single VCF record, split the record into multiple lines, but drop all INFO fields.
+"Pure" MNPs are split into multiple SNPs unless the -m flag is provided.
+Genotypes are phased where complex alleles have been decomposed, provided genotypes in the input.
 
     
 ### vcfaltcount
@@ -188,29 +186,25 @@ Counts the number of alternate alleles in the record.
         -k, --key   use this INFO field key for the annotations
         -d, --default  use this INFO field key for records without annotations
 
-    Intersect the records in the VCF file with targets provided in a BED file.
-    Intersections are done on the reference sequences in the VCF file.
-    If no VCF filename is specified on the command line (last argument) the VCF
-    read from stdin.
+Intersect the records in the VCF file with targets provided in a BED file.
+Intersections are done on the reference sequences in the VCF file.
+If no VCF filename is specified on the command line (last argument) the VCF read from stdin.
 
     
 ### vcfannotategenotypes
     
     usage: vcfannotategenotypes <annotation-tag> <vcf file> <vcf file>
 
-    annotates genotypes in the first file with genotypes in the second adding the
-    genotype as another flag to each sample filed in the first file.
-    annotation-tag is the name of the sample flag which is added to store the
-    annotation.  also adds a 'has\_variant' flag for sites where the second file has
-    a variant.
+Annotates genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file.
+Annotation-tag is the name of the sample flag which is added to store the annotation.
+Also adds a 'has\_variant' flag for sites where the second file has a variant.
     
     
 ### vcfbreakmulti
     
     usage: vcfbreakmulti [options] [file]
     
-    If multiple alleles are specified in a single record, break the record into
-    multiple lines, preserving allele-specific INFO fields.
+If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields.
     
     
 ### vcfcheck
@@ -220,7 +214,7 @@ Counts the number of alternate alleles in the record.
     options: -f, --fasta-reference  FASTA reference file to use to obtain
                                     primer sequences
     
-    Verifies that the VCF REF field matches the reference as described.
+Verifies that the VCF REF field matches the reference as described.
     
     
     
@@ -239,16 +233,18 @@ reflect positional change.
         -r --region REGION  A region specifier of the form chrN:x-y to bound the merge
 
 Combines VCF files positionally, combining samples when sites and alleles are identical.
-Any number of VCF files may be combined.  The INFO field and other columns are taken from
-one of the files which are combined when records in multiple files match.  Alleles must
-have identical ordering to be combined into one record.  If they do not, multiple records
-will be emitted.
+Any number of VCF files may be combined.
+The INFO field and other columns are taken from one of the files which are combined when records in multiple files match.
+Alleles must
+have identical ordering to be combined into one record.
+If they do not, multiple records will be emitted.
 
 
 ### vcfcommonsamples
     
-    usage: vcfcommonsamples <vcf file> <vcf file> outputs each record in the
-    first file, removing samples not present in the second
+    usage: vcfcommonsamples <vcf file> <vcf file>
+    
+Outputs each record in the first file, removing samples not present in the second.
     
     
 ### vcfcountalleles
@@ -270,11 +266,11 @@ in the file.
     
     usage: vcfentropy [options] <vcf file>
     
-    options: -f, --fasta-reference  FASTA reference file to use to obtain
-primer sequences -w, --window-size      Size of the window over which to
-calculate entropy
+    options:
+        -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+        -w, --window-size      Size of the window over which to calculate entropy
     
-    Anotates the output VCF file with, for each record, EntropyLeft,
+Anotates the output VCF file with, for each record, EntropyLeft,
 EntropyRight, EntropyCenter, which are the entropies of the sequence of the
 given window size to the left, right, and center  of the record.
     
@@ -299,26 +295,23 @@ given window size to the left, right, and center  of the record.
                               compressed file which has been indexed with tabix.  any number of
                               regions may be specified.
 
-    Filter the specified vcf file using the set of filters.
-    Filters are specified in the form "<ID> <operator> <value>:
-     -f "DP > 10"  # for info fields
-     -g "GT = 1|1" # for genotype fields
-     -f "CpG"  # for 'flag' fields
+Filter the specified vcf file using the set of filters.
+Filters are specified in the form "<ID> <operator> <value>:
+    -f "DP > 10"  # for info fields
+    -g "GT = 1|1" # for genotype fields
+    -f "CpG"  # for 'flag' fields
 
-    Operators can be any of: =, !, <, >, |, &
+Operators can be any of: =, !, <, >, |, &
 
-    Any number of filters may be specified.  They are combined via logical AND
-    unless --or is specified on the command line.  Obtain logical negation through
-    the use of parentheses, e.g. "! ( DP = 10 )"
+Any number of filters may be specified.  They are combined via logical AND unless --or is specified on the command line.
+Obtain logical negation through the use of parentheses, e.g. "! ( DP = 10 )"
 
-    For convenience, you can specify "QUAL" to refer to the quality of the site, even
-    though it does not appear in the INFO fields.
+For convenience, you can specify "QUAL" to refer to the quality of the site, even though it does not appear in the INFO fields.
 
     
 ### vcffixup
 
-Count the allele frequencies across alleles present in each record in the 
-VCF file.  (Similar to vcftools --freq.)
+Count the allele frequencies across alleles present in each record in the VCF file. (Similar to vcftools --freq.)
 
 Uses genotypes from the VCF file to correct AC (alternate allele count), AF
 (alternate allele frequency), NS (number of called), in the VCF records.  For
@@ -334,10 +327,9 @@ was not called as polymorphic.
     
     usage: vcfflatten [file]
     
-    Removes multi-allelic sites by picking the most common alternate.  Requires
-    allele frequency specification 'AF' and use of 'G' and 'A' to specify the
-    fields which vary according to the Allele or Genotype. VCF file may be
-    specified on the command line or piped as stdin.
+Removes multi-allelic sites by picking the most common alternate.
+Requires allele frequency specification 'AF' and use of 'G' and 'A' to specify the fields which vary according to the Allele or Genotype.
+VCF file may be specified on the command line or piped as stdin.
     
     
 ### vcfgeno2haplo
@@ -348,17 +340,16 @@ was not called as polymorphic.
         -w, --window-size N       compare records up to this many bp away (default 30)
         -r, --reference FILE      FASTA reference file, required with -i and -u
     
-    Convert genotype-based phased alleles within --window-size into haplotype alleles.
+Convert genotype-based phased alleles within --window-size into haplotype alleles.
     
     
     
 ### vcfgenotypecompare
     
     usage: vcfgenotypecompare <other-genotype-tag> <vcf file>
-    adds statistics to the INFO field of the vcf file describing the
-    amount of discrepancy between the genotypes (GT) in the vcf file and the
-    genotypes reported in the <other-genotype-tag>.  use this after
-    vcfannotategenotypes to get correspondence statistics for two vcfs.
+    
+Adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>.
+Use this after vcfannotategenotypes to get correspondence statistics for two vcfs.
     
     
 ### vcfgenotypes
@@ -373,8 +364,8 @@ alleles provided in the call's ALT/REF fields.
     
     options:
         -n, --fix-null-genotypes   only apply to null and partly-null genotypes
-    
-    Set genotypes using the maximum genotype likelihood for each sample.
+
+Set genotypes using the maximum genotype likelihood for each sample.
     
     
     
@@ -411,30 +402,31 @@ Adds a field (id) which contains an allele-specific numerical index.
         -M, --merge-from FROM-TAG
         -T, --merge-to   TO-TAG   merge from FROM-TAG used in the -i file, setting TO-TAG
                                   in the current file.
+
+For bed-vcf intersection, alleles which fall into the targets are retained.
     
-    For bed-vcf intersection, alleles which fall into the targets are retained.
-    
-    For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp
-    as determined by haplotype comparison alleles.
+For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp as determined by haplotype comparison alleles.
     
     
 ### vcfkeepgeno
     
     usage: vcfkeepgeno <vcf file> [FIELD1] [FIELD2] ...
-    outputs each record in the vcf file, removing FORMAT fields not listed
-    on the command line from sample specifications in the output
+    
+Outputs each record in the vcf file, removing FORMAT fields not listed on the command line from sample specifications in the output.
     
     
 ### vcfkeepinfo
     
     usage: vcfkeepinfo <vcf file> [FIELD1] [FIELD2] ...
-    outputs each record in the vcf file, removing INFO fields not listed on the command line
+    
+ Outputs each record in the vcf file, removing INFO fields not listed on the command line.
     
     
 ### vcfkeepsamples
     
     usage: vcfkeepsamples <vcf file> [SAMPLE1] [SAMPLE2] ...
-    outputs each record in the vcf file, removing samples not listed on the command line
+
+Outputs each record in the vcf file, removing samples not listed on the command line.
     
     
 ### vcfleftalign
@@ -453,9 +445,9 @@ alignments.
         -r, --reference FILE  Use this reference as a basis for realignment.
         -w, --window N        Use a window of this many bp when left aligning (150).
 
-    Left-aligns variants in the specified input file or stdin.  Window size is determined
-    dynamically according to the entropy of the regions flanking the indel.  These must have
-    entropy > 1 bit/bp, or be shorter than ~5kb.
+Left-aligns variants in the specified input file or stdin.
+Window size is determined dynamically according to the entropy of the regions flanking the indel.
+These must have entropy > 1 bit/bp, or be shorter than ~5kb.
 
 
 ### vcflength
@@ -495,12 +487,11 @@ Use `vcfallelicprimitives` to decompose records while preserving format.
         -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
         -l, --primer-length    The length of the primer sequences on each side of the variant
     
-    For each VCF record, extract the flanking sequences, and write them to stdout as FASTA
-    records suitable for alignment.  This tool is intended for use in designing validation
-    experiments.  Primers extracted which would flank all of the alleles at multi-allelic
-    sites.  The name of the FASTA "reads" indicates the VCF record which they apply to.
-    The form is >CHROM_POS_LEFT for the 3' primer and >CHROM_POS_RIGHT for the 5' primer,
-    for example:
+For each VCF record, extract the flanking sequences, and write them to stdout as FASTA records suitable for alignment.
+This tool is intended for use in designing validation experiments.
+Primers extracted which would flank all of the alleles at multi-allelic sites.
+The name of the FASTA "reads" indicates the VCF record which they apply to.
+The form is >CHROM_POS_LEFT for the 3' primer and >CHROM_POS_RIGHT for the 5' primer, for example:
     
     >20_233255_LEFT
     CCATTGTATATATAGACCATAATTTCTTTATCCAATCATCTGTTGATGGA
@@ -518,9 +509,9 @@ Use `vcfallelicprimitives` to decompose records while preserving format.
         -s, --scale-by KEY   scale sampling likelihood by this Float info field
         -p, --random-seed N  use this random seed
     
-    Randomly sample sites from an input VCF file, which may be provided as stdin.
-    Scale the sampling probability by the field specified in KEY.  This may be
-    used to provide uniform sampling across allele frequencies, for instance.
+Randomly sample sites from an input VCF file, which may be provided as stdin.
+Scale the sampling probability by the field specified in KEY.
+This may be used to provide uniform sampling across allele frequencies, for instance.
     
     
 ### vcfremap
@@ -539,8 +530,8 @@ Use `vcfallelicprimitives` to decompose records while preserving format.
         -R, --repeat-gap-extend N    penalize non-repeat-unit gaps in repeat sequence
         -a, --adjust-vcf TAG         supply a new cigar as TAG in the output VCF
     
-    For each alternate allele, attempt to realign against the reference with lowered gap open penalty.
-    If realignment is possible, adjust the cigar and reference/alternate alleles.
+For each alternate allele, attempt to realign against the reference with lowered gap open penalty.
+If realignment is possible, adjust the cigar and reference/alternate alleles.
     
     
 ### vcfremoveaberrantgenotypes
@@ -553,7 +544,8 @@ allele observation) for each genotype.
 ### vcfremovesamples
     
     usage: vcfremovesamples <vcf file> [SAMPLE1] [SAMPLE2] ...
-    outputs each record in the vcf file, removing samples listed on the command line
+
+Outputs each record in the vcf file, removing samples listed on the command line.
     
     
 ### vcfroc
@@ -565,17 +557,17 @@ allele observation) for each genotype.
         -w, --window-size N       compare records up to this many bp away (default 30)
         -r, --reference FILE      FASTA reference file
     
-    Generates a pseudo-ROC curve using sensitivity and specificity estimated against
-    a putative truth set.  Thresholding is provided by successive QUAL cutoffs.
+Generates a pseudo-ROC curve using sensitivity and specificity estimated against a putative truth set.
+Thresholding is provided by successive QUAL cutoffs.
     
     
 ### vcfsamplediff
     
     usage: vcfsamplediff <tag> <sample> <sample> [ <sample> ... ] <vcf file>
-    tags each record where the listed sample genotypes differ with <tag>
-    The first sample is assumed to be germline, the second somatic.
-    Each record is tagged with <tag>={germline,somatic,loh} to specify the type of
-    variant given the genotype difference between the two samples.
+    
+Tags each record where the listed sample genotypes differ with <tag>
+The first sample is assumed to be germline, the second somatic.
+Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples.
     
     
 ### vcfsamplenames
@@ -593,13 +585,10 @@ Prints the names of the samples in the VCF file.
     application: 
         vcfsom -a output.som -f "AF DP ABP" test.vcf >results.vcf
     
-    vcfsomtrains and/or applies a self-organizing map to the input VCF data
-    on stdin, adding two columns for the x and y coordinates of the winning
-    neuron in the network and an optional euclidean distance from a given
-    node (--center).
+vcfsom trains and/or applies a self-organizing map to the input VCF data on stdin, adding two columns for the x and y coordinates of the winning neuron in the network and an optional euclidean distance from a given node (--center).
     
-    If a map is provided via --apply,  map will be applied to input without
-    training.  Automated filtering to an estimated FP rate is 
+If a map is provided via --apply,  map will be applied to input without training.
+Automated filtering to an estimated FP rate is 
     
     options:
     
@@ -642,7 +631,7 @@ Prints the names of the samples in the VCF file.
         -o, --gap-open-penalty N     gap open penalty for SW algorithm
         -e, --gap-extend-penalty N   gap extension penalty for SW algorithm
     
-    Prints statistics about variants in the input VCF file.
+Prints statistics about variants in the input VCF file.
     
     
 ### vcfstreamsort
