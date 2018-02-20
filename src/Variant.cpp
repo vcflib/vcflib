@@ -1,6 +1,6 @@
 #include "Variant.h"
 #include <utility>
-
+#define DEBUG
 
 namespace vcflib {
 
@@ -342,7 +342,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                     #ifdef DEBUG
                                         cerr << "Replacing insertion with sequence of " << var_name << endl;
                                     #endif
-                                    this->alt[alt_pos] = fasta_reference.getSubSequence(this->sequenceName, this->position, 1) + insertion_fasta->getSequence(var_name);
+                                    this->alt[alt_pos] = ( (fasta_reference.getSubSequence(this->sequenceName, this->position, 1) + insertion_fasta->getSequence(var_name)));
                                     this->updateAlleleIndexes();
                                 }
                             }
@@ -354,13 +354,8 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             }
                         }
                         else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
-
-
-
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, abs(sv_len) + 1 ));
-
-
-                            this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len)));
+                            this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
 
                             if (this->ref.size() != abs(sv_len) + 1){
                                 cerr << "Variant made is incorrect size" << endl;
