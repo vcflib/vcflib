@@ -54,6 +54,8 @@ ostream& operator<<(ostream& out, VariantFieldType type);
 typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
+void reverse_complement(const char* seq, char* ret, int len);
+
 class VariantCallFile {
 
 public:
