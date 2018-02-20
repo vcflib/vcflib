@@ -7,14 +7,93 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [-n null_string] [-g]" << " [vcf file]" << endl
          << "Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table." << endl
-         << "Specifying -g will output one line per sample with genotype information." << endl;
+         << "Specifying -g will output one line per sample with genotype information." << endl
+         << "When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index" << endl;
+
     exit(1);
 }
 
+void loadGenoSS(std::stringstream & ss,
+                std::stringstream & info,
+                vcflib::Variant & var,
+                vcflib::VariantCallFile & vcf,
+                std::string & nullval,
+                std::vector<std::string> & formatfields){
+
+
+    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
+        const string& sampleName = s->first;
+        ss << info.str() << "\t" << sampleName;
+        map<string, vector<string> >& sample = s->second;
+        for (vector<string>::iterator f = formatfields.begin(); f != formatfields.end(); ++f) {
+            if (sample.find(*f) != sample.end()) {
+                ss << "\t" << join(sample[*f], ",");
+            } else {
+                ss << "\t" << nullval;
+            }
+        }
+        ss << std::endl;
+    }
+}
+
+void loadInfoSS(std::stringstream & ss,
+                std::map<std::string, bool> & infoToKeep,
+                vcflib::Variant & var,
+                vcflib::VariantCallFile & vcf,
+                std::string & nullval,
+                std::vector<std::string> & formatfields,
+                bool genotype){
+
+    int altindex = 0;
+
+    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a, ++altindex) {
+        string& altallele = *a;
+
+        std::stringstream o;
+        o   << var.sequenceName << "\t"
+            << var.position << "\t"
+            << var.id << "\t"
+            << var.ref << "\t"
+            << altallele << "\t"
+            << var.quality << "\t"
+            << var.filter;
+
+
+        for(std::map<std::string, bool>::iterator it = infoToKeep.begin(); it != infoToKeep.end(); it++){
+
+
+            if(var.info.find(it->first) == var.info.end()){
+                o << "\t" << nullval ;
+            }
+            else{
+                if(it->second == true){
+                    o << "\t" << var.info[it->first].front();
+                }
+                else{
+                    if(vcf.infoCounts.find(it->first) == vcf.infoCounts.end()){
+
+                        if(vcf.infoCounts[it->first] == ALLELE_NUMBER){
+                            o << "\t" << var.info[it->first].at(altindex) ;
+                        }
+                    }
+                    else{
+                        o << "\t" << join(var.info[it->first], ",") ;
+                    }
+                }
+            }
+        }
+        if(genotype){
+            loadGenoSS(ss, o, var, vcf, nullval, formatfields);
+        }
+        else{
+            ss << o.str() ;
+        }
+    }
+}
 
 int main(int argc, char** argv) {
 
-    string nullval;
+    string nullval = ".";
     bool genotypes = false;
 
     int c;
@@ -50,12 +129,12 @@ int main(int argc, char** argv) {
         case 'h':
             printSummary(argv);
             break;
-            
+
         case '?':
             printSummary(argv);
             exit(1);
             break;
-                
+
         default:
             abort ();
         }
@@ -82,18 +161,18 @@ int main(int argc, char** argv) {
     if (!variantFile.is_open()) {
         return 1;
     }
+
     // obtain all possible field names
-    vector<string> infofields;
-    vector<string> infoflags;
+    // true means it a bool field flag
+    std::map<std::string, bool> keepFields;
 
     for (map<string, VariantFieldType>::iterator i = variantFile.infoTypes.begin(); i != variantFile.infoTypes.end(); ++i) {
         if (i->second == FIELD_BOOL) {
-            infoflags.push_back(i->first);
+            keepFields[i->first] = true;
         } else {
-            infofields.push_back(i->first);
+            keepFields[i->first] = false;
         }
     }
-
     vector<string> formatfields;
     if (genotypes) {
         for (map<string, VariantFieldType>::iterator f = variantFile.formatTypes.begin(); f != variantFile.formatTypes.end(); ++f) {
@@ -102,140 +181,35 @@ int main(int argc, char** argv) {
     }
 
     // write header
-
     // defaults
-    cout << "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER";
-    
-    // configurable info field
-    for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-        cout << "\t" << *i;
+    std::cout << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER";
+
+    for (std::map<std::string, bool>::iterator i = keepFields.begin(); i != keepFields.end(); ++i) {
+        cout << "\t" << i->first;
     }
-    for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
-        cout << "\t" << *i;
-    }
-    
+
     if (genotypes) {
         cout << "\t" << "SAMPLE";
         for (vector<string>::iterator f = formatfields.begin(); f != formatfields.end(); ++f) {
             cout << "\t" << *f;
         }
     }
-    cout << endl;
+    std::cout << std::endl;
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
+        stringstream outputRecord;
 
-        if (!genotypes) {
+        loadInfoSS(outputRecord, keepFields, var, variantFile, nullval, formatfields, genotypes);
 
-            int altindex = 0;
-            for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a, ++altindex) {
-
-                string& altallele = *a;
-
-                cout << var.sequenceName << "\t"
-                     << var.position << "\t"
-                     << var.id << "\t"
-                     << var.ref << "\t"
-                     << altallele << "\t"
-                     << var.quality << "\t"
-                     << var.filter;
-
-                for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-                    vector<string> value;
-                    string& name = *i;
-                    map<string, vector<string> >::iterator f = var.info.find(name);
-                    if (f != var.info.end()) {
-                        value = f->second;
-                        if (value.size() == 1) {
-                            cout << "\t" << value.front();
-                        } else if (value.size() == var.alt.size()) {
-                            cout << "\t" << value.at(altindex);
-                        } else {
-                            cout << "\t" << nullval; // null
-                        }
-                    } else {
-                        cout << "\t" << nullval; // null
-                    }
-                }
-
-                for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
-                    string value;
-                    string& name = *i;
-                    map<string, bool>::iterator f = var.infoFlags.find(name);
-                    cout << "\t";
-                    if (f != var.infoFlags.end()) {
-                        cout << 1;
-                    } else {
-                        cout << 0;
-                    }
-                }
-
-                cout << endl;
-
-            }
-        } else {
-
-            stringstream o;
-
-            // per-genotype output
-            o << var.sequenceName << "\t"
-              << var.position << "\t"
-              << var.id << "\t"
-              << var.ref << "\t"
-              << join(var.alt, ",") << "\t"
-              << var.quality << "\t"
-              << var.filter;
-            
-            for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-                vector<string> value;
-                string& name = *i;
-                map<string, vector<string> >::iterator f = var.info.find(name);
-                if (f != var.info.end()) {
-                    value = f->second;
-                    if (value.size() == 1) {
-                        o << "\t" << value.front();
-                    } else if (value.size() == var.alt.size()) {
-                        o << "\t" << join(value, ",");
-                    } else {
-                        o << "\t" << nullval; // null
-                    }
-                } else {
-                    o << "\t" << nullval; // null
-                }
-            }
-
-            for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
-                string value;
-                string& name = *i;
-                map<string, bool>::iterator f = var.infoFlags.find(name);
-                o << "\t";
-                if (f != var.infoFlags.end()) {
-                    o << 1;
-                } else {
-                    o << 0;
-                }
-            }
-            
-            string siteinfo = o.str();
-
-            for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-                cout << siteinfo;
-                const string& sampleName = s->first;
-                cout << "\t" << sampleName;
-                map<string, vector<string> >& sample = s->second;
-                for (vector<string>::iterator f = formatfields.begin(); f != formatfields.end(); ++f) {
-                    if (sample.find(*f) != sample.end()) {
-                        cout << "\t" << join(sample[*f], ",");
-                    } else {
-                        cout << "\t" << nullval;
-                    }
-                }
-                cout << endl;
-            }
+        if(!genotypes){
+            std::cout << outputRecord.str() << std::endl;
         }
+        else{
+            std::cout << outputRecord.str() ;
+        }
+
     }
-
     return 0;
-
 }
 

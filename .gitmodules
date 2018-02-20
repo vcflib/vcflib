@@ -1,6 +1,6 @@
 [submodule "tabixpp"]
 	path = tabixpp
-	url = https://github.com/ekg/tabixpp.git
+	url = https://github.com/vgteam/tabixpp.git
 [submodule "smithwaterman"]
 	path = smithwaterman
 	url = https://github.com/ekg/smithwaterman.git
