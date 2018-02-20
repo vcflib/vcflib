@@ -4,6 +4,14 @@
 
 namespace vcflib {
 
+char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
+                           85, 86, 87, 88, 89, 90};
+void reverse_complement(const char* seq, char* ret, int len){
+    for (int i = len - 1; i >=0; i--){
+        ret[ len - 1 - i ] = (char) rev_arr[ (int) seq[i] - 65];
+    }
+}
+
 
 
 void Variant::parse(string& line, bool parseSamples) {
@@ -219,7 +227,7 @@ int64_t Variant::get_sv_end(int pos){
     if (is_sv()){
         int64_t slen = get_sv_len(pos);
         if (this->info["SVTYPE"][0] == "DEL"){
-            return (this->position - slen);
+            return (this->position + abs(slen));
         }
         else{
             return (this->position + slen);
@@ -348,7 +356,9 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
 
 
+
                             this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, abs(sv_len) + 1 ));
+
 
                             this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
 
@@ -364,8 +374,15 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV")){
                             this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len);
                             string alt_str(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len));
-                            alt_str = revcomp(alt_str);
-                            this->alt[alt_pos] = alt_str;
+
+                            //reverse(alt_str.begin(), alt_str.end());
+                            char* new_str = new char [sv_len];
+                            reverse_complement(alt_str.c_str(), new_str, sv_len);
+                            this->alt[alt_pos] = new_str;
+
+                      //      alt_str = revcomp(alt_str);
+                      //      this->alt[alt_pos] = alt_str;
+
 
                             // add 3 bases padding to right side 
                             //this->ref.insert(0, reference.getSubSequence(this->sequenceName, this->position - 3, 3));
