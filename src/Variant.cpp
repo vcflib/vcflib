@@ -186,27 +186,35 @@ bool Variant::is_sv(){
 }
 
 int64_t Variant::get_sv_len(int pos){
-        int64_t sv_len;
+        int64_t sv_len = 0;
         if (is_sv()){
             if (this->info.find("SVLEN") != this->info.end()){
                 int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
                 sv_len = abs(pre_abs);
-                this->info["END"][pos] = to_string(this->position + abs(sv_len));
+
+                int64_t prestr = this->position + abs(sv_len);
+                
+                string xstr = to_string(prestr);
+                if (this->info.find("END") != this->info.end()){
+                    this->info["END"][pos].assign(xstr);
+                }
+                else{
+                    this->info["END"].push_back(xstr);
+                }
             }
             else if (this->info.find("END") != this->info.end()){
                 int64_t pre_abs = stol(this->info["END"][pos]) - (this->position);
                 sv_len = abs( pre_abs );
                 if (this->info["SVTYPE"][pos] == "DEL"){
-                    sv_len = -1 * sv_len;
+                    sv_len =  -1 * sv_len;
                 }
-                this->info["SVLEN"][pos] = sv_len;
+                this->info["SVLEN"][pos].assign(to_string(sv_len));
 
                 }
                 else{
                     cerr << "NO SV LENGTH INFO" << endl;
                     exit(1999);
                 }
-
             return sv_len;
         }
         else {
@@ -311,23 +319,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         sv_len = get_sv_len(alt_pos);
 
 
-                        /**if (this->info.find("SVLEN") != this->info.end()){
-                            int32_t pre_abs = stoi(this->info["SVLEN"][alt_pos]); 
-                            sv_len = abs(pre_abs);
-                            this->info["END"][alt_pos] = this->position + sv_len;
-                        }
-                        else if (this->info.find("END") != this->info.end()){
-                            int32_t pre_abs = stoi(this->info["END"][alt_pos]) - (this->position);
-                            sv_len = abs( pre_abs );
-                            this->info["SVLEN"][alt_pos] = sv_len;
-
-                        }
-                        else{
-                            // If we have neither, we'll ignore it.
-                            variant_acceptable = false;
-                            break;
-                        }
-                        **/
                         if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
                             this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
                             //if (this->alt[alt_pos] == "<INS>"){
@@ -365,7 +356,9 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
 
 
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, abs( sv_len) + 1 ));
+
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, abs(sv_len) + 1 ));
+
 
                             this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
 
@@ -396,8 +389,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             //this->alt[alt_pos].insert(0, reference.getSubSequence(this->sequenceName, this->position - 3, 3));
                             //this->position = this->position - 3;
                             this->updateAlleleIndexes();
-
-                            //variant_acceptable = false;
 
                         }
                         else{
