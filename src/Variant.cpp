@@ -1,6 +1,5 @@
 #include "Variant.h"
 #include <utility>
-#define DEBUG
 
 namespace vcflib {
 

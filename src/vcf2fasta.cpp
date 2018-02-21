@@ -67,7 +67,8 @@ void printSummary(char** argv) {
          << "    -p, --prefix PREFIX     Affix this output prefix to each file, none by default" << endl
          << "    -P, --default-ploidy N  Set a default ploidy for samples which do not have information in the first record (2)." << endl
          << endl
-         << "Outputs sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]." << endl;
+         << "Outputs sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]." << endl
+         << "Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined." << endl;
         //<< "Impossible regions of haplotypes are noted with an error message.  The corresponding" << endl
         //<< "regions of the output FASTA files will be marked as N." << endl
     exit(0);
@@ -96,13 +97,14 @@ void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, vector<strin
         map<int, SampleFastaFile*>& outs = outputs[*s];
         int p = ploidies[*s];
         for (int i = 0; i < p; ++i) {
-            string name = prefix + *s + "_" + seqName + ":" + convert(i) + ".fasta";
+            string thisSeqName = *s + "_" + seqName + ":" + convert(i);
+            string fileName = prefix + thisSeqName + ".fa";
             if (!outs[i]) {
                 SampleFastaFile* fp = new SampleFastaFile;
                 outs[i] = fp;
             }
             SampleFastaFile& f = *outs[i];
-            f.open(name, seqName);
+            f.open(fileName, thisSeqName);
         }
     }
 }
