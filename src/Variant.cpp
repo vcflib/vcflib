@@ -1,9 +1,10 @@
 #include "Variant.h"
 #include <utility>
+#define DEBUG
 
 namespace vcflib {
 
-char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
+static char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
                            85, 86, 87, 88, 89, 90};
 void reverse_complement(const char* seq, char* ret, int len){
     for (int i = len - 1; i >=0; i--){
@@ -319,7 +320,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
 
                         if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1));
                             //if (this->alt[alt_pos] == "<INS>"){
                             //    variant_acceptable = false;
                             //}
@@ -337,11 +338,11 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                                     cerr << "My variant name is: " << var_name << endl;
                                 #endif
                                 if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
-                                    this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position, 1 ));
+                                    //this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1 ));
                                     #ifdef DEBUG
                                         cerr << "Replacing insertion with sequence of " << var_name << endl;
                                     #endif
-                                    this->alt[alt_pos] = ( (fasta_reference.getSubSequence(this->sequenceName, this->position, 1) + insertion_fasta->getSequence(var_name)));
+                                    this->alt[alt_pos] = ( (fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1 , 1) + insertion_fasta->getSequence(var_name)));
                                     this->updateAlleleIndexes();
                                 }
                             }
@@ -353,7 +354,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             }
                         }
                         else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len)));
+                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len) + 1));
                             this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
 
                             if (this->ref.size() != abs(sv_len) + 1){
@@ -366,22 +367,13 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
                         }
                         else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV")){
-                            this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len);
-                            string alt_str(fasta_reference.getSubSequence(this->sequenceName, this->position, sv_len));
+                            this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, sv_len);
+                            string alt_str(this->ref);
+                        
+                            //reverse_complement(alt_str.c_str(), new_str, sv_len);
+                            
+                            this->alt[alt_pos].assign(revcomp(this->ref));
 
-                            //reverse(alt_str.begin(), alt_str.end());
-                            char* new_str = new char [sv_len];
-                            reverse_complement(alt_str.c_str(), new_str, sv_len);
-                            this->alt[alt_pos] = new_str;
-
-                      //      alt_str = revcomp(alt_str);
-                      //      this->alt[alt_pos] = alt_str;
-
-
-                            // add 3 bases padding to right side 
-                            //this->ref.insert(0, reference.getSubSequence(this->sequenceName, this->position - 3, 3));
-                            //this->alt[alt_pos].insert(0, reference.getSubSequence(this->sequenceName, this->position - 3, 3));
-                            //this->position = this->position - 3;
                             this->updateAlleleIndexes();
 
                         }
@@ -391,6 +383,8 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                     }
 
                 }
+
+    this->updateAlleleIndexes();
 
 
     return variant_acceptable;
