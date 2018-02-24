@@ -1,6 +1,5 @@
 #include "Variant.h"
 #include <utility>
-#define DEBUG
 
 namespace vcflib {
 
@@ -213,14 +212,62 @@ int64_t Variant::get_sv_len(int pos){
                 }
                 else{
                     cerr << "NO SV LENGTH INFO" << endl;
-                    exit(1999);
+                    return -1;
                 }
             return sv_len;
         }
         else {
             cerr << "NOT A STRUCTURAL VARIANT" << endl;
-            exit(1872);
+            return -1;
         }
+}
+
+vector<string> Variant::get_sv_type(){
+    vector<string> ret;
+    for (int i = 0; i < this->alt.size(); i++){
+        stringstream s;
+        s << this->info["SVTYPE"][i];
+        ret.push_back(s.str());
+        s.str("");
+    }
+    return ret;
+}
+
+vector<string> Variant::get_insertion_sequences(){
+    return this->insertion_sequences;
+}
+
+void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
+    this->insertion_sequences.resize(this->alt.size());
+    FastaReference* insertion_fasta = insertions[0];
+    string var_name;
+    
+    vector<string> stype = get_sv_type();
+    for (int i = 0; i < alt.size(); i++){
+        string varname;
+        if (alt[i][0] == '<' && alt[i][ alt[i].size() - 1 ] == '>'){
+            string shortname (alt[i], 1, alt[i].length() - 2 );
+            var_name = shortname;
+        }
+        if ( (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()) ){
+            this->insertion_sequences[i].assign( insertion_fasta->getSequence(var_name) );
+        }
+        else{
+            this->insertion_sequences[i] = "";
+        }
+    }
+    
+}
+
+vector<string> Variant::sv_tags(){
+    vector<string> ret;
+    for (int i = 0; i < this->alt.size(); i++){
+        stringstream s;
+        s << "<" << this->position << "_" << this->info["SVTYPE"][i] << "_" << this->get_sv_len(i) << ">";
+        ret.push_back(s.str());
+        s.str("");
+    }
+    return ret;
 }
 
 int64_t Variant::get_sv_end(int pos){
@@ -237,6 +284,20 @@ int64_t Variant::get_sv_end(int pos){
         cerr << "VARIANT MUST BE SV" << endl;
         exit(99829);
     }
+}
+
+bool Variant::canonicalizable(){
+    if (!is_sv()){
+        return true;
+    }
+    
+    if (this->info.find("SVTYPE") != this->info.end() &&
+        !(this->info["SVTYPE"].empty()) &&
+        get_sv_len(0) > 0){
+        return true;
+    }
+    return false;
+    
 }
 
 bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int max_interval){
@@ -317,6 +378,9 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
 
                         sv_len = get_sv_len(alt_pos);
+                        if ((this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
+                            set_insertion_sequences(insertions);
+                        }
 
 
                         if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
@@ -1785,6 +1849,10 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     map<string, vector<VariantAllele> > variantAlleles;
 
+    if (is_sv()){
+        // Don't ever align SVs. It just wrecks things.
+        return this->flatAlternates();
+    }
     // add the reference allele
     variantAlleles[ref].push_back(VariantAllele(ref, ref, position));
 

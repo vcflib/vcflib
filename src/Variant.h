@@ -203,6 +203,11 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
+    // SV-specific fields
+    // One per |alt|
+    vector<string> svtags;  //bracket-enclosed tags of an SV
+    vector<string> insertion_sequences;  // insertion sequence for each alt.
+
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
@@ -226,9 +231,18 @@ public:
     bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
     
     pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
+    // Convert alleles to a set of strings
+    // that look like <pos>_<SVTYPE>_<SVLEN>
+    vector<string> sv_tags();
+    vector<string> get_sv_type();
     int64_t get_sv_end(int pos);
     int64_t get_sv_len(int pos);
     bool is_sv();
+    bool canonicalizable();
+    void set_insertion_sequences(vector<FastaReference*> insertions);
+    vector<string> get_insertion_sequences();
+
+
 
     string originalLine; // the literal of the record, as read
     // TODO
