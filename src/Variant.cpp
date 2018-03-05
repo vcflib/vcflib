@@ -181,12 +181,17 @@ pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_refer
 };
 
 bool Variant::is_sv(){
-    return this->info.find("SVTYPE") != this->info.end();
+    
+    bool found_svtype = this->info.find("SVTYPE") != this->info.end();
+    bool found_len = this->info.find("SVLEN") != this.info.end() || this->info.find("END") != this.info.end() || this->info.find("SPAN") != this.info.end();
+    return (found_svtype && found_len);
 }
 
 int64_t Variant::get_sv_len(int pos){
+
         int64_t sv_len = 0;
         if (is_sv()){
+
             if (this->info.find("SVLEN") != this->info.end()){
                 int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
                 sv_len = abs(pre_abs);
