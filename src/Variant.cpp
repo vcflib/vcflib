@@ -293,23 +293,28 @@ vector<string> Variant::get_insertion_sequences(){
 }
 
 void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
-    this->insertion_sequences.resize(this->alt.size());
-    FastaReference* insertion_fasta = insertions[0];
-    string var_name;
+    if (insertions.size() >= 1){
+        this->insertion_sequences.resize(this->alt.size());
+        FastaReference* insertion_fasta = insertions[0];
+        string var_name;
     
-    vector<string> stype = get_sv_type();
-    for (int i = 0; i < alt.size(); i++){
-        string varname;
-        if (alt[i][0] == '<' && alt[i][ alt[i].size() - 1 ] == '>'){
-            string shortname (alt[i], 1, alt[i].length() - 2 );
-            var_name = shortname;
+        vector<string> stype = get_sv_type();
+        for (int i = 0; i < alt.size(); i++){
+            string varname;
+            if (alt[i][0] == '<' && alt[i][ alt[i].size() - 1 ] == '>'){
+                string shortname (alt[i], 1, alt[i].length() - 2 );
+                var_name = shortname;
+            }
+            if ( (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()) ){
+                this->insertion_sequences[i].assign( insertion_fasta->getSequence(var_name) );
+            }
+            else{
+                this->insertion_sequences[i] = "";
+            }
         }
-        if ( (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()) ){
-            this->insertion_sequences[i].assign( insertion_fasta->getSequence(var_name) );
-        }
-        else{
-            this->insertion_sequences[i] = "";
-        }
+    }
+    else{
+        cerr << "No insertion sequences provided." << endl;
     }
     
 }
@@ -365,7 +370,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
             FastaReference* insertion_fasta;
 
 #ifdef DEBUG
-            if (do_external_insertions){
+            if (do_external_insertions && insertions.size() > 0){
                 insertion_fasta = insertions[0];
                 for (auto x : insertion_fasta->index->sequenceNames){
                     cerr << x << endl;
@@ -402,17 +407,17 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     };
 
         if (!this->is_sv()){
-            return false;
+            return true;
         }
 
 
-                if (this->info.find("SVTYPE") != this->info.end() &&
-                        !(this->info["SVTYPE"].empty())){
+        if (this->info.find("SVTYPE") != this->info.end() &&
+                !(this->info["SVTYPE"].empty())){
 
-                    var_is_sv = true;
+            var_is_sv = true;
 
-                    for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos) {
-                        string a = this->alt[alt_pos];
+            for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos) {
+                string a = this->alt[alt_pos];
                             // These should be normalized-ish
                             // Ref field might be "N"
                             // Alt field could be <INS>, but it *should* be the inserted sequence,
@@ -424,39 +429,39 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                             // SVLEN is the difference in length between REF and ALT alleles.
 
 
-                        if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
-                                        this->info["SVTYPE"][alt_pos] == "DEL" ||
-                                        this->info["SVTYPE"][alt_pos] == "INS") || this->alt.size() > 1){
-                                variant_acceptable = false;
-                                break;                                                                                                                                  
+                if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
+                        this->info["SVTYPE"][alt_pos] == "DEL" ||
+                        this->info["SVTYPE"][alt_pos] == "INS") || this->alt.size() > 1){
+                        variant_acceptable = false;
+                    break;                                                                                                                                  
+                }
+
+
+                sv_len = get_sv_len(alt_pos);
+                if ((this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
+                    set_insertion_sequences(insertions);
+                }
+
+
+                if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
+                    this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1));
+                    //if (this->alt[alt_pos] == "<INS>"){
+                    //    variant_acceptable = false;
+                    //}
+                    if (do_external_insertions){
+                        insertion_fasta = insertions[0];
+                        string var_name;
+                        if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].size() - 1 ] == '>'){
+                            string shortname (alt[alt_pos], 1, alt[alt_pos].length() - 2 );
+                            var_name = shortname;
                         }
-
-
-                        sv_len = get_sv_len(alt_pos);
-                        if ((this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
-                            set_insertion_sequences(insertions);
+                        else{
+                            var_name = alt[alt_pos]; 
                         }
-
-
-                        if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1));
-                            //if (this->alt[alt_pos] == "<INS>"){
-                            //    variant_acceptable = false;
-                            //}
-                            if (do_external_insertions){
-                                insertion_fasta = insertions[0];
-                                string var_name;
-                                if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].size() - 1 ] == '>'){
-                                    string shortname (alt[alt_pos], 1, alt[alt_pos].length() - 2 );
-                                    var_name = shortname;
-                                }
-                                else{
-                                    var_name = alt[alt_pos]; 
-                                }
-                                #ifdef DEBUG
-                                    cerr << "My variant name is: " << var_name << endl;
-                                #endif
-                                if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
+                    #ifdef DEBUG
+                    cerr << "My variant name is: " << var_name << endl;
+                    #endif
+                    if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
                                     //this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1 ));
                                     #ifdef DEBUG
                                         cerr << "Replacing insertion with sequence of " << var_name << endl;
