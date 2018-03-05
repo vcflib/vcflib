@@ -206,6 +206,7 @@ public:
     // SV-specific fields
     // One per |alt|
     vector<string> svtags;  //bracket-enclosed tags of an SV
+    vector<int64_t> sv_lengths; //SV lengths, one per allele
     vector<string> insertion_sequences;  // insertion sequence for each alt.
 
     string vrepr(void);  // a comparable record of the variantion described by the record
