@@ -229,17 +229,20 @@ vector<string> Variant::get_sv_type(){
     }
     for (int i = 0; i < this->alt.size(); i++){
         stringstream s;
-        if (this->info["SVTYPE"].find() != this->info.end()){
+        if (this->info.find("SVTYPE") != this->info.end()){
             s << this->info["SVTYPE"][i];
         }
-        ret.push_back(s.str());
+        else{
+            s << "";
+        }
+        this->svtype[i].assign( s.str() );
         s.str("");
     }
     return this->svtype;
 }
 
 vector<string> Variant::get_insertion_sequences(){
-    if (this->insertion_sequences.size() != this->alt.size(){
+    if (this->insertion_sequences.size() != this->alt.size()){
         this->insertion_sequences.resize(this->alt.size());
     }
 
@@ -271,20 +274,23 @@ void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
 }
 
 vector<string> Variant::sv_tags(){
-    if (this->sv_tags.size() == 0){
+    if (this->svtags.size() != this->alt.size()){
         for (int i = 0; i < this->alt.size(); i++){
             stringstream s;
             s << "<" << this->position << "_" << this->info["SVTYPE"][i] << "_" << this->get_sv_len(i) << ">";
-            this->sv_tags.push_back(s.str());
+            this->svtags[i].assign(s.str()));
             s.str("");
         }
     }
-    return this->sv_tags;
+    return this->svtags;
 }
 
 int64_t Variant::get_sv_end(int pos){
     if (is_sv()){
         int64_t slen = get_sv_len(pos);
+        if (slen == 0 || slen == -1){
+            return slen;
+        }
         if (this->info["SVTYPE"][0] == "DEL"){
             return (this->position + abs(slen));
         }
