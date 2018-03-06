@@ -181,45 +181,100 @@ pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_refer
 };
 
 bool Variant::is_sv(){
-    return this->info.find("SVTYPE") != this->info.end();
+    
+    bool found_svtype = this->info.find("SVTYPE") != this->info.end();
+    bool found_len = this->info.find("SVLEN") != this->info.end() || this->info.find("END") != this->info.end() || this->info.find("SPAN") != this->info.end();
+    return (found_svtype && found_len);
 }
 
 int64_t Variant::get_sv_len(int pos){
-        int64_t sv_len = 0;
-        if (is_sv()){
-            if (this->info.find("SVLEN") != this->info.end()){
-                int64_t pre_abs = stol(this->info["SVLEN"][pos]); 
-                sv_len = abs(pre_abs);
+    if (!this->is_sv()){
+        return 0;
+    }
 
-                int64_t prestr = this->position + abs(sv_len);
-                
-                string xstr = to_string(prestr);
-                if (this->info.find("END") != this->info.end()){
-                    this->info["END"][pos].assign(xstr);
-                }
-                else{
-                    this->info["END"].push_back(xstr);
-                }
+    if (this->sv_lengths.size() >= pos + 1){
+        return this->sv_lengths[pos];
+    }
+    else if (this->alt.size() < pos + 1){
+        cerr << "Invalid index to get_sv_len( ): " << pos << endl;
+        return 0;
+    }
+
+    this->sv_lengths.resize(alt.size());
+    // Set sv_lengths for each position
+    for (int i = 0; i < alt.size(); i++){
+        
+        if (this->info.find("SVLEN") != this->info.end()){
+            vector<string> lens = this->info["SVLEN"];
+            if (lens.size() == 1){
+                this->sv_lengths[i] = stoll(lens[0]);
+                return this->sv_lengths[i];
             }
-            else if (this->info.find("END") != this->info.end()){
-                int64_t pre_abs = stol(this->info["END"][pos]) - (this->position);
-                sv_len = abs( pre_abs );
-                if (this->info["SVTYPE"][pos] == "DEL"){
-                    sv_len =  -1 * sv_len;
-                }
-                this->info["SVLEN"][pos].assign(to_string(sv_len));
+            else if (lens.size() == alt.size()){
+                this->sv_lengths[i] = abs(stoll(lens[i]));
+                return this->sv_lengths[i];
+            }
+            else{
+                // Something more complex - we have some alt alleles that don't
+                // have SVLEN information.
+                cerr << "Non-standard number of SV lengths" << endl;
+                return 0;
+            }
+        }
+        else if (this->info.find("END") != this->info.end()){
+            vector<string> ends = this->info["END"];
+            if (ends.size() == 1){
+                this->sv_lengths[i] = stoull(ends[0]) - this->zeroBasedPosition();
+                return this->sv_lengths[i];
+            }
+            else if (ends.size() == alt.size()){
+                this->sv_lengths[i] = stoull(ends[i]) - this->zeroBasedPosition();
+                return this->sv_lengths[i];
+            }
+            else{
+                cerr << "Non-standard number of SV ends: " << ends.size() << endl;
+                return 0;
+            }
+        }
+        else if (this->info.find("SPAN") != this->info.end()){
+            vector<string> spans = this->info["SPAN"];
+            if (spans.size() == 1){
+               // Known special case for SvABA: SPAN == -1 for interchrom
+               if (spans[0] == "-1"){
+                   return -1;
+               }
+               else{
+                   this->sv_lengths[i] = abs(stoll(spans[0]));
+                   return this->sv_lengths[i];
+               }
+            }
+            else if (spans.size() == alt.size()){
+                if (spans[0] == "-1"){
+                   return -1;
+               }
+               else{
+                   this->sv_lengths[i] = abs(stoll(spans[0]));
+                   return this->sv_lengths[i];
+               }
+            }
+            else{
+                cerr << "Non-standard number of SV lengths: " << spans.size() << endl;
+                return 0;
+            }
+        }
+        else{
+            // Try to get it from the alt allele and fail if we can't.
+            string alt_str = alt[i];
+            if (alt_str.size() > 1 && alt_str[0] == '<'){
+                return 0;
+            }
+            return 0;
+        }
+    }
 
-                }
-                else{
-                    cerr << "NO SV LENGTH INFO" << endl;
-                    return -1;
-                }
-            return sv_len;
-        }
-        else {
-            cerr << "NOT A STRUCTURAL VARIANT" << endl;
-            return -1;
-        }
+    cerr << "NO SV LENGTH INFO" << endl;
+    return 0;
+    
 }
 
 vector<string> Variant::get_sv_type(){
@@ -251,7 +306,7 @@ vector<string> Variant::get_insertion_sequences(){
 
 void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
     this->insertion_sequences.resize(this->alt.size());
-    if (insertions.size() > 1){
+    if (insertions.size() >= 1){
         FastaReference* insertion_fasta = insertions[0];
         string var_name;
     
@@ -269,6 +324,9 @@ void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
                 this->insertion_sequences[i] = "";
             }
         }
+    }
+    else{
+        cerr << "No insertion sequences provided." << endl;
     }
     
 }
@@ -332,7 +390,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     FastaReference* insertion_fasta;
 
 #ifdef DEBUG
-            if (do_external_insertions){
+            if (do_external_insertions && insertions.size() > 0){
                 insertion_fasta = insertions[0];
                 for (auto x : insertion_fasta->index->sequenceNames){
                     cerr << x << endl;
@@ -389,6 +447,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                     break;
                 }
 
+
                 sv_len = get_sv_len(alt_pos);
                 if ((this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
                     set_insertion_sequences(insertions);
@@ -418,7 +477,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         cerr << "Replacing insertion with sequence of " << var_name << endl;
 #endif
                         this->alt[alt_pos] = ((fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1) + insertion_fasta->getSequence(var_name)));
-
                     }
                 }
                 else if (allATGC(a)){
@@ -439,6 +497,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                     cerr << this->ref[this->ref.size() - 1] << "\t" << endl;
                     variant_acceptable = false;
                 }
+
 
             }
             else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV"))
