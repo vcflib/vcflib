@@ -207,10 +207,12 @@ int64_t Variant::get_sv_len(int pos){
         if (this->info.find("SVLEN") != this->info.end()){
             vector<string> lens = this->info["SVLEN"];
             if (lens.size() == 1){
+                // We have one SV length for all alleles.
                 this->sv_lengths[i] = stoll(lens[0]);
                 return this->sv_lengths[i];
             }
             else if (lens.size() == alt.size()){
+                // We have a separate SV length for each allele.
                 this->sv_lengths[i] = abs(stoll(lens[i]));
                 return this->sv_lengths[i];
             }
@@ -224,11 +226,11 @@ int64_t Variant::get_sv_len(int pos){
         else if (this->info.find("END") != this->info.end()){
             vector<string> ends = this->info["END"];
             if (ends.size() == 1){
-                this->sv_lengths[i] = stoull(ends[0]) - this->zeroBasedPosition();
+                this->sv_lengths[i] = stoull(ends[0]) - this->position;
                 return this->sv_lengths[i];
             }
             else if (ends.size() == alt.size()){
-                this->sv_lengths[i] = stoull(ends[i]) - this->zeroBasedPosition();
+                this->sv_lengths[i] = stoull(ends[i]) - this->position;
                 return this->sv_lengths[i];
             }
             else{
@@ -336,7 +338,7 @@ vector<string> Variant::sv_tags(){
         for (int i = 0; i < this->alt.size(); i++){
             stringstream s;
             s << "<" << this->position << "_" << this->info["SVTYPE"][i] << "_" << this->get_sv_len(i) << ">";
-            this->svtags[i].assign(s.str()));
+            this->svtags[i].assign(s.str());
             s.str("");
         }
     }
