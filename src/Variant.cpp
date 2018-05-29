@@ -335,6 +335,7 @@ void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
 
 vector<string> Variant::sv_tags(){
     if (this->svtags.size() != this->alt.size()){
+        this->svtags.resize(alt.size());
         for (int i = 0; i < this->alt.size(); i++){
             stringstream s;
             s << "<" << this->position << "_" << this->info["SVTYPE"][i] << "_" << this->get_sv_len(i) << ">";
@@ -384,6 +385,11 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     bool do_external_insertions = !insertions.empty();
     int32_t sv_len = 0;
     bool var_is_sv = false;
+    var_is_sv = this->is_sv();
+
+    //cerr << "Is an sv? " << (this->is_sv() ? "true" : "false") << endl;
+    //cerr << "Alt size: " << this->alt.size() << endl;
+
 
     if (!this->is_sv()){
         return false;
@@ -427,10 +433,14 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     if (this->info.find("SVTYPE") != this->info.end() &&
         !(this->info["SVTYPE"].empty())){
 
+        //cerr << "has svtype" << endl;
+
         var_is_sv = true;
+
 
         for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos){
             string a = this->alt[alt_pos];
+                cerr << "SVTYPE_ALT_POS:" << alt_pos << " " << this->info["SVTYPE"][alt_pos] << endl;
                 // These should be normalized-ish
                 // Ref field might be "N"
                 // Alt field could be <INS>, but it *should* be the inserted sequence,
@@ -443,8 +453,8 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
                 if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
                       this->info["SVTYPE"][alt_pos] == "DEL" ||
-                      this->info["SVTYPE"][alt_pos] == "INS") ||
-                    a != ""){
+                      this->info["SVTYPE"][alt_pos] == "INS")){
+                    cerr << "invalid svtype: " << this->info["SVTYPE"][alt_pos] << endl;
                     variant_acceptable = false;
                     break;
                 }
@@ -491,6 +501,8 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
             else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
                 this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len) + 1));
                 this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
+
+                cerr << this->ref << this->alt[0] << endl;
 
                 if (this->ref.size() != abs(sv_len) + 1)
                 {
