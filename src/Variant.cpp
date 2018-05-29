@@ -440,7 +440,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
         for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos){
             string a = this->alt[alt_pos];
-                cerr << "SVTYPE_ALT_POS:" << alt_pos << " " << this->info["SVTYPE"][alt_pos] << endl;
+                //cerr << "SVTYPE_ALT_POS:" << alt_pos << " " << this->info["SVTYPE"][alt_pos] << endl;
                 // These should be normalized-ish
                 // Ref field might be "N"
                 // Alt field could be <INS>, but it *should* be the inserted sequence,
