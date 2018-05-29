@@ -207,10 +207,12 @@ int64_t Variant::get_sv_len(int pos){
         if (this->info.find("SVLEN") != this->info.end()){
             vector<string> lens = this->info["SVLEN"];
             if (lens.size() == 1){
+                // We have one SV length for all alleles.
                 this->sv_lengths[i] = stoll(lens[0]);
                 return this->sv_lengths[i];
             }
             else if (lens.size() == alt.size()){
+                // We have a separate SV length for each allele.
                 this->sv_lengths[i] = abs(stoll(lens[i]));
                 return this->sv_lengths[i];
             }
@@ -224,11 +226,11 @@ int64_t Variant::get_sv_len(int pos){
         else if (this->info.find("END") != this->info.end()){
             vector<string> ends = this->info["END"];
             if (ends.size() == 1){
-                this->sv_lengths[i] = stoull(ends[0]) - this->zeroBasedPosition();
+                this->sv_lengths[i] = stoull(ends[0]) - this->position;
                 return this->sv_lengths[i];
             }
             else if (ends.size() == alt.size()){
-                this->sv_lengths[i] = stoull(ends[i]) - this->zeroBasedPosition();
+                this->sv_lengths[i] = stoull(ends[i]) - this->position;
                 return this->sv_lengths[i];
             }
             else{
@@ -278,23 +280,35 @@ int64_t Variant::get_sv_len(int pos){
 }
 
 vector<string> Variant::get_sv_type(){
-    vector<string> ret;
+
+    if (this->svtype.size() != this->alt.size()){
+        this->svtype.resize(this->alt.size());
+    }
     for (int i = 0; i < this->alt.size(); i++){
         stringstream s;
-        s << this->info["SVTYPE"][i];
-        ret.push_back(s.str());
+        if (this->info.find("SVTYPE") != this->info.end()){
+            s << this->info["SVTYPE"][i];
+        }
+        else{
+            s << "";
+        }
+        this->svtype[i].assign( s.str() );
         s.str("");
     }
-    return ret;
+    return this->svtype;
 }
 
 vector<string> Variant::get_insertion_sequences(){
+    if (this->insertion_sequences.size() != this->alt.size()){
+        this->insertion_sequences.resize(this->alt.size());
+    }
+
     return this->insertion_sequences;
 }
 
 void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
+    this->insertion_sequences.resize(this->alt.size());
     if (insertions.size() >= 1){
-        this->insertion_sequences.resize(this->alt.size());
         FastaReference* insertion_fasta = insertions[0];
         string var_name;
     
@@ -320,19 +334,24 @@ void Variant::set_insertion_sequences(vector<FastaReference*> insertions){
 }
 
 vector<string> Variant::sv_tags(){
-    vector<string> ret;
-    for (int i = 0; i < this->alt.size(); i++){
-        stringstream s;
-        s << "<" << this->position << "_" << this->info["SVTYPE"][i] << "_" << this->get_sv_len(i) << ">";
-        ret.push_back(s.str());
-        s.str("");
+    if (this->svtags.size() != this->alt.size()){
+        this->svtags.resize(alt.size());
+        for (int i = 0; i < this->alt.size(); i++){
+            stringstream s;
+            s << "<" << this->position << "_" << this->info["SVTYPE"][i] << "_" << this->get_sv_len(i) << ">";
+            this->svtags[i].assign(s.str());
+            s.str("");
+        }
     }
-    return ret;
+    return this->svtags;
 }
 
 int64_t Variant::get_sv_end(int pos){
     if (is_sv()){
         int64_t slen = get_sv_len(pos);
+        if (slen == 0 || slen == -1){
+            return slen;
+        }
         if (this->info["SVTYPE"][0] == "DEL"){
             return (this->position + abs(slen));
         }
@@ -353,7 +372,7 @@ bool Variant::canonicalizable(){
     
     if (this->info.find("SVTYPE") != this->info.end() &&
         !(this->info["SVTYPE"].empty()) &&
-        get_sv_len(0) > 0){
+        get_sv_len(0) != 0){
         return true;
     }
     return false;
@@ -362,12 +381,21 @@ bool Variant::canonicalizable(){
 
 bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int max_interval){
     
-            bool variant_acceptable = true;
-            bool do_external_insertions = !insertions.empty();
-            int32_t sv_len = 0;
-            bool var_is_sv = false;
+    bool variant_acceptable = true;
+    bool do_external_insertions = !insertions.empty();
+    int32_t sv_len = 0;
+    bool var_is_sv = false;
+    var_is_sv = this->is_sv();
 
-            FastaReference* insertion_fasta;
+    //cerr << "Is an sv? " << (this->is_sv() ? "true" : "false") << endl;
+    //cerr << "Alt size: " << this->alt.size() << endl;
+
+
+    if (!this->is_sv()){
+        return false;
+    }
+
+    FastaReference* insertion_fasta;
 
 #ifdef DEBUG
             if (do_external_insertions && insertions.size() > 0){
@@ -391,7 +419,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
 
     std::function<string(const string&)> revcomp = [](const string& s){
-
         int len = s.length();
         char* ret = new char[len];
         char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
@@ -400,40 +427,36 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
         for (int i = len - 1; i >=0; i--){
             ret[ len - 1 - i ] = (char) rev_arr[ (int) s[i] - 65];
         }
-
         return string(ret, len);
-        
-
     };
 
-        if (!this->is_sv()){
-            return true;
-        }
+    if (this->info.find("SVTYPE") != this->info.end() &&
+        !(this->info["SVTYPE"].empty())){
+
+        //cerr << "has svtype" << endl;
+
+        var_is_sv = true;
 
 
-        if (this->info.find("SVTYPE") != this->info.end() &&
-                !(this->info["SVTYPE"].empty())){
-
-            var_is_sv = true;
-
-            for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos) {
-                string a = this->alt[alt_pos];
-                            // These should be normalized-ish
-                            // Ref field might be "N"
-                            // Alt field could be <INS>, but it *should* be the inserted sequence,
-                            // but that might be tucked away in an info field
-                            //
-                            //
-                            // From the VCF4.2 Specs:
-                            // END is POS + LEN(REF) - 1
-                            // SVLEN is the difference in length between REF and ALT alleles.
-
+        for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos){
+            string a = this->alt[alt_pos];
+                //cerr << "SVTYPE_ALT_POS:" << alt_pos << " " << this->info["SVTYPE"][alt_pos] << endl;
+                // These should be normalized-ish
+                // Ref field might be "N"
+                // Alt field could be <INS>, but it *should* be the inserted sequence,
+                // but that might be tucked away in an info field
+                //
+                //
+                // From the VCF4.2 Specs:
+                // END is POS + LEN(REF) - 1
+                // SVLEN is the difference in length between REF and ALT alleles.
 
                 if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
-                        this->info["SVTYPE"][alt_pos] == "DEL" ||
-                        this->info["SVTYPE"][alt_pos] == "INS") || this->alt.size() > 1){
-                        variant_acceptable = false;
-                    break;                                                                                                                                  
+                      this->info["SVTYPE"][alt_pos] == "DEL" ||
+                      this->info["SVTYPE"][alt_pos] == "INS")){
+                    cerr << "invalid svtype: " << this->info["SVTYPE"][alt_pos] << endl;
+                    variant_acceptable = false;
+                    break;
                 }
 
 
@@ -441,7 +464,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                 if ((this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
                     set_insertion_sequences(insertions);
                 }
-
 
                 if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
                     this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1));
@@ -451,62 +473,62 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                     if (do_external_insertions){
                         insertion_fasta = insertions[0];
                         string var_name;
-                        if (alt[alt_pos][0] == '<' && alt[alt_pos][ alt[alt_pos].size() - 1 ] == '>'){
-                            string shortname (alt[alt_pos], 1, alt[alt_pos].length() - 2 );
+                        if (alt[alt_pos][0] == '<' && alt[alt_pos][alt[alt_pos].size() - 1] == '>'){
+                            string shortname(alt[alt_pos], 1, alt[alt_pos].length() - 2);
                             var_name = shortname;
                         }
                         else{
-                            var_name = alt[alt_pos]; 
+                            var_name = alt[alt_pos];
                         }
-                    #ifdef DEBUG
-                    cerr << "My variant name is: " << var_name << endl;
-                    #endif
-                    if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
-                                    //this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1 ));
-                                    #ifdef DEBUG
-                                        cerr << "Replacing insertion with sequence of " << var_name << endl;
-                                    #endif
-                                    this->alt[alt_pos] = ( (fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1 , 1) + insertion_fasta->getSequence(var_name)));
-                                    this->updateAlleleIndexes();
-                                }
-                            }
-                            else if (allATGC(a)){
-                                // we don't have to do anything - our INS is already in the correct format!
-                            }
-                            else{
-                                variant_acceptable = false;
-                            }
-                        }
-                        else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
-                            this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len) + 1));
-                            this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
-
-                            if (this->ref.size() != abs(sv_len) + 1){
-                                cerr << "Variant made is incorrect size" << endl;
-                                cerr << this->ref.size() - 1 << "\t" << sv_len << endl;
-                                cerr << this->ref[this->ref.size() - 1] << "\t" << endl;
-                                variant_acceptable = false;
-                            }
-                            this->updateAlleleIndexes();
-
-                        }
-                        else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV")){
-                            this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, sv_len);
-                            string alt_str(this->ref);
-                        
-                            //reverse_complement(alt_str.c_str(), new_str, sv_len);
-                            
-                            this->alt[alt_pos].assign(revcomp(this->ref));
-
-                            this->updateAlleleIndexes();
-
-                        }
-                        else{
-                            variant_acceptable = false;
-                        }
+#ifdef DEBUG
+                        cerr << "My variant name is: " << var_name << endl;
+#endif
+                        if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
+//this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1 ));
+#ifdef DEBUG
+                        cerr << "Replacing insertion with sequence of " << var_name << endl;
+#endif
+                        this->alt[alt_pos] = ((fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1) + insertion_fasta->getSequence(var_name)));
                     }
-
                 }
+                else if (allATGC(a)){
+                    // we don't have to do anything - our INS is already in the correct format!
+                }
+                else{
+                    variant_acceptable = false;
+                }
+            }
+            else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
+                this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len) + 1));
+                this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
+
+                cerr << this->ref << this->alt[0] << endl;
+
+                if (this->ref.size() != abs(sv_len) + 1)
+                {
+                    cerr << "Variant made is incorrect size" << endl;
+                    cerr << this->ref.size() - 1 << "\t" << sv_len << endl;
+                    cerr << this->ref[this->ref.size() - 1] << "\t" << endl;
+                    variant_acceptable = false;
+                }
+
+
+            }
+            else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV"))
+            {
+                this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, sv_len);
+                string alt_str(this->ref);
+
+                //reverse_complement(alt_str.c_str(), new_str, sv_len);
+
+                this->alt[alt_pos].assign(revcomp(this->ref));
+            }
+            else
+            {
+                variant_acceptable = false;
+            }
+        }
+    }
 
     this->updateAlleleIndexes();
 

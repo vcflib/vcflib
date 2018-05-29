@@ -208,6 +208,7 @@ public:
     vector<string> svtags;  //bracket-enclosed tags of an SV
     vector<int64_t> sv_lengths; //SV lengths, one per allele
     vector<string> insertion_sequences;  // insertion sequence for each alt.
+    vector<string> svtype;
 
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
@@ -229,6 +230,8 @@ public:
 
     // Convert a structural variant the canonical VCF4.2 format using a reference.
     // returns true if the variant is canonicalized, false otherwise.
+    // Returns false for non-SVs
+    // place_seq: if true, the ref/alt fields are filled in with the corresponding sequences from the reference (and optionally insertion FASTA)
     bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
     
     pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
