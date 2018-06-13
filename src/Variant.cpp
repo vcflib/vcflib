@@ -171,7 +171,8 @@ pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_refer
 
     else if (this->info.find("SVTYPE") != this->info.end() &&
                this->info["SVTYPE"][0] == "TRA"){
-
+        cerr << "ERROR: TRA SVs cannot be converted to BND format" << endl;
+        exit(999);
     }
     
     else{
@@ -637,6 +638,7 @@ VariantFieldType Variant::infoType(string& key) {
                     return true;
             } else {
                 cerr << "not flag type " << key << endl;
+                exit(1);
             }
         }
     }
@@ -762,6 +764,7 @@ VariantFieldType Variant::infoType(string& key) {
                     return true;
             } else {
                 cerr << "not bool type " << key << endl;
+                exit(1);
             }
         }
     }
@@ -796,6 +799,7 @@ VariantFieldType Variant::infoType(string& key) {
                 }
             } else {
                 cerr << "not string type " << key << endl;
+                exit(1);
             }
         }
     }
@@ -834,6 +838,7 @@ VariantFieldType Variant::infoType(string& key) {
                 return r;
             } else {
                 cerr << "unsupported type for sample " << type << endl;
+                exit(1);
             }
         }
     }
