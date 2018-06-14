@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 
     Variant var;
     while (variantFile.getNextVariant(var)) {
-        bool valid = var.canonicalize_sv(ref, insertions, replace_sequences, max_interval);
+        bool valid = var.canonicalize(ref, insertions, replace_sequences, max_interval);
         if (!valid){
             cerr << "Variant could not be normalized" << var << endl;
         }

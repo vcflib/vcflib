@@ -204,12 +204,6 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
-    // SV-specific fields
-    // One per |alt|
-    vector<string> svtags;  //bracket-enclosed tags of an SV
-    vector<int64_t> sv_lengths; //SV lengths, one per allele
-    vector<string> insertion_sequences;  // insertion sequence for each alt.
-    vector<string> svtype;
 
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
@@ -233,20 +227,12 @@ public:
     // returns true if the variant is canonicalized, false otherwise.
     // Returns false for non-SVs
     // place_seq: if true, the ref/alt fields are filled in with the corresponding sequences from the reference (and optionally insertion FASTA)
-    bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
+    bool canonicalize(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = true, int interval_sz = -1);
     
     pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
-    // Convert alleles to a set of strings
-    // that look like <pos>_<SVTYPE>_<SVLEN>
-    vector<string> sv_tags();
-    // Get the SVTYPE(s) for this allele
-    vector<string> get_sv_type();
-    int64_t get_sv_end(int pos);
-    int64_t get_sv_len(int pos);
     bool is_symbolic_sv();
     bool canonicalizable();
-    void set_insertion_sequences(vector<FastaReference*> insertions);
-    vector<string> get_insertion_sequences();
+
 
 
 
