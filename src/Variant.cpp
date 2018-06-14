@@ -398,23 +398,23 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     FastaReference* insertion_fasta;
 
 #ifdef DEBUG
-            if (do_external_insertions && insertions.size() > 0){
-                insertion_fasta = insertions[0];
-                for (auto x : insertion_fasta->index->sequenceNames){
-                    cerr << x << endl;
-                }
-            }
+    if (do_external_insertions && insertions.size() > 0){
+        insertion_fasta = insertions[0];
+        for (auto x : insertion_fasta->index->sequenceNames){
+            cerr << x << endl;
+        }
+    }
 #endif
 
 
     std::function<bool(const string&)> allATGC = [](const string& s){
-    for (string::const_iterator c = s.begin(); c != s.end(); ++c) {
-        char b = *c;
-        if (b != 'A' && b != 'T' && b != 'G' && b != 'C') {
-            return false;
+        for (string::const_iterator c = s.begin(); c != s.end(); ++c) {
+            char b = *c;
+            if (b != 'A' && b != 'T' && b != 'G' && b != 'C') {
+                return false;
+            }
         }
-    }
-    return true;
+        return true;
     };
 
 
@@ -437,54 +437,74 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
         var_is_sv = true;
 
+        // We would like one SVTYPE per alt. But the file may or may not
+        // specify that in its header, and it may or may not actually have
+        // that.
+        
 
         for (int alt_pos = 0; alt_pos < this->alt.size(); ++alt_pos){
             string a = this->alt[alt_pos];
-                //cerr << "SVTYPE_ALT_POS:" << alt_pos << " " << this->info["SVTYPE"][alt_pos] << endl;
-                // These should be normalized-ish
-                // Ref field might be "N"
-                // Alt field could be <INS>, but it *should* be the inserted sequence,
-                // but that might be tucked away in an info field
-                //
-                //
-                // From the VCF4.2 Specs:
-                // END is POS + LEN(REF) - 1
-                // SVLEN is the difference in length between REF and ALT alleles.
-
-                if (!(this->info["SVTYPE"][alt_pos] == "INV" ||
-                      this->info["SVTYPE"][alt_pos] == "DEL" ||
-                      this->info["SVTYPE"][alt_pos] == "INS")){
-                    cerr << "invalid svtype: " << this->info["SVTYPE"][alt_pos] << endl;
+            
+            string svtype;
+            if (this->info["SVTYPE"].size() >= alt_pos) {
+                // We have a dedicated svtype for this alt
+                svtype = this->info["SVTYPE"][alt_pos];
+            } else {
+                // We probably have just one SVTYPE, like VCF 4.2 specifies, and we apply it to all alleles.
+                svtype = this->info["SVTYPE"].front();
+                if (this->info["SVTYPE"].size() > 1) {
+                    // We actually have more than one SVTYPE but less than one per allele.
+                    // This is weird and we don't know what to do with this variant.
+                    cerr << "multiple but insufficient SVTYPE entries" << endl;
                     variant_acceptable = false;
                     break;
                 }
+            }
+            
+            //cerr << "SVTYPE_ALT_POS:" << alt_pos << " " << svtype << endl;
+            // These should be normalized-ish
+            // Ref field might be "N"
+            // Alt field could be <INS>, but it *should* be the inserted sequence,
+            // but that might be tucked away in an info field
+            //
+            //
+            // From the VCF4.2 Specs:
+            // END is POS + LEN(REF) - 1
+            // SVLEN is the difference in length between REF and ALT alleles.
+
+            if (!(svtype == "INV" ||
+                  svtype == "DEL" ||
+                  svtype == "INS")){
+                cerr << "invalid svtype: " << svtype << endl;
+                variant_acceptable = false;
+                break;
+            }
 
 
-                sv_len = get_sv_len(alt_pos);
-                if ((this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
-                    set_insertion_sequences(insertions);
-                }
+            sv_len = get_sv_len(alt_pos);
+            if ((svtype == "INS" || a == "<INS>")){
+                set_insertion_sequences(insertions);
+            }
 
-                if (place_seq && (this->info["SVTYPE"][alt_pos] == "INS" || a == "<INS>")){
-                    this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1));
-                    //if (this->alt[alt_pos] == "<INS>"){
-                    //    variant_acceptable = false;
-                    //}
-                    if (do_external_insertions){
-                        insertion_fasta = insertions[0];
-                        string var_name;
-                        if (alt[alt_pos][0] == '<' && alt[alt_pos][alt[alt_pos].size() - 1] == '>'){
-                            string shortname(alt[alt_pos], 1, alt[alt_pos].length() - 2);
-                            var_name = shortname;
-                        }
-                        else{
-                            var_name = alt[alt_pos];
-                        }
+            if (place_seq && (svtype == "INS" || a == "<INS>")){
+                this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1));
+                //if (this->alt[alt_pos] == "<INS>"){
+                //    variant_acceptable = false;
+                //}
+                if (do_external_insertions){
+                    insertion_fasta = insertions[0];
+                    string var_name;
+                    if (alt[alt_pos][0] == '<' && alt[alt_pos][alt[alt_pos].size() - 1] == '>'){
+                        string shortname(alt[alt_pos], 1, alt[alt_pos].length() - 2);
+                        var_name = shortname;
+                    }
+                    else{
+                        var_name = alt[alt_pos];
+                    }
 #ifdef DEBUG
-                        cerr << "My variant name is: " << var_name << endl;
+                    cerr << "My variant name is: " << var_name << endl;
 #endif
-                        if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
-//this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1 ));
+                    if (insertion_fasta->index->find(var_name) != insertion_fasta->index->end()){
 #ifdef DEBUG
                         cerr << "Replacing insertion with sequence of " << var_name << endl;
 #endif
@@ -498,7 +518,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                     variant_acceptable = false;
                 }
             }
-            else if (place_seq && (a == "<DEL>" || this->info["SVTYPE"][alt_pos] == "DEL")){
+            else if (place_seq && (a == "<DEL>" || svtype == "DEL")){
                 this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len) + 1));
                 this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
 
@@ -514,7 +534,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
 
 
             }
-            else if (place_seq && (a == "<INV>" || this->info["SVTYPE"][alt_pos] == "INV"))
+            else if (place_seq && (a == "<INV>" || svtype == "INV"))
             {
                 this->ref = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, sv_len);
                 string alt_str(this->ref);
