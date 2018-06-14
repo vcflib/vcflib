@@ -11,6 +11,31 @@ void reverse_complement(const char* seq, char* ret, int len){
     }
 }
 
+bool allATGCN(const string& s, bool allowLowerCase = true){
+    if (allowLowerCase){
+       for (string::const_iterator i = s.begin(); i != s.end(); ++i){
+            char c = *i;
+            if (c != 'A' && c != 'a' &&
+                c != 'C' && c != 'c' &&
+                c != 'T' && c != 't' &&
+                c != 'G' && c != 'g' &&
+                c != 'N' && c != 'n'){
+                    return false;
+            }
+        }
+    }
+    else{
+        for (string::const_iterator i = s.begin(); i != s.end(); ++i){
+            char c = *i;
+            if (c != 'A' && c != 'C' && c != 'T' && c != 'G' && c != 'N'){
+                return false;
+            }
+        }
+        
+    }
+    return true;
+}
+
 
 
 void Variant::parse(string& line, bool parseSamples) {
@@ -121,7 +146,7 @@ void Variant::parse(string& line, bool parseSamples) {
 
 pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_reference){
 
-    if (is_sv()){
+    if (is_symbolic_sv()){
         Variant f;
         Variant s;
 
@@ -180,15 +205,24 @@ pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_refer
     }
 };
 
-bool Variant::is_sv(){
+bool Variant::is_symbolic_sv(){
     
     bool found_svtype = this->info.find("SVTYPE") != this->info.end();
     bool found_len = this->info.find("SVLEN") != this->info.end() || this->info.find("END") != this->info.end() || this->info.find("SPAN") != this->info.end();
-    return (found_svtype && found_len);
+    
+    bool ref_valid = allATGCN(this->ref);
+    bool alts_valid = true;
+    for (auto a : this->alt){
+        if (!allATGCN(a)){
+            alts_valid = false;
+        }
+    }
+    
+    return (!ref_valid || !alts_valid) && (found_svtype);
 }
 
 int64_t Variant::get_sv_len(int pos){
-    if (!this->is_sv()){
+    if (!this->is_symbolic_sv()){
         return 0;
     }
 
@@ -347,7 +381,7 @@ vector<string> Variant::sv_tags(){
 }
 
 int64_t Variant::get_sv_end(int pos){
-    if (is_sv()){
+    if (is_symbolic_sv()){
         int64_t slen = get_sv_len(pos);
         if (slen == 0 || slen == -1){
             return slen;
@@ -359,14 +393,11 @@ int64_t Variant::get_sv_end(int pos){
             return (this->position + slen);
         }
     }
-    else{
-        cerr << "VARIANT MUST BE SV" << endl;
-        exit(99829);
-    }
+    return max(strlen(ref), strlen(alt[pos]));
 }
 
 bool Variant::canonicalizable(){
-    if (!is_sv()){
+    if (!is_symbolic_sv()){
         return true;
     }
     
@@ -385,13 +416,10 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
     bool do_external_insertions = !insertions.empty();
     int32_t sv_len = 0;
     bool var_is_sv = false;
-    var_is_sv = this->is_sv();
-
-    //cerr << "Is an sv? " << (this->is_sv() ? "true" : "false") << endl;
-    //cerr << "Alt size: " << this->alt.size() << endl;
+    var_is_sv = this->is_symbolic_sv();
 
 
-    if (!this->is_sv()){
+    if (!this->is_symbolic_sv()){
         return false;
     }
 
@@ -406,16 +434,6 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
             }
 #endif
 
-
-    std::function<bool(const string&)> allATGC = [](const string& s){
-    for (string::const_iterator c = s.begin(); c != s.end(); ++c) {
-        char b = *c;
-        if (b != 'A' && b != 'T' && b != 'G' && b != 'C') {
-            return false;
-        }
-    }
-    return true;
-    };
 
 
     std::function<string(const string&)> revcomp = [](const string& s){
@@ -491,7 +509,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                         this->alt[alt_pos] = ((fasta_reference.getSubSequence(this->sequenceName, this->position - 1 - 1, 1) + insertion_fasta->getSequence(var_name)));
                     }
                 }
-                else if (allATGC(a)){
+                else if (allATGCN(a)){
                     // we don't have to do anything - our INS is already in the correct format!
                 }
                 else{
@@ -1931,7 +1949,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     map<string, vector<VariantAllele> > variantAlleles;
 
-    if (is_sv()){
+    if (is_symbolic_sv()){
         // Don't ever align SVs. It just wrecks things.
         return this->flatAlternates();
     }

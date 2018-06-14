@@ -55,6 +55,7 @@ typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
 void reverse_complement(const char* seq, char* ret, int len);
+bool allATGCN(const string& s, bool allowLowerCase);
 
 class VariantCallFile {
 
@@ -238,10 +239,11 @@ public:
     // Convert alleles to a set of strings
     // that look like <pos>_<SVTYPE>_<SVLEN>
     vector<string> sv_tags();
+    // Get the SVTYPE(s) for this allele
     vector<string> get_sv_type();
     int64_t get_sv_end(int pos);
     int64_t get_sv_len(int pos);
-    bool is_sv();
+    bool is_symbolic_sv();
     bool canonicalizable();
     void set_insertion_sequences(vector<FastaReference*> insertions);
     vector<string> get_insertion_sequences();
