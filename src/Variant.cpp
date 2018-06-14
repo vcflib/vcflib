@@ -502,7 +502,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
                 this->ref.assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, abs(sv_len) + 1));
                 this->alt[alt_pos].assign(fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1));
 
-                cerr << this->ref << this->alt[0] << endl;
+                //cerr << this->ref << this->alt[0] << endl;
 
                 if (this->ref.size() != abs(sv_len) + 1)
                 {
