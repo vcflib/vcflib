@@ -144,66 +144,6 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
-pair<Variant, Variant> Variant::convert_to_breakends(FastaReference& fasta_reference){
-
-    if (is_symbolic_sv()){
-        Variant f;
-        Variant s;
-
-        // just copy our old variant to keep our evidence tags and such
-        f = *this;
-        s = *this;
-        // First variant gets our position
-        // The second goes at sv end
-        // We need to modify the ALT field
-        // and the SVTYPE
-        // and the name
-        // and the pair info field, if there
-        
-        // int prefix = rand();
-        // stringstream f_new_alt;
-        // stringstream s_new_alt;
-
-        // string f_new_ref;
-        // string s_new_ref;
-
-        // string f_new_id;
-        // string s_new_id;
-
-        // int64_t opos = get_sv_end(1);
-
-
-        // f_new_ref = (fasta_reference.getSubSequence(this->sequenceName, this->position, 1));
-        // s_new_ref = (fasta_reference.getSubSequence(this->sequenceName, opos, 1));
-
-        // if (this->info["SVTYPE"][0] == "DEL"){
-        //     f_new_alt << f_new_ref << "[" << this->sequenceName << ":" << opos << "[";  
-        //     s_new_alt << s_new_ref << "]" << this->sequenceName << ":" << opos << "]";
-        // }
-        // else if (this->info["SVTYPE"][0] == "INS"){
-        //     f_new_alt << "";
-        //     s_new_alt <<  "";
-        // }
-        // else if (this->info["SVTYPE"][0] == "INV"){
-        //     f_new_alt << "";
-        //     s_new_alt <<  "";
-        // } 
-
-
-
-        return make_pair(f, s);
-    }
-
-    else if (this->info.find("SVTYPE") != this->info.end() &&
-               this->info["SVTYPE"][0] == "TRA"){
-
-    }
-    
-    else{
-        cerr << "ERROR: non-SV types cannot be converted to BND format" << endl;
-        exit(999);
-    }
-};
 
 bool Variant::is_symbolic_sv(){
     
@@ -289,12 +229,23 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     }
 
     FastaReference* insertion_fasta;
+
+    vector<bool> alt_i_atgcn (alt.size());
+    for (int i = 0; i < alt.size(); ++i){
+        alt_i_atgcn[i] = allATGCN(alt[i]);
+    }
  
     for (int i = 0; i < alt.size(); ++i){
         string a = alt[i];
-        if (allATGCN(a)){
-            
+
+        // handle SV alt sequences
+        if (alt_i_atgcn[i]){
+
         }
+
+        // Handle SV tags
+
+        // Check if SV tags and alts agree
     }
     
 

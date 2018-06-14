@@ -229,7 +229,6 @@ public:
     // place_seq: if true, the ref/alt fields are filled in with the corresponding sequences from the reference (and optionally insertion FASTA)
     bool canonicalize(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = true, int interval_sz = -1);
     
-    pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
     bool is_symbolic_sv();
     bool canonicalizable();
 
