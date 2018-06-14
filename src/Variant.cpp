@@ -266,14 +266,14 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         if (ref_valid && alt_i_atgcn[0] && has_type && has_len){
             // Check SVTYPE/SVLEN against ref/alt to make sure they agree,
             // and check to make sure the svlen makes sense.
-            diff = this->ref.length() - this->alt[0].length();
+            diff = this->alt[0].length() - this->ref.length();
             purported_len = abs(diff);
         
-            if (this->info.at("SVTYPE")[0] == "DEL" && diff < 0){
+            if (this->info.at("SVTYPE")[0] == "DEL" && diff > 2){
                 cerr << "WARNING: INVALID SV: type is DEL, but len(ALT) > len(REF)" << endl;
                 return false;
             }
-            else if (this->info.at("SVTYPE")[0] == "INS" && diff > 0){
+            else if (this->info.at("SVTYPE")[0] == "INS" && diff < -2){
                 // if ALT > ref, check if there's a SEQ tag.
                 if (this->info.find("SEQ") != this->info.end()){
                     this->alt[0].assign( this->info.at("SEQ")[0] );
@@ -294,32 +294,45 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 return false;
             }
 
-            
             if (info_end != 0 && info_len != 0 &&
                 info_end != (this->position + abs(info_len))){
                 // SVLEN / END should be equivalent; since they're not, throw a warning.
                 cerr << "WARNING: SVLEN / END tags indicate different lengths: " << 
-                    info_end << " " << (this->position + abs(info_len)) << endl;
+                info_end << " " << (this->position + abs(info_len)) << endl;
                 return false;
             }
             else{
-                // Set the SV END based on the end.
+            // Set the SV END based on the end.
             }
             
 
         }
-        else if (ref_valid && alt_i_atgcn[0]){
-            // Set SVTYPE/SVLEN based on ref/alt
+        else if (ref_valid && alt_i_atgcn[0] && (!has_len || !has_type)){
+            // Set SVTYPE/SVLEN based on ref/alt,
+            // as we don't have them in the info fields.
+            diff = this->alt[0].length() - this->ref.length();
+            purported_len = diff;
+            this->info["SVLEN"].push_back( to_string(purported_len));
+            if (diff > 2){
+                
+            }
+            else if (diff < -2){
 
+            }
+            else{
+
+            }
+            
             return false;
         }
         else if (place_seq && has_type && has_len){
-
+            // We're allowed to modify the sequence, we have an SV type and an SV len
             return false;
         }
         else if (has_type && has_len){
             // We aren't allowed to place sequences, so we need to make sure our tags are all valid.
-            
+            // Check that SVLEN + POS == END
+            // Check if the insertion has a SEQ tag or an external fasta ID in the ALT field
             return false;
         }
         else{
@@ -331,6 +344,8 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "WARNING: multiple SV ALT alleles not yet supported." << endl;
         return false;
     }
+
+
     
 
     this->updateAlleleIndexes();
