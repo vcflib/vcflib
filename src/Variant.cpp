@@ -447,7 +447,7 @@ bool Variant::canonicalize_sv(FastaReference& fasta_reference, vector<FastaRefer
             string a = this->alt[alt_pos];
             
             string svtype;
-            if (this->info["SVTYPE"].size() >= alt_pos) {
+            if (this->info["SVTYPE"].size() > alt_pos) {
                 // We have a dedicated svtype for this alt
                 svtype = this->info["SVTYPE"][alt_pos];
             } else {
