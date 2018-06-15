@@ -240,6 +240,9 @@ public:
     *  - END info field is set and agrees with POS + ABS(SVLEN)
     *  - Insertions get a SEQ info field
     *  - canonical = true;
+    * * SVTYPE is in {DEL, INS, INV, DUP}
+    * * SVLEN is positive for all variants except DELs
+    * * END is the POS + len(REF allele) - 1
     * TODO: CURRENTLY: canonical requires there be only one alt allele
     **/
     bool canonicalize(FastaReference& ref,
