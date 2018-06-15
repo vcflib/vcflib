@@ -223,21 +223,29 @@ public:
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
-    // Convert a structural variant to the canonical VCF4.3 format using a reference.
-    // returns true if the variant is canonicalized, false otherwise.
-    // Returns false for non-SVs
-    // place_seq: if true, the ref/alt fields are
-    //     filled in with the corresponding sequences
-    //     from the reference (and optionally insertion FASTA)
-    // Fully canonicalized variants guarantee the following:
-    //  - position < END
-    //  - SVLEN info field is set
-    //  - SVTYPE info field is set
-    //  - END info field is set and agrees with POS + ABS(SVLEN)
-    //  - Insertions get a SEQ info field
-    //  - canonical = true;
-    // TODO: CURRENTLY: canonical requires there be only one alt allele
-    bool canonicalize(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = true, int interval_sz = -1);
+    /** Convert a structural variant to the canonical VCF4.3 format using a reference.
+    *   returns true if the variant is canonicalized, false otherwise.
+    *   Returns false for non-SVs
+    *   place_seq: if true, the ref/alt fields are
+    *       filled in with the corresponding sequences
+    *     from the reference (and optionally insertion FASTA)
+    * min_size_override: If a variant is less than this size,
+    *     and it has a valid REF and ALT, consider it canonicalized
+    *     even if the below conditions are not true.
+    * Fully canonicalized variants (which are greater than min_size_override)
+    * guarantee the following:
+    *  - position < END
+    *  - SVLEN info field is set
+    *  - SVTYPE info field is set
+    *  - END info field is set and agrees with POS + ABS(SVLEN)
+    *  - Insertions get a SEQ info field
+    *  - canonical = true;
+    * TODO: CURRENTLY: canonical requires there be only one alt allele
+    **/
+    bool canonicalize(FastaReference& ref,
+         vector<FastaReference*> insertions, 
+         bool place_seq = true, 
+         int min_size_override = 0);
     bool is_symbolic_sv();
     bool canonicalizable();
     bool canonical = false;

@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     
     string ref_file = "";
     vector<string> insertion_files;
-    int max_interval = -1;
+    int min_size = 0;
     bool replace_sequences = true;
 
     int c = 0;
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 
     Variant var;
     while (variantFile.getNextVariant(var)) {
-        bool valid = var.canonicalize(ref, insertions, replace_sequences, max_interval);
+        bool valid = var.canonicalize(ref, insertions, replace_sequences, min_size);
         if (!valid){
             cerr << "Variant could not be normalized" << var << endl;
         }

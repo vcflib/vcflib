@@ -187,32 +187,7 @@ bool Variant::canonicalizable(){
     return has_len && has_type;
 }
 
-/**
- * canonicalize_sv:
- * Transforms structural variants to one of two canonical forms, depending on if place_seq is passed.
- * place_seq = false: SV info tags are altered.
- * place_seq = true: REF/ALT fields are filled in with relevant DNA bases, in addition to SV info tags
- *   being handled.
- * 
- * Input:
- *   FastaReference& fasta_reference: a FASTA reference,
- *   vector<FastaReference*> insertions: a vector of insertion fastas, or an empty vector
- *   bool place_seq : whether or not the REF/ALT fields should be filled with their sequences.
- *   int max_interval : not implemented
- * 
- * Returns:
- *    a boolean, true if the variant is canonicalized, false otherwise.
- * 
- * Fully canonicalized variants guarantee the following:
- * - position < END
- * - SVLEN info field is set
- * - SVTYPE info field is set
- * - END info field is set and agrees with POS + ABS(SVLEN)
- * - Insertions get a SEQ info field
- * - canonical = true;
- * TODO: CURRENTLY: canonical requires there be only one alt allele
- */
-bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int max_interval){
+bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int min_size){
     
     bool do_external_insertions = !insertions.empty();
     
@@ -232,7 +207,6 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         return false;
     }
 
-
     long sv_len = 0;
 
     FastaReference* insertion_fasta;
@@ -243,7 +217,15 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     }
 
     long diff = 0;
+    diff = ref.length() - alt[0].length();
+
     long purported_len = 0;
+
+    // If an SV is less than the minimum size, and its ref and alt are valid,
+    // return true.
+    if (diff < min_size && ref_valid && alt_i_atgcn[0]){
+        return true;
+    }
 
     bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
     bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) || 
@@ -292,7 +274,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     this->info["SVLEN"].resize(1);
     this->info.at("SVLEN")[0].assign(to_string(info_len));
     this->info["END"].resize(1);
-    this->info.at("END").assign(to_string(info_end));
+    this->info.at("END")[0].assign(to_string(info_end));
     if (this->info.at("SVTYPE")[0] == "INS"){
         if (has_seq && alt[0] != this->info.at("SEQ")[0] && allATGCN(this->info.at("SEQ")[0])){
             // Try to remove prepended ref sequence, assuming it's left-aligned
@@ -310,7 +292,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             this->info["SEQ"].resize(1);
             this->info.at("SEQ")[0].assign(s);
         }
-        else if (alt[0] == '<'){
+        else if (alt[0][0] == '<'){
             cerr << "Warning: external insertion fasta file(s) not yet supported [canonicalize]" << endl;
             return false;
         }
@@ -320,7 +302,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     }
     else if (this->info.at("SVTYPE")[0] == "DEL"){
-        this->info.at("SVTYPE")[0].assign( to_string( -1 * stol(info_len)));
+        this->info.at("SVTYPE")[0].assign( to_string( -1 * info_len));
     }
     else{
         cerr << "Warning: invalid SV type [canonicalize]:" << this << endl;
@@ -331,13 +313,15 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     // This point is unreachable unless
     // the SVTYPE, SVLEN, END and SEQ fields are filled.
     if (place_seq){
-        if (this->info.at("SVTYPE") == "INS"){
-
+        if (this->info.at("SVTYPE")[0] == "INS"){
+            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1);
+            this->ref.assign(ref_base);
+            this->alt[0].assign(ref_base + this->info.at("SEQ")[0]);
         }
-        else if (this->info.at("SVTYPE") == "DEL"){
-            
+        else if (this->info.at("SVTYPE")[0] == "DEL"){
+            string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, stol(this->info.at("SVLEN")[0]));
         }
-        else if (this->info.at("SVTYPE") == "INV"){
+        else if (this->info.at("SVTYPE")[0] == "INV"){
 
         }
         else{
@@ -345,12 +329,19 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     }
 
-    // Check for harmony between ref / alt / tags
-    
 
     this->updateAlleleIndexes();
     this->canonical = true;
 
+    // Check for harmony between ref / alt / tags
+    if (this->position > stol(this->info.at("END")[0])){
+        cerr << "Warning: position > END. Possible reference genome mismatch." << endl;
+        return false;
+    }
+    else if (std::stol(this->info.at("SVLEN")[0]) + this->position != std::stol(this->info.at("END")[0])){
+        cerr << "Warning: SVLEN and END disagree about the variant's length" << *this << endl;
+        return false;
+    }
 
     return true;
 }
