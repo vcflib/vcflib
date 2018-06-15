@@ -223,14 +223,14 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
 
     // If an SV is less than the minimum size, and its ref and alt are valid,
     // return true.
-    if (diff < min_size && ref_valid && alt_i_atgcn[0]){
+    if ( abs(diff) < min_size && ref_valid && alt_i_atgcn[0]){
         return true;
     }
 
     bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
     bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) || 
-        (this->info.find("END") != this->info.end() && this->info.at("END").empty()) || 
-        (this->info.find("SPAN") != this->info.end() && this->info.at("SPAN").empty());
+        (this->info.find("END") != this->info.end() && !this->info.at("END").empty()) || 
+        (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty());
     bool has_seq = this->info.find("SEQ") != this->info.end() && !this->info.at("SEQ").empty();
 
             
@@ -240,10 +240,10 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     long info_end = 0;
     if (has_len){
         if (this->info.find("SVLEN") != this->info.end()){
-            info_len = stol(this->info.at("SVLEN")[0]);
+            info_len = abs(stol(this->info.at("SVLEN")[0]));
         }
         else if (this->info.find("SPAN") != this->info.end()){
-            info_len = stol(this->info.at("SPAN")[0]);
+            info_len = abs(stol(this->info.at("SPAN")[0]));
         }
 
         if (this->info.find("END") != this->info.end()){
@@ -252,9 +252,14 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 info_len = info_end - this->position;
             }
         }
-
-        if (info_end == 0){
-            info_end = this->position + info_len;
+        else if(ref_valid && !place_seq){
+            info_end = this->position + this->ref.length() - 1;
+        }
+        else if (place_seq && has_type){
+            info_end = 0;
+        }
+        else{
+            cerr << "Warning: could not set END info " << *this << endl;
         }
     }   
 
@@ -263,9 +268,13 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         return false;
     }
 
-    if (info_len != info_end || info_end == 0 || info_len == 0){
-        cerr << "Warning: END and SVLEN do not agree [canonicalize]" << endl <<
-        "END: " << info_end << "  " << "SVLEN: " << info_len << endl;
+    if ( (this->position + info_len != info_end && info_end != 0 && info_len != 0)){
+        cerr << "Warning: END and SVLEN do not agree [canonicalize] " << *this << endl <<
+        "END: " << info_end << "  " << "SVLEN: " << this->position + info_len << endl;
+        return false;
+    }
+    else if (info_len == 0){
+        cerr << "No length info " << *this << endl;
         return false;
     }
 
@@ -274,19 +283,31 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     this->info["SVLEN"].resize(1);
     this->info.at("SVLEN")[0].assign(to_string(info_len));
     this->info["END"].resize(1);
-    this->info.at("END")[0].assign(to_string(info_end));
+    //this->info.at("END")[0].assign(to_string(info_end));
     if (this->info.at("SVTYPE")[0] == "INS"){
-        if (has_seq && alt[0] != this->info.at("SEQ")[0] && allATGCN(this->info.at("SEQ")[0])){
+        // Set REF
+        if (place_seq){
+            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
+            this->ref.assign(ref_base);
+        }
+
+        if (has_seq &&
+                 alt[0] != this->info.at("SEQ")[0] &&
+                 allATGCN(this->info.at("SEQ")[0])){
             // Try to remove prepended ref sequence, assuming it's left-aligned
             string s = this->alt[0];
             s.substr(this->ref.length());
-            if (s != this->info.at("SEQ")[0]){
+            if (s != this->info.at("SEQ")[0] && !place_seq){
                 cerr << "Warning: INS sequence in alt field does not match SEQ tag" << endl <<
                 this->alt[0] << " " << this->info.at("SEQ")[0] << endl;
                 return false;
             }
+            if (place_seq){
+                this->alt[0].assign(this->info.at("SEQ")[0]);
+            }
+            
         }
-        else if (alt_i_atgcn[0]){
+        else if (alt_i_atgcn[0] && !has_seq){
             string s = this->alt[0];
             s.substr(this->ref.length());
             this->info["SEQ"].resize(1);
@@ -297,36 +318,23 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             return false;
         }
         else{
-            cerr << "Warning: could not set SEQ [canonicalize]. " << this << endl;
+            cerr << "Warning: could not set SEQ [canonicalize]. " << *this << endl;
             return false;
         }
     }
     else if (this->info.at("SVTYPE")[0] == "DEL"){
+        // Set REF
+        if (place_seq){
+            string del_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]));
+            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition() - 1, 1);
+            this->ref.assign( ref_base + del_seq );
+            this->alt[0].assign( ref_base );
+        }
         this->info.at("SVTYPE")[0].assign( to_string( -1 * info_len));
     }
     else{
-        cerr << "Warning: invalid SV type [canonicalize]:" << this << endl;
+        cerr << "Warning: invalid SV type [canonicalize]:" << *this << endl;
         return false;
-    }
-
-    // Modify the ref/alt fields.
-    // This point is unreachable unless
-    // the SVTYPE, SVLEN, END and SEQ fields are filled.
-    if (place_seq){
-        if (this->info.at("SVTYPE")[0] == "INS"){
-            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, 1);
-            this->ref.assign(ref_base);
-            this->alt[0].assign(ref_base + this->info.at("SEQ")[0]);
-        }
-        else if (this->info.at("SVTYPE")[0] == "DEL"){
-            string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->position - 1, stol(this->info.at("SVLEN")[0]));
-        }
-        else if (this->info.at("SVTYPE")[0] == "INV"){
-
-        }
-        else{
-
-        }
     }
 
 
@@ -338,10 +346,16 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "Warning: position > END. Possible reference genome mismatch." << endl;
         return false;
     }
-    else if (std::stol(this->info.at("SVLEN")[0]) + this->position != std::stol(this->info.at("END")[0])){
+
+    if (std::stol(this->info.at("SVLEN")[0]) + this->position != std::stol(this->info.at("END")[0])){
         cerr << "Warning: SVLEN and END disagree about the variant's length" << *this << endl;
         return false;
     }
+
+    if (this->info.at("SVTYPE")[0] == "INS"){
+        assert(!this->info.at("SEQ")[0].empty());
+    }
+
 
     return true;
 }
