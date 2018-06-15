@@ -55,7 +55,7 @@ typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
 void reverse_complement(const char* seq, char* ret, int len);
-bool allATGCN(const string& s, bool allowLowerCase);
+bool allATGCN(const string& s, bool allowLowerCase = false);
 
 class VariantCallFile {
 
@@ -223,14 +223,24 @@ public:
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
-    // Convert a structural variant the canonical VCF4.2 format using a reference.
+    // Convert a structural variant to the canonical VCF4.3 format using a reference.
     // returns true if the variant is canonicalized, false otherwise.
     // Returns false for non-SVs
-    // place_seq: if true, the ref/alt fields are filled in with the corresponding sequences from the reference (and optionally insertion FASTA)
+    // place_seq: if true, the ref/alt fields are
+    //     filled in with the corresponding sequences
+    //     from the reference (and optionally insertion FASTA)
+    // Fully canonicalized variants guarantee the following:
+    //  - position < END
+    //  - SVLEN info field is set
+    //  - SVTYPE info field is set
+    //  - END info field is set and agrees with POS + ABS(SVLEN)
+    //  - Insertions get a SEQ info field
+    //  - canonical = true;
+    // TODO: CURRENTLY: canonical requires there be only one alt allele
     bool canonicalize(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = true, int interval_sz = -1);
-    
     bool is_symbolic_sv();
     bool canonicalizable();
+    bool canonical = false;
 
 
 

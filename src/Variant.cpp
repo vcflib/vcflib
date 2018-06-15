@@ -11,7 +11,7 @@ void reverse_complement(const char* seq, char* ret, int len){
     }
 }
 
-bool allATGCN(const string& s, bool allowLowerCase = true){
+bool allATGCN(const string& s, bool allowLowerCase){
     if (allowLowerCase){
        for (string::const_iterator i = s.begin(); i != s.end(); ++i){
             char c = *i;
@@ -202,15 +202,20 @@ bool Variant::canonicalizable(){
  * 
  * Returns:
  *    a boolean, true if the variant is canonicalized, false otherwise.
+ * 
+ * Fully canonicalized variants guarantee the following:
+ * - position < END
+ * - SVLEN info field is set
+ * - SVTYPE info field is set
+ * - END info field is set and agrees with POS + ABS(SVLEN)
+ * - Insertions get a SEQ info field
+ * - canonical = true;
+ * TODO: CURRENTLY: canonical requires there be only one alt allele
  */
 bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int max_interval){
     
     bool do_external_insertions = !insertions.empty();
     
-    vector<int> alt_lengths;
-    vector<int> alt_ends;
-    vector<string> alt_types;
-
     bool ref_valid = allATGCN(ref);
 
     bool single_alt = alt.size() == 1;
@@ -228,13 +233,6 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     }
 
 
-    bool has_type = this->info.find("SVTYPE") != this->info.end();
-    bool has_len = this->info.find("SVLEN") != this->info.end() || 
-        this->info.find("END") != this->info.end() || 
-        this->info.find("SPAN") != this->info.end();
-    bool has_seq = this->info.find("SEQ") != this->info.end();
-
-
     long sv_len = 0;
 
     FastaReference* insertion_fasta;
@@ -244,111 +242,114 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         alt_i_atgcn[i] = allATGCN(alt[i]);
     }
 
-    if (single_alt){
-        long diff = 0;
-        long purported_len = 0;
+    long diff = 0;
+    long purported_len = 0;
+
+    bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
+    bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) || 
+        (this->info.find("END") != this->info.end() && this->info.at("END").empty()) || 
+        (this->info.find("SPAN") != this->info.end() && this->info.at("SPAN").empty());
+    bool has_seq = this->info.find("SEQ") != this->info.end() && !this->info.at("SEQ").empty();
+
             
-        long info_len = 0;
-        long info_end = 0;
-        if (has_len){
-            if (this->info.find("SVLEN") != this->info.end()){
-                info_len = stol(this->info.at("SVLEN")[0]);
-            }
-            else if (this->info.find("SPAN") != this->info.end()){
-                info_len = stol(this->info.at("SPAN")[0]);
-            }
-
-            if (this->info.find("END") != this->info.end()){
-                info_end = stol(this->info.at("END")[0]);
-            }
-        }   
-
-        if (ref_valid && alt_i_atgcn[0] && has_type && has_len){
-            // Check SVTYPE/SVLEN against ref/alt to make sure they agree,
-            // and check to make sure the svlen makes sense.
-            diff = this->alt[0].length() - this->ref.length();
-            purported_len = abs(diff);
-        
-            if (this->info.at("SVTYPE")[0] == "DEL" && diff > 2){
-                cerr << "WARNING: INVALID SV: type is DEL, but len(ALT) > len(REF)" << endl;
-                return false;
-            }
-            else if (this->info.at("SVTYPE")[0] == "INS" && diff < -2){
-                // if ALT > ref, check if there's a SEQ tag.
-                if (this->info.find("SEQ") != this->info.end()){
-                    this->alt[0].assign( this->info.at("SEQ")[0] );
-                }
-                else{
-                    cerr << "WARNING: Invalid INS ALT allele: " << this->alt[0] << endl; 
-                }
-            }
-            else if (this->info.at("SVTYPE")[0] == "INV"){
-                // if an inversion is padded by more than two basepairs, report an error.
-                if (abs(diff) > 2){
-                    cerr << "WARNING: invalid inversion " << this << endl;
-                    return false;
-                }
-            }
-            else{
-                cerr << "WARNING: Unsupported SV type (" << this->info.at("SVTYPE")[0] << ")." << endl;
-                return false;
-            }
-
-            if (info_end != 0 && info_len != 0 &&
-                info_end != (this->position + abs(info_len))){
-                // SVLEN / END should be equivalent; since they're not, throw a warning.
-                cerr << "WARNING: SVLEN / END tags indicate different lengths: " << 
-                info_end << " " << (this->position + abs(info_len)) << endl;
-                return false;
-            }
-            else{
-            // Set the SV END based on the end.
-            }
-            
-
+    // Cache SVLEN and END if they're in the info columns,
+    // Then, if either is empty, fill it in with the other.
+    long info_len = 0;
+    long info_end = 0;
+    if (has_len){
+        if (this->info.find("SVLEN") != this->info.end()){
+            info_len = stol(this->info.at("SVLEN")[0]);
         }
-        else if (ref_valid && alt_i_atgcn[0] && (!has_len || !has_type)){
-            // Set SVTYPE/SVLEN based on ref/alt,
-            // as we don't have them in the info fields.
-            diff = this->alt[0].length() - this->ref.length();
-            purported_len = diff;
-            this->info["SVLEN"].push_back( to_string(purported_len));
-            if (diff > 2){
-                
-            }
-            else if (diff < -2){
+        else if (this->info.find("SPAN") != this->info.end()){
+            info_len = stol(this->info.at("SPAN")[0]);
+        }
 
+        if (this->info.find("END") != this->info.end()){
+            info_end = stol(this->info.at("END")[0]);
+            if (info_len == 0){
+                info_len = info_end - this->position;
             }
-            else{
+        }
 
-            }
-            
-            return false;
+        if (info_end == 0){
+            info_end = this->position + info_len;
         }
-        else if (place_seq && has_type && has_len){
-            // We're allowed to modify the sequence, we have an SV type and an SV len
-            return false;
-        }
-        else if (has_type && has_len){
-            // We aren't allowed to place sequences, so we need to make sure our tags are all valid.
-            // Check that SVLEN + POS == END
-            // Check if the insertion has a SEQ tag or an external fasta ID in the ALT field
-            return false;
-        }
-        else{
-            cerr << "Warning: insufficient SV tags were present to canonicalize SV." << endl;
-            return false;
-        }
+    }   
+
+    if (!has_type && !has_len){
+        cerr << "Warning: no SVTYPE or SVLEN present" << endl;
+        return false;
     }
-    else{
-        cerr << "WARNING: multiple SV ALT alleles not yet supported." << endl;
+
+    if (info_len != info_end || info_end == 0 || info_len == 0){
+        cerr << "Warning: END and SVLEN do not agree [canonicalize]" << endl <<
+        "END: " << info_end << "  " << "SVLEN: " << info_len << endl;
         return false;
     }
 
 
+    // Set the necessary SV Tags (SVTYPE, SVLEN, END, SEQ (if insertion))
+    this->info["SVLEN"].resize(1);
+    this->info.at("SVLEN")[0].assign(to_string(info_len));
+    this->info["END"].resize(1);
+    this->info.at("END").assign(to_string(info_end));
+    if (this->info.at("SVTYPE")[0] == "INS"){
+        if (has_seq && alt[0] != this->info.at("SEQ")[0] && allATGCN(this->info.at("SEQ")[0])){
+            // Try to remove prepended ref sequence, assuming it's left-aligned
+            string s = this->alt[0];
+            s.substr(this->ref.length());
+            if (s != this->info.at("SEQ")[0]){
+                cerr << "Warning: INS sequence in alt field does not match SEQ tag" << endl <<
+                this->alt[0] << " " << this->info.at("SEQ")[0] << endl;
+                return false;
+            }
+        }
+        else if (alt_i_atgcn[0]){
+            string s = this->alt[0];
+            s.substr(this->ref.length());
+            this->info["SEQ"].resize(1);
+            this->info.at("SEQ")[0].assign(s);
+        }
+        else if (alt[0] == '<'){
+            cerr << "Warning: external insertion fasta file(s) not yet supported [canonicalize]" << endl;
+            return false;
+        }
+        else{
+            cerr << "Warning: could not set SEQ [canonicalize]. " << this << endl;
+            return false;
+        }
+    }
+    else if (this->info.at("SVTYPE")[0] == "DEL"){
+        this->info.at("SVTYPE")[0].assign( to_string( -1 * stol(info_len)));
+    }
+    else{
+        cerr << "Warning: invalid SV type [canonicalize]:" << this << endl;
+        return false;
+    }
+
+    // Modify the ref/alt fields.
+    // This point is unreachable unless
+    // the SVTYPE, SVLEN, END and SEQ fields are filled.
+    if (place_seq){
+        if (this->info.at("SVTYPE") == "INS"){
+
+        }
+        else if (this->info.at("SVTYPE") == "DEL"){
+            
+        }
+        else if (this->info.at("SVTYPE") == "INV"){
+
+        }
+        else{
+
+        }
+    }
+
+    // Check for harmony between ref / alt / tags
     
 
     this->updateAlleleIndexes();
+    this->canonical = true;
 
 
     return true;
