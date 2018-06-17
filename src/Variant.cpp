@@ -325,9 +325,9 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     else if (this->info.at("SVTYPE")[0] == "DEL"){
         // Set REF
         if (place_seq){
-            string del_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]));
-            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition() - 1, 1);
-            this->ref.assign( ref_base + del_seq );
+            string del_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]) + 1);
+            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
+            this->ref.assign( del_seq );
             this->alt[0].assign( ref_base );
         }
         this->info.at("SVTYPE")[0].assign( to_string( -1 * info_len));
