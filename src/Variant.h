@@ -249,9 +249,10 @@ public:
          vector<FastaReference*> insertions, 
          bool place_seq = true, 
          int min_size_override = 0);
-    bool is_symbolic_sv();
+    bool is_symbolic_sv() const;
     bool canonicalizable();
     bool canonical = false;
+    int getMaxReferenceLength();
 
 
 

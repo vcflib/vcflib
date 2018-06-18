@@ -145,7 +145,7 @@ void Variant::parse(string& line, bool parseSamples) {
 }
 
 
-bool Variant::is_symbolic_sv(){
+bool Variant::is_symbolic_sv() const{
     
     bool found_svtype = this->info.find("SVTYPE") != this->info.end();
     bool found_len = this->info.find("SVLEN") != this->info.end() || this->info.find("END") != this->info.end() || this->info.find("SPAN") != this->info.end();
@@ -159,6 +159,35 @@ bool Variant::is_symbolic_sv(){
     }
     
     return (!ref_valid || !alts_valid) && (found_svtype);
+}
+
+
+int Variant::getMaxReferenceLength(){
+    if (!this->is_symbolic_sv()){
+        return this->zeroBasedPosition() + this->ref.length() - 1;
+    }
+    else if (this->canonicalizable()){
+        int len = 0;
+        if (this->info.find("SVLEN") != this->info.end()){
+            for (auto s : this->info.at("SVLEN")){
+                int alt_len = abs(stoi(s));
+                len = max(alt_len, len);
+            }
+            return this->zeroBasedPosition() + len;
+        }
+        else if (this->info.find("END") != this->info.end()){
+            for (auto s : this->info.at("SVLEN")){
+                len = max(abs(stoi(s)), len);
+            }
+            return len - 1;
+        }
+        else{
+            cerr << "Warning: insufficient length information for " << *this << endl;
+            return -1;
+        }
+    }
+
+    return -1;
 }
 
 
