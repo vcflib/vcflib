@@ -256,11 +256,13 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         return true;
     }
 
+
     bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
     bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) || 
         (this->info.find("END") != this->info.end() && !this->info.at("END").empty()) || 
         (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty());
     bool has_seq = this->info.find("SEQ") != this->info.end() && !this->info.at("SEQ").empty();
+
 
             
     // Cache SVLEN and END if they're in the info columns,
@@ -292,10 +294,12 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     }   
 
+
     if (!has_type && !has_len){
         cerr << "Warning: no SVTYPE or SVLEN present" << endl;
         return false;
     }
+
 
     if ( (this->position + info_len != info_end && info_end != 0 && info_len != 0)){
         cerr << "Warning: END and SVLEN do not agree [canonicalize] " << *this << endl <<
@@ -306,6 +310,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "No length info " << *this << endl;
         return false;
     }
+
 
 
     // Set the necessary SV Tags (SVTYPE, SVLEN, END, SEQ (if insertion))
@@ -490,6 +495,7 @@ VariantFieldType Variant::infoType(string& key) {
                     return true;
             } else {
                 cerr << "not flag type " << key << endl;
+                exit(1);
             }
         }
     }
@@ -615,6 +621,7 @@ VariantFieldType Variant::infoType(string& key) {
                     return true;
             } else {
                 cerr << "not bool type " << key << endl;
+                exit(1);
             }
         }
     }
@@ -649,6 +656,7 @@ VariantFieldType Variant::infoType(string& key) {
                 }
             } else {
                 cerr << "not string type " << key << endl;
+                exit(1);
             }
         }
     }
@@ -687,6 +695,7 @@ VariantFieldType Variant::infoType(string& key) {
                 return r;
             } else {
                 cerr << "unsupported type for sample " << type << endl;
+                exit(1);
             }
         }
     }
