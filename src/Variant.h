@@ -55,6 +55,7 @@ typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
 void reverse_complement(const char* seq, char* ret, int len);
+bool allATGCN(const string& s, bool allowLowerCase = false);
 
 class VariantCallFile {
 
@@ -203,12 +204,6 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
-    // SV-specific fields
-    // One per |alt|
-    vector<string> svtags;  //bracket-enclosed tags of an SV
-    vector<int64_t> sv_lengths; //SV lengths, one per allele
-    vector<string> insertion_sequences;  // insertion sequence for each alt.
-    vector<string> svtype;
 
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
@@ -228,23 +223,37 @@ public:
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
-    // Convert a structural variant the canonical VCF4.2 format using a reference.
-    // returns true if the variant is canonicalized, false otherwise.
-    // Returns false for non-SVs
-    // place_seq: if true, the ref/alt fields are filled in with the corresponding sequences from the reference (and optionally insertion FASTA)
-    bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
-    
-    pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
-    // Convert alleles to a set of strings
-    // that look like <pos>_<SVTYPE>_<SVLEN>
-    vector<string> sv_tags();
-    vector<string> get_sv_type();
-    int64_t get_sv_end(int pos);
-    int64_t get_sv_len(int pos);
-    bool is_sv();
+    /** Convert a structural variant to the canonical VCF4.3 format using a reference.
+    *   returns true if the variant is canonicalized, false otherwise.
+    *   Returns false for non-SVs
+    *   place_seq: if true, the ref/alt fields are
+    *       filled in with the corresponding sequences
+    *     from the reference (and optionally insertion FASTA)
+    * min_size_override: If a variant is less than this size,
+    *     and it has a valid REF and ALT, consider it canonicalized
+    *     even if the below conditions are not true.
+    * Fully canonicalized variants (which are greater than min_size_override)
+    * guarantee the following:
+    *  - position < END
+    *  - SVLEN info field is set
+    *  - SVTYPE info field is set
+    *  - END info field is set and agrees with POS + ABS(SVLEN)
+    *  - Insertions get a SEQ info field
+    *  - canonical = true;
+    * * SVTYPE is in {DEL, INS, INV, DUP}
+    * * SVLEN is positive for all variants except DELs
+    * * END is the POS + len(REF allele) - 1
+    * TODO: CURRENTLY: canonical requires there be only one alt allele
+    **/
+    bool canonicalize(FastaReference& ref,
+         vector<FastaReference*> insertions, 
+         bool place_seq = true, 
+         int min_size_override = 0);
+    bool is_symbolic_sv() const;
     bool canonicalizable();
-    void set_insertion_sequences(vector<FastaReference*> insertions);
-    vector<string> get_insertion_sequences();
+    bool canonical = false;
+    int getMaxReferenceLength();
+
 
 
 
