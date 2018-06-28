@@ -196,7 +196,7 @@ public:
 
     string sequenceName;
     long position;
-    long zeroBasedPosition(void);
+    long zeroBasedPosition(void) const;
     string id;
     string ref;
     vector<string> alt;      // a list of all the alternate alleles present at this locus
