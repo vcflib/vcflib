@@ -374,14 +374,16 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             this->ref.assign( del_seq );
             this->alt[0].assign( ref_base );
         }
-        this->info.at("SVTYPE")[0].assign( to_string( -1 * info_len));
+        this->info.at("SVLEN")[0].assign( to_string( -1 * info_len));
     }
     else if (this->info.at("SVTYPE")[0] == "INV"){
         if (place_seq){
             string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]) + 1);
-            
             string inv_seq = reverse_complement(ref_seq);
+            this->ref.assign(ref_seq);
+            this->alt[0].assign(inv_seq);
         }
+
     }
     else{
         cerr << "Warning: invalid SV type [canonicalize]:" << *this << endl;
