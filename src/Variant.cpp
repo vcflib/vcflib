@@ -11,6 +11,16 @@ void reverse_complement(const char* seq, char* ret, int len){
     }
 }
 
+std::string reverse_complement(std::string seq){
+    string ret('a', seq.length());
+    int len = seq.length();
+    for (int i = len; i >= 0; ++i){
+        ret[ len  - 1 - i ] = (char) rev_arr[ (int) seq[i] - 65 ];
+    }
+    return ret;
+}
+
+
 bool allATGCN(const string& s, bool allowLowerCase){
     if (allowLowerCase){
        for (string::const_iterator i = s.begin(); i != s.end(); ++i){
@@ -365,6 +375,13 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             this->alt[0].assign( ref_base );
         }
         this->info.at("SVTYPE")[0].assign( to_string( -1 * info_len));
+    }
+    else if (this->info.at("SVTYPE")[0] == "INV"){
+        if (place_seq){
+            string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]) + 1);
+            
+            string inv_seq = reverse_complement(ref_seq);
+        }
     }
     else{
         cerr << "Warning: invalid SV type [canonicalize]:" << *this << endl;

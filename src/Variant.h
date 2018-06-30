@@ -55,6 +55,7 @@ typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
 void reverse_complement(const char* seq, char* ret, int len);
+std::string reverse_complement(std::string seq);
 bool allATGCN(const string& s, bool allowLowerCase = false);
 
 class VariantCallFile {
