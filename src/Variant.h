@@ -254,6 +254,7 @@ public:
     bool canonicalizable();
     bool canonical = false;
     int getMaxReferenceLength();
+    string getSVTYPE(int altpos);
 
 
 

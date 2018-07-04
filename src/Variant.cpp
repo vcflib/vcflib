@@ -12,12 +12,10 @@ void reverse_complement(const char* seq, char* ret, int len){
 }
 
 std::string reverse_complement(std::string seq){
-    string ret('a', seq.length());
-    int len = seq.length();
-    for (int i = len; i >= 0; ++i){
-        ret[ len  - 1 - i ] = (char) rev_arr[ (int) seq[i] - 65 ];
-    }
-    return ret;
+    char ret[seq.length()];
+    reverse_complement(seq.c_str(), ret, seq.length());
+    string sret(ret);
+    return sret;
 }
 
 
@@ -170,6 +168,20 @@ bool Variant::is_symbolic_sv() const{
     
     return (!ref_valid || !alts_valid) && (found_svtype);
 }
+
+string Variant::getSVTYPE(int altpos){
+    
+    if (altpos > 0){
+        return "";
+    }
+
+
+    if (this->info.find("SVTYPE") != this->info.end()){
+        return this->info.at("SVTYPE")[altpos];
+    }
+
+    return "";
+};
 
 
 int Variant::getMaxReferenceLength(){
