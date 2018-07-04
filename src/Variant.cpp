@@ -412,7 +412,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         return false;
     }
 
-    if (std::stol(this->info.at("SVLEN")[0]) + this->position != std::stol(this->info.at("END")[0])){
+    if (std::abs(std::stol(this->info.at("SVLEN")[0])) + this->position != std::stol(this->info.at("END")[0])){
         cerr << "Warning: SVLEN and END disagree about the variant's length" << *this << endl;
         return false;
     }
