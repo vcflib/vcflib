@@ -342,8 +342,8 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     //this->info.at("END")[0].assign(to_string(info_end));
     if (this->info.at("SVTYPE")[0] == "INS"){
         // Set REF
-        if (place_seq){
             string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
+        if (place_seq){
             this->ref.assign(ref_base);
         }
 
@@ -359,7 +359,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 return false;
             }
             if (place_seq){
-                this->alt[0].assign(this->info.at("SEQ")[0]);
+                this->alt[0].assign( ref_base + this->info.at("SEQ")[0] );
             }
             
         }
