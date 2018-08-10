@@ -378,7 +378,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             string ins_seq;
             string seq_id = alt[0].substr(1, alt[0].size() - 2);
 
-            if (insertion_fasta->index->sequenceID.find(seq_id) != insertion_fasta->index->sequenceID.end()){
+            if (insertion_fasta->index->find(seq_id) != insertion_fasta->index->end()){
                 ins_seq = insertion_fasta->getSequence(seq_id);
                 if (allATGCN(ins_seq)){
                     this->info["SEQ"].resize(1);
