@@ -278,6 +278,10 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         return true;
     }
 
+    if (do_external_insertions){
+        insertion_fasta = insertions[0];
+    }
+
 
     bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
     bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) || 
@@ -369,9 +373,26 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             this->info["SEQ"].resize(1);
             this->info.at("SEQ")[0].assign(s);
         }
-        else if (alt[0][0] == '<'){
-            cerr << "Warning: external insertion fasta file(s) not yet supported [canonicalize]" << endl;
-            return false;
+        else if (alt[0][0] == '<' && do_external_insertions){
+
+            string ins_seq;
+            string seq_id = alt[0].substr(1, alt[0].size() - 2);
+
+            if (insertion_fasta->index->sequenceID.find(seq_id) != insertion_fasta->index->sequenceID.end()){
+                ins_seq = insertion_fasta->getSequence(seq_id);
+                if (allATGCN(ins_seq)){
+                    this->info["SEQ"].resize(1);
+                    this->info["SEQ"][0].assign(ins_seq);
+                    if (place_seq){
+                        this->alt[0].assign(ref_base + ins_seq);
+                    }
+                }
+            } 
+            else{
+                cerr << "Warning: Could not locate alt sequence for: " << *this << endl;
+                return false;
+            }
+            
         }
         else{
             cerr << "Warning: could not set SEQ [canonicalize]. " << *this << endl;
