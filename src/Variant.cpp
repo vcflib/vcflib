@@ -152,6 +152,13 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
+bool Variant::has_sv_tags() const{
+    bool found_svtype = this->info.find("SVTYPE") != this->info.end();
+    bool found_len = this->info.find("SVLEN") != this->info.end() || this->info.find("END") != this->info.end() || this->info.find("SPAN") != this->info.end();
+
+   return found_svtype && found_len;
+}
+
 
 bool Variant::is_symbolic_sv() const{
     
@@ -360,7 +367,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             if (s != this->info.at("SEQ")[0] && !place_seq){
                 cerr << "Warning: INS sequence in alt field does not match SEQ tag" << endl <<
                 this->alt[0] << " " << this->info.at("SEQ")[0] << endl;
-                return false;
+                //return false;
             }
             if (place_seq){
                 this->alt[0].assign( ref_base + this->info.at("SEQ")[0] );

@@ -251,6 +251,7 @@ public:
          bool place_seq = true, 
          int min_size_override = 0);
     bool is_symbolic_sv() const;
+    bool has_sv_tags() const;
     bool canonicalizable();
     bool canonical = false;
     int getMaxReferenceLength();
