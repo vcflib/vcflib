@@ -231,8 +231,14 @@ clean:
 	rm -rf $(LIB_DIR)
 	rm -rf $(INC_DIR)
 	rm -rf $(OBJ_DIR)
-	cd tabixpp && make clean
-	cd smithwaterman && make clean
-	cd fastahack && make clean
-
+	cd tabixpp && $(MAKE) clean
+	cd smithwaterman && $(MAKE) clean
+	cd fastahack && $(MAKE) clean
+	cd multichoose && $(MAKE) clean
+	cd fsom && $(MAKE) clean
+	cd libVCFH && $(MAKE) clean
+	cd test && $(MAKE) clean
+	cd filevercmp && $(MAKE) clean
+	cd intervaltree && $(MAKE) clean
+	
 .PHONY: clean all test pre
