@@ -20,4 +20,4 @@ tests/main: ../googletest/googletest/make/gtest_main.a
 run: tests/main
 	./tests/main
 clean:
-	rm tests/main
+	rm -f tests/main
