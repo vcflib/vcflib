@@ -349,7 +349,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     // Set the necessary SV Tags (SVTYPE, SVLEN, END, SEQ (if insertion))
     this->info["SVLEN"].resize(1);
     this->info.at("SVLEN")[0].assign(to_string(info_len));
-    this->info["END"].resize(1);
+    //this->info["END"].resize(1);
     //this->info.at("END")[0].assign(to_string(info_end));
     if (this->info.at("SVTYPE")[0] == "INS"){
         // Set REF
@@ -435,12 +435,12 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     this->canonical = true;
 
     // Check for harmony between ref / alt / tags
-    if (this->position > stol(this->info.at("END")[0])){
+    if (this->info.find("END") != this->info.end() && this->position > stol(this->info.at("END")[0])){
         cerr << "Warning: position > END. Possible reference genome mismatch." << endl;
         return false;
     }
 
-    if (std::abs(std::stol(this->info.at("SVLEN")[0])) + this->position != std::stol(this->info.at("END")[0])){
+    if (this->info.find("SVLEN") != this->info.end() && this->info.find("END") != this->info.end() && std::abs(std::stol(this->info.at("SVLEN")[0])) + this->position != std::stol(this->info.at("END")[0])){
         cerr << "Warning: SVLEN and END disagree about the variant's length" << *this << endl;
         return false;
     }
