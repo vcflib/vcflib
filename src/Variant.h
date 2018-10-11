@@ -54,7 +54,6 @@ ostream& operator<<(ostream& out, VariantFieldType type);
 typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
-void reverse_complement(const char* seq, char* ret, int len);
 std::string reverse_complement(std::string seq);
 bool allATGCN(const string& s, bool allowLowerCase = false);
 
@@ -271,7 +270,11 @@ public:
      */
     bool canonical = false;
     
-    int getMaxReferenceLength();
+    /**
+     * Get the maximum zero-based position of the reference affected by this variant.
+     */
+    int getMaxReferencePos();
+    
     string getSVTYPE(int altpos);
 
 
