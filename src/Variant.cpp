@@ -5,17 +5,27 @@ namespace vcflib {
 
 static char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
                            85, 86, 87, 88, 89, 90};
-void reverse_complement(const char* seq, char* ret, int len){
-    for (int i = len - 1; i >=0; i--){
-        ret[ len - 1 - i ] = (char) rev_arr[ (int) seq[i] - 65];
-    }
-}
 
-std::string reverse_complement(std::string seq){
-    char ret[seq.length()];
-    reverse_complement(seq.c_str(), ret, seq.length());
-    string sret(ret);
-    return sret;
+std::string reverse_complement(std::string seq) {
+    // The old implementation of this function forgot to null-terminate its
+    // returned string. This implementation uses heavier-weight C++ stuff that
+    // may be slower but should ensure that that doesn't happen again.
+    
+    if (seq.size() == 0) {
+        return seq;
+    }
+
+    string ret;
+    ret.reserve(seq.size());
+    
+    std::transform(seq.rbegin(), seq.rend(), std::back_inserter(ret), [](const char& in) -> char {
+        if (in < 'A' || in > 'Z') {
+            throw std::runtime_error("Out of range character " + std::to_string(in) + " in inverted sequence");
+        }
+        return rev_arr[((int) in) - 65];
+    });
+    
+    return ret;
 }
 
 
