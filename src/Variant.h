@@ -253,7 +253,11 @@ public:
     bool has_sv_tags() const;
     bool canonicalizable();
     bool canonical = false;
-    int getMaxReferenceLength();
+    
+    /**
+     * Get the maximum zero-based position of the reference affected by this variant.
+     */
+    int getMaxReferencePos();
     string getSVTYPE(int altpos);
 
 

@@ -201,31 +201,49 @@ string Variant::getSVTYPE(int altpos){
 };
 
 
-int Variant::getMaxReferenceLength(){
+int Variant::getMaxReferencePos(){
     if (!this->is_symbolic_sv()){
         return this->zeroBasedPosition() + this->ref.length() - 1;
     }
     else if (this->canonicalizable()){
-        int len = 0;
-        if (this->info.find("SVLEN") != this->info.end()){
-            for (auto s : this->info.at("SVLEN")){
-                int alt_len = abs(stoi(s));
-                len = max(alt_len, len);
+        if (this->info.find("END") != this->info.end()){
+            // An endpoint is defined
+            
+            int end = 0;
+            for (auto s : this->info.at("END")){
+                // Get the latest one defined.
+                end = max(abs(stoi(s)), end);
             }
-            return this->zeroBasedPosition() + len;
+            // Convert to 0-based.
+            return end - 1;
         }
-        else if (this->info.find("END") != this->info.end()){
+        else if (this->info.find("SVLEN") != this->info.end()){
+            // There's no endpoint, but we know an SVLEN.
+            // A negative SVLEN means a deletion, so if we find one we can say we delete that much.
+            int deleted = 0;
             for (auto s : this->info.at("SVLEN")){
-                len = max(abs(stoi(s)), len);
+                int alt_len = stoi(s);
+                if (alt_len > 0){
+                    // Not a deletion, so doesn't affect any ref bases
+                    continue;
+                }
+                deleted = max(-alt_len, deleted); 
             }
-            return len - 1;
+           
+            // The anchoring base at POS gets added in (because it isn't
+            // deleted) but then subtracted out (because we have to do that to
+            // match non-SV deletions). For insertions, deleted is 0 and we
+            // return 0-based POS. Inversions must have an END.
+            return this->zeroBasedPosition() + deleted;
         }
         else{
             cerr << "Warning: insufficient length information for " << *this << endl;
             return -1;
         }
     }
-
+    else {
+        cerr << "Warning: can't get end of non-canonicalizeable variant " << *this << endl;
+    }
     return -1;
 }
 
