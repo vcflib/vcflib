@@ -163,7 +163,6 @@ bool Variant::has_sv_tags() const{
 bool Variant::is_symbolic_sv() const{
     
     bool found_svtype = this->info.find("SVTYPE") != this->info.end();
-    bool found_len = this->info.find("SVLEN") != this->info.end() || this->info.find("END") != this->info.end() || this->info.find("SPAN") != this->info.end();
     
     bool ref_valid = allATGCN(this->ref);
     bool alts_valid = true;
@@ -291,41 +290,60 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
 
 
     bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
-    bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) || 
-        (this->info.find("END") != this->info.end() && !this->info.at("END").empty()) || 
-        (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty());
+    
+    // For deletions, inversions, and duplications, we can work out how much sequence is affected using either END or SVLEN or SPAN.
+    // For insertions, END is not useful because it is just the same as POS. Only SVLEN or SPAN will do.
+    
+    bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) ||
+                   (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty());
+    
+    if (has_type && this->info.at("SVTYPE").at(0).rfind("INS", 0) != 0) {
+        // This is not an INS or INS:anything
+        // We can also use END to compute length
+        // TODO: Check for complex INS specifications like INS:ALU or whatever.
+        has_len |= (this->info.find("END") != this->info.end() && !this->info.at("END").empty());
+    }
+    
     bool has_seq = this->info.find("SEQ") != this->info.end() && !this->info.at("SEQ").empty();
 
 
             
-    // Cache SVLEN and END if they're in the info columns,
-    // Then, if either is empty, fill it in with the other.
-    long info_len = 0;
+    // Cache SPAN (derived from SPAN or SVLEN) and END if we can get them.
+    long info_span = 0;
+    if (has_len) {
+        if (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) {
+            // Try SVLEN first
+            info_span = abs(stol(this->info.at("SVLEN")[0]));
+        }
+        else if (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty()) {
+            // Fall back to SPAN
+            info_span = abs(stol(this->info.at("SPAN")[0]));
+        } 
+    }
+    
     long info_end = 0;
-    if (has_len){
-        if (this->info.find("SVLEN") != this->info.end()){
-            info_len = abs(stol(this->info.at("SVLEN")[0]));
+    if (this->info.find("END") != this->info.end() && !this.info.at("END").empty()) {
+        // Get the END from the tag
+        info_end = stol(this->info.at("END")[0]);
+    }
+    else if(ref_valid && !place_seq) {
+        // Get the END from the reference sequence
+        info_end = this->position + this->ref.length() - 1;
+    }
+    else {
+        cerr << "Warning: could not set END info " << *this << endl;
+    }  
+    
+    if (has_type && this->info.at("SVTYPE").at(0).rfind("INS", 0) != 0) {
+        // This is not an INS or INS:anything
+        // We can try to get the affected length from the END
+        if (this->info.find("END") != this->info.end() && !this->info.at("END").empty()) {
+            // TODO: get it
         }
-        else if (this->info.find("SPAN") != this->info.end()){
-            info_len = abs(stol(this->info.at("SPAN")[0]));
-        }
-
-        if (this->info.find("END") != this->info.end()){
-            info_end = stol(this->info.at("END")[0]);
-            if (info_len == 0){
-                info_len = info_end - this->position;
-            }
-        }
-        else if(ref_valid && !place_seq){
-            info_end = this->position + this->ref.length() - 1;
-        }
-        else if (place_seq && has_type){
-            info_end = 0;
-        }
-        else{
-            cerr << "Warning: could not set END info " << *this << endl;
-        }
-    }   
+        
+        // TODO: Check it against or fill in the span
+        
+    }
 
 
     if (!has_type && !has_len){

@@ -235,25 +235,42 @@ public:
     *     even if the below conditions are not true.
     * Fully canonicalized variants (which are greater than min_size_override)
     * guarantee the following:
-    *  - position < END
-    *  - SVLEN info field is set
-    *  - SVTYPE info field is set
-    *  - END info field is set and agrees with POS + ABS(SVLEN)
+    *  - POS <= END and corresponds to the anchoring base for symbolic alleles
+    *  - SVLEN info field is set and is positive for all variants except DELs
+    *  - SVTYPE info field is set and is in {DEL, INS, INV, DUP}
+    *  - END info field is set to the POS + len(REF allele) - 1 and corresponds to the final affected reference base
     *  - Insertions get a SEQ info field
     *  - canonical = true;
-    * * SVTYPE is in {DEL, INS, INV, DUP}
-    * * SVLEN is positive for all variants except DELs
-    * * END is the POS + len(REF allele) - 1
     * TODO: CURRENTLY: canonical requires there be only one alt allele
     **/
     bool canonicalize(FastaReference& ref,
          vector<FastaReference*> insertions, 
          bool place_seq = true, 
          int min_size_override = 0);
+         
+    /** 
+     * Returns true if the variant's ALT contains a symbolic allele like <INV>
+     * instead of sequence, and the variant has an SVTYPE INFO tag.
+     */
     bool is_symbolic_sv() const;
+    
+    /**
+     * Returns true if the variant has an SVTYPE INFO tag and either an SVLEN or END INFO tag.
+     */
     bool has_sv_tags() const;
+    
+    /**
+     * This returns true if the variant appears able to be handled by
+     * canonicalize(). It checks if it has fully specified sequence, or if it
+     * has a defined SV type and length/endpoint. 
+     */
     bool canonicalizable();
+    
+    /**
+     * This gets set to true after canonicalize() has been called on the variant, if it succeeded.
+     */
     bool canonical = false;
+    
     int getMaxReferenceLength();
     string getSVTYPE(int altpos);
 
