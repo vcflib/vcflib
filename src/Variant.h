@@ -224,44 +224,62 @@ public:
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
     /** Convert a structural variant to the canonical VCF4.3 format using a reference.
-    *   returns true if the variant is canonicalized, false otherwise.
-    *   Returns false for non-SVs
-    *   place_seq: if true, the ref/alt fields are
-    *       filled in with the corresponding sequences
-    *     from the reference (and optionally insertion FASTA)
-    * min_size_override: If a variant is less than this size,
-    *     and it has a valid REF and ALT, consider it canonicalized
-    *     even if the below conditions are not true.
-    * Fully canonicalized variants (which are greater than min_size_override)
-    * guarantee the following:
-    *  - position < END
-    *  - SVLEN info field is set
-    *  - SVTYPE info field is set
-    *  - END info field is set and agrees with POS + ABS(SVLEN)
-    *  - Insertions get a SEQ info field
-    *  - canonical = true;
-    * * SVTYPE is in {DEL, INS, INV, DUP}
-    * * SVLEN is positive for all variants except DELs
-    * * END is the POS + len(REF allele) - 1
-    * TODO: CURRENTLY: canonical requires there be only one alt allele
+     *   returns true if the variant is canonicalized, false otherwise.
+     *   Returns false for non-SVs
+     *   place_seq: if true, the ref/alt fields are
+     *       filled in with the corresponding sequences
+     *     from the reference (and optionally insertion FASTA)
+     * min_size_override: If a variant is less than this size,
+     *     and it has a valid REF and ALT, consider it canonicalized
+     *     even if the below conditions are not true.
+     * Fully canonicalized variants (which are greater than min_size_override)
+     * guarantee the following:
+     *  - POS <= END and corresponds to the anchoring base for symbolic alleles
+     *  - SVLEN info field is set and is positive for all variants except DELs
+     *  - SVTYPE info field is set and is in {DEL, INS, INV, DUP}
+     *  - END info field is set to the POS + len(REF allele) - 1 and corresponds to the final affected reference base
+     *  - Insertions get a SEQ info field
+     *  - canonical = true;
+     * TODO: CURRENTLY: canonical requires there be only one alt allele
     **/
     bool canonicalize(FastaReference& ref,
          vector<FastaReference*> insertions, 
          bool place_seq = true, 
          int min_size_override = 0);
-    bool is_symbolic_sv() const;
-    bool has_sv_tags() const;
+         
+    /** 
+     * Returns true if the variant's ALT contains a symbolic allele like <INV>
+     * instead of sequence, and the variant has an SVTYPE INFO tag.
+     */
+    bool isSymbolicSV() const;
+    
+    /**
+     * Returns true if the variant has an SVTYPE INFO tag and either an SVLEN or END INFO tag.
+     */
+    bool hasSVTags() const;
+    
+    /**
+     * This returns true if the variant appears able to be handled by
+     * canonicalize(). It checks if it has fully specified sequence, or if it
+     * has a defined SV type and length/endpoint. 
+     */
     bool canonicalizable();
+    
+    /**
+     * This gets set to true after canonicalize() has been called on the variant, if it succeeded.
+     */
     bool canonical = false;
     
     /**
      * Get the maximum zero-based position of the reference affected by this variant.
      */
     int getMaxReferencePos();
-    string getSVTYPE(int altpos);
-
-
-
+   
+    /**
+     * Return the SV type of the given alt, or "" if there is no SV type set for that alt.
+     * This is the One True Way to get the SVTYPE of a variant; we should not touch the SVTYPE tag anywhere else.
+     */
+    string getSVTYPE(int altpos = 0) const;
 
     string originalLine; // the literal of the record, as read
     // TODO
