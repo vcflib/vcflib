@@ -162,17 +162,17 @@ void Variant::parse(string& line, bool parseSamples) {
     //return true; // we should be catching exceptions...
 }
 
-bool Variant::has_sv_tags() const{
-    bool found_svtype = this->info.find("SVTYPE") != this->info.end();
+bool Variant::hasSVTags() const{
+    bool found_svtype = !getSVTYPE().empty();
     bool found_len = this->info.find("SVLEN") != this->info.end() || this->info.find("END") != this->info.end() || this->info.find("SPAN") != this->info.end();
 
    return found_svtype && found_len;
 }
 
 
-bool Variant::is_symbolic_sv() const{
+bool Variant::isSymbolicSV() const{
     
-    bool found_svtype = this->info.find("SVTYPE") != this->info.end();
+    bool found_svtype = !getSVTYPE().empty();
     
     bool ref_valid = allATGCN(this->ref);
     bool alts_valid = true;
@@ -185,14 +185,18 @@ bool Variant::is_symbolic_sv() const{
     return (!ref_valid || !alts_valid) && (found_svtype);
 }
 
-string Variant::getSVTYPE(int altpos){
+string Variant::getSVTYPE(int altpos) const{
     
     if (altpos > 0){
+        // TODO: Implement multi-alt SVs
         return "";
     }
 
 
     if (this->info.find("SVTYPE") != this->info.end()){
+        if (altpos >= this->info.at("SVTYPE").size()) {
+            return "";
+        }
         return this->info.at("SVTYPE")[altpos];
     }
 
@@ -200,8 +204,9 @@ string Variant::getSVTYPE(int altpos){
 };
 
 
+
 int Variant::getMaxReferencePos(){
-    if (!this->is_symbolic_sv()){
+    if (!this->isSymbolicSV()){
         return this->zeroBasedPosition() + this->ref.length() - 1;
     }
     else if (this->canonicalizable()){
@@ -247,8 +252,10 @@ int Variant::getMaxReferencePos(){
 }
 
 
+
+
 // To canonicalize a variant, we need either both REF and ALT seqs filled in
-// or SVTYPE + either of SVLEN / END
+// or SVTYPE and SVLEN or END or SPAN or SEQ sufficient to define the variant.
 bool Variant::canonicalizable(){
     bool pre_canon = allATGCN(this->ref);
     
@@ -257,149 +264,151 @@ bool Variant::canonicalizable(){
             pre_canon = false;
         }
     }
-
-
-    bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) ||
-                    (this->info.find("END") != this->info.end() && this->info.at("END").empty());
-
-    bool has_type = (this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty());
-
+    
     if (pre_canon){
+        // It came in in a fully specified way.
         // TODO: ideally, we'd check to make sure ref/alt lengths, svtypes, and ends line up right here.
         return true;
     }
     
-    return has_len && has_type;
+    string svtype = getSVTYPE();
+    
+    if (svtype.empty()){
+        // We have no SV type, so we can't interpret things.
+        return false;
+    }
+    
+    // Check the tags
+    bool has_len = this->info.count("SVLEN") && !this->info.at("SVLEN").empty();
+    bool has_seq = this->info.count("SEQ") && !this->info.at("SEQ").empty();
+    bool has_span = this->info.count("SPAN") && !this->info.at("SPAN").empty();
+    bool has_end = this->info.count("END") && !this->info.at("END").empty();
+    
+    
+    if (svtype == "INS"){
+        // Insertions need a SEQ, SVLEN, or SPAN
+        return has_seq || has_len || has_span;
+    }
+    else if (svtype == "DEL"){
+        // Deletions need an SVLEN, SPAN, or END
+        return has_seq || has_span || has_end;
+    }
+    else if (svtype == "INV"){
+        // Inversions need a SPAN or END
+        return has_span || has_end;
+    }
+    else{
+        // Other SV types are unsupported
+        // TODO: DUP
+        return false;
+    }
 }
 
 bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int min_size){
     
+    // Nobody should call this without checking
+    assert(canonicalizable());
+    
+    // Find where the inserted sequence can come from for insertions
     bool do_external_insertions = !insertions.empty();
+    FastaReference* insertion_fasta;
+    if (do_external_insertions){
+        insertion_fasta = insertions[0];
+    }
     
     bool ref_valid = allATGCN(ref);
-
-    bool single_alt = alt.size() == 1;
-
-    if (!single_alt){
-        // TODO: this will need to be remove before supporting multiple alleles
-        cerr << "Warning: multiple ALT alleles not yet allowed for SVs" << endl;
-        return false;
-    }
-
+    
     if (!ref_valid && !place_seq){
         // If the reference is invalid, and we aren't allowed to change the ref sequence,
         // we can't canonicalize the variant.
         return false;
     }
-
-    long sv_len = 0;
-
-    FastaReference* insertion_fasta;
-
+    
+    // Check the alts to see if they are not symbolic
     vector<bool> alt_i_atgcn (alt.size());
     for (int i = 0; i < alt.size(); ++i){
         alt_i_atgcn[i] = allATGCN(alt[i]);
     }
-
-    long diff = 0;
-    diff = ref.length() - alt[0].length();
-
-    long purported_len = 0;
-
-    // If an SV is less than the minimum size, and its ref and alt are valid,
-    // return true.
-    if ( abs(diff) < min_size && ref_valid && alt_i_atgcn[0]){
-        return true;
-    }
-
-    if (do_external_insertions){
-        insertion_fasta = insertions[0];
-    }
-
-
-    bool has_type = this->info.find("SVTYPE") != this->info.end() && !this->info.at("SVTYPE").empty();
     
-    // For deletions, inversions, and duplications, we can work out how much sequence is affected using either END or SVLEN or SPAN.
-    // For insertions, END is not useful because it is just the same as POS. Only SVLEN or SPAN will do.
-    
-    bool has_len = (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) ||
-                   (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty());
-    
-    if (has_type && this->info.at("SVTYPE").at(0).rfind("INS", 0) != 0) {
-        // This is not an INS or INS:anything
-        // We can also use END to compute length
-        // TODO: Check for complex INS specifications like INS:ALU or whatever.
-        has_len |= (this->info.find("END") != this->info.end() && !this->info.at("END").empty());
+    // Only allow single-alt variants
+    bool single_alt = alt.size() == 1;
+    if (!single_alt){
+        // TODO: this will need to be remove before supporting multiple alleles
+        cerr << "Warning: multiple ALT alleles not yet allowed for SVs" << endl;
+        return false;
     }
     
-    bool has_seq = this->info.find("SEQ") != this->info.end() && !this->info.at("SEQ").empty();
-
-
-            
-    // Cache SPAN (derived from SPAN or SVLEN) and END if we can get them.
-    long info_span = 0;
-    if (has_len) {
-        if (this->info.find("SVLEN") != this->info.end() && !this->info.at("SVLEN").empty()) {
-            // Try SVLEN first
-            info_span = abs(stol(this->info.at("SVLEN")[0]));
-        }
-        else if (this->info.find("SPAN") != this->info.end() && !this->info.at("SPAN").empty()) {
-            // Fall back to SPAN
-            info_span = abs(stol(this->info.at("SPAN")[0]));
-        } 
-    }
+    // Fill in the SV tags
+    string svtype = getSVTYPE();
+    bool has_len = this->info.count("SVLEN") && !this->info.at("SVLEN").empty();
+    bool has_seq = this->info.count("SEQ") && !this->info.at("SEQ").empty();
+    bool has_span = this->info.count("SPAN") && !this->info.at("SPAN").empty();
+    bool has_end = this->info.count("END") && !this->info.at("END").empty();
     
+    // Where is the end, or where should it be?
     long info_end = 0;
-    if (this->info.find("END") != this->info.end() && !this.info.at("END").empty()) {
+    if (has_end) {
         // Get the END from the tag
         info_end = stol(this->info.at("END")[0]);
     }
     else if(ref_valid && !place_seq) {
-        // Get the END from the reference sequence
+        // Get the END from the reference sequence, which is ready.
         info_end = this->position + this->ref.length() - 1;
     }
-    else {
-        cerr << "Warning: could not set END info " << *this << endl;
-    }  
-    
-    if (has_type && this->info.at("SVTYPE").at(0).rfind("INS", 0) != 0) {
-        // This is not an INS or INS:anything
-        // We can try to get the affected length from the END
-        if (this->info.find("END") != this->info.end() && !this->info.at("END").empty()) {
-            // TODO: get it
-        }
-        
-        // TODO: Check it against or fill in the span
-        
+    else if (svtype == "INS"){
+        // For insertions, END is just POS
+        info_end = this->position;
     }
-
-
-    if (!has_type && !has_len){
-        cerr << "Warning: no SVTYPE or SVLEN present" << endl;
+    else{
+        cerr << "Warning: could not set END info " << *this << endl;
         return false;
     }
-
-
-    if ( (this->position + info_len != info_end && info_end != 0 && info_len != 0)){
-        cerr << "Warning: END and SVLEN do not agree [canonicalize] " << *this << endl <<
+    
+    // Commit back the END
+    this->info["END"].resize(1);
+    this->info["END"][0] = to_string(info_end);
+    has_end = true;
+    
+    // What is the variant length?
+    // We store it as absolute value
+    long info_len = 0;
+    if (has_len){
+        // Get the SVLEN from the tag
+        info_len = abs(stol(this->info.at("SVLEN")[0]));
+    }
+    else if (has_span){
+        info_len = abs(stol(this->info.at("SPAN")[0]));
+    } else if (has_end && (svtype == "INV" || svtype == "DEL")) {
+        info_len = info_end - this->position;
+    }
+    else{
+        cerr << "Warning: could not set SVLEN info " << *this << endl;
+        return false;
+    }
+    
+    // Commit the SVLEN back
+    if (svtype == "DEL"){
+        // Should be saved as negative
+        this->info["SVLEN"].resize(1);
+        this->info["SVLEN"][0] = to_string(-info_len);
+    }
+    else{
+        // Should be saved as positive
+        this->info["SVLEN"].resize(1);
+        this->info["SVLEN"][0] = to_string(info_len);
+    }
+    
+    
+    if (svtype == "INV" &&  (this->position + info_len != info_end)){
+        cerr << "Warning: inversion END and SVLEN do not agree [canonicalize] " << *this << endl <<
         "END: " << info_end << "  " << "SVLEN: " << this->position + info_len << endl;
         return false;
     }
-    else if (info_len == 0){
-        cerr << "No length info " << *this << endl;
-        return false;
-    }
 
-
-
-    // Set the necessary SV Tags (SVTYPE, SVLEN, END, SEQ (if insertion))
-    this->info["SVLEN"].resize(1);
-    this->info.at("SVLEN")[0].assign(to_string(info_len));
-    //this->info["END"].resize(1);
-    //this->info.at("END")[0].assign(to_string(info_end));
-    if (this->info.at("SVTYPE")[0] == "INS"){
+    // Set the other necessary SV Tags (SVTYPE, SEQ (if insertion))
+    if (svtype == "INS"){
         // Set REF
-            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
+        string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
         if (place_seq){
             this->ref.assign(ref_base);
         }
@@ -452,20 +461,21 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             return false;
         }
     }
-    else if (this->info.at("SVTYPE")[0] == "DEL"){
+    else if (svtype == "DEL"){
         // Set REF
         if (place_seq){
-            string del_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]) + 1);
+            string del_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_len + 1);
             string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
             this->ref.assign( del_seq );
             this->alt[0].assign( ref_base );
         }
         this->info.at("SVLEN")[0].assign( to_string( -1 * info_len));
     }
-    else if (this->info.at("SVTYPE")[0] == "INV"){
+    else if (svtype == "INV"){
         if (place_seq){
-            string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), stol(this->info.at("SVLEN")[0]) + 1);
-            string inv_seq = reverse_complement(ref_seq);
+            string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_len + 1);
+            // Note that inversions still need an anchoring left base at POS
+            string inv_seq = ref_seq.at(0) + reverse_complement(ref_seq.substr(1));
             this->ref.assign(ref_seq);
             this->alt[0].assign(inv_seq);
         }
@@ -478,24 +488,18 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
 
 
     this->updateAlleleIndexes();
-    this->canonical = true;
 
     // Check for harmony between ref / alt / tags
-    if (this->info.find("END") != this->info.end() && this->position > stol(this->info.at("END")[0])){
+    if (this->position > stol(this->info.at("END").at(0))){
         cerr << "Warning: position > END. Possible reference genome mismatch." << endl;
         return false;
     }
 
-    if (this->info.find("SVLEN") != this->info.end() && this->info.find("END") != this->info.end() && std::abs(std::stol(this->info.at("SVLEN")[0])) + this->position != std::stol(this->info.at("END")[0])){
-        cerr << "Warning: SVLEN and END disagree about the variant's length" << *this << endl;
-        return false;
-    }
-
-    if (this->info.at("SVTYPE")[0] == "INS"){
+    if (svtype == "INS"){
         assert(!this->info.at("SEQ")[0].empty());
     }
 
-
+    this->canonical = true;
     return true;
 }
 
@@ -1898,7 +1902,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     map<string, vector<VariantAllele> > variantAlleles;
 
-    if (is_symbolic_sv()){
+    if (isSymbolicSV()){
         // Don't ever align SVs. It just wrecks things.
         return this->flatAlternates();
     }
