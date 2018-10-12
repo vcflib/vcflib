@@ -412,6 +412,10 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         // Inversions have 0 length change unless otherwise specified.
         info_len = 0;
     }
+    else if (svtype == "INS" && has_seq) {
+        // Insertions can let us pick it up from the SEQ tag
+        info_len = this->info.at("SEQ").at(0).size();
+    }
     else{
         cerr << "Warning: could not set SVLEN info " << *this << endl;
         return false;
@@ -546,7 +550,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 }
             } 
             else{
-                cerr << "Warning: Could not locate alt sequence for: " << *this << endl;
+                cerr << "Warning: could not locate alt sequence for: " << *this << endl;
                 return false;
             }
             
