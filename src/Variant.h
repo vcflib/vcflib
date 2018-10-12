@@ -272,6 +272,7 @@ public:
     
     /**
      * Get the maximum zero-based position of the reference affected by this variant.
+     * Only works reliably for variants that are not SVs or for SVs that have been canonicalize()'d.
      */
     int getMaxReferencePos();
    
