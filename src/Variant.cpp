@@ -474,7 +474,15 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         if (info_end != this->position){
             cerr << "Warning: insertion END and POS do not agree (complex insertions not canonicalizeable) [canonicalize] " <<
             *this << endl << "END: " << info_end << "  " << "POS: " << this->position << endl;
-            return false;
+            
+            if (info_end == this->position + info_len) {
+                // We can probably guess what they meant here.
+                cerr << "Warning: VCF writer incorrecty produced END = POS + SVLEN for an insertion. Fixing END to POS." << endl;
+                info_end = this->position;
+                this->info["END"][0] = to_string(info_end);
+            } else {
+                return false;
+            }
         }
         
         if (info_len != info_span){
@@ -591,7 +599,15 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         if (info_len != 0){
             cerr << "Warning: inversion SVLEN specifies nonzero length change (complex inversions not canonicalizeable) [canonicalize] " <<
             *this << endl << "SVLEN: " << info_len << endl;
-            return false;
+            
+            if (info_end == this->position + info_len) {
+                // We can probably guess what they meant here.
+                cerr << "Warning: VCF writer incorrecty produced END = POS + SVLEN for an inversion. Fixing SVLEN to 0." << endl;
+                info_len = 0;
+                this->info["SVLEN"][0] = to_string(info_len);
+            } else {
+                return false;
+            }
         }
     
         if (place_seq){
