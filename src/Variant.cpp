@@ -86,6 +86,7 @@ void Variant::parse(string& line, bool parseSamples) {
     format.clear();
     alt.clear();
     alleles.clear();
+    canonical = false;
 
     // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
     vector<string> fields = split(line, '\t');

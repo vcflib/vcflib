@@ -274,7 +274,7 @@ public:
     /**
      * This gets set to true after canonicalize() has been called on the variant, if it succeeded.
      */
-    bool canonical = false;
+    bool canonical;
     
     /**
      * Get the maximum zero-based position of the reference affected by this variant.
