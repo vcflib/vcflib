@@ -6,7 +6,7 @@ namespace vcflib {
 static char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,
                            85, 86, 87, 88, 89, 90};
 
-std::string reverse_complement(std::string seq) {
+std::string reverse_complement(const std::string& seq) {
     // The old implementation of this function forgot to null-terminate its
     // returned string. This implementation uses heavier-weight C++ stuff that
     // may be slower but should ensure that that doesn't happen again.
@@ -18,11 +18,33 @@ std::string reverse_complement(std::string seq) {
     string ret;
     ret.reserve(seq.size());
     
-    std::transform(seq.rbegin(), seq.rend(), std::back_inserter(ret), [](const char& in) -> char {
-        if (in < 'A' || in > 'Z') {
-            throw std::runtime_error("Out of range character " + std::to_string(in) + " in inverted sequence");
+    std::transform(seq.rbegin(), seq.rend(), std::back_inserter(ret), [](char in) -> char {
+        bool lower_case = (in >= 'a' && in <= 'z');
+        if (lower_case) {
+            // Convert to upper case
+            in -= 32;
         }
-        return rev_arr[((int) in) - 65];
+        if (in < 'A' || in > 'Z') {
+            throw std::runtime_error("Out of range character " + std::to_string((uint8_t)in) + " in inverted sequence");
+        }
+        // Compute RC in terms of letter identity, and then lower-case if necessary.
+        return rev_arr[((int) in) - 'A'] + (lower_case ? 32 : 0);
+    });
+    
+    return ret;
+}
+
+std::string toUpper(const std::string& seq) {
+    if (seq.size() == 0) {
+        return seq;
+    }
+
+    string ret;
+    ret.reserve(seq.size());
+    
+    std::transform(seq.begin(), seq.end(), std::back_inserter(ret), [](char in) -> char {
+        // If it's lower-case, bring it down in value to upper-case.
+        return (in >= 'a' && in <= 'z') ? (in - 32) : in;
     });
     
     return ret;
@@ -325,6 +347,9 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     // Nobody should call this without checking
     assert(canonicalizable());
     
+    // Nobody should call this twice
+    assert(!this->canonical);
+    
     // Find where the inserted sequence can come from for insertions
     bool do_external_insertions = !insertions.empty();
     FastaReference* insertion_fasta;
@@ -467,6 +492,12 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         *this << endl << "END: " << info_end << "  " << "POS: " << this->position << endl;
         return false;
     }
+    
+    if (has_seq) {
+        // Force the SEQ to upper case, if already present
+        this->info["SEQ"].resize(1);
+        this->info["SEQ"][0] = toUpper(this->info["SEQ"][0]);
+    }
      
     // Set the other necessary SV Tags (SVTYPE, SEQ (if insertion))
     // Also check for agreement in the position tags
@@ -498,7 +529,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
        
         // Set REF
-        string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
+        string ref_base = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1));
         if (place_seq){
             this->ref.assign(ref_base);
         }
@@ -508,7 +539,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                  allATGCN(this->info.at("SEQ")[0])){
             // Try to remove prepended ref sequence, assuming it's left-aligned
             string s = this->alt[0];
-            s = s.substr(this->ref.length());
+            s = toUpper(s.substr(this->ref.length()));
             if (s != this->info.at("SEQ")[0] && !place_seq){
                 cerr << "Warning: INS sequence in alt field does not match SEQ tag" << endl <<
                 this->alt[0] << " " << this->info.at("SEQ")[0] << endl;
@@ -521,7 +552,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
         else if (alt_i_atgcn[0] && !has_seq){
             string s = this->alt[0];
-            s = s.substr(this->ref.length());
+            s = toUpper(s.substr(this->ref.length()));
             this->info["SEQ"].resize(1);
             this->info.at("SEQ")[0].assign(s);
             
@@ -538,7 +569,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             string seq_id = alt[0].substr(1, alt[0].size() - 2);
 
             if (insertion_fasta->index->find(seq_id) != insertion_fasta->index->end()){
-                ins_seq = insertion_fasta->getSequence(seq_id);
+                ins_seq = toUpper(insertion_fasta->getSequence(seq_id));
                 if (allATGCN(ins_seq)){
                     this->info["SEQ"].resize(1);
                     this->info["SEQ"][0].assign(ins_seq);
@@ -583,8 +614,8 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     
         // Set REF
         if (place_seq){
-            string del_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_len + 1);
-            string ref_base = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1);
+            string del_seq = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_len + 1));
+            string ref_base = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1));
             this->ref.assign( del_seq );
             this->alt[0].assign( ref_base );
         }
@@ -611,9 +642,9 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     
         if (place_seq){
-            string ref_seq = fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_len + 1);
+            string ref_seq = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_span + 1));
             // Note that inversions still need an anchoring left base at POS
-            string inv_seq = ref_seq.at(0) + reverse_complement(ref_seq.substr(1));
+            string inv_seq = ref_seq.substr(0, 1) + reverse_complement(ref_seq.substr(1));
             this->ref.assign(ref_seq);
             this->alt[0].assign(inv_seq);
         }
