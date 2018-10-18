@@ -54,7 +54,10 @@ ostream& operator<<(ostream& out, VariantFieldType type);
 typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
-std::string reverse_complement(std::string seq);
+/// Compute a reverse complement. Supports both upper-case and lower-case input characters.
+std::string reverse_complement(const std::string& seq);
+/// Convert a sequence to upper-case
+std::string toUpper(const std::string& seq);
 bool allATGCN(const string& s, bool allowLowerCase = false);
 
 class VariantCallFile {
@@ -223,8 +226,10 @@ public:
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
-    /** Convert a structural variant to the canonical VCF4.3 format using a reference.
-     *   returns true if the variant is canonicalized, false otherwise.
+    /** 
+     * Convert a structural variant to the canonical VCF4.3 format using a reference.
+     *   Meturns true if the variant is canonicalized, false otherwise.
+     *   May NOT be called twice on the same variant; it will fail an assert.
      *   Returns false for non-SVs
      *   place_seq: if true, the ref/alt fields are
      *       filled in with the corresponding sequences
@@ -238,7 +243,8 @@ public:
      *  - SVLEN info field is set and is positive for all variants except DELs
      *  - SVTYPE info field is set and is in {DEL, INS, INV, DUP}
      *  - END info field is set to the POS + len(REF allele) - 1 and corresponds to the final affected reference base
-     *  - Insertions get a SEQ info field
+     *  - Insertions get an upper-case SEQ info field
+     *  - REF and ALT are upper-case if filled in by this function
      *  - canonical = true;
      * TODO: CURRENTLY: canonical requires there be only one alt allele
     **/
