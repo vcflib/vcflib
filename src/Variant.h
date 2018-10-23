@@ -294,10 +294,10 @@ public:
     // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec
     string filter;
     double quality;
-    VariantFieldType infoType(string& key);
+    VariantFieldType infoType(const string& key);
     map<string, vector<string> > info;  // vector<string> allows for lists by Genotypes or Alternates
     map<string, bool> infoFlags;
-    VariantFieldType formatType(string& key);
+    VariantFieldType formatType(const string& key);
     vector<string> format;
     map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
     vector<string> sampleNames;
@@ -308,7 +308,7 @@ public:
     //void addInfoFloat(string& tag, double value);
     //void addInfoString(string& tag, string& value);
 
-    void removeAlt(string& altallele);
+    void removeAlt(const string& altallele);
 
 public:
 
@@ -324,29 +324,29 @@ public:
     void setVariantCallFile(VariantCallFile* v);
 
     void parse(string& line, bool parseSamples = true);
-    void addFilter(string& tag);
-    bool getValueBool(string& key, string& sample, int index = INDEX_NONE);
-    double getValueFloat(string& key, string& sample, int index = INDEX_NONE);
-    string getValueString(string& key, string& sample, int index = INDEX_NONE);
-    bool getSampleValueBool(string& key, string& sample, int index = INDEX_NONE);
-    double getSampleValueFloat(string& key, string& sample, int index = INDEX_NONE);
-    string getSampleValueString(string& key, string& sample, int index = INDEX_NONE);
-    bool getInfoValueBool(string& key, int index = INDEX_NONE);
-    double getInfoValueFloat(string& key, int index = INDEX_NONE);
-    string getInfoValueString(string& key, int index = INDEX_NONE);
+    void addFilter(const string& tag);
+    bool getValueBool(const string& key, string& sample, int index = INDEX_NONE);
+    double getValueFloat(const string& key, string& sample, int index = INDEX_NONE);
+    string getValueString(const string& key, string& sample, int index = INDEX_NONE);
+    bool getSampleValueBool(const string& key, string& sample, int index = INDEX_NONE);
+    double getSampleValueFloat(const string& key, string& sample, int index = INDEX_NONE);
+    string getSampleValueString(const string& key, string& sample, int index = INDEX_NONE);
+    bool getInfoValueBool(const string& key, int index = INDEX_NONE);
+    double getInfoValueFloat(const string& key, int index = INDEX_NONE);
+    string getInfoValueString(const string& key, int index = INDEX_NONE);
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
-    int getAltAlleleIndex(string& allele);
+    int getAltAlleleIndex(const string& allele);
     void updateAlleleIndexes(void);
-    void addFormatField(string& key);
+    void addFormatField(const string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
     int getNumSamples(void);
     int getNumValidGenotypes(void);
-    string getGenotype(string& sample);
+    string getGenotype(const string& sample);
     bool isPhased(void);
     // TODO
-    //void setInfoField(string& key, string& val);
+    //void setInfoField(const string& key, string& val);
 
 private:
 

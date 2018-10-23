@@ -720,7 +720,7 @@ VariantFieldType typeStrToVariantFieldType(string& typeStr) {
     }
 }
 
-VariantFieldType Variant::infoType(string& key) {
+VariantFieldType Variant::infoType(const string& key) {
     map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
     if (s == vcf->infoTypes.end()) {
         if (key == "FILTER") { // hack to use FILTER as an "info" field (why the hack?)
@@ -736,7 +736,7 @@ VariantFieldType Variant::infoType(string& key) {
     }
 }
 
-    VariantFieldType Variant::formatType(string& key) {
+    VariantFieldType Variant::formatType(const string& key) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->formatTypes.end()) {
             cerr << "no format field " << key << endl;
@@ -746,7 +746,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    bool Variant::getInfoValueBool(string& key, int index) {
+    bool Variant::getInfoValueBool(const string& key, int index) {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
@@ -779,7 +779,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    string Variant::getInfoValueString(string& key, int index) {
+    string Variant::getInfoValueString(const string& key, int index) {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             if (key == "FILTER") {
@@ -814,7 +814,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    double Variant::getInfoValueFloat(string& key, int index) {
+    double Variant::getInfoValueFloat(const string& key, int index) {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             if (key == "QUAL") {
@@ -871,7 +871,7 @@ VariantFieldType Variant::infoType(string& key) {
         return valid_genotypes;
     }
 
-    bool Variant::getSampleValueBool(string& key, string& sample, int index) {
+    bool Variant::getSampleValueBool(const string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
@@ -905,7 +905,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    string Variant::getSampleValueString(string& key, string& sample, int index) {
+    string Variant::getSampleValueString(const string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
@@ -940,7 +940,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    double Variant::getSampleValueFloat(string& key, string& sample, int index) {
+    double Variant::getSampleValueFloat(const string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->infoTypes.end()) {
             cerr << "no info field " << key << endl;
@@ -979,7 +979,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    bool Variant::getValueBool(string& key, string& sample, int index) {
+    bool Variant::getValueBool(const string& key, string& sample, int index) {
         if (sample.empty()) { // an empty sample name means
             return getInfoValueBool(key, index);
         } else {
@@ -987,7 +987,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    double Variant::getValueFloat(string& key, string& sample, int index) {
+    double Variant::getValueFloat(const string& key, string& sample, int index) {
         if (sample.empty()) { // an empty sample name means
             return getInfoValueFloat(key, index);
         } else {
@@ -995,7 +995,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    string Variant::getValueString(string& key, string& sample, int index) {
+    string Variant::getValueString(const string& key, string& sample, int index) {
         if (sample.empty()) { // an empty sample name means
             return getInfoValueString(key, index);
         } else {
@@ -1003,7 +1003,7 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    int Variant::getAltAlleleIndex(string& allele) {
+    int Variant::getAltAlleleIndex(const string& allele) {
         map<string, int>::iterator f = altAlleleIndexes.find(allele);
         if (f == altAlleleIndexes.end()) {
             cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
@@ -1013,14 +1013,14 @@ VariantFieldType Variant::infoType(string& key) {
         }
     }
 
-    void Variant::addFilter(string& tag) {
+    void Variant::addFilter(const string& tag) {
         if (filter == "" || filter == ".")
             filter = tag;
         else
             filter += "," + tag;
     }
 
-    void Variant::addFormatField(string& key) {
+    void Variant::addFormatField(const string& key) {
         bool hasTag = false;
         for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
             if (*t == key) {
@@ -2320,7 +2320,7 @@ void Variant::updateAlleleIndexes(void) {
 }
 
 // TODO only works on "A"llele variant fields
-  void Variant::removeAlt(string& altAllele) {
+  void Variant::removeAlt(const string& altAllele) {
 
     int altIndex = getAltAlleleIndex(altAllele);  // this is the alt-relative index, 0-based
     
@@ -2716,7 +2716,7 @@ map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMappi
     return mapping;
 }
 
-string Variant::getGenotype(string& sample) {
+string Variant::getGenotype(const string& sample) {
     map<string, map<string, vector<string> > >::iterator s = samples.find(sample);
     if (s != samples.end()) {
         map<string, vector<string> >::iterator f = s->second.find("GT");
