@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys
 import re
 import sqlite3
 
 if len(sys.argv) < 2:
-    print "usage", sys.argv[0], " [dbname]"
-    print "reads VCF on stdin, and writes output to a sqlite3 db [dbname]"
+    print("usage {} [dbname]").format(sys.argv[0])
+    print("reads VCF on stdin, and writes output to a sqlite3 db [dbname]")
     exit(1)
 
 dbname = sys.argv[1]
