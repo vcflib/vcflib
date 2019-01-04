@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys
 
 for line in sys.stdin:
@@ -13,4 +13,4 @@ for line in sys.stdin:
     span = len(fields[3]) # handle multi-base alleles
     end = start + span
     name = fields[2]
-    print "\t".join(map(str, [chrom, start, end, name]))
+    print("\t".join(str(x) for x in [chrom, start, end, name]))
