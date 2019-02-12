@@ -39,7 +39,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 			  src/sequenceDiversity.cpp \
 			  src/pFst.cpp \
 			  src/smoother.cpp \
-			  src/LD.cpp \
+			  src/vcfld.cpp \
 			  src/plotHaps.cpp \
 			  src/abba-baba.cpp \
 			  src/permuteGPAT++.cpp \
