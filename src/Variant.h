@@ -58,7 +58,7 @@ typedef vector<pair<int, string> > Cigar;
 std::string reverse_complement(const std::string& seq);
 /// Convert a sequence to upper-case
 std::string toUpper(const std::string& seq);
-bool allATGCN(const string& s, bool allowLowerCase = false);
+bool allATGCN(const string& s, bool allowLowerCase = true);
 
 class VariantCallFile {
 
