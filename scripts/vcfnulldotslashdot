@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function, division
 import sys
 import math
 
@@ -8,15 +8,15 @@ def multcoeff(n,k): return bincoeff(n+k-1,k)
 
 for line in sys.stdin:
     if line.startswith("#"):
-        print line.strip()
+        print(line.strip())
         continue
     fields = line.strip().split("\t")
     alleles = len(fields[4].split(","))+1
     # assume that we have GT:GL
     # how many genotypes?  assume diploid
-    flatgls = ",".join(map(str,[0]*multcoeff(alleles,2)))
+    flatgls = ",".join([str(x) for x in [0]*multcoeff(alleles,2)])
     for i in range(9, len(fields)):
         if fields[i] == ".":
             fields[i] = "./.:" + flatgls
-    print "\t".join(fields)
+    print("\t".join(fields))
     

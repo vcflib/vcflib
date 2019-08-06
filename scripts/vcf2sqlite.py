@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys
 import re
 import sqlite3
 
 if len(sys.argv) < 2:
-    print "usage", sys.argv[0], " [dbname]"
-    print "reads VCF on stdin, and writes output to a sqlite3 db [dbname]"
+    print("usage {} [dbname]").format(sys.argv[0])
+    print("reads VCF on stdin, and writes output to a sqlite3 db [dbname]")
     exit(1)
 
 dbname = sys.argv[1]
@@ -24,7 +24,7 @@ for line in sys.stdin:
         n = re.search("Number=(.*?),", line)
         t = re.search("Type=(.*?),", line)
         if i and n and t:
-            id = i.groups()[0]
+            iden = i.groups()[0]
             number = n.groups()[0]
             if number == "A":
                 number = -1
@@ -34,8 +34,8 @@ for line in sys.stdin:
             else:
                 number = int(number)
             typestr = t.groups()[0]
-            infotypes[id] = typestr
-            infonumbers[id] = number
+            infotypes[iden] = typestr
+            infonumbers[iden] = number
         else:
             continue
     elif line.startswith('##'):
@@ -78,13 +78,13 @@ conn.execute(tablecmd)
 
 for line in sys.stdin:
     fields = line.split('\t')
-    chrom, pos, id, ref, alts, qual, filter, info = fields[:8]
+    chrom, pos, iden, ref, alts, qual, filt, info = fields[:8]
     alts = alts.split(",")
     altindex = 0
     chrom = "\'" + chrom + "\'"
-    id = "\'" + id + "\'"
+    iden = "\'" + iden + "\'"
     ref = "\'" + ref + "\'"
-    filter = "\'" + filter + "\'"
+    filt = "\'" + filt + "\'"
     for alt in alts:
         alt = "\'" + alt + "\'"
         info_values = {}
@@ -115,7 +115,7 @@ for line in sys.stdin:
                     value = "0"
             ordered_insertion.append(value)
         cmd = "insert into alleles values (" \
-            + ", ".join([chrom, pos, id, ref, alt, qual, filter]) \
+            + ", ".join([chrom, pos, iden, ref, alt, qual, filt]) \
             + ", " \
             + ", ".join(ordered_insertion) + ")"
         conn.execute(cmd)
