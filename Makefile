@@ -128,8 +128,16 @@ LEFTALIGN = smithwaterman/LeftAlign.o
 FSOM = fsom/fsom.o
 FILEVERCMP = filevercmp/filevercmp.o
 
-INCLUDES = -Itabixpp/htslib -I$(INC_DIR) -L. -Ltabixpp/htslib
-LDFLAGS = -L$(LIB_DIR) -lvcflib -lhts -lpthread -lz -lm -llzma -lbz2
+# Work out how to find htslib
+# Use the one we ship in tabixpp unless told otherwise by the environment
+HTS_LIB ?= $(VCF_LIB_LOCAL)/tabixpp/htslib/libhts.a
+HTS_INCLUDES ?= -I$(VCF_LIB_LOCAL)/tabixpp/htslib
+HTS_LDFLAGS ?= -L$(VCF_LIB_LOCAL)/tabixpp/htslib -lhts -lbz2 -lm -lz -llzma -pthread
+
+
+INCLUDES = $(HTS_INCLUDES) -I$(INC_DIR) 
+LDFLAGS = -L$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
+
 
 
 all: $(OBJECTS) $(BINS) scriptToBin
@@ -167,7 +175,7 @@ intervaltree: pre
 	cd intervaltree && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(TABIX): pre
-	cd tabixpp && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd tabixpp && INCLUDES="$(HTS_INCLUDES)" LIBPATH="-L. $(HTS_LDFLAGS)" HTSLIB="$(HTS_LIB)" $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(SMITHWATERMAN): pre
 	cd smithwaterman && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
@@ -223,8 +231,14 @@ clean:
 	rm -rf $(LIB_DIR)
 	rm -rf $(INC_DIR)
 	rm -rf $(OBJ_DIR)
-	cd tabixpp && make clean
-	cd smithwaterman && make clean
-	cd fastahack && make clean
-
+	cd tabixpp && $(MAKE) clean
+	cd smithwaterman && $(MAKE) clean
+	cd fastahack && $(MAKE) clean
+	cd multichoose && $(MAKE) clean
+	cd fsom && $(MAKE) clean
+	cd libVCFH && $(MAKE) clean
+	cd test && $(MAKE) clean
+	cd filevercmp && $(MAKE) clean
+	cd intervaltree && $(MAKE) clean
+	
 .PHONY: clean all test pre
