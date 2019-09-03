@@ -290,9 +290,9 @@ int main(int argc, char** argv) {
     // read the VCF file for union or intersection into an interval tree
     // indexed using some proximity window
 
-    map<string, IntervalTree<Variant*> > variantIntervals;
+    map<string, IntervalTree<size_t, Variant*> > variantIntervals;
     map<string, list<Variant> > otherVariants;
-    map<string, vector<Interval<Variant*> > > otherVariantIntervals;
+    map<string, vector<Interval<size_t, Variant*> > > otherVariantIntervals;
 
     if (unioning || intersecting) {
 
@@ -302,11 +302,10 @@ int main(int argc, char** argv) {
             long int right = left + ovar.ref.size(); // this should be 1-past the end
             otherVariants[ovar.sequenceName].push_back(ovar);
             Variant* v = &otherVariants[ovar.sequenceName].back();
-            otherVariantIntervals[ovar.sequenceName].push_back(Interval<Variant*>(left, right, v));
+            otherVariantIntervals[ovar.sequenceName].push_back(Interval<size_t, Variant*>(left, right, v));
         }
-	
-        for (map<string, vector<Interval<Variant*> > >::iterator j = otherVariantIntervals.begin(); j != otherVariantIntervals.end(); ++j) {
-            variantIntervals[j->first] = IntervalTree<Variant*>(j->second);
+        for (map<string, vector<Interval<size_t, Variant*> > >::iterator j = otherVariantIntervals.begin(); j != otherVariantIntervals.end(); ++j) {
+            variantIntervals[j->first] = IntervalTree<size_t, Variant*>((vector<Interval<size_t, Variant*> >&&)j->second);
         }
 
     }
@@ -323,10 +322,9 @@ int main(int argc, char** argv) {
             lastSequenceName = var.sequenceName;
         } else if (lastSequenceName != var.sequenceName) {
             if (unioning) {
-                vector<Interval<Variant*> > previousRecords;
                 long int lastSeqLength = reference.sequenceLength(lastSequenceName);
-                variantIntervals[lastSequenceName].findContained(lastOutputPosition, lastSeqLength, previousRecords);
-                for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
+                vector<Interval<size_t, Variant*> > previousRecords = variantIntervals[lastSequenceName].findContained(lastOutputPosition, lastSeqLength);
+                for (vector<Interval<size_t, Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
                     Variant* v = r->value;
                     if (outputVariants.find(v) == outputVariants.end()) {
                         outputVariants.insert(v);
@@ -362,13 +360,12 @@ int main(int argc, char** argv) {
             // hmm... for unioning, you might need to step through the original VCF records
             // but the idea is to exclude the haplotype-based duplicates
 
-            vector<Interval<Variant*> > results;
-
-            variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize, results);
+            vector<Interval<size_t, Variant*> > results
+                = variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize);
 
             vector<Variant*> overlapping;
 
-            for (vector<Interval<Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
+            for (vector<Interval<size_t, Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
                 overlapping.push_back(r->value);
             }
 
@@ -381,13 +378,12 @@ int main(int argc, char** argv) {
                 // between the last one printed out and the first
                 // one we're about to print out
 
-                vector<Interval<Variant*> > previousRecords;
-
-                variantIntervals[var.sequenceName].findOverlapping(lastOutputPosition, var.position - windowsize, previousRecords);
+                vector<Interval<size_t, Variant*> > previousRecords
+                    = variantIntervals[var.sequenceName].findOverlapping(lastOutputPosition, var.position - windowsize);
 
                 map<long int, vector<Variant*> > variants;
 
-                for (vector<Interval<Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
+                for (vector<Interval<size_t, Variant*> >::iterator r = previousRecords.begin(); r != previousRecords.end(); ++r) {
                     Variant* v = r->value;
                     if (outputVariants.find(v) == outputVariants.end()) {
                         outputVariants.insert(v);

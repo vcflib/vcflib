@@ -93,7 +93,7 @@ public:
     bool isOpen(void) { return _isOpen; }
 
     vector<BedTarget> targets;
-    map<string, IntervalTree<BedTarget*> > intervals; // intervals by reference sequence
+    map<string, IntervalTree<size_t, BedTarget*> > intervals; // intervals by reference sequence
 
     vector<BedTarget> entries(void) {
 
@@ -119,20 +119,18 @@ public:
     }
 
     vector<BedTarget*> targetsContained(BedTarget& target) {
-        vector<Interval<BedTarget*> > results;
-        intervals[target.seq].findContained(target.left, target.right, results);
+        vector<Interval<size_t, BedTarget*> > results = intervals[target.seq].findContained(target.left, target.right);
         vector<BedTarget*> contained;
-        for (vector<Interval<BedTarget*> >::iterator r = results.begin(); r != results.end(); ++r) {
+        for (vector<Interval<size_t, BedTarget*> >::iterator r = results.begin(); r != results.end(); ++r) {
             contained.push_back(r->value);
         }
         return contained;
     }
 
     vector<BedTarget*> targetsOverlapping(BedTarget& target) {
-        vector<Interval<BedTarget*> > results;
-        intervals[target.seq].findOverlapping(target.left, target.right, results);
+        vector<Interval<size_t, BedTarget*> > results = intervals[target.seq].findOverlapping(target.left, target.right);
         vector<BedTarget*> overlapping;
-        for (vector<Interval<BedTarget*> >::iterator r = results.begin(); r != results.end(); ++r) {
+        for (vector<Interval<size_t, BedTarget*> >::iterator r = results.begin(); r != results.end(); ++r) {
             overlapping.push_back(r->value);
         }
         return overlapping;
@@ -148,12 +146,12 @@ BedReader(string& fname)
     }
 
     void addTargets(vector<BedTarget>& targets) {
-        map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
+        map<string, vector<Interval<size_t, BedTarget*> > > intervalsBySeq;
         for (vector<BedTarget>::iterator t = targets.begin(); t != targets.end(); ++t) {
-            intervalsBySeq[t->seq].push_back(Interval<BedTarget*>(1 + t->left, t->right, &*t));
+            intervalsBySeq[t->seq].push_back(Interval<size_t, BedTarget*>(1 + t->left, t->right, &*t));
         }
-        for (map<string, vector<Interval<BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
-            intervals[s->first] = IntervalTree<BedTarget*>(s->second);
+        for (map<string, vector<Interval<size_t, BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
+            intervals[s->first] = IntervalTree<size_t, BedTarget*>((vector<Interval<size_t, BedTarget*> >&&)s->second);
         }
     }
 
@@ -161,12 +159,12 @@ BedReader(string& fname)
         file.open(fname.c_str());
         _isOpen = true;
         targets = entries();
-        map<string, vector<Interval<BedTarget*> > > intervalsBySeq;
+        map<string, vector<Interval<size_t, BedTarget*> > > intervalsBySeq;
         for (vector<BedTarget>::iterator t = targets.begin(); t != targets.end(); ++t) {
-            intervalsBySeq[t->seq].push_back(Interval<BedTarget*>(1 + t->left, t->right, &*t));
+            intervalsBySeq[t->seq].push_back(Interval<size_t, BedTarget*>(1 + t->left, t->right, &*t));
         }
-        for (map<string, vector<Interval<BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
-            intervals[s->first] = IntervalTree<BedTarget*>(s->second);
+        for (map<string, vector<Interval<size_t, BedTarget*> > >::iterator s = intervalsBySeq.begin(); s != intervalsBySeq.end(); ++s) {
+            intervals[s->first] = IntervalTree<size_t, BedTarget*>((vector<Interval<size_t, BedTarget*> >&&)s->second);
         }
     }
 
