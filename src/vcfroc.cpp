@@ -26,39 +26,38 @@ void printSummary(char** argv) {
 }
 
 void buildVariantIntervalTree(VariantCallFile& variantFile,
-                              map<string, IntervalTree<Variant*> >& variantIntervals,
+                              map<string, IntervalTree<size_t, Variant*> >& variantIntervals,
                               list<Variant>& variants) {
 
-    map<string, vector<Interval<Variant*> > > rawVariantIntervals;
+    map<string, vector<Interval<size_t, Variant*> > > rawVariantIntervals;
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         long int left = var.position;
         long int right = left + var.ref.size(); // this should be 1-past the end
         variants.push_back(var);
         Variant* v = &variants.back();
-        rawVariantIntervals[var.sequenceName].push_back(Interval<Variant*>(left, right, v));
+        rawVariantIntervals[var.sequenceName].push_back(Interval<size_t, Variant*>(left, right, v));
     }
 	
-    for (map<string, vector<Interval<Variant*> > >::iterator j = rawVariantIntervals.begin(); j != rawVariantIntervals.end(); ++j) {
-        variantIntervals[j->first] = IntervalTree<Variant*>(j->second);
+    for (map<string, vector<Interval<size_t, Variant*> > >::iterator j = rawVariantIntervals.begin(); j != rawVariantIntervals.end(); ++j) {
+        variantIntervals[j->first] = IntervalTree<size_t, Variant*>((vector<Interval<size_t, Variant*> >&&)j->second);
     }
 }
 
 
 void intersectVariant(Variant& var,
-                      map<string, IntervalTree<Variant*> >& variantIntervals,
+                      map<string, IntervalTree<size_t, Variant*> >& variantIntervals,
                       vector<string*>& commonAlleles,
                       vector<string*>& uniqueAlleles,
                       FastaReference& reference,
                       int windowsize = 50) {
 
-    vector<Interval<Variant*> > results;
-
-    variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize, results);
+    vector<Interval<size_t, Variant*> > results
+        = variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize);
 
     vector<Variant*> overlapping;
 
-    for (vector<Interval<Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
+    for (vector<Interval<size_t, Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
         overlapping.push_back(r->value);
     }
 
@@ -223,11 +222,11 @@ int main(int argc, char** argv) {
     // read the VCF file for union or intersection into an interval tree
     // indexed using some proximity window
 
-    map<string, IntervalTree<Variant*> > truthVariantIntervals;
+    map<string, IntervalTree<size_t, Variant*> > truthVariantIntervals;
     list<Variant> truthVariants;
     buildVariantIntervalTree(truthVariantFile, truthVariantIntervals, truthVariants);
 
-    map<string, IntervalTree<Variant*> > testVariantIntervals;
+    map<string, IntervalTree<size_t, Variant*> > testVariantIntervals;
     list<Variant> testVariants;
     buildVariantIntervalTree(variantFile, testVariantIntervals, testVariants);
 

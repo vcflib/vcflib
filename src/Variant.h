@@ -54,6 +54,12 @@ ostream& operator<<(ostream& out, VariantFieldType type);
 typedef map<string, map<string, vector<string> > > Samples;
 typedef vector<pair<int, string> > Cigar;
 
+/// Compute a reverse complement. Supports both upper-case and lower-case input characters.
+std::string reverse_complement(const std::string& seq);
+/// Convert a sequence to upper-case
+std::string toUpper(const std::string& seq);
+bool allATGCN(const string& s, bool allowLowerCase = true);
+
 class VariantCallFile {
 
 public:
@@ -193,7 +199,7 @@ public:
 
     string sequenceName;
     long position;
-    long zeroBasedPosition(void);
+    long zeroBasedPosition(void) const;
     string id;
     string ref;
     vector<string> alt;      // a list of all the alternate alleles present at this locus
@@ -201,6 +207,7 @@ public:
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
                              // correspond to the correct offest into the allelese vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
+
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
@@ -219,14 +226,67 @@ public:
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
-    // Convert a structural variant the canonical VCF4.2 format using a reference.
-    // returns true if the variant is canonicalized, false otherwise.
-    bool canonicalize_sv(FastaReference& ref, vector<FastaReference*> insertions, bool place_seq = false, int interval_sz = -1);
+    /** 
+     * Convert a structural variant to the canonical VCF4.3 format using a reference.
+     *   Meturns true if the variant is canonicalized, false otherwise.
+     *   May NOT be called twice on the same variant; it will fail an assert.
+     *   Returns false for non-SVs
+     *   place_seq: if true, the ref/alt fields are
+     *       filled in with the corresponding sequences
+     *     from the reference (and optionally insertion FASTA)
+     * min_size_override: If a variant is less than this size,
+     *     and it has a valid REF and ALT, consider it canonicalized
+     *     even if the below conditions are not true.
+     * Fully canonicalized variants (which are greater than min_size_override)
+     * guarantee the following:
+     *  - POS <= END and corresponds to the anchoring base for symbolic alleles
+     *  - SVLEN info field is set and is positive for all variants except DELs
+     *  - SVTYPE info field is set and is in {DEL, INS, INV, DUP}
+     *  - END info field is set to the POS + len(REF allele) - 1 and corresponds to the final affected reference base
+     *  - Insertions get an upper-case SEQ info field
+     *  - REF and ALT are upper-case if filled in by this function
+     *  - canonical = true;
+     * TODO: CURRENTLY: canonical requires there be only one alt allele
+    **/
+    bool canonicalize(FastaReference& ref,
+         vector<FastaReference*> insertions, 
+         bool place_seq = true, 
+         int min_size_override = 0);
+         
+    /** 
+     * Returns true if the variant's ALT contains a symbolic allele like <INV>
+     * instead of sequence, and the variant has an SVTYPE INFO tag.
+     */
+    bool isSymbolicSV() const;
     
-    pair<Variant, Variant> convert_to_breakends(FastaReference& ref);
-    int64_t get_sv_end(int pos);
-    int64_t get_sv_len(int pos);
-    bool is_sv();
+    /**
+     * Returns true if the variant has an SVTYPE INFO tag and either an SVLEN or END INFO tag.
+     */
+    bool hasSVTags() const;
+    
+    /**
+     * This returns true if the variant appears able to be handled by
+     * canonicalize(). It checks if it has fully specified sequence, or if it
+     * has a defined SV type and length/endpoint. 
+     */
+    bool canonicalizable();
+    
+    /**
+     * This gets set to true after canonicalize() has been called on the variant, if it succeeded.
+     */
+    bool canonical;
+    
+    /**
+     * Get the maximum zero-based position of the reference affected by this variant.
+     * Only works reliably for variants that are not SVs or for SVs that have been canonicalize()'d.
+     */
+    int getMaxReferencePos();
+   
+    /**
+     * Return the SV type of the given alt, or "" if there is no SV type set for that alt.
+     * This is the One True Way to get the SVTYPE of a variant; we should not touch the SVTYPE tag anywhere else.
+     */
+    string getSVTYPE(int altpos = 0) const;
 
     string originalLine; // the literal of the record, as read
     // TODO
@@ -234,10 +294,10 @@ public:
     // vector<pair<int, int> > genotypes;  // indexes into the alleles, ordered as per the spec
     string filter;
     double quality;
-    VariantFieldType infoType(string& key);
+    VariantFieldType infoType(const string& key);
     map<string, vector<string> > info;  // vector<string> allows for lists by Genotypes or Alternates
     map<string, bool> infoFlags;
-    VariantFieldType formatType(string& key);
+    VariantFieldType formatType(const string& key);
     vector<string> format;
     map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
     vector<string> sampleNames;
@@ -248,7 +308,7 @@ public:
     //void addInfoFloat(string& tag, double value);
     //void addInfoString(string& tag, string& value);
 
-    void removeAlt(string& altallele);
+    void removeAlt(const string& altallele);
 
 public:
 
@@ -264,29 +324,29 @@ public:
     void setVariantCallFile(VariantCallFile* v);
 
     void parse(string& line, bool parseSamples = true);
-    void addFilter(string& tag);
-    bool getValueBool(string& key, string& sample, int index = INDEX_NONE);
-    double getValueFloat(string& key, string& sample, int index = INDEX_NONE);
-    string getValueString(string& key, string& sample, int index = INDEX_NONE);
-    bool getSampleValueBool(string& key, string& sample, int index = INDEX_NONE);
-    double getSampleValueFloat(string& key, string& sample, int index = INDEX_NONE);
-    string getSampleValueString(string& key, string& sample, int index = INDEX_NONE);
-    bool getInfoValueBool(string& key, int index = INDEX_NONE);
-    double getInfoValueFloat(string& key, int index = INDEX_NONE);
-    string getInfoValueString(string& key, int index = INDEX_NONE);
+    void addFilter(const string& tag);
+    bool getValueBool(const string& key, string& sample, int index = INDEX_NONE);
+    double getValueFloat(const string& key, string& sample, int index = INDEX_NONE);
+    string getValueString(const string& key, string& sample, int index = INDEX_NONE);
+    bool getSampleValueBool(const string& key, string& sample, int index = INDEX_NONE);
+    double getSampleValueFloat(const string& key, string& sample, int index = INDEX_NONE);
+    string getSampleValueString(const string& key, string& sample, int index = INDEX_NONE);
+    bool getInfoValueBool(const string& key, int index = INDEX_NONE);
+    double getInfoValueFloat(const string& key, int index = INDEX_NONE);
+    string getInfoValueString(const string& key, int index = INDEX_NONE);
     void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
     void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
-    int getAltAlleleIndex(string& allele);
+    int getAltAlleleIndex(const string& allele);
     void updateAlleleIndexes(void);
-    void addFormatField(string& key);
+    void addFormatField(const string& key);
     void setOutputSampleNames(vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
     int getNumSamples(void);
     int getNumValidGenotypes(void);
-    string getGenotype(string& sample);
+    string getGenotype(const string& sample);
     bool isPhased(void);
     // TODO
-    //void setInfoField(string& key, string& val);
+    //void setInfoField(const string& key, string& val);
 
 private:
 
