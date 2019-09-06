@@ -356,7 +356,7 @@ int main(int argc, char** argv) {
             }
 	  }
 	  else{
-	    std::cerr << "FATAL: unkown genotype index" << std::endl;
+	    std::cerr << "FATAL: unknown genotype index" << std::endl;
 cerr << populationTarget->genoIndex[i] << endl;
 cerr << var << endl;
 	    exit(1);
