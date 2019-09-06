@@ -145,7 +145,7 @@ all: $(OBJECTS) $(BINS) scriptToBin
 scriptToBin: $(BINS)
 	cp scripts/* bin
 
-GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
+GIT_VERSION += $(shell git describe --abbrev=4 --dirty --always)
 
 CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x
 #CXXFLAGS = -O2
