@@ -108,7 +108,7 @@ vcflib provides a variety of functions for VCF manipulation:
  * **Classify variants** by annotations in the INFO field using a self-organizing map ([vcfsom](#vcfsom)); **re-estimate their quality** given known variants.
 
 
-A number of "helper" perl and python scripts (e.g. vcf2bed.py, vcfbiallelic) further extend functionality.
+A number of "helper" perl and python3 scripts (e.g. vcf2bed.py, vcfbiallelic) further extend functionality.
 
 In practice, users are encouraged to drive the utilities in the library in a streaming fashion, using pipes, to fully utilize resources on multi-core systems during interactive work.  Piping provides a convenient method to interface with other libraries (vcf-tools, BedTools, GATK, htslib, bcftools, freebayes) which interface via VCF files, allowing the composition of an immense variety of processing functions.
 
@@ -135,7 +135,7 @@ To build, use Make:
     % make
 
 Executables are built into the ./bin directory in the repository.
-A number of shell, perl, python, and R scripts already reside there.
+A number of shell, perl, python3, and R scripts already reside there.
 This makes installation easy, as users can add vcflib/bin to their path, or copy the contained executables to a directory already in their path.
 
 

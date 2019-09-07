@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-from __future__ import print_function
+#!/usr/bin/python3
+
 import sys
 import re
 import sqlite3
@@ -93,7 +93,7 @@ for line in sys.stdin:
                 pair = pair.split("=")
                 key = pair[0]
                 value = pair[1]
-                if not infonumbers.has_key(key):
+                if key not in infonumbers:
                     continue
                 if infonumbers[key] == -1:
                     values = value.split(",")
@@ -105,7 +105,7 @@ for line in sys.stdin:
         ordered_insertion = []
         for field in sorted_fields:
             value = "null"
-            if info_values.has_key(field):
+            if field in info_values:
                 value = info_values[field]
                 if infotypes[field] == "String":
                     value = "\'" + value + "\'"
