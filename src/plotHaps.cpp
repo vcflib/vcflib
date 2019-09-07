@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
       }
     }
     else{
-      cerr << "FATAL: must specifiy a region" << endl;
+      cerr << "FATAL: must specify a region" << endl;
       printHelp();
       return 1;
     }

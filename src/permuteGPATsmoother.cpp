@@ -170,7 +170,7 @@ int parse = parseOpts(argc, argv);
    }
  }
  else{
-   cerr << "FATAL: coult not open file: " << globalOpts.file << endl;
+   cerr << "FATAL: could not open file: " << globalOpts.file << endl;
    exit(1);
  }
 
@@ -214,7 +214,7 @@ int parse = parseOpts(argc, argv);
    }   
  }
  else{
-   cerr << "FATAL: coult not open file: " << globalOpts.file << endl;
+   cerr << "FATAL: could not open file: " << globalOpts.file << endl;
    exit(1);
  }
 

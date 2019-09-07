@@ -47,7 +47,7 @@ void printHelp(void){
 
   cerr << "INFO: usage:  abba-baba --tree 0,1,2,3 --file my.vcf --type PL" << endl;
   cerr << endl;
-  cerr << "INFO: required: t,tree       -- a zero based comma seperated list of target individuals corrisponding to VCF columns" << endl;
+  cerr << "INFO: required: t,tree       -- a zero based comma separated list of target individuals corrisponding to VCF columns" << endl;
   cerr << "INFO: required: f,file       -- a properly formatted VCF.                                                           " << endl;
   cerr << "INFO: required: y,type       -- genotype likelihood format ; genotypes: GP,GL or PL;                                " << endl;
   cerr << endl;
