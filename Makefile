@@ -115,7 +115,7 @@ BIN_SOURCES = src/vcfecho.cpp \
 # src/vcfsom.cpp
 
 #BINS = $(BIN_SOURCES:.cpp=)
-BINS = $(addprefix bin/,$(notdir $(BIN_SOURCES:.cpp=)))
+BINS = $(addprefix $(BIN_DIR)/,$(notdir $(BIN_SOURCES:.cpp=)))
 SHORTBINS = $(notdir $(BIN_SOURCES:.cpp=))
 
 TABIX = tabixpp/tabix.o
@@ -143,7 +143,7 @@ LDFLAGS = -L$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
 all: $(OBJECTS) $(BINS) scriptToBin
 
 scriptToBin: $(BINS)
-	cp scripts/* bin
+	cp scripts/* $(BIN_DIR)
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always)
 
@@ -198,7 +198,7 @@ $(FILEVERCMP): pre
 	cd filevercmp && make && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(SHORTBINS): pre
-	$(MAKE) bin/$@
+	$(MAKE) $(BIN_DIR)/$@
 
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) pre intervaltree
 	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) -DVERSION=\"$(GIT_VERSION)\"
