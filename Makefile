@@ -150,7 +150,7 @@ scriptToBin: $(BINS)
 
 GIT_VERSION += $(shell git describe --abbrev=4 --dirty --always)
 
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -std=c++0x
+CXXFLAGS = -Ofast -D_FILE_OFFSET_BITS=64 -std=c++0x
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
