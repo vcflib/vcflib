@@ -6,7 +6,6 @@
 #### license: MIT
 
 [![Gitter](https://badges.gitter.im/ekg/vcflib.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
----
 
 ## overview
 
@@ -25,18 +24,28 @@ It is both:
 The API itself provides a quick and extremely permissive method to read and write VCF files.
 Extensions and applications of the library provided in the included utilities (*.cpp) comprise the vast bulk of the library's utility for most users.
 
-## download and install 
+## installation
 
-1. Under the repository name, click to copy the clone URL for the repository. ![](https://help.github.com/assets/images/help/repository/clone-repo-clone-url-button.png)
+## [bioconda](https://bioconda.github.io/user/install.html)
+```
+conda install -c conda-forge -c bioconda -c defaults vcflib
+```
 
-2. Go to the location where you want the cloned directory to be made:  `cd <PathWhereIWantToCloneVcflib>`
+## [homebrew](https://brew.sh))
+```
+brew install brewsci/bio/vcflib
+```
 
-3. Type `git clone --recursive`, and then paste the URL you copied in Step 1.
-
-4. Enter the cloned directory and type `make` to compile the programs.  If you want to use threading type `make openmp` instead of `make`.  Only a few VCFLIB tools are threaded.
-
-5. Once make is finished the executables are ready in the folder `<PathWhereIWantToCloneVcflib>/vcflib/bin/`. Set this path as an  environment variable in the .bashrc file to access executables form everywhere on your proile OR call the executables from the path where they are. 
-
+## source
+```
+git clone --recursive https://github.com/ekg/vcflib.git
+cd vcflib
+make -j
+```
+Executables are built into the `./bin` directory in the repository.
+A number of shell, perl, python3, and R scripts already reside there.
+This makes installation easy, as users can add vcflib/bin 
+to their path, or copy the contained executables to a directory already in their path.
 
 ## usage
 
@@ -118,25 +127,6 @@ See src/vcfecho.cpp for basic usage.  src/Variant.h and src/Variant.cpp describe
 vcflib is incorporated into several projects, such as [freebayes](https://github.com/ekg/freebayes), which may provide a point of reference for prospective developers.
 Additionally, developers should be aware of that vcflib contains submodules (git repositories) comprising its dependencies (outside of lzib and a *nix environment).
 
-
-## installing
-
-vcflib includes submodules, so to obtain vcflib you have to use:
-
-    % git clone --recursive git://github.com/ekg/vcflib.git
-
-or
-
-    % git clone --recursive https://github.com/ekg/vcflib.git
-
-To build, use Make:
-
-    % cd vcflib
-    % make
-
-Executables are built into the ./bin directory in the repository.
-A number of shell, perl, python3, and R scripts already reside there.
-This makes installation easy, as users can add vcflib/bin to their path, or copy the contained executables to a directory already in their path.
 
 
 ## executables
