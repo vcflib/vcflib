@@ -5,7 +5,9 @@
 
 #### license: MIT
 
-[![Gitter](https://badges.gitter.im/ekg/vcflib.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
+[![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
+[![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html)
+[![Gitter](https://badges.gitter.im/ekg/vcflib.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## overview
 
@@ -26,17 +28,17 @@ Extensions and applications of the library provided in the included utilities (*
 
 ## installation
 
-## [bioconda](https://bioconda.github.io/user/install.html)
+### [bioconda](https://bioconda.github.io/user/install.html)
 ```
 conda install -c conda-forge -c bioconda -c defaults vcflib
 ```
 
-## [homebrew](https://brew.sh))
+### [homebrew](https://brew.sh)
 ```
 brew install brewsci/bio/vcflib
 ```
 
-## source
+### source
 ```
 git clone --recursive https://github.com/ekg/vcflib.git
 cd vcflib
