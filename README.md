@@ -782,16 +782,24 @@ pFst is a likelihood ratio test (LRT) quantifying allele frequency differences b
 ```
 INFO: help
 INFO: description:
-      Summarizes genotype counts for bi-allelic SNVs and indel
-INFO: output: table of genotype counts for each individual.
-INFO: usage:  genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp
+     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations.
 
-INFO: required: t,target     -- a zero based comma separated list of target individuals corresponding to VCF columns
-INFO: required: f,file       -- proper formatted VCF
-INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
-INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1
-INFO: optional, s,snp        -- Only count SNPs
+Output : 3 columns :
+     1. seqid
+     2. position
+     3. pFst probability
+
+INFO: usage:  pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
+
+INFO: required: t,target     -- argument: a zero based comma separated list of target individuals corresponding to VCF columns
+INFO: required: b,background -- argument: a zero based comma separated list of background individuals corresponding to VCF columns
+INFO: required: f,file       -- argument: a properly formatted VCF.
+INFO: required: y,type       -- argument: genotype likelihood format ; genotypes: GP, GL or PL; pooled: PO
+INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero
+INFO: optional: r,region     -- argument: a tabix compliant genomic range : seqid or seqid:start-end
+INFO: optional: c,counts     -- switch  : use genotype counts rather than genotype likelihoods to estimate parameters, default false
 ```
+
 ### EHH and PI
 
 The 'sequenceDiversity' program calculates extended haplotype homozygosity and pi within a fixed-width sliding window.  This requires phased data.
