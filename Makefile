@@ -21,6 +21,9 @@ SRC_DIR=src
 INC_DIR:=include
 OBJ_DIR:=obj
 
+RM = rm -f
+CP = cp -f
+
 # TODO
 #vcfstats.cpp
 
@@ -143,7 +146,7 @@ LDFLAGS = -L$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
 all: $(OBJECTS) $(BINS) scriptToBin
 
 scriptToBin: $(BINS)
-	cp scripts/* $(BIN_DIR)
+	$(CP) scripts/* $(BIN_DIR)
 
 GIT_VERSION += $(shell git describe --abbrev=4 --dirty --always)
 
@@ -166,19 +169,19 @@ gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
 $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX) multichoose pre $(SMITHWATERMAN) $(FILEVERCMP) $(FASTAHACK)
-	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && cp src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && $(CP) src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 multichoose: pre
-	cd multichoose && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd multichoose && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 intervaltree: pre
-	cd intervaltree && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd intervaltree && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(TABIX): pre
-	cd tabixpp && INCLUDES="$(HTS_INCLUDES)" LIBPATH="-L. $(HTS_LDFLAGS)" HTSLIB="$(HTS_LIB)" $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd tabixpp && INCLUDES="$(HTS_INCLUDES)" LIBPATH="-L. $(HTS_LDFLAGS)" HTSLIB="$(HTS_LIB)" $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(SMITHWATERMAN): pre
-	cd smithwaterman && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
+	cd smithwaterman && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && $(CP) *.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
 $(DISORDER): $(SMITHWATERMAN)
 
@@ -189,13 +192,13 @@ $(LEFTALIGN): $(SMITHWATERMAN)
 $(INDELALLELE): $(SMITHWATERMAN)
 
 $(FASTAHACK): pre
-	cd fastahack && $(MAKE) && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp Fasta.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
+	cd fastahack && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && $(CP) Fasta.o $(VCF_LIB_LOCAL)/$(OBJ_DIR)/
 
 #$(FSOM):
 #	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
 
 $(FILEVERCMP): pre
-	cd filevercmp && make && cp *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && cp *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd filevercmp && make && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && $(CP) *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(SHORTBINS): pre
 	$(MAKE) $(BIN_DIR)/$@
@@ -205,7 +208,7 @@ $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(D
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
-	cp libvcflib.a $(LIB_DIR)
+	$(CP) libvcflib.a $(LIB_DIR)
 
 
 test: $(BINS)
@@ -224,21 +227,21 @@ pull:
 update: pull all
 
 clean:
-	rm -f $(BINS) $(OBJECTS)
-	rm -f ssw_cpp.o ssw.o
-	rm -f libvcflib.a
-	rm -rf $(BIN_DIR)
-	rm -rf $(LIB_DIR)
-	rm -rf $(INC_DIR)
-	rm -rf $(OBJ_DIR)
-	cd tabixpp && $(MAKE) clean
-	cd smithwaterman && $(MAKE) clean
-	cd fastahack && $(MAKE) clean
-	cd multichoose && $(MAKE) clean
-	cd fsom && $(MAKE) clean
-	cd libVCFH && $(MAKE) clean
-	cd test && $(MAKE) clean
-	cd filevercmp && $(MAKE) clean
-	cd intervaltree && $(MAKE) clean
+	$(RM) $(BINS) $(OBJECTS)
+	$(RM) ssw_cpp.o ssw.o
+	$(RM) libvcflib.a
+	$(RM) -r $(BIN_DIR)
+	$(RM) -r $(LIB_DIR)
+	$(RM) -r $(INC_DIR)
+	$(RM) -r $(OBJ_DIR)
+	$(MAKE) clean -C tabixpp
+	$(MAKE) clean -C smithwaterman
+	$(MAKE) clean -C fastahack
+	$(MAKE) clean -C multichoose
+	$(MAKE) clean -C fsom
+	$(MAKE) clean -C libVCFH
+	$(MAKE) clean -C test
+	$(MAKE) clean -C filevercmp
+	$(MAKE) clean -C intervaltree
 	
 .PHONY: clean all test pre
