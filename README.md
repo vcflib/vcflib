@@ -287,18 +287,22 @@ given window size to the left, right, and center  of the record.
                               compressed file which has been indexed with tabix.  any number of
                               regions may be specified.
 
-Filter the specified vcf file using the set of filters.
-Filters are specified in the form "<ID> <operator> <value>:
+Filter the specified VCF file using the set of filters.
+Filters are specified in the form "<ID> <operator> <value>":
     -f "DP > 10"  # for info fields
     -g "GT = 1|1" # for genotype fields
-    -f "CpG"  # for 'flag' fields
+    -f "CpG"      # for 'flag' fields
 
 Operators can be any of: =, !, <, >, |, &
 
-Any number of filters may be specified.  They are combined via logical AND unless --or is specified on the command line.
-Obtain logical negation through the use of parentheses, e.g. "! ( DP = 10 )"
+Any number of filters may be specified.  They are combined via logical AND
+unless --or is specified on the command line.  Obtain logical negation
+through the use of parentheses, and negative numbers using 0-N:
+	-f "! ( DP = 10 )"   # depth not-equal 10
+	-f "GL = ( 0 - 1 )"  # genotype-ll equal -1
 
-For convenience, you can specify "QUAL" to refer to the quality of the site, even though it does not appear in the INFO fields.
+For convenience, you can specify "QUAL" to refer to the quality of the site,
+even though it does not appear in the INFO fields.
 
     
 ### vcffixup
