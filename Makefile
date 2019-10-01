@@ -198,7 +198,7 @@ $(FASTAHACK): pre
 #	cd fsom && $(CXX) $(CXXFLAGS) -c fsom.c -lm
 
 $(FILEVERCMP): pre
-	cd filevercmp && make && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && $(CP) *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	cd filevercmp && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/ && $(CP) *.o $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 $(SHORTBINS): pre
 	$(MAKE) $(BIN_DIR)/$@
