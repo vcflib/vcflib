@@ -16,7 +16,7 @@ void printSummary(char** argv) {
          << "options:" << endl 
          << "    -h, --help              Print this message" << endl
          << "    -v, --version           Print version" << endl
-         << "    -r, --reference FILE    FASTA reference file, required with -i and -u" << endl
+         << "    -r, --reference FILE    FASTA reference file" << endl
          << "    -w, --window-size N     Merge variants at most this many bp apart (default 30)" << endl
          << "    -o, --only-variants     Don't output the entire haplotype, just concatenate" << endl
          << "                            REF/ALT strings (delimited by \":\")" << endl
