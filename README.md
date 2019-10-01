@@ -827,7 +827,7 @@ INFO: optional: w,window     -- argument: the number of SNPs per window; default
 
 ```
 
-###meltEHH
+### meltEHH
 
 The program 'meltEHH' produces the data to generate the following plot:
 
