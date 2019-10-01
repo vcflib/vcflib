@@ -49,6 +49,22 @@ A number of shell, perl, python3, and R scripts already reside there.
 This makes installation easy, as users can add vcflib/bin 
 to their path, or copy the contained executables to a directory already in their path.
 
+
+## using the C++ library
+
+```
+# Put this in your Makefile
+
+VCFLIB_DIR = /path/to/vcflib
+VCFLIB_INC = -I $(VCFLIB_DIR)/include -I $(VCFLIB_DIR)/tabixpp/htslib
+VCFLIB_LIB = -L $(VCFLIB_DIR)/tabixpp -L $(VCFLIB_DIR)/lib -lhts -lvcflib -lz -lm -llzma -lbz2
+CXX="g++"
+CXXFLAGS="-std=-std=c++0x -Ofast -D_FILE_OFFSET_BITS=64"
+
+mytool: mytool.cpp
+	$(CXX) $(CXXFLAGS) $(VCFLIB_INC) -o $@ $< $(VCFLIB_LIB)
+```
+
 ## usage
 
 vcflib provides a variety of functions for VCF manipulation:
