@@ -40,7 +40,7 @@ brew install brewsci/bio/vcflib
 
 ### source
 ```
-git clone --recursive https://github.com/ekg/vcflib.git
+git clone --recursive https://github.com/vcflib/vcflib.git
 cd vcflib
 make -j
 ```
