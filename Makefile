@@ -14,7 +14,7 @@ SOURCES = src/Variant.cpp \
 		  src/split.cpp
 OBJECTS= $(SOURCES:.cpp=.o)
 
-VCF_LIB_LOCAL:=$(shell pwd)
+VCF_LIB_LOCAL:=$(CURDIR)
 BIN_DIR:=bin
 LIB_DIR:=lib
 SRC_DIR=src
