@@ -139,7 +139,7 @@ HTS_LDFLAGS ?= -L$(VCF_LIB_LOCAL)/tabixpp/htslib -lhts -lbz2 -lm -lz -llzma -pth
 
 
 INCLUDES = $(HTS_INCLUDES) -I$(INC_DIR) 
-LDFLAGS = -L$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
+LDFLAGS += -L$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
 
 
 
@@ -150,7 +150,7 @@ scriptToBin: $(BINS)
 
 GIT_VERSION += $(shell git describe --abbrev=4 --dirty --always)
 
-CXXFLAGS = -Ofast -D_FILE_OFFSET_BITS=64 -std=c++0x
+CXXFLAGS += -Ofast -D_FILE_OFFSET_BITS=64 -std=c++0x
 #CXXFLAGS = -O2
 #CXXFLAGS = -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
@@ -169,7 +169,7 @@ gprof:
 	$(MAKE) CXXFLAGS="$(CXXFLAGS) -pg" all
 
 $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX) multichoose pre $(SMITHWATERMAN) $(FILEVERCMP) $(FASTAHACK)
-	$(CXX) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && $(CP) src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	$(CXX) $(CPPFLAGS) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && $(CP) src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 multichoose: pre
 	cd multichoose && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
@@ -204,7 +204,7 @@ $(SHORTBINS): pre
 	$(MAKE) $(BIN_DIR)/$@
 
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) pre intervaltree
-	$(CXX) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) -DVERSION=\"$(GIT_VERSION)\"
+	$(CXX) $(CPPFLAGS) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) -DVERSION=\"$(GIT_VERSION)\"
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
