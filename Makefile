@@ -204,7 +204,7 @@ $(SHORTBINS): pre
 	$(MAKE) $(BIN_DIR)/$@
 
 $(BINS): $(BIN_SOURCES) libvcflib.a $(OBJECTS) $(SMITHWATERMAN) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) pre intervaltree
-	$(CXX) $(CPPFLAGS) src/$(notdir $@).cpp -o $@ $(INCLUDES) $(LDFLAGS) -L$(VCF_LIB_LOCAL)/$(LIB_DIR) -lvcflib $(CXXFLAGS) -DVERSION=\"$(GIT_VERSION)\"
+	$(CXX) $(CPPFLAGS) src/$(notdir $@).cpp -o $@ $(INCLUDES) -L$(VCF_LIB_LOCAL)/$(LIB_DIR) -lvcflib $(LDFLAGS) $(CXXFLAGS) -DVERSION=\"$(GIT_VERSION)\"
 
 libvcflib.a: $(OBJECTS) $(SMITHWATERMAN) $(REPEATS) $(FASTAHACK) $(DISORDER) $(LEFTALIGN) $(INDELALLELE) $(SSW) $(FILEVERCMP) $(TABIX) pre
 	ar rs libvcflib.a $(OBJECTS) smithwaterman/sw.o $(FASTAHACK) $(SSW) $(FILEVERCMP) $(TABIX)
