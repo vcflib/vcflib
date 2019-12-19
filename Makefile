@@ -139,7 +139,7 @@ HTS_LDFLAGS ?= -L$(VCF_LIB_LOCAL)/tabixpp/htslib -lhts -lbz2 -lm -lz -llzma -pth
 
 
 INCLUDES = $(HTS_INCLUDES) -I$(INC_DIR) 
-LDFLAGS += -L$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
+LDFLAGS += -L$(VCF_LIB_LOCAL)/$(LIB_DIR) -lvcflib $(HTS_LDFLAGS) -lpthread -lz -lm -llzma -lbz2
 
 
 
@@ -172,7 +172,7 @@ $(OBJECTS): $(SOURCES) $(HEADERS) $(TABIX) multichoose pre $(SMITHWATERMAN) $(FI
 	$(CXX) $(CPPFLAGS) -c -o $@ src/$(*F).cpp $(INCLUDES) $(LDFLAGS) $(CXXFLAGS) && $(CP) src/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 multichoose: pre
-	cd multichoose && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
+	$(CP) multichoose/*.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
 
 intervaltree: pre
 	cd intervaltree && $(MAKE) && $(CP) *.h* $(VCF_LIB_LOCAL)/$(INC_DIR)/
@@ -243,5 +243,5 @@ clean:
 	$(MAKE) clean -C test
 	$(MAKE) clean -C filevercmp
 	$(MAKE) clean -C intervaltree
-	
+
 .PHONY: clean all test pre
