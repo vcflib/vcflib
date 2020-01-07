@@ -7,9 +7,16 @@ option(GPROF "Enable gprof profiling" OFF)
 
 include(ExternalProject)
 include(FeatureSummary)
+#include(FindLibLZMA)
+#include(ExternalProject)
+include(FindZLIB)
+include(FindBZip2)
+include(FindLibLZMA)
 
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
+#find_package(LIBLZMA)
+#set_package_properties(LIBLZMA PROPERTIES TYPE REQUIRED)
 find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
@@ -51,8 +58,8 @@ add_library(vcflib STATIC
     src/pdflib.cpp 
     src/cdflib.cpp 
     src/split.cpp
-    src/ssw.h
-    src/ssw_cpp.h
+    src/ssw.hpp
+    src/ssw_cpp.hpp
     tabixpp/tabix.cpp
     fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
@@ -79,7 +86,7 @@ set(BINS
     sequenceDiversity
     pFst
     smoother
-    LD
+    vcfld
     plotHaps
     abba-baba
     permuteGPAT++
@@ -172,7 +179,7 @@ add_definitions(-DVERSION="${GIT_VERSION}")
 
 foreach(BIN ${BINS})
   add_executable(${BIN} src/${BIN}.cpp)
-  target_link_libraries(${BIN} vcflib htslib ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+  target_link_libraries(${BIN} vcflib htslib ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
 endforeach(BIN ${BINS})
 
 install(TARGETS ${BINS} RUNTIME DESTINATION bin)
