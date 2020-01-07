@@ -51,12 +51,12 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
             if (!fieldsToKeep.count(i->first)) {
-                var.info.erase(i->first);
+                i = var.info.erase(i);
             }
         }
         for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
             if (!fieldsToKeep.count(i->first)) {
-                var.infoFlags.erase(i->first);
+                i = var.infoFlags.erase(i);
             }
         }
         cout << var << endl;
