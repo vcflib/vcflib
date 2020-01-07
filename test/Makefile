@@ -8,9 +8,9 @@ CXX=g++
 CFLAGS=-Wall -std=c++0x 
 LINKERS=-lm -lpthread -lhts -lvcflib -lz 
 INCLUDE=-I../src -I../googletest/googletest/include/ -I../tabixpp/ -I../tabixpp/htslib/ -I ../smithwaterman/ -I ../multichoose/ -I ../filevercmp/ -I ../googletest/googletest/make/
-LIB=-L../ -L../tabixpp/htslib -L../tabixpp/htslib/ -L../googletest/googletest/make/
+LIB=-L../lib -L../tabixpp/htslib -L../tabixpp/htslib/ -L../googletest/googletest/make/
 LIBGTEST=../googletest/googletest/make/gtest_main.a
-LIBVCF=../libvcflib.a
+LIBVCF=../lib/libvcflib.a
 all: run
 
 ../googletest/googletest/make/gtest_main.a:
