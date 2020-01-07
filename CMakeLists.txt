@@ -166,7 +166,7 @@ ExternalProject_Add(htslib-build
   BINARY_DIR ${CMAKE_SOURCE_DIR}/tabixpp/htslib
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/htslib
   CONFIGURE_COMMAND ""
-  BUILD_COMMAND make lib-static
+  BUILD_COMMAND $(MAKE) lib-static
   INSTALL_COMMAND ""
   )
 
@@ -177,12 +177,14 @@ add_dependencies(htslib htslib-build)
 
 add_definitions(-DVERSION="${GIT_VERSION}")
 
-foreach(BIN ${BINS})
-  add_executable(${BIN} src/${BIN}.cpp)
-  target_link_libraries(${BIN} vcflib htslib ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
-endforeach(BIN ${BINS})
+if (NOT BUILD_ONLY_LIB)
+  foreach(BIN ${BINS})
+    add_executable(${BIN} src/${BIN}.cpp)
+    target_link_libraries(${BIN} vcflib htslib ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+  endforeach(BIN ${BINS})
+  install(TARGETS ${BINS} RUNTIME DESTINATION bin)
+endif()
 
-install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 install(TARGETS vcflib ARCHIVE DESTINATION lib)
 
 file(GLOB INCLUDES
