@@ -71,6 +71,7 @@ random sampling adds noise but will not affect the overall measurement
 of D-statistic */
 int  sample_het(int &rv){
   rv = rand() % 2 ; // pick from 0/1 het with 50-50 odds
+  return rv;
 }
 
 
