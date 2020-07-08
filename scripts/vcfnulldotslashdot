@@ -3,7 +3,7 @@
 import sys
 import math
 
-def bincoeff(n,k): return math.factorial(n) / (math.factorial(n-k)*math.factorial(k))
+def bincoeff(n,k): return int(math.factorial(n) / (math.factorial(n-k)*math.factorial(k)))
 def multcoeff(n,k): return bincoeff(n+k-1,k)
 
 for line in sys.stdin:
