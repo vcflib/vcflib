@@ -179,6 +179,7 @@ add_dependencies(htslib htslib-build)
 # that, pass -DHTSLIB_EXTRA_LIBS="-ldeflate" when configuring the project with
 # cmake.
 # TODO: Stop vendoring in htslib and just use find_package
+set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
 set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
 add_definitions(-DVERSION="${GIT_VERSION}")
