@@ -174,6 +174,13 @@ add_library(htslib STATIC IMPORTED)
 set_property(TARGET htslib PROPERTY 
   IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/tabixpp/htslib/libhts.a)
 add_dependencies(htslib htslib-build)
+# If the user wants to configure our HTSlib to build with libddeflate, we need
+# to make sure to link against libdeflate as a transitive dependency. To do
+# that, pass -DHTSLIB_EXTRA_LIBS="-ldeflate" when configuring the project with
+# cmake.
+# TODO: Stop vendoring in htslib and just use find_package
+set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
+set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
 add_definitions(-DVERSION="${GIT_VERSION}")
 
