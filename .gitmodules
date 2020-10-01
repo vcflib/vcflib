@@ -25,3 +25,6 @@
 [submodule "libVCFH"]
 	path = libVCFH
 	url = https://github.com/edawson/libVCFH.git
+[submodule "src/simde"]
+	path = src/simde
+	url = https://github.com/simd-everywhere/simde-no-tests.git
