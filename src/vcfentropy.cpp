@@ -2,6 +2,7 @@
 #include "split.h"
 #include "Fasta.h"
 #include <getopt.h>
+#include "disorder.h"
 
 using namespace std;
 using namespace vcflib;
