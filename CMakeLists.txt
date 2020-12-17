@@ -30,10 +30,11 @@ find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
 pkg_check_modules(HTSLIB REQUIRED htslib)
+pkg_check_modules(TABIXPP tabixpp) # Optional
 
 # ---- Build switches
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -D_FILE_OFFSET_BITS=64 -Isrc -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++0x -D_FILE_OFFSET_BITS=64 -Isrc -O3")
 
 if(OPENMP)
   find_package(OpenMP REQUIRED)
@@ -51,7 +52,7 @@ endif(GPROF)
 # ---- Include files
 
 include_directories(include)
-include_directories(tabixpp)
+# include_directories(tabixpp)
 include_directories(fastahack)
 include_directories(intervaltree)
 include_directories(smithwaterman)
@@ -66,7 +67,7 @@ file(GLOB INCLUDES
   src/*.h*
   multichoose/*.h*
   intervaltree/*.h*
-  tabixpp/*.h*
+  # tabixpp/*.h*
   smithwaterman/*.h*
   fastahack/*.h*
   filevercmp/*.h*)
@@ -87,7 +88,7 @@ add_library(vcflib STATIC
     src/split.cpp
     src/ssw.hpp
     src/ssw_cpp.hpp
-    tabixpp/tabix.cpp
+    # tabixpp/tabix.cpp # do we need this?
     fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
     smithwaterman/Repeats.cpp
@@ -209,6 +210,7 @@ ExternalProject_Add(htslib-build
   )
 
 add_library(htslib STATIC IMPORTED)
+
 set_property(TARGET htslib PROPERTY
   IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/tabixpp/htslib/libhts.a)
 add_dependencies(htslib htslib-build)
@@ -225,10 +227,12 @@ endif(HTSLIB_LOCAL)
 
 # ---- Build all
 
+
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
-    target_link_libraries(${BIN} vcflib ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+    target_include_directories(${BIN} PUBLIC ${TABIXPP_LIBRARIES} ${HTSLIB_INCLUDE_DIRS})
+    target_link_libraries(${BIN} vcflib tabixpp ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 endif()

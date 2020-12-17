@@ -1,0 +1,30 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  arch:
+    name: vcflib-CI
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.8]
+    steps:
+    - name: Install dependencies
+      run: sudo apt-get install cmake libhts-dev libtabixpp-dev libtabixpp0
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+    - name: Configure
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+    - name: Compile
+      run: make
+    - name: Run tests
+      run: |
+        cd build
+        ctest --verbose

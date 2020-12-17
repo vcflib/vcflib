@@ -17,12 +17,12 @@
 #include <cstdio>
 #include "split.h"
 #include "join.h"
-#include "tabix.hpp"
+#include <tabix.hpp>
 #include "SmithWatermanGotoh.h"
 #include "ssw_cpp.hpp"
 #include "convert.h"
 #include "multichoose.h"
-#include "Fasta.h"
+#include <Fasta.h>
 extern "C" {
     #include "filevercmp.h"
 }
@@ -193,7 +193,7 @@ public:
 class Variant {
 
     friend ostream& operator<<(ostream& out, Variant& var);
-    
+
 public:
 
     string sequenceName;
@@ -225,7 +225,7 @@ public:
 
     map<string, string> extendedAlternates(long int newPosition, long int length);
 
-    /** 
+    /**
      * Convert a structural variant to the canonical VCF4.3 format using a reference.
      *   Meturns true if the variant is canonicalized, false otherwise.
      *   May NOT be called twice on the same variant; it will fail an assert.
@@ -248,39 +248,39 @@ public:
      * TODO: CURRENTLY: canonical requires there be only one alt allele
     **/
     bool canonicalize(FastaReference& ref,
-         vector<FastaReference*> insertions, 
-         bool place_seq = true, 
+         vector<FastaReference*> insertions,
+         bool place_seq = true,
          int min_size_override = 0);
-         
-    /** 
+
+    /**
      * Returns true if the variant's ALT contains a symbolic allele like <INV>
      * instead of sequence, and the variant has an SVTYPE INFO tag.
      */
     bool isSymbolicSV() const;
-    
+
     /**
      * Returns true if the variant has an SVTYPE INFO tag and either an SVLEN or END INFO tag.
      */
     bool hasSVTags() const;
-    
+
     /**
      * This returns true if the variant appears able to be handled by
      * canonicalize(). It checks if it has fully specified sequence, or if it
-     * has a defined SV type and length/endpoint. 
+     * has a defined SV type and length/endpoint.
      */
     bool canonicalizable();
-    
+
     /**
      * This gets set to true after canonicalize() has been called on the variant, if it succeeded.
      */
     bool canonical;
-    
+
     /**
      * Get the maximum zero-based position of the reference affected by this variant.
      * Only works reliably for variants that are not SVs or for SVs that have been canonicalize()'d.
      */
     int getMaxReferencePos();
-   
+
     /**
      * Return the SV type of the given alt, or "" if there is no SV type set for that alt.
      * This is the One True Way to get the SVTYPE of a variant; we should not touch the SVTYPE tag anywhere else.
@@ -383,7 +383,7 @@ public:
 
     // constructor
     RuleToken(string token, map<string, VariantFieldType>& variables);
-    RuleToken(void) 
+    RuleToken(void)
         : type(BOOLEAN_VARIABLE)
         , state(false)
     { }
@@ -439,7 +439,7 @@ inline bool isRightParenthesis(const RuleToken& token) {
 }
 
 inline bool isOperand(const RuleToken& token) {
-    return ( token.type == RuleToken::OPERAND || 
+    return ( token.type == RuleToken::OPERAND ||
              token.type == RuleToken::NUMBER ||
              token.type == RuleToken::NUMERIC_VARIABLE ||
              token.type == RuleToken::STRING_VARIABLE ||
@@ -629,14 +629,14 @@ private:
      */
     vector<string> header_columns;
 
-    /* 
+    /*
      * the maps we're going to be using will be case-insensitive
      * so that "fileFormat" and "fileformat" hash to the same item.
      */
     struct stringcasecmp : binary_function<string, string, bool> {
         struct charcasecmp : public std::binary_function<unsigned char, unsigned char, bool> {
             bool operator() (const unsigned char& c1, const unsigned char& c2) const {
-                return tolower (c1) < tolower (c2); 
+                return tolower (c1) < tolower (c2);
             }
         };
         bool operator() (const std::string & s1, const std::string & s2) const {
@@ -645,10 +645,10 @@ private:
     };
 
     // contains all the ##_types_ as keys, the value is either empty or a VCF file has set it
-    map<string, string, stringcasecmp> header_lines; 
+    map<string, string, stringcasecmp> header_lines;
 
     // contains all the ##_types_ as keys, the value is a vector of ##_type_ (since there can be duplicate #INFO for example, duplicate ids are not allowed)
-    map<string, vector<string>, stringcasecmp> header_lists; 
+    map<string, vector<string>, stringcasecmp> header_lists;
 
 };
 

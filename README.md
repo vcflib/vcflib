@@ -2,7 +2,7 @@
 
 ### A C++ library for parsing and manipulating VCF files.
 
-[![Build Status](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib)
+![Github-CI](https://github.com/vcflib/vcflib/workflows/CI/badge.svg) [![Travis-CI](https://travis-ci.org/vcflib/vcflib.svg?branch=master)](https://travis-ci.org/vcflib/vcflib) [![AnacondaBadge](https://anaconda.org/bioconda/vcflib/badges/installer/conda.svg)](https://anaconda.org/bioconda/vcflib) [![DL](https://anaconda.org/bioconda/vcflib/badges/downloads.svg)](https://anaconda.org/bioconda/vcflib) [![BrewBadge](https://img.shields.io/badge/%F0%9F%8D%BAbrew-vcflib-brightgreen.svg)](https://github.com/brewsci/homebrew-bio) [![GuixBadge](https://img.shields.io/badge/gnuguix-vcflib-brightgreen.svg)](https://www.gnu.org/software/guix/packages/V/) [![DebianBadge](https://badges.debian.net/badges/debian/testing/libvcflib-dev/version.svg)](https://packages.debian.org/testing/libvcflib-dev)
 [![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html)
 [![Gitter](https://badges.gitter.im/ekg/vcflib.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -55,6 +55,19 @@ ctest --verbose
 ```
 
 Executables are built into the `./build` directory in the repository.
+
+Build dependencies can be viewed in the Travis-CI and github-CI
+scripts (see badges above), as well as [guix.scm](./guix.scm) used by
+us to create the build environment. Essentially:
+
+- C++ compiler
+- htslib
+- tabixpp
+
+And for some of the VCF executables
+
+- python
+- perl
 
 ## using the C++ library
 

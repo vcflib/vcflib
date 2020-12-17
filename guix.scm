@@ -29,16 +29,6 @@
   (ice-9 popen)
   (ice-9 rdelim))
 
-;;           (substitute* (find-files "." "\\.(h|c)(pp)?$")
-;;             (("\"SmithWatermanGotoh.h\"") "<smithwaterman/SmithWatermanGotoh.h>")
-;;             (("\"convert.h\"") "<smithwaterman/convert.h>")
-;;             (("\"disorder.h\"") "<smithwaterman/disorder.h>")
-;;            (("\"tabix.hpp\"") "<tabix.hpp>")
-;;             (("\"Fasta.h\"") "<fastahack/Fasta.h>"))
-;;           (for-each delete-file-recursively
-;;                     '("fastahack" "filevercmp" "fsom" "googletest" "intervaltree"
-;;                       "libVCFH" "multichoose" "smithwaterman" "tabixpp"))
-
 (define %source-dir (dirname (current-filename)))
 
 (define %git-commit
