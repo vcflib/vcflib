@@ -35,21 +35,31 @@ conda install -c conda-forge -c bioconda -c defaults vcflib
 brew install brewsci/bio/vcflib
 ```
 
-### source
-```
+### build from source
+
+VCFLIB uses the cmake build system, after a recursive checkout
+of the sources make the files in the ./build directory with:
+
+```sh
 git clone --recursive https://github.com/vcflib/vcflib.git
 cd vcflib
-make -j
+mkdir -p build && cd build
+cmake ..
+make
 ```
-Executables are built into the `./bin` directory in the repository.
-A number of shell, perl, python3, and R scripts already reside there.
-This makes installation easy, as users can add vcflib/bin
-to their path, or copy the contained executables to a directory already in their path.
 
+and to run the tests
+
+```sh
+cd test
+make
+```
+
+Executables are built into the `./build` directory in the repository.
 
 ## using the C++ library
 
-```
+```make
 # Put this in your Makefile
 
 VCFLIB_DIR = /path/to/vcflib

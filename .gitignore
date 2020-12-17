@@ -1,5 +1,4 @@
 *~
-Makefile
 .Rhistory
 .*swp
 .nfs*
@@ -123,3 +122,7 @@ bin/
 obj/
 include/
 build/
+*.aux
+*.log
+*.synctex.gz
+

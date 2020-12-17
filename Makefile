@@ -1,3 +1,5 @@
+# Convenience Makefile invokes cmake. See also the README
+
 VCF_LIB_LOCAL:=$(shell pwd)
 BUILD_DIR:=$(VCF_LIB_LOCAL)/build
 BIN_DIR:=$(VCF_LIB_LOCAL)/bin
@@ -5,7 +7,7 @@ LIB_DIR:=$(VCF_LIB_LOCAL)/lib
 INC_DIR:=$(VCF_LIB_LOCAL)/include
 CMAKE_FLAGS?=
 
-all: 
+all:
 	if [ ! -d $(BUILD_DIR) ]; then mkdir -p $(BUILD_DIR); fi
 	cd $(BUILD_DIR); \
 		cmake $(CMAKE_FLAGS) -DCMAKE_INSTALL_PREFIX=$(VCF_LIB_LOCAL) $(VCF_LIB_LOCAL); \
