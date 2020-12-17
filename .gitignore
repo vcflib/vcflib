@@ -1,8 +1,10 @@
 *~
+Makefile
 .Rhistory
 .*swp
 .nfs*
 *.o
+*.cmake
 BedReader.cpp
 Fasta.cpp
 Fasta.h
