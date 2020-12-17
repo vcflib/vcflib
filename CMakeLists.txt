@@ -1,19 +1,25 @@
 cmake_minimum_required(VERSION 2.8)
 project(vcflib)
 
+include(ExternalProject)
+include(FeatureSummary)
+# include(FindLibLZMA)
+# include(ExternalProject)
+include(FindZLIB)
+include(FindBZip2)
+include(FindLibLZMA)
+
+feature_summary(
+  FATAL_ON_MISSING_REQUIRED_PACKAGES
+  WHAT REQUIRED_PACKAGES_NOT_FOUND)
+
+# ---- Options
+
 option(OPENMP "Enable OpenMP" OFF)
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 
-enable_testing()
-
-include(ExternalProject)
-include(FeatureSummary)
-#include(FindLibLZMA)
-#include(ExternalProject)
-include(FindZLIB)
-include(FindBZip2)
-include(FindLibLZMA)
+# ---- Dependencies
 
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
@@ -21,6 +27,8 @@ set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
 #set_package_properties(LIBLZMA PROPERTIES TYPE REQUIRED)
 find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
+
+# ---- Build switches
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -D_FILE_OFFSET_BITS=64 -Isrc -O3")
 
@@ -37,6 +45,8 @@ if(GPROF)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif(GPROF)
 
+# ---- Include files
+
 include_directories(include)
 include_directories(tabixpp)
 include_directories(tabixpp/htslib)
@@ -45,6 +55,15 @@ include_directories(intervaltree)
 include_directories(smithwaterman)
 include_directories(multichoose)
 include_directories(filevercmp)
+
+file(GLOB INCLUDES
+  src/*.h*
+  multichoose/*.h*
+  intervaltree/*.h*
+  tabixpp/*.h*
+  smithwaterman/*.h*
+  fastahack/*.h*
+  filevercmp/*.h*)
 
 add_library(vcflib STATIC
     src/Variant.h
@@ -158,10 +177,16 @@ set(BINS
     vcfglbound
     vcfinfosummarize)
 
+# ---- Get version
+
 execute_process(COMMAND git describe --abbrev=4 --dirty --always
   OUTPUT_VARIABLE GIT_VERSION
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+add_definitions(-DVERSION="${GIT_VERSION}")
+
+# ---- Build htslib
 
 ExternalProject_Add(htslib-build
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/tabixpp/htslib
@@ -176,6 +201,7 @@ add_library(htslib STATIC IMPORTED)
 set_property(TARGET htslib PROPERTY
   IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/tabixpp/htslib/libhts.a)
 add_dependencies(htslib htslib-build)
+
 # If the user wants to configure our HTSlib to build with libddeflate, we need
 # to make sure to link against libdeflate as a transitive dependency. To do
 # that, pass -DHTSLIB_EXTRA_LIBS="-ldeflate" when configuring the project with
@@ -184,7 +210,7 @@ add_dependencies(htslib htslib-build)
 set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
 set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
-add_definitions(-DVERSION="${GIT_VERSION}")
+# ---- Build all
 
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
@@ -193,6 +219,9 @@ if (NOT BUILD_ONLY_LIB)
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 endif()
+enable_testing()
+
+# ---- Test
 
 add_test(
     NAME RunTests
@@ -200,19 +229,8 @@ add_test(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
 )
 
+# ---- Install
+
 install(TARGETS vcflib ARCHIVE DESTINATION lib)
 
-file(GLOB INCLUDES
-  src/*.h*
-  multichoose/*.h*
-  intervaltree/*.h*
-  tabixpp/*.h*
-  smithwaterman/*.h*
-  fastahack/*.h*
-  filevercmp/*.h*)
-
 install(FILES ${INCLUDES} DESTINATION include)
-
-feature_summary(
-  FATAL_ON_MISSING_REQUIRED_PACKAGES
-  WHAT REQUIRED_PACKAGES_NOT_FOUND)
