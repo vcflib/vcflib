@@ -15,5 +15,6 @@ os:
     - linux
 arch:
     - amd64
+    - arm64
     - ppc64le
 script:  make
