@@ -17,4 +17,9 @@ arch:
     - amd64
     - arm64
     - ppc64le
-script:  make
+script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make
+    - ctest --verbose
