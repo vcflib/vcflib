@@ -3,11 +3,12 @@ project(vcflib)
 
 include(ExternalProject)
 include(FeatureSummary)
-# include(FindLibLZMA)
-# include(ExternalProject)
-include(FindZLIB)
+
+find_package(PkgConfig REQUIRED)
+
 include(FindBZip2)
 include(FindLibLZMA)
+include(FindZLIB)
 
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
@@ -27,6 +28,8 @@ set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
 #set_package_properties(LIBLZMA PROPERTIES TYPE REQUIRED)
 find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
+
+pkg_check_modules(HTSLIB REQUIRED htslib)
 
 # ---- Build switches
 
@@ -49,12 +52,15 @@ endif(GPROF)
 
 include_directories(include)
 include_directories(tabixpp)
-include_directories(tabixpp/htslib)
 include_directories(fastahack)
 include_directories(intervaltree)
 include_directories(smithwaterman)
 include_directories(multichoose)
 include_directories(filevercmp)
+
+if(HTSLIB_LOCAL)
+  include_directories(tabixpp/htslib)
+endif(HTSLIB_LOCAL)
 
 file(GLOB INCLUDES
   src/*.h*
@@ -187,6 +193,11 @@ execute_process(COMMAND git describe --abbrev=4 --dirty --always
 add_definitions(-DVERSION="${GIT_VERSION}")
 
 # ---- Build htslib
+#
+# Note by default we use the distributed htslib! These are
+# the old instructions:
+
+if (HTSLIB_LOCAL)
 
 ExternalProject_Add(htslib-build
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/tabixpp/htslib
@@ -210,15 +221,18 @@ add_dependencies(htslib htslib-build)
 set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
 set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
+endif(HTSLIB_LOCAL)
+
 # ---- Build all
 
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
-    target_link_libraries(${BIN} vcflib htslib ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+    target_link_libraries(${BIN} vcflib ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 endif()
+
 enable_testing()
 
 # ---- Test
