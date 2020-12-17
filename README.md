@@ -51,8 +51,7 @@ make
 and to run the tests
 
 ```sh
-cd test
-make
+ctest --verbose
 ```
 
 Executables are built into the `./build` directory in the repository.

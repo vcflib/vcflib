@@ -5,6 +5,8 @@ option(OPENMP "Enable OpenMP" OFF)
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 
+enable_testing()
+
 include(ExternalProject)
 include(FeatureSummary)
 #include(FindLibLZMA)
@@ -44,19 +46,19 @@ include_directories(smithwaterman)
 include_directories(multichoose)
 include_directories(filevercmp)
 
-add_library(vcflib STATIC 
-    src/Variant.h 
-    src/split.h 
-    src/pdflib.hpp 
-    src/var.hpp 
-    src/cdflib.hpp 
-    src/rnglib.hpp 
+add_library(vcflib STATIC
+    src/Variant.h
+    src/split.h
+    src/pdflib.hpp
+    src/var.hpp
+    src/cdflib.hpp
+    src/rnglib.hpp
     src/join.h
-    src/Variant.cpp 
-    src/rnglib.cpp 
-    src/var.cpp 
-    src/pdflib.cpp 
-    src/cdflib.cpp 
+    src/Variant.cpp
+    src/rnglib.cpp
+    src/var.cpp
+    src/pdflib.cpp
+    src/cdflib.cpp
     src/split.cpp
     src/ssw.hpp
     src/ssw_cpp.hpp
@@ -71,7 +73,7 @@ add_library(vcflib STATIC
     filevercmp/filevercmp.c
     )
 
-set(BINS 
+set(BINS
     vcfecho
     dumpContigsFromHeader
     bFst
@@ -156,8 +158,8 @@ set(BINS
     vcfglbound
     vcfinfosummarize)
 
-execute_process(COMMAND git describe --abbrev=4 --dirty --always 
-  OUTPUT_VARIABLE GIT_VERSION 
+execute_process(COMMAND git describe --abbrev=4 --dirty --always
+  OUTPUT_VARIABLE GIT_VERSION
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -171,7 +173,7 @@ ExternalProject_Add(htslib-build
   )
 
 add_library(htslib STATIC IMPORTED)
-set_property(TARGET htslib PROPERTY 
+set_property(TARGET htslib PROPERTY
   IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/tabixpp/htslib/libhts.a)
 add_dependencies(htslib htslib-build)
 # If the user wants to configure our HTSlib to build with libddeflate, we need
@@ -192,6 +194,12 @@ if (NOT BUILD_ONLY_LIB)
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 endif()
 
+add_test(
+    NAME RunTests
+    COMMAND "make"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+)
+
 install(TARGETS vcflib ARCHIVE DESTINATION lib)
 
 file(GLOB INCLUDES
@@ -206,5 +214,5 @@ file(GLOB INCLUDES
 install(FILES ${INCLUDES} DESTINATION include)
 
 feature_summary(
-  FATAL_ON_MISSING_REQUIRED_PACKAGES 
+  FATAL_ON_MISSING_REQUIRED_PACKAGES
   WHAT REQUIRED_PACKAGES_NOT_FOUND)

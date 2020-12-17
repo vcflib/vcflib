@@ -15,9 +15,14 @@ all: run
 
 ../googletest/googletest/make/gtest_main.a:
 	cd ../googletest/googletest/make/ && make
+
 tests/main: ../googletest/googletest/make/gtest_main.a
 	$(CXX) $(CFLAGS) $(INCLUDE) $(LIB) $(LINKERS) tests/mainTest.cpp ../tabixpp/tabix.cpp ../tabixpp/htslib/libhts.a $(LIBVCF) $(LIBGTEST) -o tests/main
+
 run: tests/main
 	./tests/main
+	rm -v ../googletest/googletest/make/gtest_main.a
+	rm -v ../googletest/googletest/make/sample1_unittest
+
 clean:
 	rm -f tests/main
