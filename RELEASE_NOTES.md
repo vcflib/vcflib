@@ -4,7 +4,7 @@ This is a maintenance release of Freebayes:
 
 + Removed tabixpp and htslib source dependencies, i.e., we are now using
   the distro provided libraries and include files through pkg-config.
-  The `git submodules` are left in, just in case someone wants them.
++ Removed the tabixpp+htslib git submodule
 + Generalise and document the cmake build system
 + Added tests to the cmake build system and build instructions to README
 + Added support for ARM64 and PowerPC, see #292 (thanks @genisysram and @mr-c)
