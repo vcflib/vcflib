@@ -2,9 +2,15 @@
 
 This is a maintenance release of Freebayes:
 
-+ Added support for ARM64 and PowerPC, see #292 (thanks @genisysram and @mr-c)
-+ Added github actions for the issue tracker
-+ Added tests to the cmake build system and build instructions to README
 + Removed tabixpp and htslib source dependencies, i.e., we are now using
   the distro provided libraries and include files through pkg-config.
   The `git submodules` are left in, just in case someone wants them.
++ Generalise and document the cmake build system
++ Added tests to the cmake build system and build instructions to README
++ Added support for ARM64 and PowerPC, see #292 (thanks @genisysram and @mr-c)
++ Added github actions for the issue tracker
++ Added githum CI
+
+## Older changes
+
+For older changes view the git [log](https://github.com/vcflib/vcflib/commits/master).
