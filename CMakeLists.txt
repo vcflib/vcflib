@@ -247,6 +247,34 @@ add_test(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
 )
 
+function(add_pytest TEST_FILE)
+  add_test(
+      NAME ${TEST_FILE}
+      COMMAND python3 pytest/${TEST_FILE}.py
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+  )
+endfunction()
+
+function(add_pydoctest TEST_FILE)
+  add_test(
+      NAME ${TEST_FILE}
+      COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE pytest/${TEST_FILE}.md
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+  )
+endfunction()
+
+function(add_pydoctest_fullname TEST_FILE)
+  add_test(
+      NAME ${TEST_FILE}
+      COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE ${TEST_FILE}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+  )
+endfunction()
+
+# add_pytest(vcf2tsv-test)
+add_pydoctest(vcf2tsv)
+add_pydoctest_fullname(../README.md)
+
 # ---- Install
 
 install(TARGETS vcflib ARCHIVE DESTINATION lib)

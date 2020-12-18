@@ -174,6 +174,31 @@ Additionally, developers should be aware of that vcflib contains submodules (git
 Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
 Specifying -g will output one line per sample with genotype information.
 
+
+vcf2tsv converts a CSV to a tabulated test file, e.g.
+
+       vcf2tsv ../samples/sample.vcf
+
+<!--
+```{python, echo=FALSE, results='hide'}
+
+    >>> from pytest.rtest import run_stdout, head
+
+```
+-->
+
+```python
+
+>>> head("vcf2tsv ../samples/sample.vcf")
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  AA      AC      AF      AN      DB      DP      H2      NS
+19      111     .       A       C       9.6     .       .       .       .       .       .       .       .       .
+19      112     .       A       G       10      .       .       .       .       .       .       .       .       .
+20      14370   rs6054257       G       A       29      PASS    .       .       0.5     .       .       14      .       3
+
+```
+
+For more information on `vcf2tsv` click [here](./test/pytest/vcf2tsv.md)
+
 ### vcfaddinfo
 
     usage: vcfaddinfo <vcf file> <vcf file>

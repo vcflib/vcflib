@@ -4,6 +4,7 @@
 .nfs*
 *.o
 *.cmake
+tmp
 BedReader.cpp
 Fasta.cpp
 Fasta.h
@@ -34,7 +35,6 @@ test.db
 test.vcf
 test.vcf.gz
 test.vcf.gz.tbi
-test/
 vcf2tsv
 vcfaddinfo
 vcfaddtag.cpp
@@ -125,4 +125,4 @@ build/
 *.aux
 *.log
 *.synctex.gz
-
+test/tests/main
