@@ -21,7 +21,7 @@ using namespace vcflib;
 
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
+    cerr << "usage: vcfintersect [options] [<vcf file>]" << endl
          << endl
          << "options:" << endl 
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl

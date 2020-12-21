@@ -180,7 +180,8 @@ Additionally, developers should be aware of that vcflib contains submodules (git
 ```sh
 
 >>> cat("vcf2tsv -h")
-usage: ../build/vcf2tsv [-n null_string] [-g] [vcf file]
+usage: vcf2tsv [-n null_string] [-g] [vcf file]
+>
 Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
 Specifying -g will output one line per sample with genotype information.
 When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index
@@ -202,7 +203,7 @@ vcf2tsv converts a CSV to a tabulated test file, e.g.
 
 ```
 
-For more information on `vcf2tsv` click [here](./test/pytest/vcf2tsv.md)
+Docs [vcf2tsv.md](./test/pytest/vcf2tsv.md) | source code [vcf2tsv.cpp](./src/vcf2tsv.cpp)
 
 ### vcfaddinfo
 
@@ -445,28 +446,37 @@ Adds a field (id) which contains an allele-specific numerical index.
 
 ### vcfintersect
 
-    usage: vcfintersect [options] [<vcf file>]
+```sh
 
-    options:
-        -b, --bed FILE            use intervals provided by this BED file
-        -v, --invert              invert the selection, printing only records which would
-                                    not have been printed out
-        -i, --intersect-vcf FILE  use this VCF for set intersection generation
-        -u, --union-vcf FILE      use this VCF for set union generation
-        -w, --window-size N       compare records up to this many bp away (default 30)
-        -r, --reference FILE      FASTA reference file, required with -i and -u
-        -l, --loci                output whole loci when one alternate allele matches
-        -m, --ref-match           intersect on the basis of record REF string
-        -t, --tag TAG             attach TAG to each record's info field if it would intersect
-        -V, --tag-value VAL       use this value to indicate that the allele is passing
-                                  '.' will be used otherwise.  default: 'PASS'
-        -M, --merge-from FROM-TAG
-        -T, --merge-to   TO-TAG   merge from FROM-TAG used in the -i file, setting TO-TAG
-                                  in the current file.
-
+>>> cat("vcfintersect -h")
+usage: vcfintersect [options] [<vcf file>]
+>
+options:
+    -b, --bed FILE            use intervals provided by this BED file
+    -R, --region REGION       use 1-based tabix-style region (e.g. chrZ:10-20), multiples allowed
+    -S, --start-only          don't use the reference length information in the record to determine
+                              overlap status, just use the start posiion
+    -v, --invert              invert the selection, printing only records which would
+                                not have been printed out
+    -i, --intersect-vcf FILE  use this VCF for set intersection generation
+    -u, --union-vcf FILE      use this VCF for set union generation
+    -w, --window-size N       compare records up to this many bp away (default 30)
+    -r, --reference FILE      FASTA reference file, required with -i and -u
+    -l, --loci                output whole loci when one alternate allele matches
+    -m, --ref-match           intersect on the basis of record REF string
+    -t, --tag TAG             attach TAG to each record's info field if it would intersect
+    -V, --tag-value VAL       use this value to indicate that the allele is passing
+                              '.' will be used otherwise.  default: 'PASS'
+    -M, --merge-from FROM-TAG
+    -T, --merge-to   TO-TAG   merge from FROM-TAG used in the -i file, setting TO-TAG
+                              in the current file.
+>
 For bed-vcf intersection, alleles which fall into the targets are retained.
+>
+For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp
+as determined by haplotype comparison alleles.
 
-For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp as determined by haplotype comparison alleles.
+```
 
 
 ### vcfkeepgeno

@@ -27,6 +27,7 @@ def head(cmd, lines=4):
         out = output[1]
     # out=subprocess.check_output(cmd2, universal_newlines=True)
     header = out.decode().expandtabs(tabsize=8).split("\n")[0:lines]
+    header = ['>' if i=='' else i for i in header]
     print("\n".join(header))
 
 def run_stdout(cmd, ext = None):

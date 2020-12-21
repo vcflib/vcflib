@@ -9,7 +9,8 @@
 ```
 
 >>> cat("vcf2tsv -h")
-usage: ../build/vcf2tsv [-n null_string] [-g] [vcf file]
+usage: vcf2tsv [-n null_string] [-g] [vcf file]
+>
 Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
 Specifying -g will output one line per sample with genotype information.
 When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index
@@ -39,6 +40,10 @@ Use the `-g` switch to show genotypes
 19      111     .       A       C       9.6     .       .       .       .       .       .       .       .       .       NA00003 .       .       0/1     3,3
 
 ```
+
+# Source code
+
+[vcf2tsv.cpp](../../src/vcf2tsv.cpp)
 
 # Regression tests
 

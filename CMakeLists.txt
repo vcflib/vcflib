@@ -266,7 +266,7 @@ endfunction()
 function(add_pydoctest_fullname TEST_FILE)
   add_test(
       NAME ${TEST_FILE}
-      COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE ${TEST_FILE}
+      COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF ${TEST_FILE}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
 endfunction()

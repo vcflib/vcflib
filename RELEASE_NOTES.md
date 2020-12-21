@@ -10,6 +10,7 @@ This is a maintenance release of Freebayes:
 + Added support for ARM64 and PowerPC, see #292 (thanks @genisysram and @mr-c)
 + Added github actions for the issue tracker
 + Added githum CI
++ Updated header files in src with copyright/license info, see #16
 
 ## Older changes
 
