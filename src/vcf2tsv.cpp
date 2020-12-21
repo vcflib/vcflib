@@ -1,3 +1,12 @@
+/*
+    vcflib C++ library for parsing and manipulating VCF files
+
+    Copyright © 2010-2020 Erik Garrison
+    Copyright © 2020      Pjotr Prins
+
+    This software is published under the MIT License. See the LICENSE file.
+*/
+
 #include "Variant.h"
 #include <getopt.h>
 
@@ -5,10 +14,10 @@ using namespace std;
 using namespace vcflib;
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [-n null_string] [-g]" << " [vcf file]" << endl
-         << "Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table." << endl
-         << "Specifying -g will output one line per sample with genotype information." << endl
-         << "When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index" << endl;
+  cerr << "usage: " << argv[0] << " [-n null_string] [-g]" << " [vcf file]" << endl <<
+       << "Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table." << endl
+       << "Specifying -g will output one line per sample with genotype information." << endl
+       << "When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index" << endl;
 
     exit(1);
 }
@@ -207,4 +216,3 @@ int main(int argc, char** argv) {
     }
     return 0;
 }
-

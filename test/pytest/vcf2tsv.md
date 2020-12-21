@@ -2,13 +2,13 @@
 
 <!--
 
-    >>> from pytest.rtest import run_stdout, head
+    >>> from pytest.rtest import run_stdout, head, cat
 
 -->
 
 ```
 
->>> head("vcf2tsv -h")
+>>> cat("vcf2tsv -h")
 usage: ../build/vcf2tsv [-n null_string] [-g] [vcf file]
 Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table.
 Specifying -g will output one line per sample with genotype information.
@@ -44,9 +44,8 @@ Use the `-g` switch to show genotypes
 
 The following commands run full regression tests:
 
-```python
+>>> run_stdout("vcf2tsv ../samples/sample.vcf", ext="tsv")
+output in <a href="../data/regression/vcf2tsv_4.tsv">vcf2tsv_4.tsv</a>
 
-    >>> run_stdout("vcf2tsv ../samples/sample.vcf", ext="tsv")
-    >>> run_stdout("vcf2tsv -g ../samples/sample.vcf", ext="tsv")
-
-```
+>>> run_stdout("vcf2tsv -g ../samples/sample.vcf", ext="tsv")
+output in <a href="../data/regression/vcf2tsv_5.tsv">vcf2tsv_5.tsv</a>

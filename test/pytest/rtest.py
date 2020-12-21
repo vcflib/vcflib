@@ -11,6 +11,9 @@ bindir = "../build"
 regressiondir = "data/regression"
 tmpdir = "tmp"
 
+def cat(cmd):
+    head(cmd, -1)
+
 def head(cmd, lines=4):
     # out = subprocess.check_output(f"{bindir}/{cmd}",shell=True)
     cmd2 = f"{bindir}/{cmd}".split()
@@ -50,3 +53,4 @@ def run_stdout(cmd, ext = None):
     os.system(f"{bindir}/{cmd} > {tmpfn}")
     cmpfn = regressiondir+"/"+name
     sys.stdout.writelines(difflib.unified_diff(open(cmpfn).readlines(),open(tmpfn).readlines(),cmpfn,tmpfn,n=1))
+    print(f"output in <a href=\"../data/regression/{name}\">{name}</a>")
