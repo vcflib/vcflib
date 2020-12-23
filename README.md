@@ -35,56 +35,6 @@ conda install -c conda-forge -c bioconda -c defaults vcflib
 brew install brewsci/bio/vcflib
 ```
 
-### build from source
-
-VCFLIB uses the cmake build system, after a recursive checkout
-of the sources make the files in the ./build directory with:
-
-```sh
-git clone --recursive https://github.com/vcflib/vcflib.git
-cd vcflib
-mkdir -p build && cd build
-cmake ..
-cmake --build .
-cmake --install .
-```
-
-and to run the tests
-
-```sh
-ctest --verbose
-```
-
-Executables are built into the `./build` directory in the repository.
-
-Build dependencies can be viewed in the Travis-CI and github-CI
-scripts (see badges above), as well as [guix.scm](./guix.scm) used by
-us to create the build environment. Essentially:
-
-- C++ compiler
-- htslib
-- tabixpp
-
-And for some of the VCF executables
-
-- python
-- perl
-
-## using the C++ library
-
-```make
-# Put this in your Makefile
-
-VCFLIB_DIR = /path/to/vcflib
-VCFLIB_INC = -I $(VCFLIB_DIR)/include -I $(VCFLIB_DIR)/tabixpp/htslib
-VCFLIB_LIB = -L $(VCFLIB_DIR)/tabixpp -L $(VCFLIB_DIR)/lib -lhts -lvcflib -lz -lm -llzma -lbz2
-CXX="g++"
-CXXFLAGS="-std=-std=c++0x -Ofast -D_FILE_OFFSET_BITS=64"
-
-mytool: mytool.cpp
-	$(CXX) $(CXXFLAGS) $(VCFLIB_INC) -o $@ $< $(VCFLIB_LIB)
-```
-
 ## usage
 
 vcflib provides a variety of functions for VCF manipulation:
@@ -209,7 +159,9 @@ Docs [vcf2tsv.md](./test/pytest/vcf2tsv.md) | source code [vcf2tsv.cpp](./src/vc
 ### vcfaddinfo
 
     usage: vcfaddinfo <vcf file> <vcf file>
-Adds info fields from the second file which are not present in the first vcf file.
+
+Add info fields from the second file which are not present in the
+first vcf file.
 
 
 ### vcfafpath
@@ -238,17 +190,22 @@ Counts the number of alternate alleles in the record.
 
 ### vcfannotate
 
-    usage: vcfannotate [options] [<vcf file>]
+```sh
 
-    options:
-        -b, --bed   use annotations provided by this BED file
-        -k, --key   use this INFO field key for the annotations
-        -d, --default  use this INFO field key for records without annotations
-
+>>> cat("vcfannotate -h")
+usage: vcfannotate [options] [<vcf file>]
+>
+options:
+    -b, --bed   use annotations provided by this BED file
+    -k, --key   use this INFO field key for the annotations
+    -d, --default  use this INFO field key for records without annotations
+>
 Intersect the records in the VCF file with targets provided in a BED file.
 Intersections are done on the reference sequences in the VCF file.
-If no VCF filename is specified on the command line (last argument) the VCF read from stdin.
+If no VCF filename is specified on the command line (last argument) the VCF
+read from stdin.
 
+```
 
 ### vcfannotategenotypes
 
@@ -268,71 +225,108 @@ If multiple alleles are specified in a single record, break the record into mult
 
 ### vcfcheck
 
-    usage: vcfcheck [options] <vcf file>
+```sh
 
-    options: -f, --fasta-reference  FASTA reference file to use to obtain
-                                    primer sequences
-
+>>> cat("vcfcheck -h")
+usage: vcfcheck [options] <vcf file>
+>
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    -x, --exclude-failures If a record fails, don't print it.  Otherwise do.
+    -k, --keep-failures    Print if the record fails, otherwise not.
+    -h, --help       Print this message.
+    -v, --version    Print version.
+>
 Verifies that the VCF REF field matches the reference as described.
+>
 
-
+```
 
 ### vcfcleancomplex
 
-Removes reference-matching sequence from complex alleles and adjusts records to
-reflect positional change.
+Removes reference-matching sequence from complex alleles and adjusts
+records to reflect positional change.
 
+```sh
+
+>>> cat("vcfcleancomplex")
+usage: vcfcleancomplex <vcf file>
+outputs a VCF stream in which 'long' non-complexalleles have their position corrected.
+assumes that VCF records can't overlap 5'->3'
+
+```
 
 ### vcfcombine
 
-    usage: vcfcombine [vcf file] [vcf file] ...
+```sh
 
-    options:
-        -h --help           This text.
-        -r --region REGION  A region specifier of the form chrN:x-y to bound the merge
-
+>>> cat("vcfcombine -h")
+usage: vcfcombine [vcf file] [vcf file] ...
+>
 Combines VCF files positionally, combining samples when sites and alleles are identical.
-Any number of VCF files may be combined.
-The INFO field and other columns are taken from one of the files which are combined when records in multiple files match.
-Alleles must
-have identical ordering to be combined into one record.
-If they do not, multiple records will be emitted.
+Any number of VCF files may be combined.  The INFO field and other columns are taken from
+one of the files which are combined when records in multiple files match.  Alleles must
+have identical ordering to be combined into one record.  If they do not, multiple records
+will be emitted.
+>
+options:
+    -h --help           This text.
+    -v --version        Print version.
+    -r --region REGION  A region specifier of the form chrN:x-y to bound the merge
 
+```
 
 ### vcfcommonsamples
 
-    usage: vcfcommonsamples <vcf file> <vcf file>
+```sh
 
-Outputs each record in the first file, removing samples not present in the second.
+>>> cat("vcfcommonsamples -h")
+usage: vcfcommonsamples <vcf file> <vcf file>
+outputs each record in the first file, removing samples not present in the second
 
+```
 
 ### vcfcountalleles
 
 Counts the total number of alleles in the input.
 
-
 ### vcfcreatemulti
 
-If overlapping alleles are represented across multiple records, merge them into a single record.
+If overlapping alleles are represented across multiple records, merge
+them into a single record.
 
 ### vcfdistance
 
-Adds a value to each VCF record indicating the distance to the nearest variant
-in the file.
+Adds a value to each VCF record indicating the distance to the nearest
+variant in the file.
 
+```sh
+
+>>> cat("vcfdistance -h")
+usage: vcfdistance [customtagname] < [vcf file]
+adds a tag to each variant record which indicates the distance
+to the nearest variant.
+(defaults to BasesToClosestVariant if no custom tag name is given.
+
+```
 
 ### vcfentropy
 
-    usage: vcfentropy [options] <vcf file>
+```sh
 
-    options:
-        -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
-        -w, --window-size      Size of the window over which to calculate entropy
+>>> cat("vcfentropy -h")
+usage: vcfentropy [options] <vcf file>
+>
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain flanking sequences
+    -w, --window-size      Size of the window over which to calculate entropy
+>
+Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight,
+EntropyCenter, which are the entropies of the sequence of the given window size to the
+left, right, and center  of the record.  Also adds EntropyRef and EntropyAlt for each alt.
+>
 
-Anotates the output VCF file with, for each record, EntropyLeft,
-EntropyRight, EntropyCenter, which are the entropies of the sequence of the
-given window size to the left, right, and center  of the record.
-
+```
 
 
 ### vcffilter
@@ -378,7 +372,18 @@ though it does not appear in the INFO fields.
 
 ```
 
+Docs [vcffilter.md](./test/pytest/vcffilter.md) | source code [vcffilter.cpp](./src/vcffilter.cpp)
+
+
 ### vcffixup
+
+```sh
+
+>>> cat("vcffixup -h")
+usage: vcffixup <vcf file>
+outputs a VCF stream where AC and NS have been generated for each record using sample genotypes
+
+```
 
 Count the allele frequencies across alleles present in each record in the VCF file. (Similar to vcftools --freq.)
 
@@ -394,12 +399,17 @@ was not called as polymorphic.
 
 ### vcfflatten
 
-    usage: vcfflatten [file]
+```sh
 
-Removes multi-allelic sites by picking the most common alternate.
-Requires allele frequency specification 'AF' and use of 'G' and 'A' to specify the fields which vary according to the Allele or Genotype.
-VCF file may be specified on the command line or piped as stdin.
+>>> cat("vcfflatten -h")
+usage: vcfflatten [file]
+>
+Removes multi-allelic sites by picking the most common alternate.  Requires
+allele frequency specification 'AF' and use of 'G' and 'A' to specify the
+fields which vary according to the Allele or Genotype. VCF file may be
+specified on the command line or piped as stdin.
 
+```
 
 ### vcfgeno2haplo
 
@@ -487,6 +497,8 @@ as determined by haplotype comparison alleles.
 
 ```
 
+Docs [vcfintersect.md](./test/pytest/vcfintersect.md) | source code [vcfintersect.cpp](./src/vcfintersect.cpp)
+
 
 ### vcfkeepgeno
 
@@ -542,13 +554,20 @@ Annotates the VCF stream on stdin with the number of alternate alleles at the si
 
 ### vcfoverlay
 
-    usage: vcfoverlay [options] [<vcf file> ...]
+VCF merging.
 
-    options:
-        -h, --help       this dialog
+```sh
 
-    Overlays records in the input vcf files in the order in which they appear.
+>>> cat("vcfoverlay -h")
+usage: vcfoverlay [options] [<vcf file> ...]
+>
+options:
+    -h, --help       this dialog
+    -v, --version    prints version
+>
+Overlays records in the input vcf files in the order in which they appear.
 
+```
 
 ### vcfparsealts
 
@@ -1004,6 +1023,58 @@ INFO: required: o,format   -- argument: format of input file, case sensitive
 INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)
 INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)
 INFO: optional: t,truncate -- flag    : end last window at last position (zero based) last window at last position (zero based)
+```
+
+# Development
+
+## build from source
+
+VCFLIB uses the cmake build system, after a recursive checkout
+of the sources make the files in the ./build directory with:
+
+```sh
+git clone --recursive https://github.com/vcflib/vcflib.git
+cd vcflib
+mkdir -p build && cd build
+cmake ..
+cmake --build .
+cmake --install .
+```
+
+and to run the tests
+
+```sh
+ctest --verbose
+```
+
+Executables are built into the `./build` directory in the repository.
+
+Build dependencies can be viewed in the Travis-CI and github-CI
+scripts (see badges above), as well as [guix.scm](./guix.scm) used by
+us to create the build environment. Essentially:
+
+- C++ compiler
+- htslib
+- tabixpp
+
+And for some of the VCF executables
+
+- python
+- perl
+
+## using the C++ library
+
+```make
+# Put this in your Makefile
+
+VCFLIB_DIR = /path/to/vcflib
+VCFLIB_INC = -I $(VCFLIB_DIR)/include -I $(VCFLIB_DIR)/tabixpp/htslib
+VCFLIB_LIB = -L $(VCFLIB_DIR)/tabixpp -L $(VCFLIB_DIR)/lib -lhts -lvcflib -lz -lm -llzma -lbz2
+CXX="g++"
+CXXFLAGS="-std=-std=c++0x -Ofast -D_FILE_OFFSET_BITS=64"
+
+mytool: mytool.cpp
+	$(CXX) $(CXXFLAGS) $(VCFLIB_INC) -o $@ $< $(VCFLIB_LIB)
 ```
 
 # LICENSE

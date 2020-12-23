@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+# cmake_minimum_required(VERSION 2.8)
 project(vcflib)
 
 include(ExternalProject)
@@ -187,23 +187,9 @@ set(BINS
 
 # ---- Get version
 
-find_program(GIT git)
-
-if (GIT)
-
-  execute_process(COMMAND git describe --abbrev=4 --dirty --always
-    OUTPUT_VARIABLE GIT_VERSION
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  add_definitions(-DVERSION="${GIT_VERSION}")
-
-else (GIT)
-
-  file (STRINGS "VERSION" BUILD_NUMBER)
-  add_definitions(-DVCFLIB_VERSION="${BUILD_NUMBER}")
-
-endif (GIT)
+file (STRINGS "VERSION" BUILD_NUMBER)
+add_definitions(-DVCFLIB_VERSION="${BUILD_NUMBER}")
+add_definitions(-DVERSION="${BUILD_NUMBER}")
 
 # ---- Build htslib
 #
