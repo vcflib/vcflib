@@ -239,7 +239,6 @@ endif(HTSLIB_LOCAL)
 
 # ---- Build all
 
-
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
@@ -290,26 +289,18 @@ add_pydoctest_fullname(../README.md)
 # ---- Build docs
 #
 # Generates man pages for the python doctests. Don't need
-# to run every time. For pandoc logic see
+# to run every time so it is a separate command. For pandoc logic see
 # https://www.howtogeek.com/682871/how-to-create-a-man-page-on-linux/
 #
-# cmake --build . --target doc
+# cmake --build . --target doc ; cmake --install .
 
 find_program(PANDOC pandoc)
 
 if (PANDOC)
-    # set input and output files
-    # set(PANDOC_IN ${CMAKE_CURRENT_SOURCE_DIR}/../docs/Doxyfile.in)
-    # set(PANDOC_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-    # request to configure the file
-    # configure_file(${PANDOC_IN} ${PANDOC_OUT} @ONLY)
-    # message("Doxygen build started")
-
     # note the option ALL which allows to build the docs together with the application
     add_custom_target( doc ALL
-        COMMAND ${PANDOC} ../test/pytest/vcf2tsv.md -s -t man -o ../man/vcf2tsv.1
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${PANDOC} ./test/pytest/vcf2tsv.md -s -t man -o ./man/vcf2tsv.1
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating man documentation with PANDOC"
         VERBATIM )
 else (PANDOC)
@@ -321,3 +312,5 @@ endif (PANDOC)
 install(TARGETS vcflib ARCHIVE DESTINATION lib)
 
 install(FILES ${INCLUDES} DESTINATION include)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/man DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)

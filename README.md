@@ -45,7 +45,8 @@ git clone --recursive https://github.com/vcflib/vcflib.git
 cd vcflib
 mkdir -p build && cd build
 cmake ..
-make
+cmake --build .
+cmake --install .
 ```
 
 and to run the tests
