@@ -18,6 +18,7 @@
   (gnu packages bioinformatics)
   (gnu packages build-tools)
   (gnu packages curl)
+  (gnu packages haskell-xyz) ; pandoc
   (gnu packages llvm)
   (gnu packages python)
   ;; (gnu packages ninja)
@@ -44,6 +45,7 @@
      `(("curl" ,curl)
        ("fastahack" ,fastahack)
        ("htslib" ,htslib)
+       ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
        ("smithwaterman" ,smithwaterman)

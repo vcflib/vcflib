@@ -16,6 +16,7 @@ feature_summary(
 
 # ---- Options
 
+option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" OFF)
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
@@ -186,12 +187,23 @@ set(BINS
 
 # ---- Get version
 
-execute_process(COMMAND git describe --abbrev=4 --dirty --always
-  OUTPUT_VARIABLE GIT_VERSION
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+find_program(GIT git)
 
-add_definitions(-DVERSION="${GIT_VERSION}")
+if (GIT)
+
+  execute_process(COMMAND git describe --abbrev=4 --dirty --always
+    OUTPUT_VARIABLE GIT_VERSION
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  add_definitions(-DVERSION="${GIT_VERSION}")
+
+else (GIT)
+
+  file (STRINGS "VERSION" BUILD_NUMBER)
+  add_definitions(-DVCFLIB_VERSION="${BUILD_NUMBER}")
+
+endif (GIT)
 
 # ---- Build htslib
 #
@@ -232,7 +244,7 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     target_include_directories(${BIN} PUBLIC ${TABIXPP_LIBRARIES} ${HTSLIB_INCLUDE_DIRS})
-    target_link_libraries(${BIN} vcflib tabixpp ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+    target_link_libraries(${BIN} vcflib tabixpp -DGIT_VERSION=0.9.0 ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 endif()
@@ -274,6 +286,35 @@ endfunction()
 # add_pytest(vcf2tsv-test)
 add_pydoctest(vcf2tsv)
 add_pydoctest_fullname(../README.md)
+
+# ---- Build docs
+#
+# Generates man pages for the python doctests. Don't need
+# to run every time. For pandoc logic see
+# https://www.howtogeek.com/682871/how-to-create-a-man-page-on-linux/
+#
+# cmake --build . --target doc
+
+find_program(PANDOC pandoc)
+
+if (PANDOC)
+    # set input and output files
+    # set(PANDOC_IN ${CMAKE_CURRENT_SOURCE_DIR}/../docs/Doxyfile.in)
+    # set(PANDOC_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    # request to configure the file
+    # configure_file(${PANDOC_IN} ${PANDOC_OUT} @ONLY)
+    # message("Doxygen build started")
+
+    # note the option ALL which allows to build the docs together with the application
+    add_custom_target( doc ALL
+        COMMAND ${PANDOC} ../test/pytest/vcf2tsv.md -s -t man -o ../man/vcf2tsv.1
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating man documentation with PANDOC"
+        VERBATIM )
+else (PANDOC)
+  message("Pandoc needs to be installed to generate the man pages")
+endif (PANDOC)
 
 # ---- Install
 

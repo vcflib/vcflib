@@ -15,15 +15,15 @@
 #include <stdio.h>
 
 void printBasicVersion(void){
-  std::cout << "vcflib" << "\t" << VERSION << std::endl;
+  std::cout << "vcflib" << "\t" << VCFLIB_VERSION << std::endl;
 }
 
 void printVersion(void){
 
   std::cerr << "------------------------------------------------------" << std::endl;
   std::cerr << "              This is a vcflib::GPAT++ tool           " << std::endl;
-  
-  std::cerr << "-Version       : " << VERSION << std::endl;
+
+  std::cerr << "-Version       : " << VCFLIB_VERSION << std::endl;
   std::cerr << "-Contact       : zev.kronenberg [at] gmail.com " << std::endl;
   std::cerr << "-Notes         : If you find a bug, please open a report on github!" << std::endl;
   std::cerr << "-Support       : Please post questions to biostars.org             " << std::endl;
