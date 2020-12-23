@@ -15,7 +15,8 @@ using namespace std;
 using namespace vcflib;
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
+  cerr << "vcflib " << VCFLIB_VERSION << " filtering" << endl << endl
+       << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
          << "options:" << endl
          << "    -f, --info-filter     specifies a filter to apply to the info fields of records," << endl
@@ -428,4 +429,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

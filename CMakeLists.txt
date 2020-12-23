@@ -284,6 +284,8 @@ endfunction()
 
 # add_pytest(vcf2tsv-test)
 add_pydoctest(vcf2tsv)
+add_pydoctest(vcfintersect)
+add_pydoctest(vcffilter)
 add_pydoctest_fullname(../README.md)
 
 # ---- Build docs
@@ -292,17 +294,18 @@ add_pydoctest_fullname(../README.md)
 # to run every time so it is a separate command. For pandoc logic see
 # https://www.howtogeek.com/682871/how-to-create-a-man-page-on-linux/
 #
-# cmake --build . --target doc ; cmake --install .
+# cmake --build . --target man ; cmake --install .
 
 find_program(PANDOC pandoc)
 
 if (PANDOC)
     # note the option ALL which allows to build the docs together with the application
-    add_custom_target( doc ALL
-        COMMAND ${PANDOC} ./test/pytest/vcf2tsv.md -s -t man -o ./man/vcf2tsv.1
+    add_custom_target( man
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating man documentation with PANDOC"
-        VERBATIM )
+        # COMMAND ${PANDOC} ./test/pytest/vcf2tsv.md -s -t man -o ./man/vcf2tsv.1
+        # Note this requires Ruby
+        COMMAND ./scripts/md2man
+    )
 else (PANDOC)
   message("Pandoc needs to be installed to generate the man pages")
 endif (PANDOC)

@@ -10,6 +10,7 @@ INCLUDE=-I../src -I../googletest/googletest/include/ -I../fastahack -I../smithwa
 LIB=-L../build -L../googletest/googletest/make/ -lm -ltabixpp -lhts -lpthread
 LIBGTEST=../googletest/googletest/make/gtest_main.a
 LIBVCF=../build/libvcflib.a
+
 all: run
 
 ../googletest/googletest/make/gtest_main.a:

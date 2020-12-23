@@ -11,6 +11,8 @@ bindir = "../build"
 regressiondir = "data/regression"
 tmpdir = "tmp"
 
+VERSION = open("../VERSION").read().strip()
+
 def cat(cmd):
     head(cmd, -1)
 
@@ -19,7 +21,7 @@ def head(cmd, lines=4):
     cmd2 = f"{bindir}/{cmd}".split()
     # process = Popen(cmd2, stdout=PIPE, stderr=PIPE, shell=True)
     # out = process.communicate()[0]
-    p = Popen(cmd2, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd2, stdout=PIPE, stderr=PIPE, close_fds=True)
     output = p.communicate()
     out = output[0]
     if len(out) == 0:
@@ -27,10 +29,12 @@ def head(cmd, lines=4):
         out = output[1]
     # out=subprocess.check_output(cmd2, universal_newlines=True)
     header = out.decode().expandtabs(tabsize=8).split("\n")[0:lines]
-    header = ['>' if i=='' else i for i in header]
+    header = ['>' if l=='' else l for l in header]
+    header = [l.replace(VERSION+" ", "") for l in header]
+    header = [l.replace("../build/", "") for l in header]
     print("\n".join(header))
 
-def run_stdout(cmd, ext = None):
+def run_stdout(cmd, ext = "vcf"):
     os.makedirs(tmpdir,exist_ok=True)
     curframe = inspect.currentframe()
     # pp = pprint.PrettyPrinter(indent=4)

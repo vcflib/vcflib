@@ -337,40 +337,46 @@ given window size to the left, right, and center  of the record.
 
 ### vcffilter
 
-    usage: vcffilter [options] <vcf file>
+```sh
 
-    options:
-        -f, --info-filter     specifies a filter to apply to the info fields of records,
-                              removes alleles which do not pass the filter
-        -g, --genotype-filter specifies a filter to apply to the genotype fields of records
-        -s, --filter-sites    filter entire records, not just alleles
-        -t, --tag-pass        tag vcf records as positively filtered with this tag, print all records
-        -F, --tag-fail        tag vcf records as negatively filtered with this tag, print all records
-        -A, --append-filter   append the existing filter tag, don't just replace it
-        -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag
-        -v, --invert          inverts the filter, e.g. grep -v
-        -o, --or              use logical OR instead of AND to combine filters
-        -r, --region          specify a region on which to target the filtering, requires a BGZF
-                              compressed file which has been indexed with tabix.  any number of
-                              regions may be specified.
-
-Filter the specified VCF file using the set of filters.
-Filters are specified in the form "<ID> <operator> <value>":
-    -f "DP > 10"  # for info fields
-    -g "GT = 1|1" # for genotype fields
-    -f "CpG"      # for 'flag' fields
-
+>>> cat("vcffilter -h")
+vcflib filtering
+>
+usage: vcffilter [options] <vcf file>
+>
+options:
+    -f, --info-filter     specifies a filter to apply to the info fields of records,
+                          removes alleles which do not pass the filter
+    -g, --genotype-filter specifies a filter to apply to the genotype fields of records
+    -k, --keep-info       used in conjunction with '-g', keeps variant info, but removes genotype
+    -s, --filter-sites    filter entire records, not just alleles
+    -t, --tag-pass        tag vcf records as positively filtered with this tag, print all records
+    -F, --tag-fail        tag vcf records as negatively filtered with this tag, print all records
+    -A, --append-filter   append the existing filter tag, don't just replace it
+    -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag
+    -v, --invert          inverts the filter, e.g. grep -v
+    -o, --or              use logical OR instead of AND to combine filters
+    -r, --region          specify a region on which to target the filtering, requires a BGZF
+                          compressed file which has been indexed with tabix.  any number of
+                          regions may be specified.
+>
+Filter the specified vcf file using the set of filters.
+Filters are specified in the form "<ID> <operator> <value>:
+ -f "DP > 10"  # for info fields
+ -g "GT = 1|1" # for genotype fields
+ -f "CpG"  # for 'flag' fields
+>
 Operators can be any of: =, !, <, >, |, &
-
+>
 Any number of filters may be specified.  They are combined via logical AND
-unless --or is specified on the command line.  Obtain logical negation
-through the use of parentheses, and negative numbers using 0-N:
-	-f "! ( DP = 10 )"   # depth not-equal 10
-	-f "GL = ( 0 - 1 )"  # genotype-ll equal -1
+unless --or is specified on the command line.  Obtain logical negation through
+the use of parentheses, e.g. "! ( DP = 10 )"
+>
+For convenience, you can specify "QUAL" to refer to the quality of the site, even
+though it does not appear in the INFO fields.
+>
 
-For convenience, you can specify "QUAL" to refer to the quality of the site,
-even though it does not appear in the INFO fields.
-
+```
 
 ### vcffixup
 
@@ -450,6 +456,8 @@ Adds a field (id) which contains an allele-specific numerical index.
 ```sh
 
 >>> cat("vcfintersect -h")
+vcflib set analysis
+>
 usage: vcfintersect [options] [<vcf file>]
 >
 options:

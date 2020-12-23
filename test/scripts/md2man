@@ -1,0 +1,21 @@
+#! /usr/bin/env ruby
+#
+# cd test
+# ruby md2man
+#
+# Copyright (C) 2020 Pjotr Prins
+
+Dir.glob('pytest/*.md').each do|md|
+  mdbase = File.basename(md,".md")
+  tmpfn = "tmp/"+mdbase
+  skip = false
+  File.open(tmpfn,"w") do | out |
+    File.open(md).each_line do |line|
+      skip = false if skip and line =~ /^#/
+      skip = true if line =~ /Source code/
+      skip = true if line =~ /Regression tests/
+      out.write(line) if not skip
+    end
+  end
+  print `pandoc #{tmpfn} -s -t man -o ../man/#{mdbase}.1`
+end

@@ -1,0 +1,71 @@
+% <%= cmd.upcase %>(1) <%= cmd %> <%= VERSION %> | <%= descr %>
+% Erik Garrison and vcflib contributors
+
+# NAME
+
+<%= cmd %>
+
+# SYNOPSIS
+
+<%= usage %>
+
+# DESCRIPTION
+
+<%= descr %>
+
+# OPTIONS
+
+<%= options %>
+
+# EXIT VALUES
+
+**0**
+: Success
+
+**not 0**
+: Failure
+
+# EXAMPLES
+
+
+<!--
+
+    >>> from pytest.rtest import run_stdout, head, cat
+
+-->
+
+```
+
+>>> head("<%= cmd %> -h",1)
+<%= usage_full %>
+
+
+```
+
+<%= cmd %> does something
+
+```python
+
+>>> head("<%= cmd %> ../samples/sample.vcf")
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  AA      AC      AF      AN      DB      DP      H2      NS
+19      111     .       A       C       9.6     .       .       .       .       .       .       .       .       .
+19      112     .       A       G       10      .       .       .       .       .       .       .       .       .
+20      14370   rs6054257       G       A       29      PASS    .       .       0.5     .       .       14      .       3
+
+```
+
+## Source code
+
+[<%= cmd %>.cpp](../../src/<%= cmd %>.cpp)
+
+## Regression tests
+
+The following commands run full regression tests:
+
+>>> run_stdout("<%= cmd %> ../samples/sample.vcf", ext="tsv")
+output in <a href="../data/regression/<%= cmd %>_4.tsv"><%= cmd %>_4.tsv</a>
+
+
+# LICENSE
+
+Copyright 2011-<%= year %> (C) Erik Garrison and vcflib contributors. MIT licensed.

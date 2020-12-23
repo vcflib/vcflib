@@ -19,11 +19,11 @@
 using namespace std;
 using namespace vcflib;
 
-
 void printSummary(char** argv) {
-    cerr << "usage: vcfintersect [options] [<vcf file>]" << endl
+  cerr << "vcflib " << VCFLIB_VERSION << " set analysis" << endl << endl
+       << "usage: vcfintersect [options] [<vcf file>]" << endl
          << endl
-         << "options:" << endl 
+         << "options:" << endl
          << "    -b, --bed FILE            use intervals provided by this BED file" << endl
          << "    -R, --region REGION       use 1-based tabix-style region (e.g. chrZ:10-20), multiples allowed" << endl
          << "    -S, --start-only          don't use the reference length information in the record to determine" << endl
@@ -217,7 +217,7 @@ int main(int argc, char** argv) {
     if (!bedFileName.empty()) {
         usingBED = true;
     }
-    
+
     if (usingBED || !regions.empty()) {
         variantFile.parseSamples = false;
     }
@@ -271,7 +271,7 @@ int main(int argc, char** argv) {
         VariantFieldType mergeFromType = f->second;
         stringstream s;
         s << mergeFromType;
-        
+
         variantFile.addHeaderLine("##INFO=<ID="+ mergeToTag +",Number=A,Type=" + s.str() + ",Description=\"The value of " + mergeFromTag + " in " + vcfFileName  +  " '.' if the tag does not exist for the given allele in the other file, or if there is no corresponding allele.\">");
     }
 
@@ -579,4 +579,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

@@ -26,6 +26,7 @@
   (gnu packages perl)
   (gnu packages perl6)
   (gnu packages pkg-config)
+  (gnu packages ruby)
   (srfi srfi-1)
   (ice-9 popen)
   (ice-9 rdelim))
@@ -48,6 +49,7 @@
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
+       ("ruby" ,ruby) ;; for generating man pages
        ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
        ("xz" ,xz)
