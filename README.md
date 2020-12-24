@@ -329,6 +329,24 @@ multiple lines, preserving allele-specific INFO fields.
 Source code [vcfbreakmulti.cpp](./src/vcfbreakmulti.cpp)
 
 
+
+### vcfcleancomplex
+
+Removes reference-matching sequence from complex alleles and adjusts
+records to reflect positional change.
+
+```sh
+
+>>> cat("vcfcleancomplex")
+usage: vcfcleancomplex <vcf file>
+outputs a VCF stream in which 'long' non-complexalleles have their position corrected.
+assumes that VCF records can't overlap 5'->3'
+
+```
+
+Source code [vcfbreakmulti.cpp](./src/vcfbreakmulti.cpp)
+
+
 ## tools for metrics
 
 ### vcfaltcount
@@ -391,28 +409,6 @@ Source code [vcfxx.cpp](./src/vcfxx.cpp)
 
 -->
 
-
-### vcfbreakmulti
-
-    usage: vcfbreakmulti [options] [file]
-
-If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields.
-
-
-
-### vcfcleancomplex
-
-Removes reference-matching sequence from complex alleles and adjusts
-records to reflect positional change.
-
-```sh
-
->>> cat("vcfcleancomplex")
-usage: vcfcleancomplex <vcf file>
-outputs a VCF stream in which 'long' non-complexalleles have their position corrected.
-assumes that VCF records can't overlap 5'->3'
-
-```
 
 ### vcfcombine
 
