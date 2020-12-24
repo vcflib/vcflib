@@ -28,6 +28,10 @@ Short index:
 - [Install](#INSTALL)
 - [Usage](#USAGE)
 - [TOOLS](#TOOLS)
+  * [Transformation](#tools-for-transformation)
+  * [Metrics](#tools-for-metrics)
+  * [Statistics](#tools-for-statistics)
+  * [Validation](#tools-for-validation)
 - [Link library](#link-library)
 - [Build from source](#build-from-source)
 - [Development](#Development)
@@ -149,13 +153,21 @@ Additionally, developers should be aware of that vcflib contains submodules (git
 
 
 
-## TOOLS
+# TOOLS
 
 <!--
 
     >>> from pytest.rtest import run_stdout, head, cat
 
 -->
+
+## tools for transformation
+
+## tools for metrics
+
+## tools for statistics
+
+## tools for validation
 
 ### vcf2tsv
 
