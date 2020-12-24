@@ -73,9 +73,11 @@ guix package -i vcflib
 
 ## USAGE
 
-vcflib provides a variety of functions for VCF manipulation:
+vcflib provides a variety of tools and functions for VCF manipulation.
 
-### comparison
+Quick overview:
+
+### transform
 
  * Generate **haplotype-aware intersections** ([vcfintersect](#vcfintersect) -i), **unions** (vcfintersect -u), and **complements** (vcfintersect -v -i).
  * **Overlay-merge** multiple VCF files together, using provided order as precedence ([vcfoverlay](#vcfoverlay)).
@@ -140,16 +142,17 @@ vcflib provides a variety of functions for VCF manipulation:
  * Observe how different alignment parameters, including context and entropy-dependent ones, influence **variant classification and interpretation** ([vcfremap](#vcfremap)).
  * **Classify variants** by annotations in the INFO field using a self-organizing map ([vcfsom](#vcfsom)); **re-estimate their quality** given known variants.
 
+A number of "helper" perl and python3 scripts (e.g. vcf2bed.py,
+vcfbiallelic) further extend functionality.
 
-A number of "helper" perl and python3 scripts (e.g. vcf2bed.py, vcfbiallelic) further extend functionality.
-
-In practice, users are encouraged to drive the utilities in the library in a streaming fashion, using pipes, to fully utilize resources on multi-core systems during interactive work.  Piping provides a convenient method to interface with other libraries (vcf-tools, BedTools, GATK, htslib, bcftools, freebayes) which interface via VCF files, allowing the composition of an immense variety of processing functions.
-
-## development
-
-See src/vcfecho.cpp for basic usage.  src/Variant.h and src/Variant.cpp describe methods available in the API.
-vcflib is incorporated into several projects, such as [freebayes](https://github.com/ekg/freebayes), which may provide a point of reference for prospective developers.
-Additionally, developers should be aware of that vcflib contains submodules (git repositories) comprising its dependencies (outside of lzib and a *nix environment).
+Users are encouraged to drive the utilities in the library in a
+streaming fashion, using pipes, to fully utilize resources on
+multi-core systems during interactive work.  Piping provides a
+convenient method to interface with other libraries (vcf-tools,
+BedTools, GATK, htslib, [bio-vcf](https://github.com/vcflib/bio-vcf),
+bcftools, [freebayes](https://github.com/freebayes)) which interface
+via VCF files, allowing the composition of an immense variety of
+processing functions.
 
 
 
@@ -1142,6 +1145,18 @@ CXXFLAGS="-std=-std=c++0x -Ofast -D_FILE_OFFSET_BITS=64"
 mytool: mytool.cpp
 	$(CXX) $(CXXFLAGS) $(VCFLIB_INC) -o $@ $< $(VCFLIB_LIB)
 ```
+
+## source code
+
+See [vcfecho.cpp](./src/vcfecho.cpp) for basic usage.
+[Variant.h](./src/Variant.h) and [Variant.cpp](./src/Variant.cpp)
+describe methods available in the API.  vcflib is incorporated into
+several projects, such as
+[freebayes](https://github.com/freebayes/freebayes), which may provide
+a point of reference for prospective developers.  Note vcflib contains
+submodules (git repositories) comprising some dependencies. A full
+Guix development environment we use is defined [here](./guix.scm).
+
 
 # LICENSE
 
