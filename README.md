@@ -23,7 +23,17 @@ It is both:
 The API itself provides a quick and extremely permissive method to read and write VCF files.
 Extensions and applications of the library provided in the included utilities (*.cpp) comprise the vast bulk of the library's utility for most users.
 
-## installation
+Short index:
+
+- [Install](#INSTALL)
+- [Usage](#USAGE)
+- [TOOLS](#TOOLS)
+- [Link library](#link-library)
+- [Build from source](#build-from-source)
+- [Development](#Development)
+- [LICENSE](#LICENSE)
+
+## INSTALL
 
 ### [bioconda](https://bioconda.github.io/user/install.html)
 ```
@@ -35,7 +45,7 @@ conda install -c conda-forge -c bioconda -c defaults vcflib
 brew install brewsci/bio/vcflib
 ```
 
-## usage
+## USAGE
 
 vcflib provides a variety of functions for VCF manipulation:
 
@@ -117,7 +127,7 @@ Additionally, developers should be aware of that vcflib contains submodules (git
 
 
 
-## executables
+## TOOLS
 
 <!--
 
@@ -1072,12 +1082,18 @@ us to create the build environment. Essentially:
 - htslib
 - tabixpp
 
+For include files add
+
+- libhts-dev
+- libtabixpp-dev
+- libtabixpp0
+
 And for some of the VCF executables
 
 - python
 - perl
 
-## using the C++ library
+## link library
 
 ```make
 # Put this in your Makefile
