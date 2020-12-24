@@ -23,7 +23,7 @@ jobs:
         cd build
         cmake ..
     - name: Compile
-      run: cmake build
+      run: cmake --build build/ --verbose
     - name: Run tests
       run: |
         cd build
