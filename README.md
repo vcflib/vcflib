@@ -435,11 +435,16 @@ Will break haplotype construction when encountering non-phased genotypes on inpu
 
 ### vcfgenotypecompare
 
-    usage: vcfgenotypecompare <other-genotype-tag> <vcf file>
+```sh
 
-Adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>.
-Use this after vcfannotategenotypes to get correspondence statistics for two vcfs.
+>>> cat("vcfgenotypecompare -h")
+usage: vcfgenotypecompare <other-genotype-tag> <vcf file>
+adds statistics to the INFO field of the vcf file describing the
+amount of discrepancy between the genotypes (GT) in the vcf file and the
+genotypes reported in the <other-genotype-tag>.  use this after
+vcfannotategenotypes to get correspondence statistics for two vcfs.
 
+```
 
 ### vcfgenotypes
 
