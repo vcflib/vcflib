@@ -325,7 +325,26 @@ Uses allele frequencies in the AF info column to estimate phylogeny at multialle
 
 ## tools for validation
 
+### vcfcheck
 
+```sh
+
+>>> cat("vcfcheck -h")
+usage: vcfcheck [options] <vcf file>
+>
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    -x, --exclude-failures If a record fails, don't print it.  Otherwise do.
+    -k, --keep-failures    Print if the record fails, otherwise not.
+    -h, --help       Print this message.
+    -v, --version    Print version.
+>
+Verifies that the VCF REF field matches the reference as described.
+>
+
+```
+
+Source code [vcfcheck.cpp](./src/vcfcheck.cpp)
 
 
 
@@ -346,24 +365,6 @@ Also adds a 'has\_variant' flag for sites where the second file has a variant.
 If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields.
 
 
-### vcfcheck
-
-```sh
-
->>> cat("vcfcheck -h")
-usage: vcfcheck [options] <vcf file>
->
-options:
-    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
-    -x, --exclude-failures If a record fails, don't print it.  Otherwise do.
-    -k, --keep-failures    Print if the record fails, otherwise not.
-    -h, --help       Print this message.
-    -v, --version    Print version.
->
-Verifies that the VCF REF field matches the reference as described.
->
-
-```
 
 ### vcfcleancomplex
 
