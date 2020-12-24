@@ -204,13 +204,6 @@ as determined by haplotype comparison alleles.
 
 Docs [vcfintersect.md](./test/pytest/vcfintersect.md) | source code [vcfintersect.cpp](./src/vcfintersect.cpp)
 
-
-## tools for metrics
-
-## tools for statistics
-
-## tools for validation
-
 ### vcf2tsv
 
 
@@ -248,6 +241,24 @@ Docs [vcf2tsv.md](./test/pytest/vcf2tsv.md) | source code [vcf2tsv.cpp](./src/vc
 
 Add info fields from the second file which are not present in the
 first vcf file.
+
+```sh
+
+>>> cat("vcfaddinfo -h")
+usage: vcfaddinfo <vcf file> <vcf file>
+Adds info fields from the second file which are not present in the first vcf file.
+
+```
+
+Source code [vcfaddinfo.cpp](./src/vcfaddinfo.cpp)
+
+
+## tools for metrics
+
+## tools for statistics
+
+## tools for validation
+
 
 
 ### vcfafpath
