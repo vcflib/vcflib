@@ -368,6 +368,22 @@ options:
 
 Source code [vcfcombine.cpp](./src/vcfcombine.cpp)
 
+### vcfdistance
+
+Adds a value to each VCF record indicating the distance to the nearest
+variant in the file.
+
+```sh
+
+>>> cat("vcfdistance -h")
+usage: vcfdistance [customtagname] < [vcf file]
+adds a tag to each variant record which indicates the distance
+to the nearest variant.
+(defaults to BasesToClosestVariant if no custom tag name is given.
+
+```
+
+Source code [vcfdistance.cpp](./src/vcfdistance.cpp)
 
 ## tools for metrics
 
@@ -384,6 +400,50 @@ count the number of alternate alleles in all records in the vcf file
 ```
 
 Source code [vcfaltcount.cpp](./src/vcfaltcount.cpp)
+
+### vcfcommonsamples
+
+```sh
+
+>>> cat("vcfcommonsamples -h")
+usage: vcfcommonsamples <vcf file> <vcf file>
+outputs each record in the first file, removing samples not present in the second
+
+```
+
+Source code [vcfcommonsamples.cpp](./src/vcfcommonsamples.cpp)
+
+
+
+### vcfcountalleles
+
+Counts the total number of alleles in the input.
+
+```sh
+
+>> cat("vcfcountalleles -h")
+
+```
+
+Source code [vcfcountalleles.cpp](./src/vcfcountalleles.cpp)
+
+
+
+### vcfcreatemulti
+
+
+```sh
+
+>>> cat("vcfcreatemulti -h")
+usage: vcfcreatemulti [options] [file]
+>
+If overlapping alleles are represented across multiple records, merge
+them into a single record.  Currently only for indels.
+
+```
+
+Source code [vcfcreatemulti.cpp](./src/vcfcreatemulti.cpp)
+
 
 
 ## tools for statistics
@@ -432,40 +492,6 @@ Source code [vcfxx.cpp](./src/vcfxx.cpp)
 -->
 
 
-
-### vcfcommonsamples
-
-```sh
-
->>> cat("vcfcommonsamples -h")
-usage: vcfcommonsamples <vcf file> <vcf file>
-outputs each record in the first file, removing samples not present in the second
-
-```
-
-### vcfcountalleles
-
-Counts the total number of alleles in the input.
-
-### vcfcreatemulti
-
-If overlapping alleles are represented across multiple records, merge
-them into a single record.
-
-### vcfdistance
-
-Adds a value to each VCF record indicating the distance to the nearest
-variant in the file.
-
-```sh
-
->>> cat("vcfdistance -h")
-usage: vcfdistance [customtagname] < [vcf file]
-adds a tag to each variant record which indicates the distance
-to the nearest variant.
-(defaults to BasesToClosestVariant if no custom tag name is given.
-
-```
 
 ### vcfentropy
 
