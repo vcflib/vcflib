@@ -35,14 +35,36 @@ Short index:
 
 ## INSTALL
 
-### [bioconda](https://bioconda.github.io/user/install.html)
-```
-conda install -c conda-forge -c bioconda -c defaults vcflib
+### [Bioconda](https://bioconda.github.io/user/install.html)
+
+Conda installs in user land without root access
+
+```sh
+conda install -c bioconda vcflib
 ```
 
-### [homebrew](https://brew.sh)
-```
+### [Homebrew](https://brew.sh)
+
+Homebrew installs on Linux and Mac OSX
+
+```sh
 brew install brewsci/bio/vcflib
+```
+
+### [Debian](https://debian.org/)
+
+For Debian and Ubuntu
+
+```sh
+apt-get install libvcflib-tools libvcflib-dev
+```
+
+### [GNU Guix](https://guix.gnu.org/)
+
+We develop against guix
+
+```sh
+guix package -i vcflib
 ```
 
 ## USAGE
