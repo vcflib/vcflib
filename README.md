@@ -1230,18 +1230,8 @@ And for some of the VCF executables
 
 ## link library
 
-```make
-# Put this in your Makefile
-
-VCFLIB_DIR = /path/to/vcflib
-VCFLIB_INC = -I $(VCFLIB_DIR)/include -I $(VCFLIB_DIR)/tabixpp/htslib
-VCFLIB_LIB = -L $(VCFLIB_DIR)/tabixpp -L $(VCFLIB_DIR)/lib -lhts -lvcflib -lz -lm -llzma -lbz2
-CXX="g++"
-CXXFLAGS="-std=-std=c++0x -Ofast -D_FILE_OFFSET_BITS=64"
-
-mytool: mytool.cpp
-	$(CXX) $(CXXFLAGS) $(VCFLIB_INC) -o $@ $< $(VCFLIB_LIB)
-```
+The standard build creates `build/vcflib.a`. Take a hint from the
+[cmake](./CMakeLists.txt) file that builds all the vcflib tools.
 
 ## source code
 
