@@ -247,6 +247,27 @@ Adds info fields from the second file which are not present in the first vcf fil
 
 Source code [vcfaddinfo.cpp](./src/vcfaddinfo.cpp)
 
+### vcfannotate
+
+```sh
+
+>>> cat("vcfannotate -h")
+usage: vcfannotate [options] [<vcf file>]
+>
+options:
+    -b, --bed   use annotations provided by this BED file
+    -k, --key   use this INFO field key for the annotations
+    -d, --default  use this INFO field key for records without annotations
+>
+Intersect the records in the VCF file with targets provided in a BED file.
+Intersections are done on the reference sequences in the VCF file.
+If no VCF filename is specified on the command line (last argument) the VCF
+read from stdin.
+
+```
+
+Source code [vcfannotate.cpp](./src/vcfannotate.cpp)
+
 
 ### vcfallelicprimitives
 
@@ -309,24 +330,6 @@ Uses allele frequencies in the AF info column to estimate phylogeny at multialle
 Counts the number of alternate alleles in the record.
 
 
-### vcfannotate
-
-```sh
-
->>> cat("vcfannotate -h")
-usage: vcfannotate [options] [<vcf file>]
->
-options:
-    -b, --bed   use annotations provided by this BED file
-    -k, --key   use this INFO field key for the annotations
-    -d, --default  use this INFO field key for records without annotations
->
-Intersect the records in the VCF file with targets provided in a BED file.
-Intersections are done on the reference sequences in the VCF file.
-If no VCF filename is specified on the command line (last argument) the VCF
-read from stdin.
-
-```
 
 ### vcfannotategenotypes
 
