@@ -313,6 +313,21 @@ also adds a 'has_variant' flag for sites where the second file has a variant.
 
 Source code [vcfannotategenotypes.cpp](./src/vcfannotategenotypes.cpp)
 
+### vcfbreakmulti
+
+
+```sh
+
+>>> cat("vcfbreakmulti -h")
+usage: vcfbreakmulti [options] [file]
+>
+If multiple alleles are specified in a single record, break the record into
+multiple lines, preserving allele-specific INFO fields.
+
+```
+
+Source code [vcfbreakmulti.cpp](./src/vcfbreakmulti.cpp)
+
 
 ## tools for metrics
 
