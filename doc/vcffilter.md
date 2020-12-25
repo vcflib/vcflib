@@ -22,6 +22,8 @@ VCF filter the specified vcf file using the set of filters
 
 # OPTIONS
 
+```
+
 
 options:
     -f, --info-filter     specifies a filter to apply to the info fields of records,
@@ -55,6 +57,8 @@ For convenience, you can specify "QUAL" to refer to the quality of the site, eve
 though it does not appear in the INFO fields.
 
 type: filter
+
+```
 
 # EXIT VALUES
 
