@@ -15,7 +15,7 @@ using namespace std;
 using namespace vcflib;
 
 void printSummary(char** argv) {
-  cerr << "vcflib " << VCFLIB_VERSION << " filtering" << endl << endl
+  cerr << "vcflib " << VCFLIB_VERSION << " filter the specified vcf file using the set of filters" << endl << endl
        << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
          << "options:" << endl
@@ -48,7 +48,7 @@ void printSummary(char** argv) {
          << endl
          << "For convenience, you can specify \"QUAL\" to refer to the quality of the site, even" << endl
          << "though it does not appear in the INFO fields." << endl
-         << endl;
+       << endl << "type: filter" << endl;
     exit(0);
 }
 

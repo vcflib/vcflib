@@ -516,7 +516,7 @@ left, right, and center  of the record.  Also adds EntropyRef and EntropyAlt for
 
 ```sh
 
->>> cat("vcffilter -h")
+>> cat("vcffilter -h")
 vcflib filtering
 >
 usage: vcffilter [options] <vcf file>
