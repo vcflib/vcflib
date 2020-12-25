@@ -5,9 +5,11 @@
 #
 # Copyright (C) 2020 Pjotr Prins
 
-Dir.glob('pytest/*.md').each do|md|
+print("--- Creating man files\n")
+
+def md2man md
   mdbase = File.basename(md,".md")
-  tmpfn = "tmp/"+mdbase
+  tmpfn = "test/tmp/"+mdbase
   skip = false
   File.open(tmpfn,"w") do | out |
     File.open(md).each_line do |line|
@@ -17,5 +19,8 @@ Dir.glob('pytest/*.md').each do|md|
       out.write(line) if not skip
     end
   end
-  print `pandoc #{tmpfn} -s -t man -o ../man/#{mdbase}.1`
+  print `pandoc #{tmpfn} -s -t man -o ./man/#{mdbase}.1`
 end
+
+Dir.glob('./doc/*.md').each { |md| md2man(md) }
+# Dir.glob('./test/pytest/*.md').each { |md| md2man(md) }

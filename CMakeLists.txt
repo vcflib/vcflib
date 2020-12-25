@@ -260,6 +260,14 @@ function(add_pydoctest TEST_FILE)
   )
 endfunction()
 
+function(add_doctest TEST_FILE)
+  add_test(
+      NAME ${TEST_FILE}
+      COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF ../${TEST_FILE}.md
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+  )
+endfunction()
+
 function(add_pydoctest_fullname TEST_FILE)
   add_test(
       NAME ${TEST_FILE}
@@ -271,7 +279,7 @@ endfunction()
 # add_pytest(vcf2tsv-test)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfintersect)
-add_pydoctest(vcffilter)
+add_doctest(doc/vcffilter)
 add_pydoctest_fullname(../README.md)
 
 # ---- Build docs
@@ -289,8 +297,7 @@ if (PANDOC)
     add_custom_target( man
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         # COMMAND ${PANDOC} ./test/pytest/vcf2tsv.md -s -t man -o ./man/vcf2tsv.1
-        # Note this requires Ruby
-        COMMAND ./scripts/md2man
+        COMMAND ruby ./test/scripts/md2man
     )
 else (PANDOC)
   message("Pandoc needs to be installed to generate the man pages")
