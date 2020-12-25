@@ -7,10 +7,20 @@
 #    bin2md [--index] erbtemplate [binary]
 #
 # by Pjotr Prins (C) 2020
+#
+# The rules are simple USAGE:
+#
+#    usage: can be multiline block anywhere in the output
+#
+# After removing that the next block is the DESCRIPTION.
+# Onle line create a TYPE (see TYPES).
+# The rest are the OPTIONS.
 
 require 'erb'
 require 'date'
 require 'open3'
+
+TYPES = ["filter","transformation","statistics","metrics"]
 
 VERSION=`cat ../VERSION`.strip
 template = ARGV.shift
@@ -42,7 +52,7 @@ Dir.glob(bindir+'/*').each do|bin|
     # $stderr.print(out)
     usage_full = out
     lines = (out).split("\n")
-    pydoc_full = lines.map{|l| l=="" ? ">" : l }.join("\n")
+    pydoc_full = lines.map{|l| l=="" ? '>' : l }.join("\n")
     in_usage = false
     usage = []
     other = []
@@ -66,6 +76,7 @@ Dir.glob(bindir+'/*').each do|bin|
     other.each do | l |
       if l =~ /type: (\S+)/i
         type = $1
+        raise "Unknown type" if !TYPES.include?(type)
         break
       end
     end
