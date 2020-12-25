@@ -1,5 +1,12 @@
-% VCFINTERSECT(1) vcfintersect 1.0.2-rc1 | VCF set analysis
+% VCFINTERSECT(1) vcfintersect 1.0.2-rc1 | vcfintersect (vcflib transformation)
 % Erik Garrison and vcflib contributors
+
+<!--
+  Created with
+
+  ./scripts/bin2md.rb scripts/bin2md-template.erb
+
+-->
 
 # NAME
 
@@ -7,7 +14,7 @@ vcfintersect
 
 # SYNOPSIS
 
-vcfintersect [options] [<vcf file>]
+usage: vcfintersect [options] [<vcf file>]
 
 # DESCRIPTION
 
@@ -15,8 +22,10 @@ VCF set analysis
 
 # OPTIONS
 
+```
 
 
+options:
     -b, --bed FILE            use intervals provided by this BED file
     -R, --region REGION       use 1-based tabix-style region (e.g. chrZ:10-20), multiples allowed
     -S, --start-only          don't use the reference length information in the record to determine
@@ -41,6 +50,10 @@ For bed-vcf intersection, alleles which fall into the targets are retained.
 For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp
 as determined by haplotype comparison alleles.
 
+type: transformation
+
+```
+
 # EXIT VALUES
 
 **0**
@@ -49,13 +62,11 @@ as determined by haplotype comparison alleles.
 **not 0**
 : Failure
 
-# EXAMPLES
-
+# OTHER
 
 ## Source code
 
-[vcfintersect.cpp](../../src/vcfintersect.cpp)
-
+[vcfintersect.cpp](https://github.com/vcflib/vcflib/blob/master/src/vcfintersect.cpp)
 
 # LICENSE
 

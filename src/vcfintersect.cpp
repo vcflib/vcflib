@@ -46,7 +46,8 @@ void printSummary(char** argv) {
          << "For bed-vcf intersection, alleles which fall into the targets are retained." << endl
          << endl
          << "For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp" << endl
-         << "as determined by haplotype comparison alleles." << endl;
+       << "as determined by haplotype comparison alleles." << endl << endl
+         << "type: transformation" << endl;
 	//<< "Intersect the records in the VCF file with targets provided in a BED file." << endl
 	//<< "Intersections are done on the reference sequences in the VCF file." << endl
 	//<< "If no VCF filename is specified on the command line (last argument) the VCF" << endl

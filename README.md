@@ -199,6 +199,8 @@ For bed-vcf intersection, alleles which fall into the targets are retained.
 >
 For vcf-vcf intersection and union, unify on equivalent alleles within window-size bp
 as determined by haplotype comparison alleles.
+>
+type: transformation
 
 ```
 

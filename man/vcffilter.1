@@ -12,41 +12,45 @@ usage: vcffilter options
 .PP
 VCF filter the specified vcf file using the set of filters
 .SH OPTIONS
-.PP
-options: -f, \[en]info-filter specifies a filter to apply to the info
-fields of records, removes alleles which do not pass the filter -g,
-\[en]genotype-filter specifies a filter to apply to the genotype fields
-of records -k, \[en]keep-info used in conjunction with `-g', keeps
-variant info, but removes genotype -s, \[en]filter-sites filter entire
-records, not just alleles -t, \[en]tag-pass tag vcf records as
-positively filtered with this tag, print all records -F, \[en]tag-fail
-tag vcf records as negatively filtered with this tag, print all records
--A, \[en]append-filter append the existing filter tag, don\[cq]t just
-replace it -a, \[en]allele-tag apply -t on a per-allele basis.
-adds or sets the corresponding INFO field tag -v, \[en]invert inverts
-the filter, e.g.\ grep -v -o, \[en]or use logical OR instead of AND to
-combine filters -r, \[en]region specify a region on which to target the
-filtering, requires a BGZF compressed file which has been indexed with
-tabix.
-any number of regions may be specified.
-.PP
+.IP
+.nf
+\f[C]
+
+
+options:
+    -f, --info-filter     specifies a filter to apply to the info fields of records,
+                          removes alleles which do not pass the filter
+    -g, --genotype-filter specifies a filter to apply to the genotype fields of records
+    -k, --keep-info       used in conjunction with \[aq]-g\[aq], keeps variant info, but removes genotype
+    -s, --filter-sites    filter entire records, not just alleles
+    -t, --tag-pass        tag vcf records as positively filtered with this tag, print all records
+    -F, --tag-fail        tag vcf records as negatively filtered with this tag, print all records
+    -A, --append-filter   append the existing filter tag, don\[aq]t just replace it
+    -a, --allele-tag      apply -t on a per-allele basis.  adds or sets the corresponding INFO field tag
+    -v, --invert          inverts the filter, e.g. grep -v
+    -o, --or              use logical OR instead of AND to combine filters
+    -r, --region          specify a region on which to target the filtering, requires a BGZF
+                          compressed file which has been indexed with tabix.  any number of
+                          regions may be specified.
+
 Filter the specified vcf file using the set of filters.
-Filters are specified in the form \[lq] : -f\[rq]DP > 10\[dq] # for info
-fields -g \[lq]GT = 1|1\[rq] # for genotype fields -f \[lq]CpG\[rq] #
-for `flag' fields
-.PP
+Filters are specified in the form \[dq]<ID> <operator> <value>:
+ -f \[dq]DP > 10\[dq]  # for info fields
+ -g \[dq]GT = 1|1\[dq] # for genotype fields
+ -f \[dq]CpG\[dq]  # for \[aq]flag\[aq] fields
+
 Operators can be any of: =, !, <, >, |, &
-.PP
-Any number of filters may be specified.
-They are combined via logical AND unless \[en]or is specified on the
-command line.
-Obtain logical negation through the use of parentheses, e.g.\ \[lq]! (
-DP = 10 )\[rq]
-.PP
-For convenience, you can specify \[lq]QUAL\[rq] to refer to the quality
-of the site, even though it does not appear in the INFO fields.
-.PP
+
+Any number of filters may be specified.  They are combined via logical AND
+unless --or is specified on the command line.  Obtain logical negation through
+the use of parentheses, e.g. \[dq]! ( DP = 10 )\[dq]
+
+For convenience, you can specify \[dq]QUAL\[dq] to refer to the quality of the site, even
+though it does not appear in the INFO fields.
+
 type: filter
+\f[R]
+.fi
 .SH EXIT VALUES
 .TP
 .B \f[B]0\f[R]
