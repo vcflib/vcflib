@@ -21,10 +21,11 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
-  string filename = argv[1];
+  if (argc == 2) {
+    string h_flag = argv[1];
 
-  if (argc == 2 && filename == "-h") {
-    cerr << R"(
+    if (argc == 2 && (h_flag == "-h" || h_flag == "--help")) {
+      cerr << R"(
 Dump contigs from header
 
 Usage: dumpContigsFromHeader file
@@ -45,10 +46,11 @@ Example:
 
 Type: transformation
       )";
-    exit(1);
+      exit(1);
+    }
   }
 
-
+  string filename = argv[1];
   VariantCallFile variantFile;
 
   variantFile.open(filename);
