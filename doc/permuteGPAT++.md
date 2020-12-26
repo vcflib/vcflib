@@ -7,7 +7,7 @@ permuteGPAT++
 
 # SYNOPSIS
 
-usage: permuteGPAT++ -f gpat.txt -n 5 -s 1 
+usage: permuteGPAT++ -f gpat.txt -n 5 -s 1
 
 # DESCRIPTION
 

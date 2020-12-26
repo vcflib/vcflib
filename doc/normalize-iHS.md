@@ -7,11 +7,11 @@ normalize-iHS
 
 # SYNOPSIS
 
-usage: normalizeHS -s 0.01 -f input.txt 
+usage: normalizeHS -s 0.01 -f input.txt
 
 # DESCRIPTION
 
- normalizes iHS or XP-EHH scores Output : normalize-iHS adds one additional column to input (normalized score). required: -f -- Output from iHS or XPEHH optional: -s -- Max AF diff for window [0.01]
+normalizes iHS or XP-EHH scores Output : normalize-iHS adds one additional column to input (normalized score). required: -f -- Output from iHS or XPEHH optional: -s -- Max AF diff for window [0.01]
 
 # OPTIONS
 

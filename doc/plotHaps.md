@@ -11,7 +11,7 @@ plotHaps
 
 # DESCRIPTION
 
- plotHaps provides the formatted output that can be used with 'bin/plotHaplotypes.R'. Output : haplotype matrix and positions
+plotHaps provides the formatted output that can be used with 'bin/plotHaplotypes.R'. Output : haplotype matrix and positions
 
 # OPTIONS
 

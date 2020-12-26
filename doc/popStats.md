@@ -7,11 +7,11 @@ popStats
 
 # SYNOPSIS
 
-usage: popStat --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf 
+usage: popStat --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf
 
 # DESCRIPTION
 
- General population genetic statistics for each SNP 
+General population genetic statistics for each SNP
 
 # OPTIONS
 

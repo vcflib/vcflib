@@ -7,11 +7,11 @@ sequenceDiversity
 
 # SYNOPSIS
 
-usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf 
+usage: sequenceDiversity --target 0,1,2,3,4,5,6,7 --file my.vcf
 
 # DESCRIPTION
 
- The sequenceDiversity program calculates two popular metrics of haplotype diversity: pi and extended haplotype homozygoisty (eHH). Pi is calculated using the Nei and Li 1979 formulation. eHH a convenient way to think about haplotype diversity. When eHH = 0 all haplotypes in the window are unique and when eHH = 1 all haplotypes in the window are identical. 
+The sequenceDiversity program calculates two popular metrics of haplotype diversity: pi and extended haplotype homozygoisty (eHH). Pi is calculated using the Nei and Li 1979 formulation. eHH a convenient way to think about haplotype diversity. When eHH = 0 all haplotypes in the window are unique and when eHH = 1 all haplotypes in the window are identical.
 
 # OPTIONS
 

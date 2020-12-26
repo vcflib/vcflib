@@ -7,7 +7,7 @@ permuteSmooth
 
 # SYNOPSIS
 
-usage: permuteSmooth -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1 
+usage: permuteSmooth -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1
 
 # DESCRIPTION
 

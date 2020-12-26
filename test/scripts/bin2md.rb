@@ -52,7 +52,7 @@ Dir.glob(bindir+'/*').each do|bin|
     # $stderr.print(out)
     usage_full = out
     lines = (out).split("\n")
-    lines = lines.map{|l| l.gsub(/INFO: help/,"")}
+    lines = lines.map{|l| l.gsub(/INFO: help:?/,"")}
     lines = lines.map{|l| l.gsub(/INFO: description:/,"")}
     lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
     pydoc_full = lines.map{|l| l=="" ? '>' : l }.join("\n")
@@ -94,13 +94,13 @@ Dir.glob(bindir+'/*').each do|bin|
     body = rest.drop(descr.size).join("\n")
     usage = usage.join(" ").gsub(/#{VERSION}\s+/,"")
     usage = usage.sub(/\.\.\/build\//,"")
-    usage = usage.gsub(/\s+/," ")
+    usage = usage.gsub(/\s+/," ").strip
     pydoc_full = pydoc_full.gsub(/#{VERSION}\s+/,"")
     pydoc_full = pydoc_full.gsub(/\.\.\/build\//,"")
     # pydoc_full = pydoc_full.gsub(/vcflib/,"VCF")
     descr = descr.join(" ").gsub(/#{VERSION}\s+/,"")
     descr = descr.sub(/vcflib/,"VCF")
-    descr = descr.gsub(/\s+/," ")
+    descr = descr.gsub(/\s+/," ").strip
     # print("HELP:",help_cmd,"\n")
     # print("DESCRIPTION:",descr,"\n")
     # print("USAGE:",usage,"\n")
