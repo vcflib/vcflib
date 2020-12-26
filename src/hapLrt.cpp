@@ -15,7 +15,7 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>  
+#include <math.h>
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
@@ -37,14 +37,14 @@ void printHelp(void){
   cerr << "     The sign denotes if the target has longer haplotypes (1) or the background (-1).                                     " << endl << endl;
 
   cerr << "Output : 4 columns :                             " << endl;
-  cerr << "     1. seqid                                    " << endl; 
-  cerr << "     2. position                                 " << endl; 
-  cerr << "     3. mean target haplotype length             " << endl; 
-  cerr << "     4. mean background haplotype length         " << endl; 
-  cerr << "     5. p-value from LRT                         " << endl; 
+  cerr << "     1. seqid                                    " << endl;
+  cerr << "     2. position                                 " << endl;
+  cerr << "     3. mean target haplotype length             " << endl;
+  cerr << "     4. mean background haplotype length         " << endl;
+  cerr << "     5. p-value from LRT                         " << endl;
   cerr << "     6. sign                                     " << endl << endl;
 
-  cerr << "INFO: hapLRT  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --type GP --file my.vcf                                     " << endl;
+  cerr << "INFO: Usage: hapLRT  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --type GP --file my.vcf                                     " << endl;
   cerr << endl;
 
   cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        " << endl;
@@ -53,7 +53,8 @@ void printHelp(void){
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
   cerr << "INFO: optional: r,region     -- argument: a genomice range to calculate hapLrt on in the format : \"seqid:start-end\" or \"seqid\" " << endl;
   cerr << endl;
- 
+  cerr << endl << "Type: genotype" << endl << endl;
+
   printVersion();
 
   exit(1);
@@ -67,10 +68,10 @@ void clearHaplotypes(string **haplotypes, int ntarget){
 }
 
 void loadIndices(map<int, int> & index, string set){
-  
+
   vector<string>  indviduals = split(set, ",");
   vector<string>::iterator it = indviduals.begin();
-  
+
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
   }
@@ -85,7 +86,7 @@ void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]
   for(int i = 0 ; i < gmax*2; i++){
     lengths[i] = 0;
   }
-  
+
   for(int i = 0; i < gmax*2; i++){ //get group member 1
     int g = (i < gmax) ? group[i] : group[i-gmax];
     int c = (i < gmax) ? 0 : 1;
@@ -129,7 +130,7 @@ void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]
           if(*citE != *aitE) break;
 	  to_add++;
 	}
-	
+
 	len += to_add;
       }
 
@@ -181,7 +182,7 @@ double lfactorial(int n) {
   for (i=1.0; i<=n; i++){
     fact += log(i);
   }
-  
+
   return fact;
 }
 
@@ -193,13 +194,13 @@ double lnbinomial(double k, double r, double m ){
   // R example dnbinom(x=6, size=0.195089, mu=7.375, log=TRUE)
 
   double ans = lgamma( r+k ) - ( lfactorial(k)  + lgamma(r)  ) ;
-  ans += log(pow((m/(r+m)),k))   ; 
+  ans += log(pow((m/(r+m)),k))   ;
   ans += log(pow((r/(r+m)),r)) ;
-  
+
   //cerr << "k: " << k << "\t" << "m: " << m << "\t" << "r: " << r << "\t" << "ans: " << ans << endl;
-  
+
   return ans;
-  
+
 }
 
 double lexp(double x, double lambda){
@@ -207,11 +208,11 @@ double lexp(double x, double lambda){
   double ans = lambda * pow ( exp(1) , (-lambda * x));
 
   return log(ans);
-  
+
 }
 
 double totalLL(int dat[], int n, double m){
-  
+
   double ll = 0;
 
   for(int j = 0; j < n; j++){
@@ -222,17 +223,17 @@ double totalLL(int dat[], int n, double m){
 }
 
 double var(int dat[], int n, double mean){
-  
+
   double sum = 0;
 
   for(int i = 0; i < n; i++){
     sum += pow( (double(dat[i]) - mean), 2);
   }
-  
+
   double var = sum / (n - 1);
-  
+
   return var;
-  
+
 }
 
 void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background,  vector<int> total,  string seqid){
@@ -248,7 +249,7 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> a
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
 
     int targetLengths[tl];
-    int backgroundLengths[bl]; 
+    int backgroundLengths[bl];
     int totalLengths[al];
 
     //changed (carson) --> findLengths(haplotypes, target,     snp, targetLengths, tl);
@@ -258,8 +259,8 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> a
 
     copy(targetLengths, targetLengths + tl, totalLengths);
     copy(backgroundLengths, backgroundLengths +bl, totalLengths + tl);
-      
-    
+
+
     double tm = mean(targetLengths, tl);
     double bm = mean(backgroundLengths, bl);
     double am = mean(totalLengths, al);
@@ -272,18 +273,18 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> a
 
 
     double Alt = totalLL(targetLengths, 2*target.size(), tm)
-      + totalLL(backgroundLengths, 2*background.size(), bm);    
-    
+      + totalLL(backgroundLengths, 2*background.size(), bm);
+
 
     double Null = totalLL(targetLengths, 2*target.size(), am)
-      + totalLL(backgroundLengths, 2*background.size(), am);    
+      + totalLL(backgroundLengths, 2*background.size(), am);
 
     double l = 2 * (Alt - Null);
 
     if(l < 0){
       continue;
     }
-    
+
     int     which = 1;
     double  p ;
     double  q ;
@@ -295,12 +296,12 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> a
     cdfchi(&which, &p, &q, &x, &df, &status, &bound );
 
     cout << seqid << "\t" << pos[snp] << "\t" << tm << "\t" << bm  <<  "\t" << 1-p <<  "\t" << dir <<  endl;
-  
+
   }
 }
 
 void loadPhased(string **haplotypes, genotype * pop, int ntarget){
-  
+
   int indIndex = 0;
 
   for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
@@ -310,7 +311,7 @@ void loadPhased(string **haplotypes, genotype * pop, int ntarget){
 //    }
     vector< string > gs = split(g, "|");
     haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);  
+    haplotypes[indIndex][1].append(gs[1]);
     indIndex += 1;
   }
 }
@@ -327,27 +328,27 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
-  // using vcflib; thanks to Erik Garrison 
+  // using vcflib; thanks to Erik Garrison
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
-  
+  // zero based index for the target and background indivudals
+
   map<int, int> targetIndex, backgroundIndex;
-  
-  // deltaaf is the difference of allele frequency we bother to look at 
+
+  // deltaaf is the difference of allele frequency we bother to look at
 
   // ancestral state is set to zero by default
-  
-  // phased 
+
+  // phased
 
   int phased = 0;
 
   string type = "NA";
 
-    const struct option longopts[] = 
+    const struct option longopts[] =
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
@@ -366,7 +367,7 @@ int main(int argc, char** argv) {
     while(iarg != -1)
       {
 	iarg = getopt_long(argc, argv, "y:r:t:b:f:hv", longopts, &findex);
-	
+
 	switch (iarg)
 	  {
 	  case 'h':
@@ -392,7 +393,7 @@ int main(int argc, char** argv) {
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg; 
+	    region = optarg;
 	    break;
 	  default:
 	    break;
@@ -404,7 +405,7 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["GL"] = 1;
     okayGenotypeLikelihoods["GP"] = 1;
     okayGenotypeLikelihoods["GT"] = 1;
-    
+
 
     if(type == "NA"){
       cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
@@ -425,9 +426,9 @@ int main(int argc, char** argv) {
 
 
     variantFile.open(filename);
-    
+
     if(region != "NA"){
-      if(!variantFile.setRegion(region)){ //check if region is even specified in header                                                                                        
+      if(!variantFile.setRegion(region)){ //check if region is even specified in header
         bool region_exists = false;
         vector<string> headerLines = split (variantFile.header, "\n");
         for(vector<string>::iterator it = headerLines.begin(); it != headerLines.end(); it++){
@@ -468,20 +469,20 @@ int main(int argc, char** argv) {
     if (!variantFile.is_open()) {
         return 1;
     }
-    
+
 
 
     Variant var(variantFile);
 
     vector<string> samples = variantFile.sampleNames;
     int nsamples = samples.size();
-    
+
     vector<int> ibi, iti, itot;
 
     int index, indexi = 0;
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
-      
+
       string samplename  = (*samp) ;
 
       if(targetIndex.find(index) != targetIndex.end() ){
@@ -498,22 +499,22 @@ int main(int argc, char** argv) {
     }
 
     //   itot.insert(itot.end(), iti.begin(), iti.end());
-    
+
     itot = iti;
     itot.insert(itot.end(), ibi.begin(), ibi.end());
 
     vector<long int> positions;
     vector<double>   afs;
 
-    //string haplotypes [nsamples][2];    
+    //string haplotypes [nsamples][2];
 	string **haplotypes = new string*[nsamples];
 	for (int i = 0; i < nsamples; i++) {
 	  haplotypes[i] = new string[2];
 	}
-    
+
     string currentSeqid = "NA";
 
-    int count = 0;    
+    int count = 0;
     while (variantFile.getNextVariant(var)) {
       count++;
       //cerr << count << endl;
@@ -537,31 +538,31 @@ int main(int argc, char** argv) {
 	currentSeqid = var.sequenceName;
 	afs.clear();
       }
-      
+
       vector < map< string, vector<string> > > target, background, total;
-      
+
       int sindex = 0;
 
       for(int nsamp = 0; nsamp < nsamples; nsamp++){
-	
+
 	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
-        
+
 	if(targetIndex.find(sindex) != targetIndex.end() ){
 	  target.push_back(sample);
-	  total.push_back(sample);	  
+	  total.push_back(sample);
 	}
 	if(backgroundIndex.find(sindex) != backgroundIndex.end()){
 	  background.push_back(sample);
-	  total.push_back(sample);	  
+	  total.push_back(sample);
 	}
-	
+
 	sindex += 1;
       }
-            
+
       genotype * populationTarget    ;
       genotype * populationBackground;
       genotype * populationTotal     ;
-      
+
       if(type == "PL"){
 	populationTarget     = new pl();
 	populationBackground = new pl();
@@ -583,39 +584,39 @@ int main(int argc, char** argv) {
         populationTotal      = new gt();
       }
 
-     
+
       populationTarget->loadPop(target,         var.sequenceName, var.position);
-      
+
       populationBackground->loadPop(background, var.sequenceName, var.position);
-	
+
       populationTotal->loadPop(total,           var.sequenceName, var.position);
-      
-      
+
+
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){
 	delete populationTarget;
 	delete populationBackground;
 	delete populationTotal;
-	
+
 	populationTarget     = NULL;
 	populationBackground = NULL;
 	populationTotal      = NULL;
 	continue;
       }
 
-     
+
 
 	afs.push_back(populationTotal->af);
 	positions.push_back(var.position);
-	loadPhased(haplotypes, populationTotal, nsamples);      
-	
+	loadPhased(haplotypes, populationTotal, nsamples);
+
 	delete populationTarget;
 	delete populationBackground;
 	delete populationTotal;
-	
+
 	populationTarget     = NULL;
 	populationBackground = NULL;
 	populationTotal      = NULL;
-	
+
 
     }
 
@@ -628,6 +629,6 @@ int main(int argc, char** argv) {
 //    populationTotal      = NULL;
 
     calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
-    
-    return 0;		    
+
+    return 0;
 }
