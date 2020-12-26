@@ -1,4 +1,4 @@
-% IHS(1) iHS (vcflib) | iHS (VCF unknown)
+% IHS(1) iHS (vcflib) | iHS (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -35,6 +35,9 @@ Params:
                                      than [0.05] are skipped.                  
        optional: x,threads <INT>     Number of CPUS [1].                       
        recommended: g,gen <STRING>   A PLINK formatted map file.               
+
+Type: statistics
+
 
 
 ```
