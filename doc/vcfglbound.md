@@ -13,6 +13,8 @@ usage: ./build/vcfglbound [options] <vcf file>
 
 options: -b, --bound N Bound GLs to this limit. -x, --exclude-broken If GLs are > 0, remove site.
 
+
+
 # OPTIONS
 
 ```
@@ -22,6 +24,8 @@ Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by th
 Then cap (bound) at N (e.g. -10).
 
 ```
+
+
 
 
 

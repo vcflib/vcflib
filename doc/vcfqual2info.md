@@ -13,13 +13,7 @@ usage: ./build/vcfqual2info [key] [vcf_file] Puts QUAL into an info field tag ke
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

@@ -13,6 +13,8 @@ usage: ./build/vcfentropy [options] <vcf file>
 
 options: -f, --fasta-reference FASTA reference file to use to obtain flanking sequences -w, --window-size Size of the window over which to calculate entropy
 
+
+
 # OPTIONS
 
 ```
@@ -23,6 +25,8 @@ EntropyCenter, which are the entropies of the sequence of the given window size 
 left, right, and center  of the record.  Also adds EntropyRef and EntropyAlt for each alt.
 
 ```
+
+
 
 
 

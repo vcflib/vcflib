@@ -13,13 +13,7 @@ usage: ./build/vcfannotategenotypes <annotation-tag> <vcf file> <vcf file> annot
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

@@ -13,6 +13,8 @@ usage: wcFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file m
 
 wcFst is Weir & Cockerham's Fst for two populations. Negative values are VALID, they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. Specifically wcFst uses equations 1,2,3,4.
 
+
+
 # OPTIONS
 
 ```
@@ -33,6 +35,8 @@ optional: r,region     -- argument: a tabix compliant genomic range: seqid or se
 optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero 
 
 ```
+
+
 
 
 

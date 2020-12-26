@@ -13,13 +13,7 @@ vcfuniqalleles
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

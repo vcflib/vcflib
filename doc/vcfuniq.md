@@ -13,13 +13,7 @@ vcfuniq
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

@@ -13,6 +13,8 @@ usage: ./build/vcfleftalign [options] [file]
 
 options: -r, --reference FILE Use this reference as a basis for realignment. -w, --window N Use a window of this many bp when left aligning (150).
 
+
+
 # OPTIONS
 
 ```
@@ -23,6 +25,8 @@ dynamically according to the entropy of the regions flanking the indel.  These m
 entropy > 1 bit/bp, or be shorter than ~5kb.
 
 ```
+
+
 
 
 

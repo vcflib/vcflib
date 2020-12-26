@@ -13,13 +13,7 @@ vcfhethomratio
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

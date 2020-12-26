@@ -13,6 +13,8 @@ usage: ./build/vcfsample2info [options] <vcf file>
 
 options: -f, --field Add information about this field in samples to INFO column -i, --info Store the computed statistic in this info field -a, --average Take the mean of samples for field (default) -m, --median Use the median -n, --min Use the min -x, --max Use the max
 
+
+
 # OPTIONS
 
 ```
@@ -22,6 +24,8 @@ Take annotations given in the per-sample fields and add the mean, median, min, o
 to the site-level INFO.
 
 ```
+
+
 
 
 

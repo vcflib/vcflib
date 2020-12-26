@@ -13,6 +13,8 @@ usage: vcfintersect [options] [<vcf file>]
 
 VCF set analysis
 
+
+
 # OPTIONS
 
 ```
@@ -46,6 +48,8 @@ as determined by haplotype comparison alleles.
 type: transformation
 
 ```
+
+
 
 
 

@@ -13,6 +13,8 @@ usage: permuteSmooth -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1
 
 ./build/permuteSmooth: invalid option -- 'h' FATAL: no file was provided
 
+
+
 # OPTIONS
 
 ```
@@ -39,6 +41,8 @@ OUTPUT: permuteSmooth will append three additional columns:
 
 
 ```
+
+
 
 
 

@@ -13,13 +13,7 @@ vcfcountalleles
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

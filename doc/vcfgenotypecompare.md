@@ -13,13 +13,7 @@ usage: ./build/vcfgenotypecompare <other-genotype-tag> <vcf file> adds statistic
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

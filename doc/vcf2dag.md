@@ -13,6 +13,8 @@ usage: ./build/vcf2dag [options] [<vcf file>]
 
 options: -r, --reference FILE FASTA reference file.
 
+
+
 # OPTIONS
 
 ```
@@ -23,6 +25,8 @@ For each ref and alt allele, assign an index.  These steps are sufficient to
 enable use of the VCF as a DAG (specifically a partially-ordered graph).
 
 ```
+
+
 
 
 

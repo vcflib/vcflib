@@ -13,13 +13,7 @@ vcfgenosamplenames
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

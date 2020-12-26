@@ -13,6 +13,8 @@ usage: pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my
 
 pFst is a probabilistic approach for detecting differences in allele frequencies between two populations.
 
+
+
 # OPTIONS
 
 ```
@@ -34,6 +36,8 @@ optional: c,counts     -- switch  : use genotype counts rather than genotype lik
 Type: statistics
 
 ```
+
+
 
 
 

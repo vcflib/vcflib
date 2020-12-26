@@ -7,7 +7,7 @@
 vcfsamplediff
 .SH SYNOPSIS
 .PP
-usage: ./build/vcfsamplediff options [ \&... ] Tags each record where
+usage: ./build/vcfsamplediff [options] [ \&... ] Tags each record where
 the listed sample genotypes differ with .
 The first sample is assumed to be germline, the second somatic.
 Each record is tagged with ={germline,somatic,loh} to specify the type
@@ -16,14 +16,6 @@ of variant given the genotype difference between the two samples.
 .PP
 options: -s \[en]strict Require that no observations in the germline
 support the somatic alternate.
-.SH OPTIONS
-.IP
-.nf
-\f[C]
-
-
-\f[R]
-.fi
 .SH EXIT VALUES
 .TP
 .B \f[B]0\f[R]

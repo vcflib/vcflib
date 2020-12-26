@@ -13,13 +13,7 @@ usage: ./build/vcfinfo2qual [key] [vcf_file] Sets QUAL from info field tag keyed
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

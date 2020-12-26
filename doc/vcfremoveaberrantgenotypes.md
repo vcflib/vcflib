@@ -13,13 +13,7 @@ vcfremoveaberrantgenotypes
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

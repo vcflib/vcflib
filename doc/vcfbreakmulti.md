@@ -13,13 +13,7 @@ usage: ./build/vcfbreakmulti [options] [file]
 
 If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields.
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

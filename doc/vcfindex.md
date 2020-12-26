@@ -13,13 +13,7 @@ vcfindex
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

@@ -13,13 +13,7 @@ vcfgenosummarize
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

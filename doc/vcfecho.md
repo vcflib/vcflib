@@ -13,13 +13,7 @@ vcfecho
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

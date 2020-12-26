@@ -13,6 +13,8 @@ plotHaps
 
 plotHaps provides the formatted output that can be used with 'bin/plotHaplotypes.R'. Output : haplotype matrix and positions
 
+
+
 # OPTIONS
 
 ```
@@ -28,6 +30,8 @@ required: y,type       -- argument: genotype likelihood format: PL,GP,GP
 version 1.0.1 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu 
 
 ```
+
+
 
 
 

@@ -13,6 +13,8 @@ usage: popStat --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf
 
 General population genetic statistics for each SNP
 
+
+
 # OPTIONS
 
 ```
@@ -34,6 +36,8 @@ required, y,type       -- genotype likelihood format; genotype : GL,PL,GP
 optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1                                              
 
 ```
+
+
 
 
 

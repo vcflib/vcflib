@@ -13,13 +13,7 @@ usage: ./build/vcfgenotypes <vcf file> report the genotypes for each sample, for
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

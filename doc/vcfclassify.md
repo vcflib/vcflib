@@ -13,13 +13,7 @@ vcfclassify
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

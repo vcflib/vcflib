@@ -13,13 +13,7 @@ vcfparsealts
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

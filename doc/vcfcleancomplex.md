@@ -13,13 +13,7 @@ vcfcleancomplex
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

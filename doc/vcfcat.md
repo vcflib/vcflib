@@ -13,13 +13,7 @@ vcfcat
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

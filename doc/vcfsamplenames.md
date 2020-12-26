@@ -13,13 +13,7 @@ vcfsamplenames
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

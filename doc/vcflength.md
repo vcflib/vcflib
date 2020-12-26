@@ -13,13 +13,7 @@ vcflength
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

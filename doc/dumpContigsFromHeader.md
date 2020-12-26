@@ -13,13 +13,7 @@ Usage: dumpContigsFromHeader file
 
 Dump contigs from header
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

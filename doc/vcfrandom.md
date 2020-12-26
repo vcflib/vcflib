@@ -11,15 +11,9 @@ vcfrandom
 
 # DESCRIPTION
 
-##fileformat=VCFv4.0 ##source=vcfrandom ##reference=/d2/data/references/build_37/human_reference_v37.fa ##phasing=none ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data"> ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total read depth at the locus"> ##INFO=<ID=AC,Number=1,Type=Integer,Description="Total number of alternate alleles in called genotypes"> ##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes"> ##INFO=<ID=AF,Number=1,Type=Float,Description="Estimated allele frequency in the range (0,1]"> ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype"> ##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality, the Phred-scaled marginal (or unconditional) probability of the called genotype"> ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth"> #CHROM POS ID REF ALT QUAL FILTER INFO FORMAT bill one 1 . C C,A 100 . DP=24 GT:DP 0/1:63 one 2 . G T,C 100 . DP=17 GT:DP 0/1:88 one 3 . A C,A 100 . DP=90 GT:DP 0/1:29 one 4 . T T,T 100 . DP=75 GT:DP 0/1:42 one 5 . T T,C 100 . DP=69 GT:DP 0/1:16 one 6 . C G,G 100 . DP=22 GT:DP 0/1:15 one 7 . C C,G 100 . DP=53 GT:DP 0/1:33 one 8 . C C,A 100 . DP=17 GT:DP 0/1:64 one 9 . C C,G 100 . DP=17 GT:DP 0/1:1
-
-# OPTIONS
-
-```
+##fileformat=VCFv4.0 ##source=vcfrandom ##reference=/d2/data/references/build_37/human_reference_v37.fa ##phasing=none ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data"> ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total read depth at the locus"> ##INFO=<ID=AC,Number=1,Type=Integer,Description="Total number of alternate alleles in called genotypes"> ##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes"> ##INFO=<ID=AF,Number=1,Type=Float,Description="Estimated allele frequency in the range (0,1]"> ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype"> ##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality, the Phred-scaled marginal (or unconditional) probability of the called genotype"> ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth"> #CHROM POS ID REF ALT QUAL FILTER INFO FORMAT bill one 1 . A G,G 100 . DP=60 GT:DP 0/1:33 one 2 . A G,T 100 . DP=13 GT:DP 0/1:91 one 3 . C A,G 100 . DP=36 GT:DP 0/1:48 one 4 . A T,C 100 . DP=82 GT:DP 0/1:65 one 5 . A T,G 100 . DP=88 GT:DP 0/1:43 one 6 . G A,T 100 . DP=43 GT:DP 0/1:23 one 7 . G C,A 100 . DP=45 GT:DP 0/1:87 one 8 . T T,C 100 . DP=24 GT:DP 0/1:93 one 9 . A T,A 100 . DP=66 GT:DP 0/1:73
 
 
-
-```
 
 
 

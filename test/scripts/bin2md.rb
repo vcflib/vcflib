@@ -57,6 +57,7 @@ Dir.glob(bindir+'/*').each do|bin|
     lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
     pydoc_full = lines.map{|l| l=="" ? '>' : l }.join("\n")
     in_usage = false
+    has_options = nil
     has_example = false
     usage = []
     other = []
@@ -101,6 +102,7 @@ Dir.glob(bindir+'/*').each do|bin|
     end
 
     body = rest.drop(descr.size).join("\n")
+    has_options = true if body != ""
     usage = usage.join(" ").gsub(/#{VERSION}\s+/,"")
     usage = usage.sub(/\.\.\/build\//,"")
     usage = usage.gsub(/\s+/," ").strip

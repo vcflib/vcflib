@@ -13,13 +13,7 @@ usage: vcfflatten [file]
 
 Removes multi-allelic sites by picking the most common alternate. Requires allele frequency specification 'AF' and use of 'G' and 'A' to specify the fields which vary according to the Allele or Genotype. VCF file may be specified on the command line or piped as stdin.
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

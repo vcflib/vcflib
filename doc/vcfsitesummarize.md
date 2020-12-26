@@ -13,13 +13,7 @@ vcfsitesummarize
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

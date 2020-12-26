@@ -13,6 +13,8 @@ usage: ./build/vcfevenregions [options] <vcf file>
 
 options: -f, --fasta-reference REF FASTA reference file to use to obtain primer sequences. -n, --number-of-regions N The number of desired regions. -p, --number-of-positions N The number of positions per region. -o, --offset N Add an offset to region positioning, to avoid boundary related artifacts in downstream processing. -l, --overlap N The number of sites to overlap between regions. Default 0. -s, --separator SEQ Specify string to use to separate region output. Default '-'
 
+
+
 # OPTIONS
 
 ```
@@ -24,6 +26,8 @@ even numbers of variants.  This can be use to reduce the variance in runtime
 when dividing variant detection or genotyping by genomic coordinates.
 
 ```
+
+
 
 
 

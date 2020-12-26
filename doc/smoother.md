@@ -13,6 +13,8 @@ usage: smoother --format pFst --file GPA.output.txt
 
 Smoother averages a set of scores over a sliding genomic window. Smoother slides over genomic positions not the SNP indices. In other words the number of scores within a window will not be constant. The last window for each seqid can be smaller than the defined window size. Smoother automatically analyses different seqids separately. Output : 4 columns : 1. seqid 2. window start 2. window end 3. averaged score
 
+
+
 # OPTIONS
 
 ```
@@ -27,6 +29,8 @@ optional: s,step     -- argument: window step size in base pairs (default 1000)
 optional: t,truncate -- flag    : end last window at last position (zero based)      
 
 ```
+
+
 
 
 

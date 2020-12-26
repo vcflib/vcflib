@@ -13,13 +13,7 @@ usage: ./build/vcfsamplediff [options] <tag> <sample> <sample> [ <sample> ... ] 
 
 options: -s --strict Require that no observations in the germline support the somatic alternate.
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

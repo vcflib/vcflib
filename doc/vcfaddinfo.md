@@ -13,13 +13,7 @@ usage: ./build/vcfaddinfo <vcf file> <vcf file> Adds info fields from the second
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

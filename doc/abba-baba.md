@@ -13,6 +13,8 @@ usage: abba-baba --tree 0,1,2,3 --file my.vcf --type PL
 
 abba-baba calculates the tree pattern for four indviduals. This tool assumes reference is ancestral and ignores non abba-baba sites. The output is a boolian value: 1 = true , 0 = false for abba and baba. the tree argument should be specified from the most basal taxa to the most derived.
 
+
+
 # OPTIONS
 
 ```
@@ -41,6 +43,8 @@ required: y,type       -- genotype likelihood format ; genotypes: GP,GL or PL;
 type: genotype
 
 ```
+
+
 
 
 

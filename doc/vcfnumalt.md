@@ -13,13 +13,7 @@ vcfnumalt
 
 could not open -h
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

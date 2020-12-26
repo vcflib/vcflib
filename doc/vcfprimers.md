@@ -13,6 +13,8 @@ usage: ./build/vcfprimers [options] <vcf file>
 
 options: -f, --fasta-reference FASTA reference file to use to obtain primer sequences -l, --primer-length The length of the primer sequences on each side of the variant
 
+
+
 # OPTIONS
 
 ```
@@ -31,6 +33,8 @@ CCATTGTATATATAGACCATAATTTCTTTATCCAATCATCTGTTGATGGA
 ACTCAGTTGATTCCATACCTTTGCCATCATGAATCATGTTGTAATAAACA
 
 ```
+
+
 
 
 

@@ -13,13 +13,7 @@ vcfafpath
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

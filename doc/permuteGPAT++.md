@@ -13,6 +13,8 @@ usage: permuteGPAT++ -f gpat.txt -n 5 -s 1
 
 ./build/permuteGPAT++: invalid option -- 'h' FATAL: no file was provided
 
+
+
 # OPTIONS
 
 ```
@@ -34,6 +36,8 @@ number:  n   -- argument: the number of permutations to run for each value [1000
 success: s   -- argument: stop permutations after 's' successes [1]
 
 ```
+
+
 
 
 

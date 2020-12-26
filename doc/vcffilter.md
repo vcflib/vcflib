@@ -13,6 +13,8 @@ usage: ./build/vcffilter [options] <vcf file>
 
 VCF filter the specified vcf file using the set of filters
 
+
+
 # OPTIONS
 
 ```
@@ -52,6 +54,8 @@ though it does not appear in the INFO fields.
 type: filter
 
 ```
+
+
 
 
 

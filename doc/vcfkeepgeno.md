@@ -13,13 +13,7 @@ usage: ./build/vcfkeepgeno <vcf file> [FIELD1] [FIELD2] ... outputs each record 
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

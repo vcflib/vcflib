@@ -13,6 +13,8 @@ usage: ./build/vcfoverlay [options] [<vcf file> ...]
 
 options: -h, --help this dialog -v, --version prints version
 
+
+
 # OPTIONS
 
 ```
@@ -21,6 +23,8 @@ options: -h, --help this dialog -v, --version prints version
 Overlays records in the input vcf files in the order in which they appear.
 
 ```
+
+
 
 
 

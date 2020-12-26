@@ -13,13 +13,7 @@ usage: ./build/vcfcommonsamples <vcf file> <vcf file> outputs each record in the
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

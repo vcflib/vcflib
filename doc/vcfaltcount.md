@@ -13,13 +13,7 @@ usage: ./build/vcfaltcount <vcf file> count the number of alternate alleles in a
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

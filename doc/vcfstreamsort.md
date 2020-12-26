@@ -13,6 +13,8 @@ usage: ./build/vcfstreamsort [options] [vcf file]
 
 Sorts the input (either stdin or file) using a streaming sort algorithm. options:
 
+
+
 # OPTIONS
 
 ```
@@ -23,6 +25,8 @@ Sorts the input (either stdin or file) using a streaming sort algorithm. options
     -a, --all              load all sites and then sort in memory
 
 ```
+
+
 
 
 

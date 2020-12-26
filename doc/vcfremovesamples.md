@@ -13,13 +13,7 @@ usage: ./build/vcfremovesamples <vcf file> [SAMPLE1] [SAMPLE2] ... outputs each 
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

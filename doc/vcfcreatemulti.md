@@ -13,13 +13,7 @@ usage: ./build/vcfcreatemulti [options] [file]
 
 If overlapping alleles are represented across multiple records, merge them into a single record. Currently only for indels.
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

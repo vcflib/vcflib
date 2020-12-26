@@ -13,6 +13,8 @@ usage: ./build/vcfglxgt [options] <vcf file>
 
 options: -n, --fix-null-genotypes only apply to null and partly-null genotypes
 
+
+
 # OPTIONS
 
 ```
@@ -21,6 +23,8 @@ options: -n, --fix-null-genotypes only apply to null and partly-null genotypes
 Set genotypes using the maximum genotype likelihood for each sample.
 
 ```
+
+
 
 
 

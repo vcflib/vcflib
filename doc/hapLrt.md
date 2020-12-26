@@ -13,6 +13,8 @@ hapLrt
 
 HapLRT is a likelihood ratio test for haplotype lengths. The lengths are modeled with an exponential distribution. The sign denotes if the target has longer haplotypes (1) or the background (-1).
 
+
+
 # OPTIONS
 
 ```
@@ -35,6 +37,8 @@ required: y,type       -- argument: type of genotype likelihood: PL, GL or GP
 optional: r,region     -- argument: a genomice range to calculate hapLrt on in the format : "seqid:start-end" or "seqid" 
 
 ```
+
+
 
 
 

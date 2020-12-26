@@ -13,6 +13,8 @@ usage: ./build/vcfannotate [options] [<vcf file>]
 
 options: -b, --bed use annotations provided by this BED file -k, --key use this INFO field key for the annotations -d, --default use this INFO field key for records without annotations
 
+
+
 # OPTIONS
 
 ```
@@ -24,6 +26,8 @@ If no VCF filename is specified on the command line (last argument) the VCF
 read from stdin.
 
 ```
+
+
 
 
 

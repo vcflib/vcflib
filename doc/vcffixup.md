@@ -13,13 +13,7 @@ usage: ./build/vcffixup <vcf file> outputs a VCF stream where AC and NS have bee
 
 
 
-# OPTIONS
 
-```
-
-
-
-```
 
 
 

@@ -13,6 +13,8 @@ usage: ./build/vcfgeno2haplo [options] [<vcf file>]
 
 options: -h, --help Print this message -v, --version Print version -r, --reference FILE FASTA reference file -w, --window-size N Merge variants at most this many bp apart (default 30) -o, --only-variants Don't output the entire haplotype, just concatenate REF/ALT strings (delimited by ":")
 
+
+
 # OPTIONS
 
 ```
@@ -22,6 +24,8 @@ Convert genotype-based phased alleles within --window-size into haplotype allele
 Will break haplotype construction when encountering non-phased genotypes on input.
 
 ```
+
+
 
 
 
