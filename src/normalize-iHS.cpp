@@ -87,7 +87,17 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "      normalizes iHS or XP-EHH scores  " << endl;
+  cerr << "      normalizes iHS or XP-EHH scores. " << endl << endl ;
+
+  cerr << R"(
+
+A cross-population extended haplotype homozygosity (XP-EHH) score is
+directional: a positive score suggests selection is likely to have
+happened in population A, whereas a negative score suggests the same
+about population B. See for example
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2687721/
+
+)" << endl ;
 
   cerr << "Output : normalize-iHS adds one additional column to input (normalized score)." << endl;
 
@@ -95,6 +105,7 @@ void printHelp(void){
   cerr << endl;
   cerr << "INFO: required: -f            -- Output from iHS or XPEHH "   << endl;
   cerr << "INFO: optional: -s            -- Max AF diff for window [0.01]"   << endl;
+  cerr << endl << "Type: genotype" << endl << endl;
 
   cerr << endl;
 
@@ -110,7 +121,7 @@ int parseOpts(int argc, char** argv)
       switch(opt){
       case 's':
 	{
-	  string op = optarg;    
+	  string op = optarg;
 	  globalOpts.afDiff = atof(op.c_str());
 	  break;
 	}
@@ -120,7 +131,7 @@ int parseOpts(int argc, char** argv)
 	  exit(1);
 	  break;
 	}
-	
+
       case 'f':
 	{
 	  globalOpts.file = optarg;
@@ -130,8 +141,8 @@ int parseOpts(int argc, char** argv)
 	{
 	  break;
 	}
-      }	
-	opt = getopt( argc, argv, optString ); 
+      }
+	opt = getopt( argc, argv, optString );
    }
 return 1;
 }
@@ -185,7 +196,7 @@ double windowAvg(std::vector<double> & rangeData){
     s += *it;
     n += 1;
   }
-  
+
 
   return (s/n);
 }
@@ -194,7 +205,7 @@ double windowAvg(std::vector<double> & rangeData){
 
 //------------------------------- SUBROUTINE --------------------------------
 /*
- Function input  : vector of iHS data 
+ Function input  : vector of iHS data
 
  Function does   : normalizes
 
@@ -203,13 +214,13 @@ double windowAvg(std::vector<double> & rangeData){
 */
 
 void normalize(std::vector<iHSdat *> & data, int * pos){
-  
+
   std::vector<double> windat;
 
   int start = *pos;
   int end   = *pos;
 
-  while((abs(data[start]->af - data[end]->af ) < globalOpts.afDiff) 
+  while((abs(data[start]->af - data[end]->af ) < globalOpts.afDiff)
 	&& end < data.size() -1 ){
     end += 1;
   }
@@ -217,22 +228,22 @@ void normalize(std::vector<iHSdat *> & data, int * pos){
   for(int i = start; i <= end; i++){
     windat.push_back(data[i]->iHS);
   }
-  
+
   double avg = windowAvg(windat);
   double sd  = sqrt(var(windat, avg));
 
-  std::cerr << "start: " << data[start]->af << " " 
-	    << "end: " << data[end]->af  << " " 
-            << "n iHS scores: " << windat.size() << " "  
-	    << "mean: " << avg << " " 
+  std::cerr << "start: " << data[start]->af << " "
+	    << "end: " << data[end]->af  << " "
+            << "n iHS scores: " << windat.size() << " "
+	    << "mean: " << avg << " "
 	    << "sd: " << sd << std::endl;
 
   for(int i = start; i <= end; i++){
     data[i]->niHS = (data[i]->iHS - avg) / (sd);
   }
-  
+
   *pos = end;
-  
+
 }
 
 //-------------------------------    MAIN     --------------------------------
@@ -273,14 +284,14 @@ int main( int argc, char** argv)
 	data.push_back(tp);
 
       }
-  
+
     myfile.close();
     }
   else{
     cerr << "FATAL: could not open file: " << globalOpts.file << endl;
     exit(1);
   }
-  
+
 
   std::cerr << "INFO: sorting " << data.size() << " scores by AF" << std::endl;
 
@@ -303,7 +314,7 @@ int main( int argc, char** argv)
 	      << data[i]->niHS << "\t"
 	      << data[i]->F1 << "\t"
 	      << data[i]->F2 << std::endl;
-	     
+
   }
 
 
