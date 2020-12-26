@@ -15,15 +15,15 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>  
+#include <math.h>
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
-#include <algorithm> 
-#include <ctime>        
-#include <cstdlib>      
+#include <algorithm>
+#include <ctime>
+#include <cstdlib>
 #include "gpatInfo.hpp"
 
 #if defined HAS_OPENMP
@@ -53,7 +53,15 @@ void printHelp(void){
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
   cerr << "     vFst calculates vst, a measure of CNV stratification." << endl << endl;
- 
+     cerr << R"(
+
+The statistic Vst is used to test the difference in copy numbers at
+each SV between two groups: Vst = (Vt-Vs)/Vt, where Vt is the overall
+variance of copy number and Vs the average variance within
+populations.
+
+)";
+
   cerr << "Output : 4 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;
   cerr << "     2. position         "    << endl;
@@ -69,8 +77,9 @@ void printHelp(void){
   cerr << "INFO: required: y,type       -- argument: the genotype field with the copy number: e.g. CN|CNF                           "  << endl;
   cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range : seqid or seqid:start-end                                 "  << endl;
   cerr << "INFO: optional: x,cpu        -- argument: number of CPUs [1] " << endl ;
-  cerr << "INFO: optional: n,per        -- argument: number of permutations [1000] " << endl;       
-  
+  cerr << "INFO: optional: n,per        -- argument: number of permutations [1000] " << endl;
+
+  cerr << endl << "Type: statistics" << endl << endl;
   cerr << endl;
 
   printVersion() ;
@@ -137,10 +146,10 @@ inline double mean(vector<double> & data){
 }
 
 double vst(copyNcounts * d){
-  
+
   double muA = mean(d->total     );
   double vA = var(d->total, muA     );
-  
+
   if(vA <= 0){
     return 0;
   }
@@ -153,7 +162,7 @@ double vst(copyNcounts * d){
 
   double cT = double(d->target.size())     / double(d->total.size());
   double cB = double(d->background.size()) / double(d->total.size());
-  
+
   double ans =  (vA - ( (cT * vT) + (cB * vB) )) / vA;
 
   //purge negative
@@ -176,16 +185,16 @@ void calc(copyNcounts * d){
     if (nsuc > 1){
       break;
     }
-    
+
     trials += 1;
 
     std::random_shuffle(d->total.begin(), d->total.end());
-    
+
     int tsize = d->target.size();
-          
+
     d->target.clear();
     d->background.clear();
-    
+
     int counter = 0;
 
     for(std::vector<double>::iterator it = d->total.begin();
@@ -198,9 +207,9 @@ void calc(copyNcounts * d){
       }
       counter+=1;
     }
-    
+
     //    std::cerr << "PER\t" << v << "\t" << vst(d) << std::endl;
-    
+
     if (vst(d) >= v ){
       nsuc += 1;
     }
@@ -211,12 +220,12 @@ void calc(copyNcounts * d){
     p = double(nsuc) / double(trials);
   }
 
-  
 
-  d->results << d->seqid 
-	     << "\t" 
-	     << d->pos 
-	     << "\t" 
+
+  d->results << d->seqid
+	     << "\t"
+	     << d->pos
+	     << "\t"
 	     << d->end
 	     << "\t"
 	     << d->type
@@ -224,8 +233,8 @@ void calc(copyNcounts * d){
 	     << v
 	     << "\t"
 	     << p ;
-  
-  
+
+
 
 
 }
@@ -235,36 +244,36 @@ void calc(copyNcounts * d){
 //------------------------------- SUBROUTINE --------------------------------
 
 void loadIndices(map<int, int> & index, string set){
-  
+
   vector<string>  indviduals = split(set, ",");
 
   vector<string>::iterator it = indviduals.begin();
-  
+
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
   }
 }
 
 // gotta load the dat so that we can permute using open MP
-void loadDat(copyNcounts * d, 
+void loadDat(copyNcounts * d,
 	     std::string & type,
 	     vector < map< string, vector<string> > > & target,
 	     vector < map< string, vector<string> > > & background){
 
-  for(vector < map< string, vector<string> > >::iterator it 
+  for(vector < map< string, vector<string> > >::iterator it
 	= target.begin(); it!= target.end(); it++){
     d->target.push_back( atof((*it)[type].front().c_str()) );
     d->total.push_back(  atof((*it)[type].front().c_str()) );
-    
+
     d->targetV += (*it)[type].front();
     d->targetV += ",";
-    
+
   }
-  for(vector < map< string, vector<string> > >::iterator it 
+  for(vector < map< string, vector<string> > >::iterator it
 	= background.begin(); it!= background.end(); it++){
     d->background.push_back( atof((*it)[type].front().c_str()) );
-    d->total.push_back( atof((*it)[type].front().c_str()) );  
-  
+    d->total.push_back( atof((*it)[type].front().c_str()) );
+
     d->backgroundV += (*it)[type].front();
     d->backgroundV += ",";
 
@@ -284,22 +293,22 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
-  // using vcflib; thanks to Erik Garrison 
+  // using vcflib; thanks to Erik Garrison
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
-  
+  // zero based index for the target and background indivudals
+
   map<int, int> it, ib;
-  
-  // deltaaf is the difference of allele frequency we bother to look at 
+
+  // deltaaf is the difference of allele frequency we bother to look at
 
   string deltaaf ;
   double daf  = 0;
 
-  // 
+  //
 
   int counts = 0;
 
@@ -307,7 +316,7 @@ int main(int argc, char** argv) {
 
   string type = "NA";
 
-    const struct option longopts[] = 
+    const struct option longopts[] =
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
@@ -318,7 +327,7 @@ int main(int argc, char** argv) {
 	{"background", 1, 0, 'b'},
 	{"region"    , 1, 0, 'r'},
 	{"type"      , 1, 0, 'y'},
-  
+
 	{0,0,0,0}
       };
 
@@ -347,7 +356,7 @@ int main(int argc, char** argv) {
 	      return 0;
 	    }
 	  case 'y':
-	    {	    
+	    {
 	      type = optarg;
 	      cerr << "INFO: Copy number will be found in : " << type << endl;
 	      break;
@@ -382,12 +391,12 @@ int main(int argc, char** argv) {
 	    {
 	      cerr << "INFO: only scoring sites where the allele frequency difference is greater than: " << optarg << endl;
 	      deltaaf = optarg;
-	      daf = atof(deltaaf.c_str());	    
+	      daf = atof(deltaaf.c_str());
 	      break;
 	    }
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg; 
+	    region = optarg;
 	    break;
 	  default:
 	    break;
@@ -398,15 +407,15 @@ int main(int argc, char** argv) {
     omp_set_num_threads(cpu);
 #endif
 
-    
+
     if(filename == "NA"){
       cerr << "FATAL: did not specify the file\n";
       printHelp();
       exit(1);
     }
-    
+
     variantFile.open(filename);
-    
+
     if(region != "NA"){
       if(! variantFile.setRegion(region)){
 	cerr <<"FATAL: unable to set region" << endl;
@@ -417,13 +426,13 @@ int main(int argc, char** argv) {
     if (!variantFile.is_open()) {
       exit(1);
     }
- 
+
     if(type == "NA"){
       cerr << "FATAL: failed to specify copy number genotype field" << endl;
       printHelp();
       return 1;
     }
- 
+
     Variant var(variantFile);
 
     vector<string> samples = variantFile.sampleNames;
@@ -446,14 +455,14 @@ int main(int argc, char** argv) {
       if(formatMap.find(type) == formatMap.end()){
 	continue;
       }
-      
- 
+
+
       copyNcounts * varDat = new copyNcounts;
 
       varDat->pos   = var.position    ;
       varDat->seqid = var.sequenceName;
       varDat->type  = var.alt.front() ;
-      
+
       if(var.info.find("CALLERS") != var.info.end()){
 	stringstream caller;
 	for(std::vector<std::string>::iterator z = var.info["CALLERS"].begin();
@@ -461,7 +470,7 @@ int main(int argc, char** argv) {
 	  caller << (*z);
 	  caller << ',';
 	}
-	
+
 	varDat->callers = caller.str();
       }
 
@@ -473,31 +482,31 @@ int main(int argc, char** argv) {
       }
 
       vector < map< string, vector<string> > > target, background, total;
-      
+
       int index = 0;
-      
-     
+
+
       for(int nsamp = 0; nsamp < nsamples; nsamp++){
-	
+
 	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
-	
+
 	if(sample[type].front() != "."){
 	  if(it.find(index) != it.end() ){
-	    target.push_back(sample);		
-	    total.push_back(sample);		
+	    target.push_back(sample);
+	    total.push_back(sample);
 	  }
 	  if(ib.find(index) != ib.end()){
 	    background.push_back(sample);
-	    total.push_back(sample);		
+	    total.push_back(sample);
 	  }
 	}
-        
+
 	index += 1;
       }
-      
+
       loadDat(varDat, type, target, background);
 
-      if(varDat->target.size() < 2 
+      if(varDat->target.size() < 2
 	 || varDat->background.size() < 2){
 	delete varDat;
 	continue;
@@ -507,7 +516,7 @@ int main(int argc, char** argv) {
 
       // this odd pattern is for open MP ... later
       if(dataBin.size() == cpu){
-	
+
 #if defined HAS_OPENMP
 #pragma omp parallel for schedule(dynamic, 1)
 #endif
@@ -516,19 +525,19 @@ int main(int argc, char** argv) {
 	}
 	for(int i = 0 ; i < dataBin.size(); i++){
 	  std::cout << dataBin[i]->results.str() << "\t" << dataBin[i]->targetV << "\t" << dataBin[i]->backgroundV ;
-	  
+
 	  if(!dataBin[i]->callers.empty()){
 	    std::cout << "\t" << dataBin[i]->callers << std::endl;
 	  }
 	  else{
 	    std::cout << std::endl;
 	  }
-	  
+
 
 	  delete dataBin[i];
 	}
 	dataBin.clear();
       }
     }
-    return 0;		    
+    return 0;
 }

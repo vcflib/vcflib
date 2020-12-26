@@ -74,6 +74,8 @@ Dir.glob(bindir+'/*').each do|bin|
       stdout, stderr, status = Open3.capture3(bin)
       out = stderr + stdout
     end
+    # out = ,:encoding => 'UTF-8'
+    out = out.encode('UTF-8')
     # $stderr.print(out)
     usage_full = out
     lines = (out).split("\n")

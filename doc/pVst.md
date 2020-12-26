@@ -1,4 +1,4 @@
-% PVST(1) pVst (vcflib) | pVst (VCF unknown)
+% PVST(1) pVst (vcflib) | pVst (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -20,6 +20,13 @@ vFst calculates vst, a measure of CNV stratification.
 ```
 
 
+
+
+The statistic Vst is used to test the difference in copy numbers at
+each SV between two groups: Vst = (Vt-Vs)/Vt, where Vt is the overall
+variance of copy number and Vs the average variance within
+populations.
+
 Output : 4 columns :     
      1. seqid            
      2. position         
@@ -34,6 +41,9 @@ required: y,type       -- argument: the genotype field with the copy number: e.g
 optional: r,region     -- argument: a tabix compliant genomic range : seqid or seqid:start-end                                 
 optional: x,cpu        -- argument: number of CPUs [1] 
 optional: n,per        -- argument: number of permutations [1000] 
+
+Type: statistics
+
 
 
 ```
