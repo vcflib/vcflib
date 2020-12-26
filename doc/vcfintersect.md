@@ -1,13 +1,6 @@
 % VCFINTERSECT(1) vcfintersect (vcflib) | vcfintersect (VCF transformation)
 % Erik Garrison and vcflib contributors
 
-<!--
-  Created with
-
-  ./scripts/bin2md.rb scripts/bin2md-template.erb
-
--->
-
 # NAME
 
 vcfintersect
@@ -71,3 +64,7 @@ type: transformation
 # LICENSE
 
 Copyright 2011-2020 (C) Erik Garrison and vcflib contributors. MIT licensed.
+
+<!--
+  Created with ./scripts/bin2md.rb scripts/bin2md-template.erb
+-->

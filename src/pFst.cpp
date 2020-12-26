@@ -15,7 +15,7 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>  
+#include <math.h>
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
@@ -32,7 +32,7 @@ void printHelp(void){
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
   cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations." << endl << endl;
- 
+
 
   cerr << "Output : 3 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;
@@ -49,7 +49,7 @@ void printHelp(void){
   cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range : seqid or seqid:start-end                                 "  << endl;
   cerr << "INFO: optional: c,counts     -- switch  : use genotype counts rather than genotype likelihoods to estimate parameters, default false "  << endl;
 
-  cerr << endl;
+  cerr << endl << "Type: statistics" << endl;
 
   printVersion() ;
 }
@@ -65,11 +65,11 @@ double bound(double v){
 }
 
 void loadIndices(map<int, int> & index, string set){
-  
+
   vector<string>  indviduals = split(set, ",");
 
   vector<string>::iterator it = indviduals.begin();
-  
+
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
   }
@@ -79,7 +79,7 @@ double logLbinomial(double x, double n, double p){
 
   double ans = lgamma(n+1)-lgamma(x+1)-lgamma(n-x+1) + x * log(p) + (n-x) * log(1-p);
   return ans;
-    
+
 }
 
 int main(int argc, char** argv) {
@@ -94,22 +94,22 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
-  // using vcflib; thanks to Erik Garrison 
+  // using vcflib; thanks to Erik Garrison
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
-  
+  // zero based index for the target and background indivudals
+
   map<int, int> it, ib;
-  
-  // deltaaf is the difference of allele frequency we bother to look at 
+
+  // deltaaf is the difference of allele frequency we bother to look at
 
   string deltaaf ;
   double daf  = 0;
 
-  // 
+  //
 
   int counts = 0;
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
   string type = "NA";
 
-    const struct option longopts[] = 
+    const struct option longopts[] =
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     while(iarg != -1)
       {
 	iarg = getopt_long(argc, argv, "r:d:t:b:f:y:chv", longopts, &index);
-	
+
 	switch (iarg)
 	  {
 	  case 'h':
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 	  case 'v':
 	    printVersion();
 	    return 0;
-	  case 'y':	    
+	  case 'y':
 	    type = optarg;
 	    cerr << "INFO: genotype likelihoods set to: " << type << endl;
 	    if(type == "GT"){
@@ -174,26 +174,26 @@ int main(int argc, char** argv) {
 	  case 'd':
 	    cerr << "INFO: only scoring sites where the allele frequency difference is greater than: " << optarg << endl;
 	    deltaaf = optarg;
-	    daf = atof(deltaaf.c_str());	    
+	    daf = atof(deltaaf.c_str());
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg; 
+	    region = optarg;
 	    break;
 	  default:
 	    break;
 	  }
       }
 
-    
+
     if(filename == "NA"){
       cerr << "FATAL: did not specify the file\n";
       printHelp();
       exit(1);
     }
-    
+
     variantFile.open(filename);
-    
+
     if(region != "NA"){
       if(! variantFile.setRegion(region)){
 	cerr <<"FATAL: unable to set region" << endl;
@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
       cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL,PO,GL,GP" << endl;
       printHelp();
       return 1;
-    }    
+    }
 
     Variant var(variantFile);
 
@@ -236,10 +236,10 @@ int main(int argc, char** argv) {
       if(var.alt.size() > 1){
 	continue;
       }
-      
-        
+
+
       vector < map< string, vector<string> > > target, background, total;
-	        
+
 	int index = 0;
 
         for(int nsamp = 0; nsamp < nsamples; nsamp++){
@@ -248,18 +248,18 @@ int main(int argc, char** argv) {
 
 	    if(sample["GT"].front() != "./."){
 	      if(it.find(index) != it.end() ){
-		target.push_back(sample);		
-		total.push_back(sample);		
+		target.push_back(sample);
+		total.push_back(sample);
 	      }
 	      if(ib.find(index) != ib.end()){
 		background.push_back(sample);
-		total.push_back(sample);		
+		total.push_back(sample);
 	      }
 	    }
-            
+
 	index += 1;
 	}
-	
+
 	zvar * populationTarget        ;
 	zvar * populationBackground    ;
 	zvar * populationTotal         ;
@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
 	if(type == "GL"){
 	  populationTarget     = new gl();
 	  populationBackground = new gl();
-	  populationTotal      = new gl();	  
+	  populationTotal      = new gl();
 	}
 	if(type == "GP"){
 	  populationTarget     = new gp();
@@ -288,9 +288,9 @@ int main(int argc, char** argv) {
           populationTarget     = new gt();
           populationBackground = new gt();
           populationTotal      = new gt();
-        }	
+        }
 
-	populationTotal->loadPop(total          , var.sequenceName, var.position);	
+	populationTotal->loadPop(total          , var.sequenceName, var.position);
 	populationTarget->loadPop(target        , var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
@@ -302,7 +302,7 @@ int main(int argc, char** argv) {
 	  continue;
 	}
 
-	populationTotal->estimatePosterior();	
+	populationTotal->estimatePosterior();
 	populationTarget->estimatePosterior();
 	populationBackground->estimatePosterior();
 
@@ -319,7 +319,7 @@ int main(int argc, char** argv) {
 
 	  populationTotal->alpha  = 0.001 + populationTotal->nref;
 	  populationTotal->beta   = 0.001 + populationTotal->nalt;
-	  
+
 	  populationTarget->alpha = 0.001 + populationTarget->nref;
 	  populationTarget->beta  = 0.001 + populationTarget->nalt;
 
@@ -340,9 +340,9 @@ int main(int argc, char** argv) {
 	  logLbinomial(populationBackground->beta, (populationBackground->alpha + populationBackground->beta),  populationTotalEstAF) ;
 	double alt  = logLbinomial(populationTarget->beta, (populationTarget->alpha + populationTarget->beta),  populationTargetEstAF) +
 	  logLbinomial(populationBackground->beta, (populationBackground->alpha + populationBackground->beta),  populationBackgroundEstAF) ;
-		
+
 	double l = 2 * (alt - null);
-	
+
 	if(l <= 0){
 	  delete populationTarget;
 	  delete populationBackground;
@@ -359,19 +359,19 @@ int main(int argc, char** argv) {
 	double  df = 1;
 	int     status;
 	double  bound ;
-	
+
 	cdfchi(&which, &p, &q, &x, &df, &status, &bound );
-	
+
 	cout << var.sequenceName << "\t"  << var.position << "\t" << 1-p << endl ;
-	
+
 	delete populationTarget;
 	delete populationBackground;
 	delete populationTotal;
-	
+
 	populationTarget     = NULL;
 	populationBackground = NULL;
 	populationTotal      = NULL;
 
     }
-    return 0;		    
+    return 0;
 }

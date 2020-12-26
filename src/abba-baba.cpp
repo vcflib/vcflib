@@ -15,7 +15,7 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>  
+#include <math.h>
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
@@ -44,9 +44,9 @@ void printHelp(void){
   cerr <<  "        \\  /     "  << endl;
   cerr <<  "         /        "  << endl;
   cerr <<  "        /         "  << endl;
-  
+
   cerr << " --tree A,B,C,D"  << endl << endl;
-    
+
 
   cerr << "Output : 4 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;
@@ -59,7 +59,7 @@ void printHelp(void){
   cerr << "INFO: required: t,tree       -- a zero based comma separated list of target individuals corrisponding to VCF columns" << endl;
   cerr << "INFO: required: f,file       -- a properly formatted VCF.                                                           " << endl;
   cerr << "INFO: required: y,type       -- genotype likelihood format ; genotypes: GP,GL or PL;                                " << endl;
-  cerr << endl;
+  cerr << endl << endl << "type: genotype" << endl;
 
   printVersion() ;
 }
@@ -74,7 +74,7 @@ double bound(double v){
   return v;
 }
 
-/*random sample heterozygous genotypes could eventually be weighted 
+/*random sample heterozygous genotypes could eventually be weighted
 by genotype likelihoods  and added complexity for linked, phased genos
 random sampling adds noise but will not affect the overall measurement
 of D-statistic */
@@ -129,7 +129,7 @@ int  containsRef(string gt){
 }
 
 void loadIndices(vector<int> & tree, string set){
-  
+
   vector<string>  indviduals = split(set, ",");
 
   if(indviduals.size() < 4){
@@ -137,7 +137,7 @@ void loadIndices(vector<int> & tree, string set){
     exit(1);
   }
   for( vector<string>::iterator it = indviduals.begin(); it != indviduals.end(); it++){
-    
+
     int indx = atoi((*it).c_str());
     cerr << indx << endl; //print sample index for user check
     tree.push_back(indx);
@@ -147,7 +147,7 @@ void loadIndices(vector<int> & tree, string set){
 int main(int argc, char** argv) {
 
   // pooled or genotyped
-  
+
   int pool = 0;
 
   // the filename
@@ -156,22 +156,22 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
-  // using vcflib; thanks to Erik Garrison 
+  // using vcflib; thanks to Erik Garrison
 
   VariantCallFile variantFile;
 
   // zero based index for the tree
-  
+
   vector<int> tree;
-  
-  // deltaaf is the difference of allele frequency we bother to look at 
+
+  // deltaaf is the difference of allele frequency we bother to look at
 
   string deltaaf ;
   double daf  = 0;
 
-  // 
+  //
 
   int counts = 0;
 
@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
 
   string type = "NA";
 
-    const struct option longopts[] = 
+    const struct option longopts[] =
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
     while(iarg != -1)
       {
 	iarg = getopt_long(argc, argv, "r:d:t:f:y:hv", longopts, &index);
-	
+
 	switch (iarg)
 	  {
 	  case 'h':
@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
 	  case 'v':
 	    printVersion();
 	    return 0;
-	  case 'y':	    
+	  case 'y':
 	    type = optarg;
 	    cerr << "INFO: genotype likelihoods set to: " << type << endl;
 	    break;
@@ -220,22 +220,22 @@ int main(int argc, char** argv) {
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg; 
+	    region = optarg;
 	    break;
 	  default:
 	    break;
 	  }
       }
 
-    
+
     if(filename == "NA"){
       cerr << "FATAL: did not specify the file\n";
       printHelp();
       exit(1);
     }
-    
+
     variantFile.open(filename);
-    
+
     if(region != "NA"){
       variantFile.setRegion(region);
     }
@@ -260,10 +260,10 @@ int main(int argc, char** argv) {
       cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL or GL" << endl;
       printHelp();
       return 1;
-    }    
+    }
 
     Variant var(variantFile);
-    
+
     vector<string> sampleNames = variantFile.sampleNames;
 
     srand(time(0)); //initialize random number generator
@@ -273,7 +273,7 @@ int main(int argc, char** argv) {
       if(var.alt.size() > 1){
 	continue;
       }
-      
+
       map<string, vector<string> >  tA, tB, tC, tD;
 
       tA = var.samples[sampleNames[tree[0]]];
@@ -284,7 +284,7 @@ int main(int argc, char** argv) {
       if(tA["GT"].front() == "./." || tB["GT"].front() == "./." || tC["GT"].front() == "./." || tD["GT"].front() == "./."){
 	continue;
       }
-      
+
       int A = 0,B = 0,C = 0,D = 0; // set default allelic state to zero
 
       double abba = 0; //booleans for abab or baba state.
@@ -319,5 +319,5 @@ int main(int argc, char** argv) {
       // above is alternate print to check that we are getting observed
       // ABBA or BABA patterns
     }
-    return 0;		    
+    return 0;
 }

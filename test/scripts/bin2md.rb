@@ -20,7 +20,7 @@ require 'erb'
 require 'date'
 require 'open3'
 
-TYPES = ["filter","transformation","statistics","metrics"]
+TYPES = ["filter","transformation","statistics","metrics","phenotype","genotype"]
 
 VERSION=`cat ./VERSION`.strip
 template = ARGV.shift
@@ -52,11 +52,16 @@ Dir.glob(bindir+'/*').each do|bin|
     # $stderr.print(out)
     usage_full = out
     lines = (out).split("\n")
+    lines = lines.map{|l| l.gsub(/INFO: help/,"")}
+    lines = lines.map{|l| l.gsub(/INFO: description:/,"")}
+    lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
     pydoc_full = lines.map{|l| l=="" ? '>' : l }.join("\n")
     in_usage = false
     usage = []
     other = []
+    lines.shift while lines[0] == ""
     lines.each do | l |
+      break if l == "------------------------------------------------------"
       if l =~ /usage/i
         in_usage = true
       end
@@ -76,7 +81,7 @@ Dir.glob(bindir+'/*').each do|bin|
     other.each do | l |
       if l =~ /type: (\S+)/i
         type = $1
-        raise "Unknown type" if !TYPES.include?(type)
+        raise "Unknown type #{type} for #{cmd}" if !TYPES.include?(type)
         break
       end
     end
@@ -85,14 +90,17 @@ Dir.glob(bindir+'/*').each do|bin|
       break if l == ""
       descr << l
     end
+
     body = rest.drop(descr.size).join("\n")
     usage = usage.join(" ").gsub(/#{VERSION}\s+/,"")
     usage = usage.sub(/\.\.\/build\//,"")
+    usage = usage.gsub(/\s+/," ")
     pydoc_full = pydoc_full.gsub(/#{VERSION}\s+/,"")
     pydoc_full = pydoc_full.gsub(/\.\.\/build\//,"")
     # pydoc_full = pydoc_full.gsub(/vcflib/,"VCF")
     descr = descr.join(" ").gsub(/#{VERSION}\s+/,"")
     descr = descr.sub(/vcflib/,"VCF")
+    descr = descr.gsub(/\s+/," ")
     # print("HELP:",help_cmd,"\n")
     # print("DESCRIPTION:",descr,"\n")
     # print("USAGE:",usage,"\n")

@@ -1,13 +1,6 @@
 % VCFFILTER(1) vcffilter (vcflib) | vcffilter (VCF filter)
 % Erik Garrison and vcflib contributors
 
-<!--
-  Created with
-
-  ./scripts/bin2md.rb scripts/bin2md-template.erb
-
--->
-
 # NAME
 
 vcffilter
@@ -77,3 +70,7 @@ type: filter
 # LICENSE
 
 Copyright 2011-2020 (C) Erik Garrison and vcflib contributors. MIT licensed.
+
+<!--
+  Created with ./scripts/bin2md.rb scripts/bin2md-template.erb
+-->

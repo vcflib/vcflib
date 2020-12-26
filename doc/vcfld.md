@@ -1,0 +1,52 @@
+% VCFLD(1) vcfld (vcflib) | vcfld (VCF unknown)
+% Erik Garrison and vcflib contributors
+
+# NAME
+
+vcfld
+
+# SYNOPSIS
+
+
+
+# DESCRIPTION
+
+LD --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf -e -d -r 
+
+# OPTIONS
+
+```
+
+
+required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        
+required: b,background -- argument: a zero base comma separated list of background individuals corrisponding to VCF columns    
+required: f,file       -- argument: a properly formatted phased VCF file                                                       
+required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  
+optional: w,window     -- argument: window size to average LD; default is 1000                                                 
+optional: e,external   -- switch: population to calculate LD expectation; default is target                                    
+optional: d,derived    -- switch: which haplotype to count "00" vs "11"; default "00",                                   
+
+
+```
+
+# EXIT VALUES
+
+**0**
+: Success
+
+**not 0**
+: Failure
+
+# OTHER
+
+## Source code
+
+[vcfld.cpp](https://github.com/vcflib/vcflib/blob/master/src/vcfld.cpp)
+
+# LICENSE
+
+Copyright 2011-2020 (C) Erik Garrison and vcflib contributors. MIT licensed.
+
+<!--
+  Created with ./scripts/bin2md.rb scripts/bin2md-template.erb
+-->
