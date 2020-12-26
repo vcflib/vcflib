@@ -21,6 +21,8 @@ Converts stdin or given VCF file to tab-delimited format, using null string to r
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

@@ -21,6 +21,8 @@ normalizes iHS or XP-EHH scores Output : normalize-iHS adds one additional colum
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

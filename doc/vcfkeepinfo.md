@@ -21,6 +21,8 @@ usage: ./build/vcfkeepinfo <vcf file> [FIELD1] [FIELD2] ... outputs each record 
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

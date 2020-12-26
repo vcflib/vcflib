@@ -21,6 +21,8 @@ vcfuniqalleles
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

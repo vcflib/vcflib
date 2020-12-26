@@ -21,6 +21,8 @@ usage: ./build/vcffixup <vcf file> outputs a VCF stream where AC and NS have bee
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

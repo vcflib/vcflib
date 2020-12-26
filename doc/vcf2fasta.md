@@ -23,6 +23,8 @@ Each sequence in the fasta file is named using the same pattern used for the fil
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

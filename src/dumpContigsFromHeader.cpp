@@ -23,16 +23,42 @@ int main(int argc, char** argv) {
 
   string filename = argv[1];
 
+  if (argc == 2 && filename == "-h") {
+    cerr << R"(
+Dump contigs from header
+
+Usage: dumpContigsFromHeader file
+
+Example:
+
+    dumpContigsFromHeader samples/scaffold612.vcf
+
+    ##contig=<ID=scaffold4,length=1524>
+    ##contig=<ID=scaffold12,length=56895>
+    (...)
+
+    output
+
+    scaffold4       1524
+    scaffold12      56895
+    (...)
+
+Type: transformation
+      )";
+    exit(1);
+  }
+
+
   VariantCallFile variantFile;
 
   variantFile.open(filename);
 
   vector<string> headerLines = split (variantFile.header, "\n");
-  
+
   for(vector<string>::iterator it = headerLines.begin(); it != headerLines.end(); it++){
 
     //    cerr << "h:" <<  (*it) << endl;
-    
+
   if((*it).substr(0,8) == "##contig"){
     string contigInfo = (*it).substr(10, (*it).length() -11);
     //    cerr << contigInfo << endl;
@@ -47,7 +73,7 @@ int main(int argc, char** argv) {
 	cout << subfield[1] << endl;
       }
     }
-    
+
   }
 
 

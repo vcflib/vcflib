@@ -11,7 +11,7 @@ usage: bFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my
 
 # DESCRIPTION
 
-bFst is a Bayesian approach to Fst. Importantly bFst account for genotype uncertainty in the model using genotype likelihoods. For a more detailed description see: `A Bayesian approach to inferring population structure from dominant markers' by Holsinger et al. Molecular Ecology Vol 11, issue 7 2002. The likelihood function has been modified to use genotype likelihoods provided by variant callers. There are five free parameters estimated in the model: each subpopulation's allele frequency and Fis (fixation index, within each subpopulation), a free parameter for the total population's allele frequency, and Fst.
+bFst is a Bayesian approach to Fst. Importantly bFst accounts for genotype uncertainty in the model using genotype likelihoods. For a more detailed description see: `A Bayesian approach to inferring population structure from dominant markers' by Holsinger et al. Molecular Ecology Vol 11, issue 7 2002. The likelihood function has been modified to use genotype likelihoods provided by variant callers. There are five free parameters estimated in the model: each subpopulation's allele frequency and Fis (fixation index, within each subpopulation), a free parameter for the total population's allele frequency, and Fst.
 
 # OPTIONS
 
@@ -40,6 +40,8 @@ required: d,deltaaf    -- skip sites were the difference in allele frequency is 
 Type: statistics
 
 ```
+
+
 
 # EXIT VALUES
 

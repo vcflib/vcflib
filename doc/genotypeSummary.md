@@ -21,6 +21,8 @@ Summarizes genotype counts for bi-allelic SNVs and indel output: table of genoty
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

@@ -36,6 +36,8 @@ optional: w,window     -- argument: the number of SNPs per window; default is 20
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

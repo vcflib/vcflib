@@ -35,6 +35,8 @@ success: s   -- argument: stop permutations after 's' successes [1]
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

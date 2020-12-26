@@ -21,6 +21,8 @@ Removes multi-allelic sites by picking the most common alternate. Requires allel
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

@@ -57,8 +57,10 @@ Dir.glob(bindir+'/*').each do|bin|
     lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
     pydoc_full = lines.map{|l| l=="" ? '>' : l }.join("\n")
     in_usage = false
+    has_example = false
     usage = []
     other = []
+    example = []
     lines.shift while lines[0] == ""
     lines.each do | l |
       break if l == "------------------------------------------------------"
@@ -72,13 +74,20 @@ Dir.glob(bindir+'/*').each do|bin|
         end
         usage << l
       else
-        other << l
+        if l =~ /^Example:/
+          has_example = true
+        end
+        if has_example
+          example << l
+        else
+          other << l
+        end
       end
     end
     descr = []
     rest = other
     type = "unknown"
-    other.each do | l |
+    (other+example).each do | l |
       if l =~ /type: (\S+)/i
         type = $1
         raise "Unknown type #{type} for #{cmd}" if !TYPES.include?(type)
@@ -101,6 +110,7 @@ Dir.glob(bindir+'/*').each do|bin|
     descr = descr.join(" ").gsub(/#{VERSION}\s+/,"")
     descr = descr.sub(/vcflib/,"VCF")
     descr = descr.gsub(/\s+/," ").strip
+    example = example.join("\n")
     # print("HELP:",help_cmd,"\n")
     # print("DESCRIPTION:",descr,"\n")
     # print("USAGE:",usage,"\n")

@@ -22,6 +22,8 @@ Overlays records in the input vcf files in the order in which they appear.
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

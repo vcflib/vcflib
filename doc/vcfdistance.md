@@ -21,6 +21,8 @@ usage: ./build/vcfdistance [customtagname] < [vcf file] adds a tag to each varia
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

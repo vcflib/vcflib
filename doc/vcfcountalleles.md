@@ -21,6 +21,8 @@ vcfcountalleles
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

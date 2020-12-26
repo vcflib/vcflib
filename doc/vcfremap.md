@@ -23,6 +23,8 @@ If realignment is possible, adjust the cigar and reference/alternate alleles.
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

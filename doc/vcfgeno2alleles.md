@@ -21,6 +21,8 @@ usage: ./build/vcfgeno2alleles <[vcf file] modifies the genotypes field to provi
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

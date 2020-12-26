@@ -25,6 +25,8 @@ when dividing variant detection or genotyping by genomic coordinates.
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

@@ -22,6 +22,8 @@ Prints statistics about variants in the input VCF file.
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

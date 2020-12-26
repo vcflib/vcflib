@@ -22,6 +22,8 @@ Verifies that the VCF REF field matches the reference as described.
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

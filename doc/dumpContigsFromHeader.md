@@ -1,4 +1,4 @@
-% DUMPCONTIGSFROMHEADER(1) dumpContigsFromHeader (vcflib) | dumpContigsFromHeader (VCF unknown)
+% DUMPCONTIGSFROMHEADER(1) dumpContigsFromHeader (vcflib) | dumpContigsFromHeader (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,11 @@ dumpContigsFromHeader
 
 # SYNOPSIS
 
-
+Usage: dumpContigsFromHeader file
 
 # DESCRIPTION
 
-terminate called after throwing an instance of 'std::logic_error' what(): basic_string::_M_construct null not valid
+Dump contigs from header
 
 # OPTIONS
 
@@ -20,6 +20,33 @@ terminate called after throwing an instance of 'std::logic_error' what(): basic_
 
 
 ```
+
+
+
+# EXAMPLES
+
+```
+
+Example:
+
+    dumpContigsFromHeader samples/scaffold612.vcf
+
+    ##contig=<ID=scaffold4,length=1524>
+    ##contig=<ID=scaffold12,length=56895>
+    (...)
+
+    output
+
+    scaffold4       1524
+    scaffold12      56895
+    (...)
+
+Type: transformation
+      
+
+```
+
+
 
 # EXIT VALUES
 

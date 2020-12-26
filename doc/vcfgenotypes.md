@@ -21,6 +21,8 @@ usage: ./build/vcfgenotypes <vcf file> report the genotypes for each sample, for
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

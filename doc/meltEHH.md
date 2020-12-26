@@ -21,6 +21,8 @@ meltEHH provides the data to plot EHH curves. Output : 4 columns : 1. seqid 2. p
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

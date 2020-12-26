@@ -21,6 +21,8 @@ usage: ./build/vcfaltcount <vcf file> count the number of alternate alleles in a
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

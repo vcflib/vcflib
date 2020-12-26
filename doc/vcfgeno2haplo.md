@@ -23,6 +23,8 @@ Will break haplotype construction when encountering non-phased genotypes on inpu
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

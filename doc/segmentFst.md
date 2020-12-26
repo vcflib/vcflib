@@ -21,6 +21,8 @@ Creates genomic segments (bed file) for regions with high wcFst Output : 8 colum
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

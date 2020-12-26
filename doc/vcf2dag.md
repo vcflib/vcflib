@@ -24,6 +24,8 @@ enable use of the VCF as a DAG (specifically a partially-ordered graph).
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

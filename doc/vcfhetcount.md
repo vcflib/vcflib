@@ -21,6 +21,8 @@ vcfhetcount
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**

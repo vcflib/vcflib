@@ -21,6 +21,8 @@ vcfuniq
 
 ```
 
+
+
 # EXIT VALUES
 
 **0**
