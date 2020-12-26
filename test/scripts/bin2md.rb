@@ -22,7 +22,7 @@ require 'open3'
 
 TYPES = ["filter","transformation","statistics","metrics"]
 
-VERSION=`cat ../VERSION`.strip
+VERSION=`cat ./VERSION`.strip
 template = ARGV.shift
 create_index = false
 if template == "--index"
@@ -31,7 +31,7 @@ if template == "--index"
 end
 search = ARGV.shift
 
-bindir = '../build'
+bindir = './build'
 $stderr.print("--- Parsing the bin files in #{bindir} for #{VERSION}\n")
 
 Dir.glob(bindir+'/*').each do|bin|
@@ -105,7 +105,10 @@ Dir.glob(bindir+'/*').each do|bin|
 
     b = binding
     renderer = ERB.new(File.read(template))
-    print renderer.result(b)
+
+    File.open("./doc/#{cmd}.md","w") { |f|
+      f.print renderer.result(b)
+    }
 
   end
 end

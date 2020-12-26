@@ -1,4 +1,4 @@
-% VCFFILTER(1) vcffilter 1.0.2-rc1 | vcffilter (vcflib filter)
+% VCFFILTER(1) vcffilter (vcflib) | vcffilter (VCF filter)
 % Erik Garrison and vcflib contributors
 
 <!--
@@ -14,7 +14,7 @@ vcffilter
 
 # SYNOPSIS
 
-usage: vcffilter [options] <vcf file>
+usage: ./build/vcffilter [options] <vcf file>
 
 # DESCRIPTION
 

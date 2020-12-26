@@ -1,4 +1,4 @@
-% VCFINTERSECT(1) vcfintersect 1.0.2-rc1 | vcfintersect (vcflib transformation)
+% VCFINTERSECT(1) vcfintersect (vcflib) | vcfintersect (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 <!--
