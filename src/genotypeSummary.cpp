@@ -40,7 +40,7 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "      Summarizes genotype counts for bi-allelic SNVs and indel " << endl;
+  cerr << "      Summarizes genotype counts for bi-allelic SNVs and indel " << endl << endl;
 
   cerr << "INFO: output: table of genotype counts for each individual." << endl;
 
@@ -53,6 +53,7 @@ void printHelp(void){
   cerr << "INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1                                              " << endl;
   cerr << "INFO: optional, s,snp        -- Only count SNPs                                              " << endl;
   cerr << "INFO: optional, a,ancestral  -- describe counts relative to the ancestral allele defined as AA in INFO" << endl;
+  cerr << endl << "Type: statistics" << endl << endl;
 
   printVersion();
 }
@@ -92,7 +93,7 @@ int main(int argc, char** argv) {
 
   string filename;
 
-  // open standardout 
+  // open standardout
 
   // set region to scaffold
 
@@ -199,7 +200,7 @@ int main(int argc, char** argv) {
       printHelp();
     }
 
-    bool is_open; 
+    bool is_open;
 
     if (filename == "-") {
 
@@ -207,10 +208,10 @@ int main(int argc, char** argv) {
 
     } else {
 
-    	is_open=variantFile.open(filename); 
-	
+    	is_open=variantFile.open(filename);
+
      }
-    
+
     if (!is_open)  {
           cerr << "FATAL: could not open file for reading" << endl;
           printHelp();
@@ -258,7 +259,7 @@ int main(int argc, char** argv) {
 
     for ( map<int ,int>::iterator x=it.begin(); x!=it.end(); ++x) {
 
-        countDataSampleName.push_back(samples[x->first] ); 
+        countDataSampleName.push_back(samples[x->first] );
     }
 
 

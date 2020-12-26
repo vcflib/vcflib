@@ -20,6 +20,7 @@ require 'erb'
 require 'date'
 require 'open3'
 
+# Add with cerr << endl << "Type: statistics" << endl << endl;
 TYPES = ["filter","transformation","statistics","metrics","phenotype","genotype"]
 
 VERSION=`cat ./VERSION`.strip
