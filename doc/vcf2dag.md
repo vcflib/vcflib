@@ -1,4 +1,4 @@
-% VCF2DAG(1) vcf2dag (vcflib) | vcf2dag (VCF unknown)
+% VCF2DAG(1) vcf2dag (vcflib) | vcf2dag (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcf2dag** [options] [<vcf file>]
+**vcf2dag** [options] [<vcf file>]
 
 # DESCRIPTION
 
-options: -r, --reference FILE FASTA reference file.
+Modify VCF to be able to build a directed acyclic graph (DAG)
 
 
 
@@ -19,10 +19,14 @@ options: -r, --reference FILE FASTA reference file.
 
 ```
 
+options:
+    -r, --reference FILE         FASTA reference file.
 
 Modify the VCF file so that homozygous regions are included as REF/. calls.
 For each ref and alt allele, assign an index.  These steps are sufficient to
 enable use of the VCF as a DAG (specifically a partially-ordered graph).
+
+Type: transformation
 
 ```
 
