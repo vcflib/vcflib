@@ -7,17 +7,16 @@
 \f[B]vcfleftalign\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfleftalign\f[R] options [file]
+\f[B]vcfleftalign\f[R] options [file]
 .SH DESCRIPTION
-.PP
-options: -r, \[en]reference FILE Use this reference as a basis for
-realignment.
--w, \[en]window N Use a window of this many bp when left aligning (150).
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -r, --reference FILE  Use this reference as a basis for realignment.
+    -w, --window N        Use a window of this many bp when left aligning (150).
 
 Left-aligns variants in the specified input file or stdin.  Window size is determined
 dynamically according to the entropy of the regions flanking the indel.  These must have

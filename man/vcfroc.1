@@ -7,19 +7,18 @@
 \f[B]vcfroc\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfroc\f[R] options []
+\f[B]vcfroc\f[R] options []
 .SH DESCRIPTION
-.PP
-options: -t, \[en]truth-vcf FILE use this VCF as ground truth for ROC
-generation -w, \[en]window-size N compare records up to this many bp
-away (default 30) -c, \[en]complex directly compare complex alleles,
-don\[cq]t parse into primitives -r, \[en]reference FILE FASTA reference
-file
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -t, --truth-vcf FILE      use this VCF as ground truth for ROC generation
+    -w, --window-size N       compare records up to this many bp away (default 30)
+    -c, --complex             directly compare complex alleles, don\[aq]t parse into primitives
+    -r, --reference FILE      FASTA reference file
 
 Generates a pseudo-ROC curve using sensitivity and specificity estimated against
 a putative truth set.  Thresholding is provided by successive QUAL cutoffs.

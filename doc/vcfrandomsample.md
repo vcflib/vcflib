@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfrandomsample** [options] [<vcf file>]
+**vcfrandomsample** [options] [<vcf file>]
 
 # DESCRIPTION
 
-options: -r, --rate RATE base sampling probability per locus -s, --scale-by KEY scale sampling likelihood by this Float info field -p, --random-seed N use this random seed (by default read from /dev/random) -q, --pseudorandom-seed use a pseudorandom seed (by default read from /dev/random)
+
 
 
 
@@ -19,6 +19,11 @@ options: -r, --rate RATE base sampling probability per locus -s, --scale-by KEY 
 
 ```
 
+options:
+    -r, --rate RATE          base sampling probability per locus
+    -s, --scale-by KEY       scale sampling likelihood by this Float info field
+    -p, --random-seed N      use this random seed (by default read from /dev/random)
+    -q, --pseudorandom-seed  use a pseudorandom seed (by default read from /dev/random)
 
 Randomly sample sites from an input VCF file, which may be provided as stdin.
 Scale the sampling probability by the field specified in KEY.  This may be

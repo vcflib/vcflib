@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfoverlay** [options] [<vcf file> ...]
+**vcfoverlay** [options] [<vcf file> ...]
 
 # DESCRIPTION
 
-options: -h, --help this dialog -v, --version prints version
+
 
 
 
@@ -19,6 +19,9 @@ options: -h, --help this dialog -v, --version prints version
 
 ```
 
+options:
+    -h, --help       this dialog
+    -v, --version    prints version
 
 Overlays records in the input vcf files in the order in which they appear.
 

@@ -21,6 +21,7 @@ require 'date'
 require 'open3'
 
 # Add with cerr << endl << "Type: statistics" << endl << endl;
+# Add with cerr << endl << "Type: transformation" << endl << endl;
 TYPES = ["filter","transformation","statistics","metrics","phenotype","genotype"]
 
 =begin
@@ -79,6 +80,7 @@ Dir.glob(bindir+'/*').each do|bin|
     # $stderr.print(out)
     lines = (out).split("\n")
     lines = lines.map{|l| l.gsub(/#{Regexp.escape(cmd)}/,"**#{cmd}**")}
+    lines = lines.map{|l| l.gsub(/\.+\/build\//,"")}
     lines = lines.map{|l| l.gsub(/INFO: help:?/,"")}
     lines = lines.map{|l| l.gsub(/INFO: description:/,"")}
     lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
@@ -124,14 +126,13 @@ Dir.glob(bindir+'/*').each do|bin|
     end
 
     other.each do | l |
-      break if l == "" or l =~ /^Output/i
+      break if l == "" or l =~ /^Output/i or l =~ /Options/i
       descr << l
     end
 
     body = rest.drop(descr.size).join("\n")
     has_options = true if body != ""
     usage = usage.join(" ").gsub(/#{VERSION}\s+/,"")
-    usage = usage.sub(/\.\.\/build\//,"")
     usage = usage.gsub(/usage:\s+/i,"")
     usage = usage.gsub(/\s+/," ").strip
     pydoc_full = pydoc_full.gsub(/#{VERSION}\s+/,"")

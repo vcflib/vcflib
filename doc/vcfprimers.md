@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfprimers** [options] <vcf file>
+**vcfprimers** [options] <vcf file>
 
 # DESCRIPTION
 
-options: -f, --fasta-reference FASTA reference file to use to obtain primer sequences -l, --primer-length The length of the primer sequences on each side of the variant
+
 
 
 
@@ -19,6 +19,9 @@ options: -f, --fasta-reference FASTA reference file to use to obtain primer sequ
 
 ```
 
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    -l, --primer-length    The length of the primer sequences on each side of the variant
 
 For each VCF record, extract the flanking sequences, and write them to stdout as FASTA
 records suitable for alignment.  This tool is intended for use in designing validation

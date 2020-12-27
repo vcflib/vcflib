@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfqual2info** [key] [vcf_file] Puts QUAL into an info field tag keyed by [key]. The VCF file may be omitted and read from stdin.
+**vcfqual2info** [key] [vcf_file] Puts QUAL into an info field tag keyed by [key]. The VCF file may be omitted and read from stdin.
 
 # DESCRIPTION
 

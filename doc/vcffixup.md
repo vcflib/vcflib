@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcffixup** <vcf file>
+**vcffixup** <vcf file>
 
 # DESCRIPTION
 

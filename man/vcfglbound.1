@@ -7,16 +7,16 @@
 \f[B]vcfglbound\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfglbound\f[R] options
+\f[B]vcfglbound\f[R] options
 .SH DESCRIPTION
-.PP
-options: -b, \[en]bound N Bound GLs to this limit.
--x, \[en]exclude-broken If GLs are > 0, remove site.
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -b, --bound N          Bound GLs to this limit.
+    -x, --exclude-broken   If GLs are > 0, remove site.
 
 Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by the max.
 Then cap (bound) at N (e.g. -10).

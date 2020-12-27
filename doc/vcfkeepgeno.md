@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfkeepgeno** <vcf file> [FIELD1] [FIELD2] ...
+**vcfkeepgeno** <vcf file> [FIELD1] [FIELD2] ...
 
 # DESCRIPTION
 

@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfcommonsamples** <vcf file> <vcf file>
+**vcfcommonsamples** <vcf file> <vcf file>
 
 # DESCRIPTION
 

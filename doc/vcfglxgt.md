@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfglxgt** [options] <vcf file>
+**vcfglxgt** [options] <vcf file>
 
 # DESCRIPTION
 
-options: -n, --fix-null-genotypes only apply to null and partly-null genotypes
+
 
 
 
@@ -19,6 +19,8 @@ options: -n, --fix-null-genotypes only apply to null and partly-null genotypes
 
 ```
 
+options:
+    -n, --fix-null-genotypes   only apply to null and partly-null genotypes
 
 Set genotypes using the maximum genotype likelihood for each sample.
 

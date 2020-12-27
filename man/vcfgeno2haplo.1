@@ -7,19 +7,20 @@
 \f[B]vcfgeno2haplo\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfgeno2haplo\f[R] options []
+\f[B]vcfgeno2haplo\f[R] options []
 .SH DESCRIPTION
-.PP
-options: -h, \[en]help Print this message -v, \[en]version Print version
--r, \[en]reference FILE FASTA reference file -w, \[en]window-size N
-Merge variants at most this many bp apart (default 30) -o,
-\[en]only-variants Don\[cq]t output the entire haplotype, just
-concatenate REF/ALT strings (delimited by \[lq]:\[rq])
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -h, --help              Print this message
+    -v, --version           Print version
+    -r, --reference FILE    FASTA reference file
+    -w, --window-size N     Merge variants at most this many bp apart (default 30)
+    -o, --only-variants     Don\[aq]t output the entire haplotype, just concatenate
+                            REF/ALT strings (delimited by \[dq]:\[dq])
 
 Convert genotype-based phased alleles within --window-size into haplotype alleles.
 Will break haplotype construction when encountering non-phased genotypes on input.

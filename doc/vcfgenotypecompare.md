@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfgenotypecompare** <other-genotype-tag> <vcf file> adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>. use this after vcfannotategenotypes to get correspondence statistics for two vcfs.
+**vcfgenotypecompare** <other-genotype-tag> <vcf file> adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>. use this after vcfannotategenotypes to get correspondence statistics for two vcfs.
 
 # DESCRIPTION
 

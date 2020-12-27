@@ -23,12 +23,14 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
-         << "options:" << endl 
+         << "Modify VCF to be able to build a directed acyclic graph (DAG)" << endl
+         << "options:" << endl
          << "    -r, --reference FILE         FASTA reference file." << endl
          << endl
          << "Modify the VCF file so that homozygous regions are included as REF/. calls." << endl
          << "For each ref and alt allele, assign an index.  These steps are sufficient to" << endl
          << "enable use of the VCF as a DAG (specifically a partially-ordered graph)." << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -102,7 +104,7 @@ int main(int argc, char** argv) {
     } else {
         reference.open(fastaFileName);
     }
-    
+
     string idname = "id";
     long int uid = 0;
 
@@ -174,4 +176,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

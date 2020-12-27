@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfkeepsamples** <vcf file> [SAMPLE1] [SAMPLE2] ...
+**vcfkeepsamples** <vcf file> [SAMPLE1] [SAMPLE2] ...
 
 # DESCRIPTION
 

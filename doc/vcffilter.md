@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcffilter** [options] <vcf file>
+**vcffilter** [options] <vcf file>
 
 # DESCRIPTION
 

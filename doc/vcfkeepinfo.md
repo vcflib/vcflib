@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfkeepinfo** <vcf file> [FIELD1] [FIELD2] ...
+**vcfkeepinfo** <vcf file> [FIELD1] [FIELD2] ...
 
 # DESCRIPTION
 

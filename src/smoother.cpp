@@ -15,10 +15,10 @@
 #include <vector>
 #include <string>
 #include "split.h"
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include "gpatInfo.hpp"
-#include <math.h> 
+#include <math.h>
 
 using namespace std;
 
@@ -28,7 +28,7 @@ struct opts{
   long int step;
   long int size;
   int      seqid;
-  int      pos  ; 
+  int      pos  ;
   int      value;
 };
 
@@ -64,6 +64,7 @@ void printHelp(void){
   cerr << "INFO: optional: w,window   -- argument: size of genomic window in base pairs (default 5000)" << endl;
   cerr << "INFO: optional: s,step     -- argument: window step size in base pairs (default 1000)      " << endl;
   cerr << "INFO: optional: t,truncate -- flag    : end last window at last position (zero based)      " << endl;
+  cerr << endl << "Type: transformation" << endl << endl;
   printVersion();
   cerr << endl << endl;
 }
@@ -71,13 +72,13 @@ void printHelp(void){
 double ngreater(list<score> & rangeData, double val){
 
   double n = 0;
- 
 
-  for(list<score>::iterator it = rangeData.begin(); 
+
+  for(list<score>::iterator it = rangeData.begin();
       it != rangeData.end(); it++ ){
     if(it->score >= val){
       n += 1;
-    }   
+    }
   }
   return n;
 }
@@ -114,24 +115,24 @@ double dStatistic(list<score> & rangeData){
 }
 
 void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
-    
+
   string line ;
-  
+
   long int windowSize = opt.size;
   long int start = 0;
   long int end   = windowSize;
 
   list<score> windowDat;
-  
+
   file.clear();
-    
+
   file.seekg(offset);
-  
+
   vector<string> sline;
 
   while(getline(file, line)){
 
-    sline = split(line, '\t');     
+    sline = split(line, '\t');
     score current ;
     if(seqid != sline[opt.seqid]){
       break;
@@ -145,7 +146,7 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
 
 
 
-    // add in if abba-baba to process second score. 
+    // add in if abba-baba to process second score.
 
 
     if(current.position > end){
@@ -166,8 +167,8 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
 	}
 	std::cout << std::endl;
       }
-      
-           
+
+
     }
     while(end < current.position){
       start += opt.step;
@@ -176,14 +177,14 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
 	windowDat.pop_front();
       }
     }
-    windowDat.push_back(current);  
+    windowDat.push_back(current);
   }
   // add function for D-stat if abba-baba
   double finalMean = windowAvg(windowDat);
-  
+
   if(opt.truncate && (finalMean == finalMean) ){
     cout << seqid << "\t" << start << "\t" << windowDat.back().position - 1 << "\t" << windowDat.size()  << "\t" << finalMean;
-  
+
     if(opt.format == "iHS"){
       std::cout << "\t" << ngreater(windowDat, 2.5) ;
     }
@@ -203,7 +204,7 @@ void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
 }
 
 int main(int argc, char** argv) {
-  
+
   map<string, int> acceptableFormats;
   acceptableFormats["pFst"]  = 1;
   acceptableFormats["col3"]  = 1;
@@ -223,7 +224,7 @@ int main(int argc, char** argv) {
 
   string filename = "NA";
 
-  static struct option longopts[] = 
+  static struct option longopts[] =
     {
       {"version"   , 0, 0, 'v'},
       {"help"      , 0, 0, 'h'},
@@ -344,23 +345,23 @@ int main(int argc, char** argv) {
     cerr << "INFO:  please use smoother --help" << endl;
     return 1;
   }
-  
+
   ifstream ifs(filename.c_str());
- 
+
   string currentSeqid = "NA";
 
   string line;
 
   map<string, streampos > seqidIndex;
-  
+
   if(ifs){
     while(getline(ifs, line)){
       vector<string> sline = split(line, '\t');
       if(sline[opt.seqid] != currentSeqid){
-	
+
 	long int bline = ifs.tellg() ;
 	bline -=  ( line.size() +1 );
-	
+
 	//	std::cerr << "INFO: seqid: " << sline[opt.seqid] << " tellg: " << bline << std::endl;
 
 	map<string, streampos>::iterator it;
@@ -382,7 +383,7 @@ int main(int argc, char** argv) {
     cerr << "INFO: processing seqid : "<< (it->first) << endl;
     processSeqid(ifs, (it->first),(it->second), opt);
   }
-  
+
   ifs.close();
   cerr << "INFO: smoother has successfully finished" << endl;
 

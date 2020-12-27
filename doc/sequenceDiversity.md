@@ -1,4 +1,4 @@
-% SEQUENCEDIVERSITY(1) sequenceDiversity (vcflib) | sequenceDiversity (VCF unknown)
+% SEQUENCEDIVERSITY(1) sequenceDiversity (vcflib) | sequenceDiversity (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -34,6 +34,9 @@ required: y,type       -- argument: type of genotype likelihood: PL, GL or GP
 optional: a,af         -- sites less than af  are filtered out; default is 0                                          
 optional: r,region     -- argument: a tabix compliant region : "seqid:0-100" or "seqid"                                    
 optional: w,window     -- argument: the number of SNPs per window; default is 20                                               
+
+Type: statistics
+
 
 
 ```

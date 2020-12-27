@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfleftalign** [options] [file]
+**vcfleftalign** [options] [file]
 
 # DESCRIPTION
 
-options: -r, --reference FILE Use this reference as a basis for realignment. -w, --window N Use a window of this many bp when left aligning (150).
+
 
 
 
@@ -19,6 +19,9 @@ options: -r, --reference FILE Use this reference as a basis for realignment. -w,
 
 ```
 
+options:
+    -r, --reference FILE  Use this reference as a basis for realignment.
+    -w, --window N        Use a window of this many bp when left aligning (150).
 
 Left-aligns variants in the specified input file or stdin.  Window size is determined
 dynamically according to the entropy of the regions flanking the indel.  These must have

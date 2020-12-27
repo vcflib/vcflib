@@ -7,17 +7,16 @@
 \f[B]vcfentropy\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfentropy\f[R] options
+\f[B]vcfentropy\f[R] options
 .SH DESCRIPTION
-.PP
-options: -f, \[en]fasta-reference FASTA reference file to use to obtain
-flanking sequences -w, \[en]window-size Size of the window over which to
-calculate entropy
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain flanking sequences
+    -w, --window-size      Size of the window over which to calculate entropy
 
 Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight,
 EntropyCenter, which are the entropies of the sequence of the given window size to the

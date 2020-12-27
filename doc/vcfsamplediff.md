@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-./build/**vcfsamplediff** [options] <tag> <sample> <sample> [ <sample> ... ] <vcf file> Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples.
+**vcfsamplediff** [options] <tag> <sample> <sample> [ <sample> ... ] <vcf file> Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples.
 
 # DESCRIPTION
 
-options: -s --strict Require that no observations in the germline support the somatic alternate.
+
+
+
+
+# OPTIONS
+
+```
+
+options:
+    -s --strict     Require that no observations in the germline support the somatic alternate.
+
+```
 
 
 

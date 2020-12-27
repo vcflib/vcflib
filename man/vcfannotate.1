@@ -7,17 +7,17 @@
 \f[B]vcfannotate\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfannotate\f[R] options []
+\f[B]vcfannotate\f[R] options []
 .SH DESCRIPTION
-.PP
-options: -b, \[en]bed use annotations provided by this BED file -k,
-\[en]key use this INFO field key for the annotations -d, \[en]default
-use this INFO field key for records without annotations
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -b, --bed   use annotations provided by this BED file
+    -k, --key   use this INFO field key for the annotations
+    -d, --default  use this INFO field key for records without annotations
 
 Intersect the records in the VCF file with targets provided in a BED file.
 Intersections are done on the reference sequences in the VCF file.

@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfannotate** [options] [<vcf file>]
+**vcfannotate** [options] [<vcf file>]
 
 # DESCRIPTION
 
-options: -b, --bed use annotations provided by this BED file -k, --key use this INFO field key for the annotations -d, --default use this INFO field key for records without annotations
+
 
 
 
@@ -19,6 +19,10 @@ options: -b, --bed use annotations provided by this BED file -k, --key use this 
 
 ```
 
+options:
+    -b, --bed   use annotations provided by this BED file
+    -k, --key   use this INFO field key for the annotations
+    -d, --default  use this INFO field key for records without annotations
 
 Intersect the records in the VCF file with targets provided in a BED file.
 Intersections are done on the reference sequences in the VCF file.

@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfcombine** [vcf file] [vcf file] ...
+**vcfcombine** [vcf file] [vcf file] ...
 
 # DESCRIPTION
 

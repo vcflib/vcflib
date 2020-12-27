@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfbreakmulti** [options] [file]
+**vcfbreakmulti** [options] [file]
 
 # DESCRIPTION
 

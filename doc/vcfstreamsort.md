@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfstreamsort** [options] [vcf file]
+**vcfstreamsort** [options] [vcf file]
 
 # DESCRIPTION
 
-Sorts the input (either stdin or file) using a streaming sort algorithm. options:
+Sorts the input (either stdin or file) using a streaming sort algorithm.
 
 
 
@@ -19,6 +19,7 @@ Sorts the input (either stdin or file) using a streaming sort algorithm. options
 
 ```
 
+options:
 
     -h, --help             this dialog
     -w, --window N         number of sites to sort (default 10000)

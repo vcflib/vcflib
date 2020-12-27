@@ -7,21 +7,19 @@
 \f[B]vcfcheck\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfcheck\f[R] options
+\f[B]vcfcheck\f[R] options
 .SH DESCRIPTION
-.PP
-options: -f, \[en]fasta-reference FASTA reference file to use to obtain
-primer sequences -x, \[en]exclude-failures If a record fails, don\[cq]t
-print it.
-Otherwise do.
--k, \[en]keep-failures Print if the record fails, otherwise not.
--h, \[en]help Print this message.
--v, \[en]version Print version.
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    -x, --exclude-failures If a record fails, don\[aq]t print it.  Otherwise do.
+    -k, --keep-failures    Print if the record fails, otherwise not.
+    -h, --help       Print this message.
+    -v, --version    Print version.
 
 Verifies that the VCF REF field matches the reference as described.
 \f[R]

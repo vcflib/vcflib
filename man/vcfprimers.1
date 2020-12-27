@@ -7,17 +7,16 @@
 \f[B]vcfprimers\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfprimers\f[R] options
+\f[B]vcfprimers\f[R] options
 .SH DESCRIPTION
-.PP
-options: -f, \[en]fasta-reference FASTA reference file to use to obtain
-primer sequences -l, \[en]primer-length The length of the primer
-sequences on each side of the variant
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    -l, --primer-length    The length of the primer sequences on each side of the variant
 
 For each VCF record, extract the flanking sequences, and write them to stdout as FASTA
 records suitable for alignment.  This tool is intended for use in designing validation

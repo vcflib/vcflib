@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfcreatemulti** [options] [file]
+**vcfcreatemulti** [options] [file]
 
 # DESCRIPTION
 

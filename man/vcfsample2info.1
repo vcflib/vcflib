@@ -7,19 +7,20 @@
 \f[B]vcfsample2info\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfsample2info\f[R] options
+\f[B]vcfsample2info\f[R] options
 .SH DESCRIPTION
-.PP
-options: -f, \[en]field Add information about this field in samples to
-INFO column -i, \[en]info Store the computed statistic in this info
-field -a, \[en]average Take the mean of samples for field (default) -m,
-\[en]median Use the median -n, \[en]min Use the min -x, \[en]max Use the
-max
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -f, --field         Add information about this field in samples to INFO column
+    -i, --info          Store the computed statistic in this info field
+    -a, --average       Take the mean of samples for field (default)
+    -m, --median        Use the median
+    -n, --min           Use the min
+    -x, --max           Use the max
 
 Take annotations given in the per-sample fields and add the mean, median, min, or max
 to the site-level INFO.

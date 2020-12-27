@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfcheck** [options] <vcf file>
+**vcfcheck** [options] <vcf file>
 
 # DESCRIPTION
 
-options: -f, --fasta-reference FASTA reference file to use to obtain primer sequences -x, --exclude-failures If a record fails, don't print it. Otherwise do. -k, --keep-failures Print if the record fails, otherwise not. -h, --help Print this message. -v, --version Print version.
+
 
 
 
@@ -19,6 +19,12 @@ options: -f, --fasta-reference FASTA reference file to use to obtain primer sequ
 
 ```
 
+options:
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+    -x, --exclude-failures If a record fails, don't print it.  Otherwise do.
+    -k, --keep-failures    Print if the record fails, otherwise not.
+    -h, --help       Print this message.
+    -v, --version    Print version.
 
 Verifies that the VCF REF field matches the reference as described.
 

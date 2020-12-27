@@ -1,4 +1,4 @@
-% SMOOTHER(1) smoother (vcflib) | smoother (VCF unknown)
+% SMOOTHER(1) smoother (vcflib) | smoother (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -32,6 +32,9 @@ required: o,format   -- argument: format of input file, case sensitive
 optional: w,window   -- argument: size of genomic window in base pairs (default 5000)
 optional: s,step     -- argument: window step size in base pairs (default 1000)      
 optional: t,truncate -- flag    : end last window at last position (zero based)      
+
+Type: transformation
+
 
 ```
 

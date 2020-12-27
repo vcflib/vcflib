@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfgenotypes** <vcf file> report the genotypes for each sample, for each variant in the vcf file
+**vcfgenotypes** <vcf file> report the genotypes for each sample, for each variant in the vcf file
 
 # DESCRIPTION
 

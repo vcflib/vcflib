@@ -8,19 +8,22 @@ unknown)"
 \f[B]vcfinfosummarize\f[R]
 .SH SYNOPSIS
 .PP
-\&./build/\f[B]vcfinfosummarize\f[R] options
+\f[B]vcfinfosummarize\f[R] options
 .SH DESCRIPTION
-.PP
-options: -f, \[en]field Summarize this field in the INFO column -i,
-\[en]info Store the computed statistic in this info field -a,
-\[en]average Take the mean for field (default) -m, \[en]median Use the
-median -n, \[en]min Use the min -x, \[en]max Use the max -h, \[en]help
-Print this message -v, \[en]version Print version
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+options:
+    -f, --field         Summarize this field in the INFO column
+    -i, --info          Store the computed statistic in this info field
+    -a, --average       Take the mean for field (default)
+    -m, --median        Use the median
+    -n, --min           Use the min
+    -x, --max           Use the max
+    -h, --help          Print this message
+    -v, --version       Print version
 
 Take annotations given in the per-sample fields and add the mean, median, min, or max
 to the site-level INFO.

@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfinfo2qual** [key] [vcf_file] Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values.
+**vcfinfo2qual** [key] [vcf_file] Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values.
 
 # DESCRIPTION
 

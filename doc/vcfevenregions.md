@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfevenregions** [options] <vcf file>
+**vcfevenregions** [options] <vcf file>
 
 # DESCRIPTION
 
-options: -f, --fasta-reference REF FASTA reference file to use to obtain primer sequences. -n, --number-of-regions N The number of desired regions. -p, --number-of-positions N The number of positions per region. -o, --offset N Add an offset to region positioning, to avoid boundary related artifacts in downstream processing. -l, --overlap N The number of sites to overlap between regions. Default 0. -s, --separator SEQ Specify string to use to separate region output. Default '-'
+
 
 
 
@@ -19,6 +19,14 @@ options: -f, --fasta-reference REF FASTA reference file to use to obtain primer 
 
 ```
 
+options:
+    -f, --fasta-reference REF    FASTA reference file to use to obtain primer sequences.
+    -n, --number-of-regions N    The number of desired regions.
+    -p, --number-of-positions N  The number of positions per region.
+    -o, --offset N               Add an offset to region positioning, to avoid boundary
+                                 related artifacts in downstream processing.
+    -l, --overlap N              The number of sites to overlap between regions.  Default 0.
+    -s, --separator SEQ          Specify string to use to separate region output.  Default '-'
 
 Generates a list of regions, e.g. chr20:10..30 using the variant
 density information provided in the VCF file to ensure that the regions have

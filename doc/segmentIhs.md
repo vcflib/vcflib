@@ -1,4 +1,4 @@
-% SEGMENTIHS(1) segmentIhs (vcflib) | segmentIhs (VCF unknown)
+% SEGMENTIHS(1) segmentIhs (vcflib) | segmentIhs (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -30,6 +30,9 @@ Output : 8 columns :
      8. Segment length               
 required: -f            -- Output from normalizeIHS     
 optional: -s            -- High absolute iHS cutoff [2] 
+
+Type: statistics
+
 
 
 ```

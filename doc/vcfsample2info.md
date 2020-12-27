@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfsample2info** [options] <vcf file>
+**vcfsample2info** [options] <vcf file>
 
 # DESCRIPTION
 
-options: -f, --field Add information about this field in samples to INFO column -i, --info Store the computed statistic in this info field -a, --average Take the mean of samples for field (default) -m, --median Use the median -n, --min Use the min -x, --max Use the max
+
 
 
 
@@ -19,6 +19,13 @@ options: -f, --field Add information about this field in samples to INFO column 
 
 ```
 
+options:
+    -f, --field         Add information about this field in samples to INFO column
+    -i, --info          Store the computed statistic in this info field
+    -a, --average       Take the mean of samples for field (default)
+    -m, --median        Use the median
+    -n, --min           Use the min
+    -x, --max           Use the max
 
 Take annotations given in the per-sample fields and add the mean, median, min, or max
 to the site-level INFO.

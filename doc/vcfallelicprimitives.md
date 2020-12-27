@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-./build/**vcfallelicprimitives** [options] [file]
+**vcfallelicprimitives** [options] [file]
 
 # DESCRIPTION
 
-options: -m, --use-mnps Retain MNPs as separate events (default: false). -t, --tag-parsed FLAG Tag records which are split apart of a complex allele with this flag. -L, --max-length LEN Do not manipulate records in which either the ALT or REF is longer than LEN (default: 200). -k, --keep-info Maintain site and allele-level annotations when decomposing. Note that in many cases, such as multisample VCFs, these won't be valid post-decomposition. For biallelic loci in single-sample VCFs, they should be usable with caution. -g, --keep-geno Maintain genotype-level annotations when decomposing. Similar caution should be used for this as for --keep-info.
+
 
 
 
@@ -19,6 +19,17 @@ options: -m, --use-mnps Retain MNPs as separate events (default: false). -t, --t
 
 ```
 
+options:
+    -m, --use-mnps          Retain MNPs as separate events (default: false).
+    -t, --tag-parsed FLAG   Tag records which are split apart of a complex allele with this flag.
+    -L, --max-length LEN    Do not manipulate records in which either the ALT or
+                            REF is longer than LEN (default: 200).
+    -k, --keep-info         Maintain site and allele-level annotations when decomposing.
+                            Note that in many cases, such as multisample VCFs, these won't
+                            be valid post-decomposition.  For biallelic loci in single-sample
+                            VCFs, they should be usable with caution.
+    -g, --keep-geno         Maintain genotype-level annotations when decomposing.  Similar
+                            caution should be used for this as for --keep-info.
 
 If multiple allelic primitives (gaps or mismatches) are specified in
 a single VCF record, split the record into multiple lines, but drop all

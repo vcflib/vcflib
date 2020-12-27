@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfstats** [options] <vcf file>
+**vcfstats** [options] <vcf file>
 
 # DESCRIPTION
 

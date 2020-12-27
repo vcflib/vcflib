@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfremovesamples** <vcf file> [SAMPLE1] [SAMPLE2] ...
+**vcfremovesamples** <vcf file> [SAMPLE1] [SAMPLE2] ...
 
 # DESCRIPTION
 
