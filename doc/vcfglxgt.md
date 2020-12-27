@@ -1,4 +1,4 @@
-% VCFGLXGT(1) vcfglxgt (vcflib) | vcfglxgt (VCF unknown)
+% VCFGLXGT(1) vcfglxgt (vcflib) | vcfglxgt (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Set genotypes using the maximum genotype likelihood for each sample.
 
 
 
@@ -22,7 +22,9 @@
 options:
     -n, --fix-null-genotypes   only apply to null and partly-null genotypes
 
-Set genotypes using the maximum genotype likelihood for each sample.
+
+
+Type: transformation
 
 ```
 

@@ -1,4 +1,4 @@
-% VCFHETHOMRATIO(1) vcfhethomratio (vcflib) | vcfhethomratio (VCF unknown)
+% VCFHETHOMRATIO(1) vcfhethomratio (vcflib) | vcfhethomratio (VCF metrics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-
+**vcfhethomratio** <vcf file>
 
 # DESCRIPTION
 
-could not open -h
+Generates the het/hom ratio for each individual in the file
+
+
+
+# OPTIONS
+
+```
+
+
+Type: metrics
+
+```
 
 
 

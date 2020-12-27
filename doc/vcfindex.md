@@ -1,4 +1,4 @@
-% VCFINDEX(1) vcfindex (vcflib) | vcfindex (VCF unknown)
+% VCFINDEX(1) vcfindex (vcflib) | vcfindex (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfindex** <vcf file>
 
 # DESCRIPTION
 
+Adds an index number to the INFO field (id=position)
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+      
+
+```
 
 
 

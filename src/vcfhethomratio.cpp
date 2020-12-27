@@ -18,12 +18,15 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
-    if (argc != 2) {
-        cerr << "usage: " << argv[0] << " <vcf file>" << endl
-             << "outputs the het/hom ratio for each individual in the file" << endl;
-        return 1;
+  if (argc == 2) {
+    string h_flag = argv[1];
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
+           << "Generates the het/hom ratio for each individual in the file" << endl;
+      cerr << endl << "Type: metrics" << endl << endl;
+      return 1;
     }
-
+  }
     string filename = argv[1];
 
     VariantCallFile variantFile;
@@ -72,4 +75,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

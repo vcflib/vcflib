@@ -1,4 +1,4 @@
-% VCFHETCOUNT(1) vcfhetcount (vcflib) | vcfhetcount (VCF unknown)
+% VCFHETCOUNT(1) vcfhetcount (vcflib) | vcfhetcount (VCF metrics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,23 @@
 
 # SYNOPSIS
 
-
+**vcfhetcount** <vcf file>
 
 # DESCRIPTION
 
+count the number of alternate alleles in heterozygous genotypes in all records in the vcf file
 
+
+
+# OPTIONS
+
+```
+
+outputs a count for each individual in the file
+
+Type: metrics
+
+```
 
 
 

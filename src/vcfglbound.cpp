@@ -17,12 +17,13 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "options:" << endl 
+         << "Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by the max." << endl << endl
+         << "Then cap (bound) at N (e.g. -10)."
+         << "options:" << endl
          << "    -b, --bound N          Bound GLs to this limit." << endl
          << "    -x, --exclude-broken   If GLs are > 0, remove site." << endl
-         << endl
-         << "Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by the max." << endl
-         << "Then cap (bound) at N (e.g. -10)." << endl;
+         << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -53,7 +54,7 @@ int main(int argc, char** argv) {
       /* Detect the end of the options. */
           if (c == -1)
             break;
- 
+
           switch (c)
             {
             case 0:
@@ -69,11 +70,11 @@ int main(int argc, char** argv) {
           case 'b':
               glBound = atof(optarg);
               break;
-          
+
           case 'x':
               excludeBroken = true;
               break;
-          
+
           case 'h':
               printSummary(argv);
               exit(0);
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
               printSummary(argv);
               exit(1);
               break;
- 
+
           default:
               abort ();
           }
@@ -184,4 +185,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

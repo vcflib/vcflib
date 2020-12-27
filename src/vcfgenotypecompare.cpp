@@ -36,11 +36,12 @@ string genotypeSpec(map<int, int>& genotype) {
 int main(int argc, char** argv) {
 
     if (argc != 3) {
-        cerr << "usage: " << argv[0] << " <other-genotype-tag> <vcf file>" << endl
-             << "adds statistics to the INFO field of the vcf file describing the" << endl
-             << "amount of discrepancy between the genotypes (GT) in the vcf file and the" << endl
-             << "genotypes reported in the <other-genotype-tag>.  use this after" << endl
-             << "vcfannotategenotypes to get correspondence statistics for two vcfs." << endl;
+      cerr << "usage: " << argv[0] << " <other-genotype-tag> <vcf file>" << endl << endl
+           << "adds statistics to the INFO field of the vcf file describing the" << endl
+           << "amount of discrepancy between the genotypes (GT) in the vcf file and the" << endl
+           << "genotypes reported in the <other-genotype-tag>.  use this after" << endl
+           << "vcfannotategenotypes to get correspondence statistics for two vcfs." << endl;
+      cerr << endl << "Type: statistics" << endl << endl;
         return 1;
     }
 
@@ -333,4 +334,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

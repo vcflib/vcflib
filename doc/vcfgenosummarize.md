@@ -1,4 +1,4 @@
-% VCFGENOSUMMARIZE(1) vcfgenosummarize (vcflib) | vcfgenosummarize (VCF unknown)
+% VCFGENOSUMMARIZE(1) vcfgenosummarize (vcflib) | vcfgenosummarize (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-
+**vcfgenosummarize** <[input file] >[output vcf]
 
 # DESCRIPTION
 
-could not open -h
+Adds summary statistics to each record summarizing qualities reported in called genotypes. Uses: RO (reference observation count), QR (quality sum reference observations) AO (alternate observation count), QA (quality sum alternate observations)
+
+
+
+# OPTIONS
+
+```
+
+
+Type: statistics
+
+```
 
 
 

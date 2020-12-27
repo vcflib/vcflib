@@ -1,4 +1,4 @@
-% VCFGENOTYPECOMPARE(1) vcfgenotypecompare (vcflib) | vcfgenotypecompare (VCF unknown)
+% VCFGENOTYPECOMPARE(1) vcfgenotypecompare (vcflib) | vcfgenotypecompare (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-**vcfgenotypecompare** <other-genotype-tag> <vcf file> adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>. use this after vcfannotategenotypes to get correspondence statistics for two vcfs.
+**vcfgenotypecompare** <other-genotype-tag> <vcf file>
 
 # DESCRIPTION
 
+adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>. use this after vcfannotategenotypes to get correspondence statistics for two vcfs.
 
+
+
+# OPTIONS
+
+```
+
+
+Type: statistics
+
+```
 
 
 

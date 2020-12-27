@@ -1,4 +1,4 @@
-% VCFGLBOUND(1) vcfglbound (vcflib) | vcfglbound (VCF unknown)
+% VCFGLBOUND(1) vcfglbound (vcflib) | vcfglbound (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by the max.
 
 
 
@@ -19,12 +19,13 @@
 
 ```
 
-options:
+
+Then cap (bound) at N (e.g. -10).options:
     -b, --bound N          Bound GLs to this limit.
     -x, --exclude-broken   If GLs are > 0, remove site.
 
-Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by the max.
-Then cap (bound) at N (e.g. -10).
+
+Type: transformation
 
 ```
 
