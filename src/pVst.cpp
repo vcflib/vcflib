@@ -52,7 +52,7 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     vFst calculates vst, a measure of CNV stratification." << endl << endl;
+  cerr << "     pVst calculates vst, a measure of CNV stratification." << endl << endl;
      cerr << R"(
 
 The statistic Vst is used to test the difference in copy numbers at

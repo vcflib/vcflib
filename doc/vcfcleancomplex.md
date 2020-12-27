@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfcleancomplex
+**vcfcleancomplex**
 
 # SYNOPSIS
 

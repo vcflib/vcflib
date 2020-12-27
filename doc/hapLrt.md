@@ -3,11 +3,11 @@
 
 # NAME
 
-hapLrt
+**hapLrt**
 
 # SYNOPSIS
 
-Usage: hapLRT --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --type GP --file my.vcf
+hapLRT --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --type GP --file my.vcf
 
 # DESCRIPTION
 
@@ -32,7 +32,7 @@ required: t,target     -- argument: a zero base comma separated list of target i
 required: b,background -- argument: a zero base comma separated list of background individuals corrisponding to VCF columns    
 required: f,file       -- argument: a properly formatted phased VCF file                                                       
 required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  
-optional: r,region     -- argument: a genomice range to calculate hapLrt on in the format : "seqid:start-end" or "seqid" 
+optional: r,region     -- argument: a genomice range to calculate **hapLrt** on in the format : "seqid:start-end" or "seqid" 
 
 
 Type: genotype

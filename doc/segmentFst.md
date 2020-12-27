@@ -3,11 +3,11 @@
 
 # NAME
 
-segmentFst
+**segmentFst**
 
 # SYNOPSIS
 
-usage: segmentFst -s 0.7 -f wcFst.output.txt
+**segmentFst** -s 0.7 -f wcFst.output.txt
 
 # DESCRIPTION
 

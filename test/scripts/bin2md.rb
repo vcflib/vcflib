@@ -77,8 +77,8 @@ Dir.glob(bindir+'/*').each do|bin|
     # out = ,:encoding => 'UTF-8'
     out = out.encode('UTF-8')
     # $stderr.print(out)
-    usage_full = out
     lines = (out).split("\n")
+    lines = lines.map{|l| l.gsub(/#{cmd}/,"**#{cmd}**")}
     lines = lines.map{|l| l.gsub(/INFO: help:?/,"")}
     lines = lines.map{|l| l.gsub(/INFO: description:/,"")}
     lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
@@ -132,6 +132,7 @@ Dir.glob(bindir+'/*').each do|bin|
     has_options = true if body != ""
     usage = usage.join(" ").gsub(/#{VERSION}\s+/,"")
     usage = usage.sub(/\.\.\/build\//,"")
+    usage = usage.gsub(/usage:\s+/i,"")
     usage = usage.gsub(/\s+/," ").strip
     pydoc_full = pydoc_full.gsub(/#{VERSION}\s+/,"")
     pydoc_full = pydoc_full.gsub(/\.\.\/build\//,"")

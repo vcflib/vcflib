@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfdistance
+**vcfdistance**
 
 # SYNOPSIS
 
-usage: ./build/vcfdistance [customtagname] < [vcf file] adds a tag to each variant record which indicates the distance to the nearest variant. (defaults to BasesToClosestVariant if no custom tag name is given.
+./build/**vcfdistance** [customtagname] < [vcf file] adds a tag to each variant record which indicates the distance to the nearest variant. (defaults to BasesToClosestVariant if no custom tag name is given.
 
 # DESCRIPTION
 

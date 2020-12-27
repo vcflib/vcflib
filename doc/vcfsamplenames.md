@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfsamplenames
+**vcfsamplenames**
 
 # SYNOPSIS
 

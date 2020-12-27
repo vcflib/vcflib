@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfkeepgeno
+**vcfkeepgeno**
 
 # SYNOPSIS
 
-usage: ./build/vcfkeepgeno <vcf file> [FIELD1] [FIELD2] ... outputs each record in the vcf file, removing FORMAT fields not listed on the command line from sample specifications in the output
+./build/**vcfkeepgeno** <vcf file> [FIELD1] [FIELD2] ... outputs each record in the vcf file, removing FORMAT fields not listed on the command line from sample specifications in the output
 
 # DESCRIPTION
 

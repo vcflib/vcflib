@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfuniq
+**vcfuniq**
 
 # SYNOPSIS
 

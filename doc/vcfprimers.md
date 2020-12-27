@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfprimers
+**vcfprimers**
 
 # SYNOPSIS
 
-usage: ./build/vcfprimers [options] <vcf file>
+./build/**vcfprimers** [options] <vcf file>
 
 # DESCRIPTION
 

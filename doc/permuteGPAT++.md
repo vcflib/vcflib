@@ -3,15 +3,15 @@
 
 # NAME
 
-permuteGPAT++
+**permuteGPAT++**
 
 # SYNOPSIS
 
-usage: permuteGPAT++ -f gpat.txt -n 5 -s 1
+**permuteGPAT++**++ -f gpat.txt -n 5 -s 1
 
 # DESCRIPTION
 
-./build/permuteGPAT++: invalid option -- 'h' FATAL: no file was provided
+./build/**permuteGPAT++**++: invalid option -- 'h' FATAL: no file was provided
 
 
 
@@ -23,10 +23,10 @@ usage: permuteGPAT++ -f gpat.txt -n 5 -s 1
 
 
 
-     permuteGPAT++ is a method for adding empirical p-values to a GPAT++ score.
-     Currently permuteGPAT++ only supports wcFst, but will be extended.    
+     **permuteGPAT++**++ is a method for adding empirical p-values to a GPAT++ score.
+     Currently **permuteGPAT++**++ only supports wcFst, but will be extended.    
 
-OUTPUT: permuteGPAT++ will append three additional columns:
+OUTPUT: **permuteGPAT++**++ will append three additional columns:
         1. The number of successes                         
         2. The number of trials                            
         3. The empirical p-value                           

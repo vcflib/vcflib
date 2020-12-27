@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfbreakmulti
+**vcfbreakmulti**
 
 # SYNOPSIS
 
-usage: ./build/vcfbreakmulti [options] [file]
+./build/**vcfbreakmulti** [options] [file]
 
 # DESCRIPTION
 

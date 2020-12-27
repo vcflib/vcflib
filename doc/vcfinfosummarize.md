@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfinfosummarize
+**vcfinfosummarize**
 
 # SYNOPSIS
 
-usage: ./build/vcfinfosummarize [options] <vcf file>
+./build/**vcfinfosummarize** [options] <vcf file>
 
 # DESCRIPTION
 

@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfentropy
+**vcfentropy**
 
 # SYNOPSIS
 
-usage: ./build/vcfentropy [options] <vcf file>
+./build/**vcfentropy** [options] <vcf file>
 
 # DESCRIPTION
 

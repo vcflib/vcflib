@@ -3,7 +3,7 @@
 
 # NAME
 
-plotHaps
+**plotHaps**
 
 # SYNOPSIS
 
@@ -11,7 +11,7 @@ plotHaps
 
 # DESCRIPTION
 
-plotHaps provides the formatted output that can be used with 'bin/plotHaplotypes.R'. Output : haplotype matrix and positions
+**plotHaps** provides the formatted output that can be used with 'bin/plotHaplotypes.R'. Output : haplotype matrix and positions
 
 
 
@@ -20,7 +20,7 @@ plotHaps provides the formatted output that can be used with 'bin/plotHaplotypes
 ```
 
 
-plotHaps  --target 0,1,2,3,4,5,6,7  --file my.phased.vcf.gz                                                           
+**plotHaps**  --target 0,1,2,3,4,5,6,7  --file my.phased.vcf.gz                                                           
 
 required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF column s        
 required: r,region     -- argument: a tabix compliant genomic range : "seqid:start-end" or "seqid"                          

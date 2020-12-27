@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfhethomratio
+**vcfhethomratio**
 
 # SYNOPSIS
 

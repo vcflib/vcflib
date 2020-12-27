@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfremoveaberrantgenotypes
+**vcfremoveaberrantgenotypes**
 
 # SYNOPSIS
 

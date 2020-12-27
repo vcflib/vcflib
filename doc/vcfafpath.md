@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfafpath
+**vcfafpath**
 
 # SYNOPSIS
 

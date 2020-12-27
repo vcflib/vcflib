@@ -3,11 +3,11 @@
 
 # NAME
 
-dumpContigsFromHeader
+**dumpContigsFromHeader**
 
 # SYNOPSIS
 
-Usage: dumpContigsFromHeader file
+**dumpContigsFromHeader** file
 
 # DESCRIPTION
 
@@ -23,7 +23,7 @@ Dump contigs from header
 
 Example:
 
-    dumpContigsFromHeader samples/scaffold612.vcf
+    **dumpContigsFromHeader** samples/scaffold612.vcf
 
     ##contig=<ID=scaffold4,length=1524>
     ##contig=<ID=scaffold12,length=56895>

@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfevenregions
+**vcfevenregions**
 
 # SYNOPSIS
 
-usage: ./build/vcfevenregions [options] <vcf file>
+./build/**vcfevenregions** [options] <vcf file>
 
 # DESCRIPTION
 

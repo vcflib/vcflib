@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfstreamsort
+**vcfstreamsort**
 
 # SYNOPSIS
 
-usage: ./build/vcfstreamsort [options] [vcf file]
+./build/**vcfstreamsort** [options] [vcf file]
 
 # DESCRIPTION
 

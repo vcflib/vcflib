@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfintersect
+**vcfintersect**
 
 # SYNOPSIS
 
-usage: vcfintersect [options] [<vcf file>]
+**vcfintersect** [options] [<vcf file>]
 
 # DESCRIPTION
 

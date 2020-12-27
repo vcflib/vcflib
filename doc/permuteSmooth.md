@@ -3,15 +3,15 @@
 
 # NAME
 
-permuteSmooth
+**permuteSmooth**
 
 # SYNOPSIS
 
-usage: permuteSmooth -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1
+**permuteSmooth** -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1
 
 # DESCRIPTION
 
-./build/permuteSmooth: invalid option -- 'h' FATAL: no file was provided
+./build/**permuteSmooth**: invalid option -- 'h' FATAL: no file was provided
 
 
 
@@ -23,7 +23,7 @@ usage: permuteSmooth -s wcFst.smooth.txt -f wcFst.txt -n 5 -s 1
 
 
 
-     permuteSmooth is a method for adding empirical p-values  smoothed wcFst scores.
+     **permuteSmooth** is a method for adding empirical p-values  smoothed wcFst scores.
 
 Required:
       file:     f   -- argument: original wcFst data     
@@ -34,7 +34,7 @@ Optional:
       success:  u   -- argument: stop permutations after 's' successes [1]
       success:  x   -- argument: number of threads [1]
 
-OUTPUT: permuteSmooth will append three additional columns:
+OUTPUT: **permuteSmooth** will append three additional columns:
         1. The number of successes                            
         2. The number of trials                               
         3. The empirical p-value                              

@@ -3,11 +3,11 @@
 
 # NAME
 
-segmentIhs
+**segmentIhs**
 
 # SYNOPSIS
 
-usage: segmentFst -s 2 -f iHS.normalized.output.txt
+segmentFst -s 2 -f iHS.normalized.output.txt
 
 # DESCRIPTION
 

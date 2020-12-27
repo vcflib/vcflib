@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfindex
+**vcfindex**
 
 # SYNOPSIS
 

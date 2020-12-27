@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfgeno2haplo
+**vcfgeno2haplo**
 
 # SYNOPSIS
 
-usage: ./build/vcfgeno2haplo [options] [<vcf file>]
+./build/**vcfgeno2haplo** [options] [<vcf file>]
 
 # DESCRIPTION
 

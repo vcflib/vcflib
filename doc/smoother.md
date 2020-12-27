@@ -3,11 +3,11 @@
 
 # NAME
 
-smoother
+**smoother**
 
 # SYNOPSIS
 
-usage: smoother --format pFst --file GPA.output.txt
+**smoother** --format pFst --file GPA.output.txt
 
 # DESCRIPTION
 

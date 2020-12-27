@@ -3,15 +3,15 @@
 
 # NAME
 
-pFst
+**pFst**
 
 # SYNOPSIS
 
-usage: pFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
+**pFst** --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
 
 # DESCRIPTION
 
-pFst is a probabilistic approach for detecting differences in allele frequencies between two populations.
+**pFst** is a probabilistic approach for detecting differences in allele frequencies between two populations.
 
 
 
@@ -23,7 +23,7 @@ pFst is a probabilistic approach for detecting differences in allele frequencies
 Output : 3 columns :     
      1. seqid            
      2. position         
-     3. pFst probability 
+     3. **pFst** probability 
 
 required: t,target     -- argument: a zero based comma separated list of target individuals corresponding to VCF columns       
 required: b,background -- argument: a zero based comma separated list of background individuals corresponding to VCF columns   

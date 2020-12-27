@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfleftalign
+**vcfleftalign**
 
 # SYNOPSIS
 
-usage: ./build/vcfleftalign [options] [file]
+./build/**vcfleftalign** [options] [file]
 
 # DESCRIPTION
 

@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfgenosummarize
+**vcfgenosummarize**
 
 # SYNOPSIS
 

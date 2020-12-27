@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfcat
+**vcfcat**
 
 # SYNOPSIS
 

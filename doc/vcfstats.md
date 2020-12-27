@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfstats
+**vcfstats**
 
 # SYNOPSIS
 
-usage: ./build/vcfstats [options] <vcf file>
+./build/**vcfstats** [options] <vcf file>
 
 # DESCRIPTION
 

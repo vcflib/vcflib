@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfclassify
+**vcfclassify**
 
 # SYNOPSIS
 

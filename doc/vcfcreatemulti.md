@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfcreatemulti
+**vcfcreatemulti**
 
 # SYNOPSIS
 
-usage: ./build/vcfcreatemulti [options] [file]
+./build/**vcfcreatemulti** [options] [file]
 
 # DESCRIPTION
 

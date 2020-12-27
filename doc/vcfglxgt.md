@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfglxgt
+**vcfglxgt**
 
 # SYNOPSIS
 
-usage: ./build/vcfglxgt [options] <vcf file>
+./build/**vcfglxgt** [options] <vcf file>
 
 # DESCRIPTION
 

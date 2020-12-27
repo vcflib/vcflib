@@ -3,11 +3,11 @@
 
 # NAME
 
-vcf2tsv
+**vcf2tsv**
 
 # SYNOPSIS
 
-usage: vcf2tsv [-n null_string] [-g] [vcf file]
+**vcf2tsv** [-n null_string] [-g] [vcf file]
 
 # DESCRIPTION
 

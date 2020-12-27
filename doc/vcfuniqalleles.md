@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfuniqalleles
+**vcfuniqalleles**
 
 # SYNOPSIS
 

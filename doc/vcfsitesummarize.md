@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfsitesummarize
+**vcfsitesummarize**
 
 # SYNOPSIS
 

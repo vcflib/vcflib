@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfannotate
+**vcfannotate**
 
 # SYNOPSIS
 
-usage: ./build/vcfannotate [options] [<vcf file>]
+./build/**vcfannotate** [options] [<vcf file>]
 
 # DESCRIPTION
 

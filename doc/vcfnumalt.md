@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfnumalt
+**vcfnumalt**
 
 # SYNOPSIS
 

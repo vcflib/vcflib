@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfgeno2alleles
+**vcfgeno2alleles**
 
 # SYNOPSIS
 
-usage: ./build/vcfgeno2alleles <[vcf file] modifies the genotypes field to provide the literal alleles rather than indexes
+./build/**vcfgeno2alleles** <[vcf file] modifies the genotypes field to provide the literal alleles rather than indexes
 
 # DESCRIPTION
 

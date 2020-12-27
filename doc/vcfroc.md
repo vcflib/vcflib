@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfroc
+**vcfroc**
 
 # SYNOPSIS
 
-usage: ./build/vcfroc [options] [<vcf file>]
+./build/**vcfroc** [options] [<vcf file>]
 
 # DESCRIPTION
 

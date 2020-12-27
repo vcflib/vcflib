@@ -3,11 +3,11 @@
 
 # NAME
 
-vcffilter
+**vcffilter**
 
 # SYNOPSIS
 
-usage: ./build/vcffilter [options] <vcf file>
+./build/**vcffilter** [options] <vcf file>
 
 # DESCRIPTION
 

@@ -3,15 +3,15 @@
 
 # NAME
 
-iHS
+**iHS**
 
 # SYNOPSIS
 
-Usage: iHS --target 0,1,2,3,4,5,6,7 --file my.phased.vcf \ --region chr1:1-1000 > STDOUT 2> STDERR
+**iHS** --target 0,1,2,3,4,5,6,7 --file my.phased.vcf \ --region chr1:1-1000 > STDOUT 2> STDERR
 
 # DESCRIPTION
 
-iHS calculates the integrated ratio of haplotype decay between the reference and non-reference allele. Output : 4 columns : 1. seqid 2. position 3. target allele frequency 4. integrated EHH (alternative) 5. integrated EHH (reference) 6. iHS ln(iEHHalt/iEHHref)
+**iHS** calculates the integrated ratio of haplotype decay between the reference and non-reference allele. Output : 4 columns : 1. seqid 2. position 3. target allele frequency 4. integrated EHH (alternative) 5. integrated EHH (reference) 6. **iHS** ln(iEHHalt/iEHHref)
 
 
 

@@ -3,15 +3,15 @@
 
 # NAME
 
-meltEHH
+**meltEHH**
 
 # SYNOPSIS
 
-Usage: meltEHH --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf \ --region chr1:1-1000 > STDOUT 2> STDERR
+**meltEHH** --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf \ --region chr1:1-1000 > STDOUT 2> STDERR
 
 # DESCRIPTION
 
-meltEHH provides the data to plot extended haplotype homozygosity (EHH) curves.
+**meltEHH** provides the data to plot extended haplotype homozygosity (EHH) curves.
 
 
 

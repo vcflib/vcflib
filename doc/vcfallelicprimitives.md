@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfallelicprimitives
+**vcfallelicprimitives**
 
 # SYNOPSIS
 
-usage: ./build/vcfallelicprimitives [options] [file]
+./build/**vcfallelicprimitives** [options] [file]
 
 # DESCRIPTION
 

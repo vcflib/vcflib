@@ -3,11 +3,11 @@
 
 # NAME
 
-vcf2fasta
+**vcf2fasta**
 
 # SYNOPSIS
 
-usage: ./build/vcf2fasta [options] [file]
+./build/**vcf2fasta** [options] [file]
 
 # DESCRIPTION
 

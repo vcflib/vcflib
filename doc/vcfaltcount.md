@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfaltcount
+**vcfaltcount**
 
 # SYNOPSIS
 
-usage: ./build/vcfaltcount <vcf file> count the number of alternate alleles in all records in the vcf file
+./build/**vcfaltcount** <vcf file> count the number of alternate alleles in all records in the vcf file
 
 # DESCRIPTION
 

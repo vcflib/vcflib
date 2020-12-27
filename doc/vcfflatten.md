@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfflatten
+**vcfflatten**
 
 # SYNOPSIS
 
-usage: vcfflatten [file]
+**vcfflatten** [file]
 
 # DESCRIPTION
 

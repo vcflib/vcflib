@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfkeepsamples
+**vcfkeepsamples**
 
 # SYNOPSIS
 
-usage: ./build/vcfkeepsamples <vcf file> [SAMPLE1] [SAMPLE2] ... outputs each record in the vcf file, removing samples not listed on the command line
+./build/**vcfkeepsamples** <vcf file> [SAMPLE1] [SAMPLE2] ... outputs each record in the vcf file, removing samples not listed on the command line
 
 # DESCRIPTION
 

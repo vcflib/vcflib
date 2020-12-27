@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfsample2info
+**vcfsample2info**
 
 # SYNOPSIS
 
-usage: ./build/vcfsample2info [options] <vcf file>
+./build/**vcfsample2info** [options] <vcf file>
 
 # DESCRIPTION
 

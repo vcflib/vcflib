@@ -3,11 +3,11 @@
 
 # NAME
 
-vcffixup
+**vcffixup**
 
 # SYNOPSIS
 
-usage: ./build/vcffixup <vcf file> outputs a VCF stream where AC and NS have been generated for each record using sample genotypes
+./build/**vcffixup** <vcf file> outputs a VCF stream where AC and NS have been generated for each record using sample genotypes
 
 # DESCRIPTION
 

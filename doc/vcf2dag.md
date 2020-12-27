@@ -3,11 +3,11 @@
 
 # NAME
 
-vcf2dag
+**vcf2dag**
 
 # SYNOPSIS
 
-usage: ./build/vcf2dag [options] [<vcf file>]
+./build/**vcf2dag** [options] [<vcf file>]
 
 # DESCRIPTION
 

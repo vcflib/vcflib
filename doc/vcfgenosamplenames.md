@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfgenosamplenames
+**vcfgenosamplenames**
 
 # SYNOPSIS
 

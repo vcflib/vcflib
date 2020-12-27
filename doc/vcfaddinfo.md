@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfaddinfo
+**vcfaddinfo**
 
 # SYNOPSIS
 
-usage: ./build/vcfaddinfo <vcf file> <vcf file> Adds info fields from the second file which are not present in the first vcf file.
+./build/**vcfaddinfo** <vcf file> <vcf file> Adds info fields from the second file which are not present in the first vcf file.
 
 # DESCRIPTION
 

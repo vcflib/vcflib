@@ -3,11 +3,11 @@
 
 # NAME
 
-normalize-iHS
+**normalize-iHS**
 
 # SYNOPSIS
 
-usage: normalizeHS -s 0.01 -f input.txt
+normalizeHS -s 0.01 -f input.txt
 
 # DESCRIPTION
 
@@ -29,7 +29,7 @@ about population B. See for example
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2687721/
 
 
-Output : normalize-iHS adds one additional column to input (normalized score).
+Output : **normalize-iHS** adds one additional column to input (normalized score).
 required: -f            -- Output from iHS or XPEHH 
 optional: -s            -- Max AF diff for window [0.01]
 

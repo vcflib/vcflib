@@ -3,15 +3,15 @@
 
 # NAME
 
-wcFst
+**wcFst**
 
 # SYNOPSIS
 
-usage: wcFst --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
+**wcFst** --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --file my.vcf --deltaaf 0.1 --type PL
 
 # DESCRIPTION
 
-wcFst is Weir & Cockerham's Fst for two populations. Negative values are VALID, they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. Specifically wcFst uses equations 1,2,3,4.
+**wcFst** is Weir & Cockerham's Fst for two populations. Negative values are VALID, they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. Specifically **wcFst** uses equations 1,2,3,4.
 
 
 
@@ -25,7 +25,7 @@ Output : 3 columns :
      2. position                     
      3. target allele frequency      
      4. background allele frequency  
-     5. wcFst                        
+     5. **wcFst**                        
 
 required: t,target     -- argument: a zero based comma separated list of target individuals corrisponding to VCF columns        
 required: b,background -- argument: a zero based comma separated list of background individuals corrisponding to VCF columns    

@@ -3,7 +3,7 @@
 
 # NAME
 
-vcflength
+**vcflength**
 
 # SYNOPSIS
 

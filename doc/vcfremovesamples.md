@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfremovesamples
+**vcfremovesamples**
 
 # SYNOPSIS
 
-usage: ./build/vcfremovesamples <vcf file> [SAMPLE1] [SAMPLE2] ... outputs each record in the vcf file, removing samples listed on the command line
+./build/**vcfremovesamples** <vcf file> [SAMPLE1] [SAMPLE2] ... outputs each record in the vcf file, removing samples listed on the command line
 
 # DESCRIPTION
 

@@ -3,11 +3,11 @@
 
 # NAME
 
-genotypeSummary
+**genotypeSummary**
 
 # SYNOPSIS
 
-usage: genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp
+genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp
 
 # DESCRIPTION
 

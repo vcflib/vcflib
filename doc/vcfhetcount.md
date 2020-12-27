@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfhetcount
+**vcfhetcount**
 
 # SYNOPSIS
 

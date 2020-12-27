@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfglbound
+**vcfglbound**
 
 # SYNOPSIS
 
-usage: ./build/vcfglbound [options] <vcf file>
+./build/**vcfglbound** [options] <vcf file>
 
 # DESCRIPTION
 

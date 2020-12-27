@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfrandomsample
+**vcfrandomsample**
 
 # SYNOPSIS
 
-usage: ./build/vcfrandomsample [options] [<vcf file>]
+./build/**vcfrandomsample** [options] [<vcf file>]
 
 # DESCRIPTION
 

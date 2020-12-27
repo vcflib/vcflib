@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfkeepinfo
+**vcfkeepinfo**
 
 # SYNOPSIS
 
-usage: ./build/vcfkeepinfo <vcf file> [FIELD1] [FIELD2] ... outputs each record in the vcf file, removing INFO fields not listed on the command line
+./build/**vcfkeepinfo** <vcf file> [FIELD1] [FIELD2] ... outputs each record in the vcf file, removing INFO fields not listed on the command line
 
 # DESCRIPTION
 

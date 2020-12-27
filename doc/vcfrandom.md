@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfrandom
+**vcfrandom**
 
 # SYNOPSIS
 
-Usage: vcfrandom
+**vcfrandom**
 
 # DESCRIPTION
 
@@ -23,10 +23,10 @@ Generate a random VCF file
 
 Example:
 
-    vcfrandom
+    **vcfrandom**
 
 ##fileformat=VCFv4.0
-##source=vcfrandom
+##source=**vcfrandom**
 ##reference=/d2/data/references/build_37/human_reference_v37.fa
 ##phasing=none
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">

@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfremap
+**vcfremap**
 
 # SYNOPSIS
 
-usage: ./build/vcfremap [options] [<vcf file>]
+./build/**vcfremap** [options] [<vcf file>]
 
 # DESCRIPTION
 

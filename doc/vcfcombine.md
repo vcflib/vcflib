@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfcombine
+**vcfcombine**
 
 # SYNOPSIS
 
-usage: ./build/vcfcombine [vcf file] [vcf file] ...
+./build/**vcfcombine** [vcf file] [vcf file] ...
 
 # DESCRIPTION
 

@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfannotategenotypes
+**vcfannotategenotypes**
 
 # SYNOPSIS
 
-usage: ./build/vcfannotategenotypes <annotation-tag> <vcf file> <vcf file> annotates genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant.
+./build/**vcfannotategenotypes** <annotation-tag> <vcf file> <vcf file> annotates genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant.
 
 # DESCRIPTION
 

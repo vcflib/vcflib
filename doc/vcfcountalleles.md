@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfcountalleles
+**vcfcountalleles**
 
 # SYNOPSIS
 

@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfcheck
+**vcfcheck**
 
 # SYNOPSIS
 
-usage: ./build/vcfcheck [options] <vcf file>
+./build/**vcfcheck** [options] <vcf file>
 
 # DESCRIPTION
 

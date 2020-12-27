@@ -3,11 +3,11 @@
 
 # NAME
 
-vcfoverlay
+**vcfoverlay**
 
 # SYNOPSIS
 
-usage: ./build/vcfoverlay [options] [<vcf file> ...]
+./build/**vcfoverlay** [options] [<vcf file> ...]
 
 # DESCRIPTION
 
