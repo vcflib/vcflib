@@ -1,4 +1,4 @@
-% PERMUTEGPAT++(1) permuteGPAT++ (vcflib) | permuteGPAT++ (VCF unknown)
+% PERMUTEGPAT++(1) permuteGPAT++ (vcflib) | permuteGPAT++ (VCF phenotype)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-**permuteGPAT++**++ -f gpat.txt -n 5 -s 1
+**permuteGPAT++** -f gpat.txt -n 5 -s 1
 
 # DESCRIPTION
 
-./build/**permuteGPAT++**++: invalid option -- 'h' FATAL: no file was provided
+**permuteGPAT++** is a method for adding empirical p-values to a GPAT++ score.
 
 
 
@@ -20,13 +20,9 @@
 ```
 
 
+     Currently **permuteGPAT++** only supports wcFst, but will be extended.    
 
-
-
-     **permuteGPAT++**++ is a method for adding empirical p-values to a GPAT++ score.
-     Currently **permuteGPAT++**++ only supports wcFst, but will be extended.    
-
-OUTPUT: **permuteGPAT++**++ will append three additional columns:
+OUTPUT: **permuteGPAT++** will append three additional columns:
         1. The number of successes                         
         2. The number of trials                            
         3. The empirical p-value                           
@@ -34,6 +30,8 @@ OUTPUT: **permuteGPAT++**++ will append three additional columns:
 file:    f   -- argument: the input file     
 number:  n   -- argument: the number of permutations to run for each value [1000]
 success: s   -- argument: stop permutations after 's' successes [1]
+
+Type: phenotype
 
 ```
 

@@ -1,4 +1,4 @@
-% PERMUTESMOOTH(1) permuteSmooth (vcflib) | permuteSmooth (VCF unknown)
+% PERMUTESMOOTH(1) permuteSmooth (vcflib) | permuteSmooth (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-./build/**permuteSmooth**: invalid option -- 'h' FATAL: no file was provided
+**permuteSmooth** is a method for adding empirical p-values smoothed wcFst scores.
 
 
 
@@ -19,11 +19,6 @@
 
 ```
 
-
-
-
-
-     **permuteSmooth** is a method for adding empirical p-values  smoothed wcFst scores.
 
 Required:
       file:     f   -- argument: original wcFst data     
@@ -38,6 +33,9 @@ OUTPUT: **permuteSmooth** will append three additional columns:
         1. The number of successes                            
         2. The number of trials                               
         3. The empirical p-value                              
+
+
+Type: statistics
 
 
 ```

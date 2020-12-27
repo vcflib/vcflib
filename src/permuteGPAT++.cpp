@@ -2,6 +2,7 @@
     vcflib C++ library for parsing and manipulating VCF files
 
     Copyright © 2010-2020 Erik Garrison
+    Copyright © 2015      Zev N. Kronenberg
     Copyright © 2020      Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
@@ -60,7 +61,7 @@ THE SOFTWARE.
 struct options{
   std::string file;
   int npermutation;
-  int nsuc; 
+  int nsuc;
 }globalOpts;
 
 static const char *optString = "f:n:s:";
@@ -76,7 +77,7 @@ int parseOpts(int argc, char** argv)
 
     globalOpts.nsuc         = 1;
     globalOpts.npermutation = 1000;
-    
+
     opt = getopt(argc, argv, optString);
     while(opt != -1){
       switch(opt){
@@ -102,8 +103,8 @@ int parseOpts(int argc, char** argv)
 	  break;
 	}
       }
-      
-      opt = getopt( argc, argv, optString ); 
+
+      opt = getopt( argc, argv, optString );
     }
     return 1;
     }
@@ -122,13 +123,13 @@ void printHelp()
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     permuteGPAT++ is a method for adding empirical p-values to a GPAT++ score." << endl ;
+  cerr << "     permuteGPAT++ is a method for adding empirical p-values to a GPAT++ score." << endl << endl ;
   cerr << "     Currently permuteGPAT++ only supports wcFst, but will be extended.    " << endl ;
   cerr << endl;
   cerr << "OUTPUT: permuteGPAT++ will append three additional columns:" << endl;
   cerr << "        1. The number of successes                         " << endl;
   cerr << "        2. The number of trials                            " << endl;
-  cerr << "        3. The empirical p-value                           " << endl << endl; 
+  cerr << "        3. The empirical p-value                           " << endl << endl;
 
   cerr << "INFO: usage:  permuteGPAT++ -f gpat.txt -n 5 -s 1 "<< endl;
   cerr << endl;
@@ -136,7 +137,7 @@ void printHelp()
   cerr << "INFO: number:  n   -- argument: the number of permutations to run for each value [1000]" << endl;
   cerr << "INFO: success: s   -- argument: stop permutations after \'s\' successes [1]"             << endl;
 
-
+  cerr << endl << "Type: phenotype" << endl << endl;
   cerr << endl;
 
 }
@@ -148,10 +149,16 @@ void printHelp()
 
 int main( int argc, char** argv)
 {
-int parse = parseOpts(argc, argv);
+  if (argc == 2) {
+    string h_flag = argv[1];
 
+    if (argc == 2 && (h_flag == "-h" || h_flag == "--help")) {
+      printHelp();
+      exit(1);
+    }
+  }
+  int parse = parseOpts(argc, argv);
  if(globalOpts.file.compare("NA") == 0){
-   cerr << "FATAL: no file was provided" << endl;
    printHelp();
    exit(1);
  }
@@ -195,20 +202,20 @@ int parse = parseOpts(argc, argv);
      vector<string> region = split(line, "\t");
 
      double value = atof(region[4].c_str());
-     
+
      if(value < 0){
        value = 0;
      }
-     
+
 
      double suc   = 0;
      double per   = 0;
      int    datas = data.size();
-     double pv = (1.0 / globalOpts.npermutation);     
+     double pv = (1.0 / globalOpts.npermutation);
 
      while( suc < globalOpts.nsuc && per < globalOpts.npermutation){
        per += 1.0;
-       
+
        int r = rand() % datas;
 
        if(value < data[r]){
@@ -220,7 +227,7 @@ int parse = parseOpts(argc, argv);
      }
      cout << line << "\t" << suc << "\t" << per << "\t" << pv << endl;
    }
-   
+
  }
  else{
    cerr << "FATAL: could not open file: " << globalOpts.file << endl;

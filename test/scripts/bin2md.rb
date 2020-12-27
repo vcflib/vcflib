@@ -78,7 +78,7 @@ Dir.glob(bindir+'/*').each do|bin|
     out = out.encode('UTF-8')
     # $stderr.print(out)
     lines = (out).split("\n")
-    lines = lines.map{|l| l.gsub(/#{cmd}/,"**#{cmd}**")}
+    lines = lines.map{|l| l.gsub(/#{Regexp.escape(cmd)}/,"**#{cmd}**")}
     lines = lines.map{|l| l.gsub(/INFO: help:?/,"")}
     lines = lines.map{|l| l.gsub(/INFO: description:/,"")}
     lines = lines.map{|l| l.gsub(/INFO:\s+/,"")}
