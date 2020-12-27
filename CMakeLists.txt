@@ -280,7 +280,7 @@ endfunction()
 add_pydoctest(vcf2tsv)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
-add_pydoctest_fullname(../README.md)
+# add_pydoctest_fullname(../README.md)
 
 # ---- Build docs
 #
