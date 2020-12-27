@@ -96,7 +96,7 @@ Dir.glob(bindir+'/*').each do|bin|
         in_usage = true
       end
       if in_usage
-        if l == ""
+        if l == "" or l =~ /^Output/i
           in_usage = false
           next
         end
@@ -124,7 +124,7 @@ Dir.glob(bindir+'/*').each do|bin|
     end
 
     other.each do | l |
-      break if l == ""
+      break if l == "" or l =~ /^Output/i
       descr << l
     end
 

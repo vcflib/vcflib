@@ -89,7 +89,7 @@ void printHelp(void){
   cerr << endl;
   cerr << "INFO: required: -f            -- Output from wcFst     "   << endl;
   cerr << "INFO: optional: -s            -- High Fst cutoff [0.8] "    << endl;
-
+  cerr << endl << "Type: statistics" << endl << endl;
   cerr << endl;
 
   printVersion();

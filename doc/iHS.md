@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-**iHS** calculates the integrated ratio of haplotype decay between the reference and non-reference allele. Output : 4 columns : 1. seqid 2. position 3. target allele frequency 4. integrated EHH (alternative) 5. integrated EHH (reference) 6. **iHS** ln(iEHHalt/iEHHref)
+**iHS** calculates the integrated ratio of haplotype decay between the reference and non-reference allele.
 
 
 
@@ -19,6 +19,13 @@
 
 ```
 
+Output : 4 columns :                  
+     1. seqid                         
+     2. position                      
+     3. target allele frequency       
+     4. integrated EHH (alternative)  
+     5. integrated EHH (reference)    
+     6. **iHS** ln(iEHHalt/iEHHref)       
 
      7. != 0 integration failure                    
 

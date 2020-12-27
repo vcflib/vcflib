@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-./build/**vcfcommonsamples** <vcf file> <vcf file> outputs each record in the first file, removing samples not present in the second
+./build/**vcfcommonsamples** <vcf file> <vcf file>
 
 # DESCRIPTION
 

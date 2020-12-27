@@ -1,4 +1,4 @@
-% SEGMENTFST(1) segmentFst (vcflib) | segmentFst (VCF unknown)
+% SEGMENTFST(1) segmentFst (vcflib) | segmentFst (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,31 @@
 
 # DESCRIPTION
 
-Creates genomic segments (bed file) for regions with high wcFst Output : 8 columns : 1. Seqid 2. Start (zero based) 3. End (zero based) 4. Average Fst 5. Average high Fst (Fst > -s) 6. N Fst values in segment 7. N high fst values in segment 8. Segment length required: -f -- Output from wcFst optional: -s -- High Fst cutoff [0.8]
+Creates genomic segments (bed file) for regions with high wcFst
+
+
+
+# OPTIONS
+
+```
+
+Output : 8 columns :                 
+     1. Seqid                        
+     2. Start (zero based)           
+     3. End   (zero based)           
+     4. Average Fst                  
+     5. Average high Fst (Fst > -s)  
+     6. N Fst values in segment      
+     7. N high fst values in segment 
+     8. Segment length               
+required: -f            -- Output from wcFst     
+optional: -s            -- High Fst cutoff [0.8] 
+
+Type: statistics
+
+
+
+```
 
 
 
