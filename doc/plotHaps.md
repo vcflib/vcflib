@@ -1,4 +1,4 @@
-% PLOTHAPS(1) plotHaps (vcflib) | plotHaps (VCF unknown)
+% PLOTHAPS(1) plotHaps (vcflib) | plotHaps (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-**plotHaps** provides the formatted output that can be used with 'bin/plotHaplotypes.R'. Output : haplotype matrix and positions
+**plotHaps** provides the formatted output that can be used with 'bin/plotHaplotypes.R'.
 
 
 
@@ -20,6 +20,8 @@
 ```
 
 
+Output : haplotype matrix and positions
+
 **plotHaps**  --target 0,1,2,3,4,5,6,7  --file my.phased.vcf.gz                                                           
 
 required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF column s        
@@ -27,7 +29,7 @@ required: r,region     -- argument: a tabix compliant genomic range : "seqid:sta
 required: f,file       -- argument: proper formatted phased VCF file                                                            
 required: y,type       -- argument: genotype likelihood format: PL,GP,GP                                                        
 
-version 1.0.1 ; date: April 2014 ; author: Zev Kronenberg; email : zev.kronenberg@utah.edu 
+Type: statistics
 
 ```
 

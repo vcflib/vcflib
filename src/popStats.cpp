@@ -15,7 +15,7 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>  
+#include <math.h>
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
@@ -52,7 +52,7 @@ void printHelp(void){
   cerr << "INFO: required: f,file       -- proper formatted VCF                                                                        " << endl;
   cerr << "INFO: required, y,type       -- genotype likelihood format; genotype : GL,PL,GP                                             " << endl;
   cerr << "INFO: optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1                                              " << endl;
-
+  cerr << endl << "Type: statistics" << endl << endl;
   printVersion();
 }
 
@@ -68,11 +68,11 @@ double bound(double v){
 }
 
 void loadIndices(map<int, int> & index, string set){
-  
+
   vector<string>  indviduals = split(set, ",");
 
   vector<string>::iterator it = indviduals.begin();
-  
+
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
   }
@@ -91,21 +91,21 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
-  // using vcflib; thanks to Erik Garrison 
+  // using vcflib; thanks to Erik Garrison
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
-  
+  // zero based index for the target and background indivudals
+
   map<int, int> it, ib;
-  
+
   // genotype likelihood format
 
   string type = "NA";
 
-    const struct option longopts[] = 
+    const struct option longopts[] =
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
     while(iarg != -1)
       {
 	iarg = getopt_long(argc, argv, "y:r:d:t:b:f:chv", longopts, &index);
-	
+
 	switch (iarg)
 	  {
 	  case 'h':
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg; 
+	    region = optarg;
 	    break;
 	  case 'y':
 	    type = optarg;
@@ -163,12 +163,12 @@ int main(int argc, char** argv) {
       cerr << "FATAL: failed to specify a file" << endl;
       printHelp();
     }
-    
+
     if(!variantFile.open(filename)){
       cerr << "FATAL: could not open file for reading" << endl;
       printHelp();
     }
-    
+
     if(region != "NA"){
       if(! variantFile.setRegion(region)){
 	cerr <<"FATAL: unable to set region" << endl;
@@ -205,15 +205,15 @@ int main(int argc, char** argv) {
     int nsamples = samples.size();
 
     while (variantFile.getNextVariant(var)) {
-        
-	// biallelic sites naturally 
+
+	// biallelic sites naturally
 
 	if(var.alt.size() > 1){
 	  continue;
 	}
-	
+
 	vector < map< string, vector<string> > > target, background, total;
-	        
+
 	int index = 0;
 
 	for(int nsamp = 0; nsamp < nsamples; nsamp++){
@@ -224,10 +224,10 @@ int main(int argc, char** argv) {
 	      if(it.find(index) != it.end() ){
 		target.push_back(sample);
 	      }
-	    }            
+	    }
 	    index += 1;
 	}
-	
+
 	genotype * populationTarget      ;
 	genotype * populationBackground  ;
 
@@ -243,7 +243,7 @@ int main(int argc, char** argv) {
 	if(type == "GT"){
           populationTarget     = new gt();
 	}
-	
+
 	populationTarget->loadPop(target, var.sequenceName, var.position);
 
 	 //cerr << "     3. target allele frequency      "    << endl;
@@ -260,8 +260,8 @@ int main(int argc, char** argv) {
 	}
 
 	double ehet = 2*(populationTarget->af * (1 - populationTarget->af));
-	
-	cout << var.sequenceName << "\t"  << var.position << "\t" 
+
+	cout << var.sequenceName << "\t"  << var.position << "\t"
 	     << populationTarget->af  << "\t"
 	     << ehet << "\t"
 	     << populationTarget->hfrq  << "\t"
@@ -273,5 +273,5 @@ int main(int argc, char** argv) {
 	delete populationTarget;
 
     }
-    return 0;		    
+    return 0;
 }

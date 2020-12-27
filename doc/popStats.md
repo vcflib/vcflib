@@ -1,4 +1,4 @@
-% POPSTATS(1) popStats (vcflib) | popStats (VCF unknown)
+% POPSTATS(1) popStats (vcflib) | popStats (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -34,6 +34,9 @@ required: t,target     -- a zero based comma separated list of target individual
 required: f,file       -- proper formatted VCF                                                                        
 required, y,type       -- genotype likelihood format; genotype : GL,PL,GP                                             
 optional, r,region     -- a tabix compliant region : chr1:1-1000 or chr1                                              
+
+Type: statistics
+
 
 ```
 
