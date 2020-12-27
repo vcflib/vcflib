@@ -19,14 +19,15 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "options:" << endl 
-         << "    -f, --fasta-reference  FASTA reference file to use to obtain flanking sequences" << endl
-         << "    -w, --window-size      Size of the window over which to calculate entropy" << endl
-         << endl
          << "Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight," << endl
          << "EntropyCenter, which are the entropies of the sequence of the given window size to the" << endl
          << "left, right, and center  of the record.  Also adds EntropyRef and EntropyAlt for each alt." << endl
+         << "options:" << endl
+         << "    -f, --fasta-reference  FASTA reference file to use to obtain flanking sequences" << endl
+         << "    -w, --window-size      Size of the window over which to calculate entropy" << endl
+         << endl
          << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -60,7 +61,7 @@ int main(int argc, char** argv) {
       /* Detect the end of the options. */
           if (c == -1)
             break;
- 
+
           switch (c)
             {
             case 0:
@@ -80,7 +81,7 @@ int main(int argc, char** argv) {
           case 'w':
             windowSize = atoi(optarg);
             break;
- 
+
           case 'h':
             printSummary(argv);
             exit(0);
@@ -91,7 +92,7 @@ int main(int argc, char** argv) {
             printSummary(argv);
             exit(1);
             break;
- 
+
           default:
             abort ();
           }
@@ -166,4 +167,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

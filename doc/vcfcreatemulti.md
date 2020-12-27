@@ -1,4 +1,4 @@
-% VCFCREATEMULTI(1) vcfcreatemulti (vcflib) | vcfcreatemulti (VCF unknown)
+% VCFCREATEMULTI(1) vcfcreatemulti (vcflib) | vcfcreatemulti (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -12,6 +12,17 @@
 # DESCRIPTION
 
 If overlapping alleles are represented across multiple records, merge them into a single record. Currently only for indels.
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

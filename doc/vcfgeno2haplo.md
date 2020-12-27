@@ -1,4 +1,4 @@
-% VCFGENO2HAPLO(1) vcfgeno2haplo (vcflib) | vcfgeno2haplo (VCF unknown)
+% VCFGENO2HAPLO(1) vcfgeno2haplo (vcflib) | vcfgeno2haplo (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Convert genotype-based phased alleles within --window-size into haplotype alleles. Will break haplotype construction when encountering non-phased genotypes on input.
 
 
 
@@ -27,8 +27,9 @@ options:
     -o, --only-variants     Don't output the entire haplotype, just concatenate
                             REF/ALT strings (delimited by ":")
 
-Convert genotype-based phased alleles within --window-size into haplotype alleles.
-Will break haplotype construction when encountering non-phased genotypes on input.
+
+
+Type: transformation
 
 ```
 

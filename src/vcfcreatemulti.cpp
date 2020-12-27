@@ -28,6 +28,7 @@ void printSummary(char** argv) {
          << endl
          << "If overlapping alleles are represented across multiple records, merge" << endl
          << "them into a single record.  Currently only for indels." << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -203,4 +204,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

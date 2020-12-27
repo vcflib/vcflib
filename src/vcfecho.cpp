@@ -14,6 +14,21 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
+if (argc == 2) {
+  string h_flag = argv[1];
+  if (h_flag == "-h" || h_flag == "--help") {
+      cerr << R"(
+usage: vcfecho <vcf file>
+
+Echo VCF to stdout (simple demo)
+
+Type: transformation
+
+      )";
+      exit(1);
+    }
+  }
+
     VariantCallFile variantFile;
 
     if (argc > 1) {
@@ -37,4 +52,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

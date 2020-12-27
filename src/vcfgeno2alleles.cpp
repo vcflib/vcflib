@@ -19,8 +19,9 @@ using namespace vcflib;
 int main(int argc, char** argv) {
 
     if (argc > 1) {
-        cerr << "usage: " << argv[0] << " <[vcf file]" << endl
+      cerr << "usage: " << argv[0] << " <[vcf file]" << endl << endl
              << "modifies the genotypes field to provide the literal alleles rather than indexes" << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
         return 1;
     }
 
@@ -36,15 +37,15 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
+        map<string, map<string, vector<string> > >::iterator s     = var.samples.begin();
         map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
-        
+
         for (; s != sEnd; ++s) {
             map<string, vector<string> >& sample = s->second;
             vector<string>& gtstrs = sample["GT"];
             string& genotype = gtstrs.front();
             vector<string> gt = split(genotype, "|/");
-            
+
             // report the sample and it's genotype
             stringstream o;
             for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {
@@ -60,4 +61,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

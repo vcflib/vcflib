@@ -1,4 +1,4 @@
-% VCFECHO(1) vcfecho (vcflib) | vcfecho (VCF unknown)
+% VCFECHO(1) vcfecho (vcflib) | vcfecho (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfecho** <vcf file>
 
 # DESCRIPTION
 
+Echo VCF to stdout (simple demo)
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+      
+
+```
 
 
 

@@ -22,7 +22,9 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
-         << "options:" << endl 
+         << "Convert genotype-based phased alleles within --window-size into haplotype alleles." << endl
+         << "Will break haplotype construction when encountering non-phased genotypes on input." << endl
+         << "options:" << endl
          << "    -h, --help              Print this message" << endl
          << "    -v, --version           Print version" << endl
          << "    -r, --reference FILE    FASTA reference file" << endl
@@ -30,9 +32,8 @@ void printSummary(char** argv) {
          << "    -o, --only-variants     Don't output the entire haplotype, just concatenate" << endl
          << "                            REF/ALT strings (delimited by \":\")" << endl
          << endl
-         << "Convert genotype-based phased alleles within --window-size into haplotype alleles." << endl
-         << "Will break haplotype construction when encountering non-phased genotypes on input." << endl
          << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -78,7 +79,7 @@ int main(int argc, char** argv) {
 
         c = getopt_long (argc, argv, "hvow:r:",
                          long_options, &option_index);
-	
+
         if (c == -1){
             break;
         }
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
         {
             printBasicVersion();
             exit(0);
-        }  
+        }
         case 'o':
         {
             onlyVariants = true;
@@ -220,7 +221,7 @@ int main(int argc, char** argv) {
                 // only build haplotypes for samples with complete information
                 string& sampleName = *s;
                 vector<vector<int> >& haplotypes = sampleHaplotypes[sampleName];
-		
+
                 bool completeCoverage = true;
                 // ensure complete genotype coverage over the haplotype cluster
                 for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {
@@ -233,7 +234,7 @@ int main(int argc, char** argv) {
                 if (!completeCoverage) {
                     continue; // skip samples without complete coverage
                 }
-		
+
                 // what's the ploidy?
                 {
                     string& gt = cluster.front().samples[sampleName]["GT"].front();
@@ -243,7 +244,7 @@ int main(int argc, char** argv) {
                         haplotypes.push_back(haplotype);
                     }
                 }
-		
+
                 for (vector<Variant>::iterator v = cluster.begin(); v != cluster.end(); ++v) {
                     string& gt = v->samples[sampleName]["GT"].front();
                     vector<string> gtspec = split(gt, "|");
@@ -266,12 +267,12 @@ int main(int argc, char** argv) {
                     hapToSamples[&*uniqueHaplotypes.find(*h)].push_back(hs->first);
                 }
             }
-	    
+
             // write new haplotypes
             map<vector<int>, string> haplotypeSeqs;
             map<vector<int>, int> haplotypeIndexes;
             map<int, string> alleles;
-	    
+
             int impossibleHaplotypes = 0;
 
             // always include the reference haplotype as 0
@@ -337,7 +338,7 @@ int main(int argc, char** argv) {
                         }
                     }
                 }
-		
+
                 if (impossibleHaplotype) {
                     ++impossibleHaplotypes;
                     haplotypeIndexes[*u] = -1; // indicates impossible haplotype
@@ -374,7 +375,7 @@ int main(int argc, char** argv) {
             for (int i = 1; i < alleleIndex; ++i) {
                 outputVar.alt.push_back(alleles[i]);
             }
-	    
+
             outputVar.sequenceName = cluster.front().sequenceName;
             outputVar.position = cluster.front().position;
             outputVar.filter = ".";
@@ -382,7 +383,7 @@ int main(int argc, char** argv) {
             outputVar.info = cluster.front().info;
             outputVar.samples.clear();
             outputVar.format = cluster.front().format;
-	    
+
             // now the genotypes
             for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
                 string& sampleName = *s;
@@ -421,4 +422,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

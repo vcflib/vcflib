@@ -1,4 +1,4 @@
-% VCFGENO2ALLELES(1) vcfgeno2alleles (vcflib) | vcfgeno2alleles (VCF unknown)
+% VCFGENO2ALLELES(1) vcfgeno2alleles (vcflib) | vcfgeno2alleles (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-**vcfgeno2alleles** <[vcf file] modifies the genotypes field to provide the literal alleles rather than indexes
+**vcfgeno2alleles** <[vcf file]
 
 # DESCRIPTION
 
+modifies the genotypes field to provide the literal alleles rather than indexes
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

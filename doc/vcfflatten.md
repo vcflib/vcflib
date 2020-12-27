@@ -1,4 +1,4 @@
-% VCFFLATTEN(1) vcfflatten (vcflib) | vcfflatten (VCF unknown)
+% VCFFLATTEN(1) vcfflatten (vcflib) | vcfflatten (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -12,6 +12,17 @@
 # DESCRIPTION
 
 Removes multi-allelic sites by picking the most common alternate. Requires allele frequency specification 'AF' and use of 'G' and 'A' to specify the fields which vary according to the Allele or Genotype. VCF file may be specified on the command line or piped as stdin.
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

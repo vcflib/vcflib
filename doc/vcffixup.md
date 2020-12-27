@@ -1,4 +1,4 @@
-% VCFFIXUP(1) vcffixup (vcflib) | vcffixup (VCF unknown)
+% VCFFIXUP(1) vcffixup (vcflib) | vcffixup (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,18 @@
 
 # DESCRIPTION
 
+Generates a VCF stream where AC and NS have been generated for each record using sample genotypes
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

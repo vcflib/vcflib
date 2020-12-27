@@ -36,12 +36,15 @@ vector<T> intersection(vector<T>& a, vector<T>& b) {
 
 int main(int argc, char** argv) {
 
-    if (argc != 3) {
-        cerr << "usage: " << argv[0] << " <vcf file> <vcf file>" << endl
-             << "outputs each record in the first file, removing samples not present in the second" << endl;
-        return 1;
+  if (argc == 2) {
+    string h_flag = argv[1];
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << "usage: " << argv[0] << " <vcf file> <vcf file>" << endl << endl
+           << "Generates each record in the first file, removing samples not present in the second" << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
+      return 1;
     }
-
+  }
     string filenameA = argv[1];
     string filenameB = argv[2];
 
@@ -79,10 +82,10 @@ int main(int argc, char** argv) {
 
     // and restrict the output sample names in the variant to those we are keeping
     varA.setOutputSampleNames(commonSamples);
- 
+
     // write the new header
     cout << variantFileA.header << endl;
- 
+
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFileA.getNextVariant(varA)) {
         cout << varA << endl;
@@ -91,4 +94,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

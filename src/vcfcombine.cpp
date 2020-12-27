@@ -28,6 +28,7 @@ void printSummary(char** argv) {
          << "    -h --help           This text." << endl
 	 << "    -v --version        Print version." << endl
 	 << "    -r --region REGION  A region specifier of the form chrN:x-y to bound the merge" << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(1);
 }
 
@@ -226,4 +227,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

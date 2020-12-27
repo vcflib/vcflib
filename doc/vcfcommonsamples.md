@@ -1,4 +1,4 @@
-% VCFCOMMONSAMPLES(1) vcfcommonsamples (vcflib) | vcfcommonsamples (VCF unknown)
+% VCFCOMMONSAMPLES(1) vcfcommonsamples (vcflib) | vcfcommonsamples (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,18 @@
 
 # DESCRIPTION
 
+Generates each record in the first file, removing samples not present in the second
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
                  << "allele frequency specification 'AF' and use of 'G' and 'A' to specify the" << endl
                  << "fields which vary according to the Allele or Genotype. VCF file may be" << endl
                  << "specified on the command line or piped as stdin." << endl;
+            cerr << endl << "Type: transformation" << endl << endl;
             exit(1);
         }
         variantFile.open(filename);
@@ -78,7 +79,7 @@ int main(int argc, char** argv) {
 
             // now get the genotype indexes we want to keep
             vector<int> alleleIndexes;
-            alleleIndexes.push_back(0); 
+            alleleIndexes.push_back(0);
             alleleIndexes.push_back(bestaltGenotypeIndex);
 
             // add the reference allele index for generating genotype indexes
@@ -184,4 +185,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

@@ -1,4 +1,4 @@
-% VCFGENOSAMPLENAMES(1) vcfgenosamplenames (vcflib) | vcfgenosamplenames (VCF unknown)
+% VCFGENOSAMPLENAMES(1) vcfgenosamplenames (vcflib) | vcfgenosamplenames (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,13 +7,34 @@
 
 # SYNOPSIS
 
-
+**vcfgenosamplenames**
 
 # DESCRIPTION
 
+Get samplenames
 
 
 
+
+
+# EXAMPLES
+
+```
+
+Example:
+
+vcfsamplenames samples/sample.vcf
+
+NA00001
+NA00002
+NA00003
+
+
+Type: transformation
+
+      
+
+```
 
 
 

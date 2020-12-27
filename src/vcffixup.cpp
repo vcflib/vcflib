@@ -53,8 +53,9 @@ int countAlleles(Variant& var) {
 int main(int argc, char** argv) {
 
   if (argc == 1 || ((argc > 1) && strcmp(argv[1], "-h") == 0) || strcmp(argv[1], "--help") == 0) {
-        cerr << "usage: " << argv[0] << " <vcf file>" << endl
-             << "outputs a VCF stream where AC and NS have been generated for each record using sample genotypes" << endl;
+    cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
+         << "Generates a VCF stream where AC and NS have been generated for each record using sample genotypes" << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
         return 1;
     }
 
@@ -125,4 +126,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

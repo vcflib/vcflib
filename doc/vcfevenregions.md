@@ -1,4 +1,4 @@
-% VCFEVENREGIONS(1) vcfevenregions (vcflib) | vcfevenregions (VCF unknown)
+% VCFEVENREGIONS(1) vcfevenregions (vcflib) | vcfevenregions (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Generates a list of regions, e.g. chr20:10..30 using the variant density information provided in the VCF file to ensure that the regions have even numbers of variants. This can be use to reduce the variance in runtime when dividing variant detection or genotyping by genomic coordinates.
 
 
 
@@ -28,10 +28,7 @@ options:
     -l, --overlap N              The number of sites to overlap between regions.  Default 0.
     -s, --separator SEQ          Specify string to use to separate region output.  Default '-'
 
-Generates a list of regions, e.g. chr20:10..30 using the variant
-density information provided in the VCF file to ensure that the regions have
-even numbers of variants.  This can be use to reduce the variance in runtime
-when dividing variant detection or genotyping by genomic coordinates.
+Type: transformation
 
 ```
 

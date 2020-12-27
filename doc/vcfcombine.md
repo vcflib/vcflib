@@ -1,4 +1,4 @@
-% VCFCOMBINE(1) vcfcombine (vcflib) | vcfcombine (VCF unknown)
+% VCFCOMBINE(1) vcfcombine (vcflib) | vcfcombine (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -24,6 +24,8 @@ options:
     -h --help           This text.
     -v --version        Print version.
     -r --region REGION  A region specifier of the form chrN:x-y to bound the merge
+
+Type: transformation
 
 ```
 

@@ -1,4 +1,4 @@
-% VCFCOUNTALLELES(1) vcfcountalleles (vcflib) | vcfcountalleles (VCF unknown)
+% VCFCOUNTALLELES(1) vcfcountalleles (vcflib) | vcfcountalleles (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,13 +7,30 @@
 
 # SYNOPSIS
 
-
+**vcfcountalleles** <vcf file>
 
 # DESCRIPTION
 
+Count alleles
 
 
 
+
+
+# EXAMPLES
+
+```
+
+Example:
+
+**vcfcountalleles** samples/scaffold612.vcf
+42603
+
+Type: statistics
+
+      
+
+```
 
 
 
