@@ -1,4 +1,4 @@
-% VCFAFPATH(1) vcfafpath (vcflib) | vcfafpath (VCF unknown)
+% VCFAFPATH(1) vcfafpath (vcflib) | vcfafpath (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,13 +7,44 @@
 
 # SYNOPSIS
 
-
+**vcfafpath** <vcf file>
 
 # DESCRIPTION
 
+Display genotype paths
 
 
 
+
+
+# EXAMPLES
+
+```
+
+Example:
+
+    **vcfafpath** samples/scaffold612.vcf
+
+```
+
+T -> A
+A -> G
+T -> C
+C -> A
+C -> T
+A -> G
+T -> C
+G -> C
+C -> CAGA
+A -> G
+```
+
+
+Type: transformation
+
+      
+
+```
 
 
 

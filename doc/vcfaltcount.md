@@ -1,4 +1,4 @@
-% VCFALTCOUNT(1) vcfaltcount (vcflib) | vcfaltcount (VCF unknown)
+% VCFALTCOUNT(1) vcfaltcount (vcflib) | vcfaltcount (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-**vcfaltcount** <vcf file> count the number of alternate alleles in all records in the vcf file
+**vcfaltcount** <vcf file>
 
 # DESCRIPTION
 
+count the number of alternate alleles in all records in the vcf file
 
+
+
+# OPTIONS
+
+```
+
+
+Type: statistics
+
+```
 
 
 

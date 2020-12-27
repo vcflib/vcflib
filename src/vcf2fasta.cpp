@@ -71,13 +71,14 @@ public:
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [file]" << endl
          << endl
+         << "Generates sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]." << endl
+         << "Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined." << endl
          << "options:" << endl
          << "    -f, --reference REF     Use this reference when decomposing samples." << endl
          << "    -p, --prefix PREFIX     Affix this output prefix to each file, none by default" << endl
          << "    -P, --default-ploidy N  Set a default ploidy for samples which do not have information in the first record (2)." << endl
-         << endl
-         << "Outputs sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]." << endl
-         << "Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined." << endl;
+         << endl ;
+    cerr << endl << "Type: transformation" << endl << endl;
         //<< "Impossible regions of haplotypes are noted with an error message.  The corresponding" << endl
         //<< "regions of the output FASTA files will be marked as N." << endl
     exit(0);
@@ -176,7 +177,7 @@ void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& 
                 if( *g == NULL_ALLELE ){
                     if( nullAlleleString == "" ){
                         cerr << "empty genotype call for sample " << *s << " at " << var.sequenceName << ":" << var.position << endl;
-                        cerr << "use -n option to set value to output for missing calls" << endl; 
+                        cerr << "use -n option to set value to output for missing calls" << endl;
                         exit(1);
                     }else{
                         outputs[sample].at(i)->write(nullAlleleString);
@@ -289,4 +290,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

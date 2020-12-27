@@ -1,4 +1,4 @@
-% VCFCAT(1) vcfcat (vcflib) | vcfcat (VCF unknown)
+% VCFCAT(1) vcfcat (vcflib) | vcfcat (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfcat** [file1] [file2] ... [fileN]
 
 # DESCRIPTION
 
-could not open -h
+Concatenates VCF files
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+      
+
+```
 
 
 

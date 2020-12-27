@@ -1,4 +1,4 @@
-% VCFCHECK(1) vcfcheck (vcflib) | vcfcheck (VCF unknown)
+% VCFCHECK(1) vcfcheck (vcflib) | vcfcheck (VCF metrics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Verifies that the VCF REF field matches the reference as described.
 
 
 
@@ -26,7 +26,8 @@ options:
     -h, --help       Print this message.
     -v, --version    Print version.
 
-Verifies that the VCF REF field matches the reference as described.
+
+Type: metrics
 
 ```
 

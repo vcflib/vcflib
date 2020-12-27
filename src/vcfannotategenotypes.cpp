@@ -20,7 +20,7 @@ void annotateWithBlankGenotypes(Variant& var, string& annotationTag) {
 
     var.addFormatField(annotationTag);
 
-    map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
+    map<string, map<string, vector<string> > >::iterator s     = var.samples.begin();
     map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
 
     for (; s != sEnd; ++s) {
@@ -34,7 +34,7 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
 
     varA.addFormatField(annotationTag);
 
-    map<string, map<string, vector<string> > >::iterator s     = varA.samples.begin(); 
+    map<string, map<string, vector<string> > >::iterator s     = varA.samples.begin();
     map<string, map<string, vector<string> > >::iterator sEnd  = varA.samples.end();
 
     map<string, int> varAAlleleInts;
@@ -64,7 +64,7 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
             map<string, vector<string> >& other = o->second;
             string& otherGenotype = other["GT"].front();
             // XXX this must compare the genotypes in the two files
-           
+
             if (otherGenotype.find("|") != string::npos) {
               vector<int> gtB = decomposePhasedGenotype(otherGenotype);
               vector<int> gtnew;
@@ -99,12 +99,13 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
 int main(int argc, char** argv) {
 
     if (argc != 4) {
-        cerr << "usage: " << argv[0] << " <annotation-tag> <vcf file> <vcf file>" << endl
-             << "annotates genotypes in the first file with genotypes in the second" << endl
-             << "adding the genotype as another flag to each sample filed in the first file." << endl
-             << "annotation-tag is the name of the sample flag which is added to store the annotation." << endl
-             << "also adds a 'has_variant' flag for sites where the second file has a variant." << endl;
-        return 1;
+      cerr << "usage: " << argv[0] << " <annotation-tag> <vcf file> <vcf file>" << endl << endl
+           << "annotates genotypes in the first file with genotypes in the second" << endl
+           << "adding the genotype as another flag to each sample filed in the first file." << endl
+           << "annotation-tag is the name of the sample flag which is added to store the annotation." << endl
+           << "also adds a 'has_variant' flag for sites where the second file has a variant." << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
+      return 1;
     }
 
     string annotag = argv[1];
@@ -141,7 +142,7 @@ int main(int argc, char** argv) {
     // step forward, annotating each genotype record with an empty genotype
     // when the two match, iterate through the genotypes from the first file
     // and get the genotypes reported in the second file
-    
+
     variantFileA.getNextVariant(varA);
     variantFileB.getNextVariant(varB);
 
@@ -166,8 +167,8 @@ int main(int argc, char** argv) {
             variantFileB.getNextVariant(varB);
         }
 
-		// if A is not done- and A is less than B, read A.  
-		// should also read if variant B is done. 
+		// if A is not done- and A is less than B, read A.
+		// should also read if variant B is done.
         if (!variantFileA.done()
             && (varA.sequenceName != varB.sequenceName
                 || (varA.sequenceName == varB.sequenceName && varA.position < varB.position)
@@ -209,14 +210,14 @@ int main(int argc, char** argv) {
         if (!hasMultipleAlts && (varsA.size() > 1 || varsB.size() > 1)) {
 
             map<pair<string, string>, Variant> varsAParsed;
-            map<pair<string, string>, Variant> varsBParsed;	
+            map<pair<string, string>, Variant> varsBParsed;
             for (vector<Variant>::iterator v = varsA.begin(); v != varsA.end(); ++v) {
                 varsAParsed[make_pair(v->ref, v->alt.front())] = *v;
             }
             for (vector<Variant>::iterator v = varsB.begin(); v != varsB.end(); ++v) {
                 varsBParsed[make_pair(v->ref, v->alt.front())] = *v;
             }
-	    
+
             for (map<pair<string, string>, Variant>::iterator vs = varsAParsed.begin(); vs != varsAParsed.end(); ++vs) {
                 Variant& varA = vs->second;
                 annotateWithBlankGenotypes(varA, annotag);
@@ -250,4 +251,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

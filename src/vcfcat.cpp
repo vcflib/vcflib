@@ -13,10 +13,23 @@ using namespace std;
 using namespace vcflib;
 
 int main(int argc, char** argv) {
+  if (argc == 2) {
+    string h_flag = argv[1];
+
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << R"(
+usage: vcfcat [file1] [file2] ... [fileN]
+
+Concatenates VCF files
+
+Type: transformation
+
+      )";
+    }
+    exit(1);
+  }
 
     if (argc == 1) {
-        cout << "usage: " << argv[0] << " [file1] [file2] ... [fileN]" << endl
-             << "Concatenates VCF files." << endl;
         return 0;
     } else {
         for (int i = 1; i < argc; ++i) {
@@ -40,4 +53,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

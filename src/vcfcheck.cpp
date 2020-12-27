@@ -19,15 +19,15 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "options:" << endl 
+         << "Verifies that the VCF REF field matches the reference as described." << endl
+         << "options:" << endl
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
          << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
 	 << "    -h, --help       Print this message." << endl
 	 << "    -v, --version    Print version." << endl
-         << endl
-         << "Verifies that the VCF REF field matches the reference as described." << endl
          << endl;
+      cerr << endl << "Type: metrics" << endl << endl;
     exit(0);
 }
 
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
         /* Detect the end of the options. */
         if (c == -1)
             break;
- 
+
         switch (c)
         {
         case 0:
@@ -159,4 +159,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

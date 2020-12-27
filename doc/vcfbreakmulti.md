@@ -1,4 +1,4 @@
-% VCFBREAKMULTI(1) vcfbreakmulti (vcflib) | vcfbreakmulti (VCF unknown)
+% VCFBREAKMULTI(1) vcfbreakmulti (vcflib) | vcfbreakmulti (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -12,6 +12,17 @@
 # DESCRIPTION
 
 If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields.
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

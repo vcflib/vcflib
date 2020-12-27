@@ -1,4 +1,4 @@
-% VCFCLASSIFY(1) vcfclassify (vcflib) | vcfclassify (VCF unknown)
+% VCFCLASSIFY(1) vcfclassify (vcflib) | vcfclassify (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfclassify** <vcf file>
 
 # DESCRIPTION
 
-could not open -h
+Creates a new VCF where each variant is tagged by allele class: snp, ts/tv, indel, mnp
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+      
+
+```
 
 
 

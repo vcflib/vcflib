@@ -20,15 +20,15 @@ require 'erb'
 require 'date'
 require 'open3'
 
-# Add with cerr << endl << "Type: statistics" << endl << endl;
-# Add with cerr << endl << "Type: transformation" << endl << endl;
+# cerr << endl << "Type: statistics" << endl << endl;
+# cerr << endl << "Type: transformation" << endl << endl;
 TYPES = ["filter","transformation","statistics","metrics","phenotype","genotype"]
 
 =begin
-  if (argc == 2) {
-    string h_flag = argv[1];
 
-    if (argc == 2 && (h_flag == "-h" || h_flag == "--help")) {
+if (argc == 2) {
+  string h_flag = argv[1];
+  if (h_flag == "-h" || h_flag == "--help") {
       cerr << R"(
 Generate a random VCF file
 

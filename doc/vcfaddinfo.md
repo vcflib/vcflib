@@ -1,4 +1,4 @@
-% VCFADDINFO(1) vcfaddinfo (vcflib) | vcfaddinfo (VCF unknown)
+% VCFADDINFO(1) vcfaddinfo (vcflib) | vcfaddinfo (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-**vcfaddinfo** <vcf file> <vcf file> Adds info fields from the second file which are not present in the first vcf file.
+**vcfaddinfo** <vcf file> <vcf file>
 
 # DESCRIPTION
 
+Adds info fields from the second file which are not present in the first vcf file.
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

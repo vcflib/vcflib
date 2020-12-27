@@ -18,7 +18,7 @@ void printSummary(char** argv) {
        << "Converts stdin or given VCF file to tab-delimited format, using null string to replace empty values in the table." << endl
        << "Specifying -g will output one line per sample with genotype information." << endl
        << "When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index" << endl;
-
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(1);
 }
 

@@ -1,4 +1,4 @@
-% VCFANNOTATE(1) vcfannotate (vcflib) | vcfannotate (VCF unknown)
+% VCFANNOTATE(1) vcfannotate (vcflib) | vcfannotate (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Intersect the records in the VCF file with targets provided in a BED file. Intersections are done on the reference sequences in the VCF file. If no VCF filename is specified on the command line (last argument) the VCF read from stdin.
 
 
 
@@ -19,15 +19,13 @@
 
 ```
 
+
 options:
     -b, --bed   use annotations provided by this BED file
     -k, --key   use this INFO field key for the annotations
     -d, --default  use this INFO field key for records without annotations
 
-Intersect the records in the VCF file with targets provided in a BED file.
-Intersections are done on the reference sequences in the VCF file.
-If no VCF filename is specified on the command line (last argument) the VCF
-read from stdin.
+Type: transformation
 
 ```
 

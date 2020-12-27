@@ -27,6 +27,7 @@ void printSummary(char** argv) {
 	 << endl
 	 << "If multiple alleles are specified in a single record, break the record into" << endl
 	 << "multiple lines, preserving allele-specific INFO fields." << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -120,4 +121,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

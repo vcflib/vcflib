@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-
+**vcfcleancomplex** <vcf file>
 
 # DESCRIPTION
 
-could not open -h
+Generate a VCF stream in which 'long' non-complexalleles have their position corrected. assumes that VCF records can't overlap 5'->3'
 
 
 

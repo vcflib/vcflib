@@ -1,4 +1,4 @@
-% VCF2FASTA(1) vcf2fasta (vcflib) | vcf2fasta (VCF unknown)
+% VCF2FASTA(1) vcf2fasta (vcflib) | vcf2fasta (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Generates sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]. Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined.
 
 
 
@@ -24,8 +24,8 @@ options:
     -p, --prefix PREFIX     Affix this output prefix to each file, none by default
     -P, --default-ploidy N  Set a default ploidy for samples which do not have information in the first record (2).
 
-Outputs sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy].
-Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined.
+
+Type: transformation
 
 ```
 

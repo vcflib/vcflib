@@ -1,4 +1,4 @@
-% VCFANNOTATEGENOTYPES(1) vcfannotategenotypes (vcflib) | vcfannotategenotypes (VCF unknown)
+% VCFANNOTATEGENOTYPES(1) vcfannotategenotypes (vcflib) | vcfannotategenotypes (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-**vcfannotategenotypes** <annotation-tag> <vcf file> <vcf file> annotates genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant.
+**vcfannotategenotypes** <annotation-tag> <vcf file> <vcf file>
 
 # DESCRIPTION
 
+annotates genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant.
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

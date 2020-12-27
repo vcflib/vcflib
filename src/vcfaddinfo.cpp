@@ -28,9 +28,10 @@ void addInfo(Variant& varA, Variant& varB) {
 int main(int argc, char** argv) {
 
     if (argc != 3) {
-        cerr << "usage: " << argv[0] << " <vcf file> <vcf file>" << endl
-             << "Adds info fields from the second file which are not present in the first vcf file." << endl;
-        return 1;
+      cerr << "usage: " << argv[0] << " <vcf file> <vcf file>" << endl << endl
+           << "Adds info fields from the second file which are not present in the first vcf file." << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
+      return 1;
     }
 
     string filenameA = argv[1];
@@ -66,12 +67,12 @@ int main(int argc, char** argv) {
     // step forward, annotating each genotype record with an empty genotype
     // when the two match, iterate through the genotypes from the first file
     // and get the genotypes reported in the second file
-    
+
     variantFileA.getNextVariant(varA);
     variantFileB.getNextVariant(varB);
-    
+
     variantFileA.header = unionInfoHeaderLines(variantFileA.header, variantFileB.header);
-    
+
     cout << variantFileA.header << endl;
 
     do {
@@ -104,7 +105,7 @@ int main(int argc, char** argv) {
             variantFileA.getNextVariant(varA);
             variantFileB.getNextVariant(varB);
         }
-        
+
     } while (!variantFileA.done() && !variantFileB.done());
 
     if (!variantFileA.done()) {
@@ -117,4 +118,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

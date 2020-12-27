@@ -19,9 +19,10 @@ using namespace vcflib;
 int main(int argc, char** argv) {
 
     if (argc != 2) {
-        cerr << "usage: " << argv[0] << " <vcf file>" << endl
-             << "count the number of alternate alleles in all records in the vcf file" << endl;
-        return 1;
+      cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
+           << "count the number of alternate alleles in all records in the vcf file" << endl;
+      cerr << endl << "Type: statistics" << endl << endl;
+      return 1;
     }
 
     string filename = argv[1];
@@ -56,4 +57,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-
