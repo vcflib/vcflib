@@ -22,7 +22,7 @@ require 'open3'
 
 # cerr << endl << "Type: statistics" << endl << endl;
 # cerr << endl << "Type: transformation" << endl << endl;
-TYPES = ["filter","transformation","statistics","metrics","phenotype","genotype"]
+TYPES = ["filter","metrics","phenotype","genotype","transformation","statistics"]
 
 =begin
 
@@ -48,17 +48,27 @@ Type: statistics
 
 =end
 
+
 VERSION=`cat ./VERSION`.strip
 template = ARGV.shift
+is_man = false # creating man pages?
+if template == "--man"
+  is_man = true
+  template = ARGV.shift
+end
 create_index = false
 if template == "--index"
   create_index = true
   template = ARGV.shift
+  index = []
 end
 search = ARGV.shift
 
 bindir = './build'
 $stderr.print("--- Parsing the bin files in #{bindir} for #{VERSION}\n")
+
+d = DateTime.now
+year = d.year
 
 Dir.glob(bindir+'/*').each do|bin|
   if !File.directory?(bin) and File.executable?(bin)
@@ -130,7 +140,29 @@ Dir.glob(bindir+'/*').each do|bin|
       descr << l
     end
 
-    body = rest.drop(descr.size).join("\n")
+    if descr == []
+      lineno = 0
+      rr = rest.reverse
+      rr.each_with_index do | l,i |
+        if l != "" and l !~ /^Type/i
+          lineno = i
+          break
+        end
+      end
+      rr = rr[lineno..-1]
+      rr.each do | l |
+        if descr.length and l == "" or l =~ /^\s/
+          descr = descr.reverse
+          break
+        end
+        descr << l
+      end
+      rest = rr.drop(descr.size).reverse
+    else
+      rest = rest.drop(descr.size)
+    end
+
+    body = rest.join("\n")
     has_options = true if body != ""
     usage = usage.join(" ").gsub(/#{VERSION}\s+/,"")
     usage = usage.gsub(/usage:\s+/i,"")
@@ -148,16 +180,91 @@ Dir.glob(bindir+'/*').each do|bin|
     # print("TYPE:",type,"\n")
     # print("BODY:",body,"\n")
 
-    d = DateTime.now
+    if create_index
+      rec = {
+        cmd: cmd,
+        type: type,
+        descr: descr
+      }
+      index << rec
+    else
+      b = binding
+      renderer = ERB.new(File.read(template))
 
-    year = d.year
-
-    b = binding
-    renderer = ERB.new(File.read(template))
-
-    File.open("./doc/#{cmd}.md","w") { |f|
-      f.print renderer.result(b)
-    }
-
+      File.open("./doc/#{cmd}.md","w") { |f|
+        f.print renderer.result(b)
+      }
+    end
   end
+end
+if create_index
+  require 'ostruct'
+
+  renderer = ERB.new(File.read("./test/scripts/index-item.erb"))
+  File.open("./doc/vcflib.md","w") { |f|
+    f.print <<HEADER
+% vcflib(1) vcflib | vcfilb (index)
+% Erik Garrison and vcflib contributors
+
+# NAME
+
+**vcflib** index
+
+# DESCRIPTION
+
+vcflib contains tools and libraries for dealing with the Variant Call
+Format (VCF) which is a flat-file, tab-delimited textual format
+intended to describe reference-indexed variations between
+individuals.
+
+VCF provides a common interchange format for the description of
+variation in individuals and populations of samples, and has become
+the defacto standard reporting format for a wide array of genomic
+variant detectors.
+
+vcflib provides methods to manipulate and interpret sequence variation
+as it can be described by VCF. It is both:
+
+* an API for parsing and operating on records of genomic variation as it can be described by the VCF format,
+* and a collection of command-line utilities for executing complex manipulations on VCF files.
+
+The API itself provides a quick and extremely permissive method to
+read and write VCF files. Extensions and applications of the library
+provided in the included utilities (*.cpp) comprise the vast bulk of
+the library's utility for most users.
+
+<!--
+  Created with ./scripts/bin2md.rb --index
+-->
+
+HEADER
+    TYPES.each do | type |
+      f.print   %{
+## #{type}
+
+| #{type} command | description |
+| :-------------- | :---------- |
+}
+
+      index.each do | rec |
+        rec = OpenStruct.new(rec)
+        if rec.type == type
+          b = binding
+          f.print renderer.result(b)
+        end
+      end
+    end
+    github = "https://github.com/vcflib/vcflib"
+    f.print <<FOOTER
+
+# SOURCE CODE
+
+See the source code repository at #{github}
+
+# LICENSE
+
+Copyright 2011-#{year} (C) Erik Garrison and vcflib contributors. MIT licensed.
+
+FOOTER
+  }
 end

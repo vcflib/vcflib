@@ -10,12 +10,15 @@
 \f[B]segmentFst\f[R] -s 0.7 -f wcFst.output.txt
 .SH DESCRIPTION
 .PP
-Creates genomic segments (bed file) for regions with high wcFst
+\f[B]segmentFst\f[R] creates genomic segments (bed file) for regions
+with high wcFst
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
+
+**segmentFst** provides a way to find continious regions with high Fst values.  It takes the output of wcFst and produces a BED file.  These high Fst region can be permutated with \[aq]permuteGPATwindow\[aq]
 Output : 8 columns :                 
      1. Seqid                        
      2. Start (zero based)           
@@ -40,6 +43,9 @@ Success
 .TP
 .B \f[B]not 0\f[R]
 Failure
+.SH SEE ALSO
+.PP
+\f[B]vcflib\f[R](1)
 .SH OTHER
 .SH LICENSE
 .PP

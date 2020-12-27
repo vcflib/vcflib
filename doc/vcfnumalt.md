@@ -1,4 +1,4 @@
-% VCFNUMALT(1) vcfnumalt (vcflib) | vcfnumalt (VCF unknown)
+% VCFNUMALT(1) vcfnumalt (vcflib) | vcfnumalt (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-
+**vcfnumalt** <vcf file>
 
 # DESCRIPTION
 
-could not open -h
+outputs a VCF stream where NUMALT has been generated for each record using sample genotypes
 
 
 
@@ -24,6 +24,14 @@ could not open -h
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

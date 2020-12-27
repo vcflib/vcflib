@@ -70,6 +70,8 @@ public:
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
+         << "Prints statistics about variants in the input VCF file." << endl << endl
+
          << "    -r, --region          specify a region on which to target the stats, requires a BGZF" << endl
          << "                          compressed file which has been indexed with tabix.  any number of" << endl
          << "                          regions may be specified." << endl
@@ -81,8 +83,9 @@ void printSummary(char** argv) {
          << "    -x, --mismatch-score N       mismatch score for SW algorithm" << endl
          << "    -o, --gap-open-penalty N     gap open penalty for SW algorithm" << endl
          << "    -e, --gap-extend-penalty N   gap extension penalty for SW algorithm" << endl
-         << endl
-         << "Prints statistics about variants in the input VCF file." << endl;
+         << endl;
+    cerr << endl << "Type: statistics" << endl << endl;
+    exit(1);
 }
 
 
@@ -128,7 +131,7 @@ int main(int argc, char** argv) {
         /* Detect the end of the options. */
         if (c == -1)
             break;
- 
+
         switch (c)
         {
         case 0:
@@ -145,15 +148,15 @@ int main(int argc, char** argv) {
             printSummary(argv);
             exit(0);
             break;
-		
+
 	    case 'r':
             regions.push_back(optarg);
             break;
-		
+
 	    case 'l':
             lengthFrequency = false;
             break;
-		
+
 	    case 'a':
             addTags = true;
             break;
@@ -177,7 +180,7 @@ int main(int argc, char** argv) {
 	    case 'e':
             gapExtendPenalty = atof(optarg);
 	        break;
-		
+
 	    default:
             abort ();
         }
@@ -266,7 +269,7 @@ int main(int argc, char** argv) {
             } else {
                 ++biallelics;
             }
-            map<string, vector<VariantAllele> > alternates 
+            map<string, vector<VariantAllele> > alternates
 	      = var.parsedAlternates(includePreviousBaseForIndels,
 				     useMNPs,
 				     useEntropy,
@@ -276,9 +279,9 @@ int main(int argc, char** argv) {
 				     gapExtendPenalty);
 
             map<VariantAllele, vector<string> > uniqueVariants;
-	    
+
             vector<string> cigars;
-	    
+
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                 string& alternate = *a;
                 if (addTags)
@@ -578,4 +581,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

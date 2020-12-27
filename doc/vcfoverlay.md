@@ -1,4 +1,4 @@
-% VCFOVERLAY(1) vcfoverlay (vcflib) | vcfoverlay (VCF unknown)
+% VCFOVERLAY(1) vcfoverlay (vcflib) | vcfoverlay (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Overlays records in the input vcf files in the order in which they appear.
 
 
 
@@ -23,7 +23,6 @@ options:
     -h, --help       this dialog
     -v, --version    prints version
 
-Overlays records in the input vcf files in the order in which they appear.
 
 ```
 
@@ -38,6 +37,14 @@ Overlays records in the input vcf files in the order in which they appear.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

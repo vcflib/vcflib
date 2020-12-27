@@ -1,4 +1,4 @@
-% VCFINFOSUMMARIZE(1) vcfinfosummarize (vcflib) | vcfinfosummarize (VCF unknown)
+% VCFINFOSUMMARIZE(1) vcfinfosummarize (vcflib) | vcfinfosummarize (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO.
 
 
 
@@ -29,8 +29,6 @@ options:
     -h, --help          Print this message
     -v, --version       Print version
 
-Take annotations given in the per-sample fields and add the mean, median, min, or max
-to the site-level INFO.
 
 ```
 
@@ -45,6 +43,14 @@ to the site-level INFO.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

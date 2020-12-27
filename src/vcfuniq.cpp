@@ -14,6 +14,25 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
+  if (argc == 2) {
+    string h_flag = argv[1];
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << R"(
+
+Usage: vcfuniq <vcf file>
+
+List unique genotypes.  Like GNU uniq, but for VCF records.  Remove
+records which have the same positon, ref, and alt as the previous
+record.
+
+Type: filter
+
+      )";
+      exit(1);
+    }
+  }
+
+
     VariantCallFile variantFile;
 
     if (argc > 1) {
@@ -55,4 +74,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

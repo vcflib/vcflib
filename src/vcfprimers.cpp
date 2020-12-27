@@ -18,12 +18,13 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "options:" << endl 
+         << "For each VCF record, extract the flanking sequences, and write them to stdout as FASTA" << endl
+         << "records suitable for alignment." << endl
+         << "options:" << endl
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -l, --primer-length    The length of the primer sequences on each side of the variant" << endl
          << endl
-         << "For each VCF record, extract the flanking sequences, and write them to stdout as FASTA" << endl
-         << "records suitable for alignment.  This tool is intended for use in designing validation" << endl
+         << "This tool is intended for use in designing validation" << endl
          << "experiments.  Primers extracted which would flank all of the alleles at multi-allelic" << endl
          << "sites.  The name of the FASTA \"reads\" indicates the VCF record which they apply to." << endl
          << "The form is >CHROM_POS_LEFT for the 3' primer and >CHROM_POS_RIGHT for the 5' primer," << endl
@@ -34,6 +35,7 @@ void printSummary(char** argv) {
          << ">20_233255_RIGHT" << endl
          << "ACTCAGTTGATTCCATACCTTTGCCATCATGAATCATGTTGTAATAAACA" << endl
          << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -67,7 +69,7 @@ int main(int argc, char** argv) {
       /* Detect the end of the options. */
           if (c == -1)
             break;
- 
+
           switch (c)
             {
             case 0:
@@ -87,7 +89,7 @@ int main(int argc, char** argv) {
           case 'l':
             primerLength = atoi(optarg);
             break;
- 
+
           case 'h':
             printSummary(argv);
             exit(0);
@@ -98,7 +100,7 @@ int main(int argc, char** argv) {
             printSummary(argv);
             exit(1);
             break;
- 
+
           default:
             abort ();
           }
@@ -146,4 +148,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

@@ -1,4 +1,4 @@
-% VCFKEEPSAMPLES(1) vcfkeepsamples (vcflib) | vcfkeepsamples (VCF unknown)
+% VCFKEEPSAMPLES(1) vcfkeepsamples (vcflib) | vcfkeepsamples (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+outputs each record in the vcf file, removing samples not listed on the command line
 
 
 
@@ -24,6 +24,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

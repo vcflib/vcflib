@@ -54,7 +54,21 @@ int main(int argc, char** argv) {
 
   if (argc == 1 || ((argc > 1) && strcmp(argv[1], "-h") == 0) || strcmp(argv[1], "--help") == 0) {
     cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
-         << "Generates a VCF stream where AC and NS have been generated for each record using sample genotypes" << endl;
+         << "Generates a VCF stream where AC and NS have been generated for each record using sample genotypes" << endl << endl;
+      cerr << R"(
+
+Count the allele frequencies across alleles present in each record in the VCF file. (Similar to vcftools --freq.)
+
+Uses genotypes from the VCF file to correct AC (alternate allele count), AF
+(alternate allele frequency), NS (number of called), in the VCF records.  For
+example:
+
+    % vcfkeepsamples file.vcf NA12878 | vcffixup - | vcffilter -f "AC > 0"
+
+Would downsample file.vcf to only NA12878, removing sites for which the sample
+was not called as polymorphic.
+)";
+
     cerr << endl << "Type: transformation" << endl << endl;
         return 1;
     }

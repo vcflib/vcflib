@@ -1,4 +1,4 @@
-% VCFSAMPLEDIFF(1) vcfsamplediff (vcflib) | vcfsamplediff (VCF unknown)
+% VCFSAMPLEDIFF(1) vcfsamplediff (vcflib) | vcfsamplediff (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,11 @@
 
 # SYNOPSIS
 
-**vcfsamplediff** [options] <tag> <sample> <sample> [ <sample> ... ] <vcf file> Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples.
+**vcfsamplediff** [options] <tag> <sample> <sample> [ <sample> ... ] <vcf file>
 
 # DESCRIPTION
 
-
+Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples.
 
 
 
@@ -19,8 +19,12 @@
 
 ```
 
+
 options:
     -s --strict     Require that no observations in the germline support the somatic alternate.
+
+
+Type: transformation
 
 ```
 
@@ -35,6 +39,14 @@ options:
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

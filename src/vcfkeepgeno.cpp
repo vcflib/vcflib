@@ -19,13 +19,17 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
-    if (argc < 3) {
-        cerr << "usage: " << argv[0] << " <vcf file> [FIELD1] [FIELD2] ..." << endl
-             << "outputs each record in the vcf file, removing FORMAT fields not listed "
-	     << "on the command line from sample specifications in the output"
-	     << endl;
-        return 1;
+  if (argc == 2) {
+    string h_flag = argv[1];
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << "usage: " << argv[0] << " <vcf file> [FIELD1] [FIELD2] ..." << endl << endl
+           << "outputs each record in the vcf file, removing FORMAT fields not listed "
+           << "on the command line from sample specifications in the output"
+           << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
+      return 1;
     }
+  }
 
     string filename = argv[1];
 
@@ -58,7 +62,7 @@ int main(int argc, char** argv) {
 
     // write the header
     cout << variantFile.header << endl;
- 
+
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         var.format = newFormat;
@@ -68,4 +72,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

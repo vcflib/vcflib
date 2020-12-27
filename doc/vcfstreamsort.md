@@ -1,4 +1,4 @@
-% VCFSTREAMSORT(1) vcfstreamsort (vcflib) | vcfstreamsort (VCF unknown)
+% VCFSTREAMSORT(1) vcfstreamsort (vcflib) | vcfstreamsort (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-Sorts the input (either stdin or file) using a streaming sort algorithm.
+Sorts the input (either stdin or file) using a streaming sort algorithm. Guarantees that the positional order is correct provided out-of-order variants are no more than 100 positions in the VCF file apart.
 
 
 
@@ -24,6 +24,8 @@ options:
     -h, --help             this dialog
     -w, --window N         number of sites to sort (default 10000)
     -a, --all              load all sites and then sort in memory
+
+Type: transformation
 
 ```
 
@@ -38,6 +40,14 @@ options:
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

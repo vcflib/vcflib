@@ -10,30 +10,36 @@
 \f[B]meltEHH\f[R] \[en]target 0,1,2,3,4,5,6,7 \[en]pos 10 \[en]file
 my.phased.vcf \ \[en]region chr1:1-1000 > STDOUT 2> STDERR
 .SH DESCRIPTION
-.PP
-\f[B]meltEHH\f[R] provides the data to plot extended haplotype
-homozygosity (EHH) curves.
 .SH OPTIONS
 .IP
 .nf
 \f[C]
 
 
-Output : 4 columns :                  
-     1. seqid                         
-     2. position                      
-     3. EHH                           
-     4. ref or alt [0 == ref]         
+ **meltEHH** provides the data to plot extended haplotype homozygosity
+(EHH) curves and produces the data to generate the following plot:
+<img src=\[dq]https://github.com/vcflib/vcflib/blob/master/examples/example-ehh.png?raw=true\[dq] alt=\[dq]\[dq] width=400>
+
+
+
+     **meltEHH** provides the data to plot EHH curves.
+Output : 4 columns :
+     1. seqid
+     2. position
+     3. EHH
+     4. ref or alt [0 == ref]
 Params:
        required: t,target   <STRING>  A zero base comma separated list of target
-                                     individuals corresponding  to VCF columns  
-       required: r,region   <STRING>  A tabix compliant genomic range           
-                                     format: \[dq]seqid:start-end\[dq] or \[dq]seqid\[dq]  
-       required: f,file     <STRING>  Proper formatted and phased VCF.          
-       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP   
-       required: p,position <INT>     Variant position to melt.                 
-       optional: a,af       <DOUBLE>  Alternative  alleles with frequencies less   
-                                     than [0.05] are skipped.                  
+                                     individuals corresponding to VCF columns
+       required: r,region   <STRING>  A tabix compliant genomic range
+                                     format: \[dq]seqid:start-end\[dq] or \[dq]seqid\[dq]
+       required: f,file     <STRING>  Proper formatted and phased VCF.
+       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP
+       required: p,position <INT>     Variant position to melt.
+       optional: a,af       <DOUBLE>  Alternative alleles with frequencies less
+                                     than [0.05] are skipped.
+
+
 
 Type: statistics
 
@@ -47,6 +53,9 @@ Success
 .TP
 .B \f[B]not 0\f[R]
 Failure
+.SH SEE ALSO
+.PP
+\f[B]vcflib\f[R](1)
 .SH OTHER
 .SH LICENSE
 .PP

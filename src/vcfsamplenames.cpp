@@ -13,6 +13,20 @@ using namespace std;
 using namespace vcflib;
 
 int main(int argc, char** argv) {
+if (argc == 2) {
+  string h_flag = argv[1];
+  if (h_flag == "-h" || h_flag == "--help") {
+      cerr << R"(
+List sample names
+
+Usage: vcfsamplenames
+
+Type: transformation
+
+      )";
+      exit(1);
+    }
+  }
 
     VariantCallFile variantFile;
 
@@ -35,4 +49,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

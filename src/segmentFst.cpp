@@ -73,7 +73,8 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "      Creates genomic segments (bed file) for regions with high wcFst  " << endl;
+  cerr << "segmentFst creates genomic segments (bed file) for regions with high wcFst" << endl << endl ;
+  cerr << "segmentFst provides a way to find continious regions with high Fst values.  It takes the output of wcFst and produces a BED file.  These high Fst region can be permutated with 'permuteGPATwindow'" << endl ;
 
   cerr << "Output : 8 columns :                 "    << endl;
   cerr << "     1. Seqid                        "    << endl;

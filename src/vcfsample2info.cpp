@@ -20,7 +20,7 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "options:" << endl 
+         << "options:" << endl
          << "    -f, --field         Add information about this field in samples to INFO column" << endl
          << "    -i, --info          Store the computed statistic in this info field" << endl
          << "    -a, --average       Take the mean of samples for field (default)" << endl
@@ -31,6 +31,7 @@ void printSummary(char** argv) {
          << "Take annotations given in the per-sample fields and add the mean, median, min, or max" << endl
          << "to the site-level INFO." << endl
          << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -54,7 +55,7 @@ int main(int argc, char** argv) {
     int c;
     string sampleField;
     string infoField;
-    StatType statType = MEAN; 
+    StatType statType = MEAN;
 
     if (argc == 1)
         printSummary(argv);
@@ -81,7 +82,7 @@ int main(int argc, char** argv) {
         /* Detect the end of the options. */
         if (c == -1)
             break;
- 
+
         switch (c)
         {
         case 0:
@@ -101,7 +102,7 @@ int main(int argc, char** argv) {
         case 'i':
             infoField = optarg;
             break;
- 
+
         case 'a':
             statType = MEAN;
             break;
@@ -127,7 +128,7 @@ int main(int argc, char** argv) {
             printSummary(argv);
             exit(1);
             break;
- 
+
         default:
             abort ();
         }
@@ -224,4 +225,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

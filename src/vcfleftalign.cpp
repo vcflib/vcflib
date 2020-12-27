@@ -149,7 +149,7 @@ double entropy(const string& st) {
 }
 
 void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<AltAlignment>& alignments, int window) {
-    
+
     // default alignment params
     float matchScore = 10.0f;
     float mismatchScore = -9.0f;
@@ -350,18 +350,18 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
                     if (previous->sequence.at(0) == seq.at(0)
                             && FBhomopolymer(seq)
                             && FBhomopolymer(readseq)) {
-                        VCFLEFTALIGN_DEBUG("moving " << *previous << " right to " 
+                        VCFLEFTALIGN_DEBUG("moving " << *previous << " right to "
                                 << (indel.insertion ? indel.position : indel.position - previous->length) << endl);
                         previous->position = indel.insertion ? indel.position : indel.position - previous->length;
                     }
-                } 
+                }
                 else {
                     int pos = previous->position;
                     while (pos < (int) referenceSequence.length() &&
                             ((previous->insertion && pos + previous->length <= indel.position)
                             ||
                             (!previous->insertion && pos + previous->length < indel.position))
-                            && previous->sequence 
+                            && previous->sequence
                                 == referenceSequence.substr(pos + previous->length, previous->length)) {
                         pos += previous->length;
                     }
@@ -380,7 +380,7 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
     }
 
     // for each indel
-    //     if ( we're matched up to the previous insertion (or deletion) 
+    //     if ( we're matched up to the previous insertion (or deletion)
     //          and it's also an insertion or deletion )
     //         merge the indels
     //
@@ -420,7 +420,7 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
         last = *id;
         lastend = last.insertion ? last.position : (last.position + last.length);
     }
-    
+
     if (lastend < alignedLength) {
         newCigar.push_back(make_pair(alignedLength - lastend, "M"));
     }
@@ -465,7 +465,7 @@ bool stablyLeftAlign(string& alternateSequence, string referenceSequence, Cigar&
     } else {
 
         bool result = true;
-        while ((result = leftAlign(alternateSequence, cigar, referenceSequence, debug)) && --maxiterations > 0) { 
+        while ((result = leftAlign(alternateSequence, cigar, referenceSequence, debug)) && --maxiterations > 0) {
         }
 
         if (maxiterations <= 0) {
@@ -480,15 +480,31 @@ bool stablyLeftAlign(string& alternateSequence, string referenceSequence, Cigar&
 
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] [file]" << endl
-         << endl
-         << "options:" << endl
-         << "    -r, --reference FILE  Use this reference as a basis for realignment." << endl
-         << "    -w, --window N        Use a window of this many bp when left aligning (150)." << endl
-         << endl
-         << "Left-aligns variants in the specified input file or stdin.  Window size is determined" << endl
-         << "dynamically according to the entropy of the regions flanking the indel.  These must have" << endl
-         << "entropy > 1 bit/bp, or be shorter than ~5kb." << endl;
+      cerr << R"(
+
+Left-align indels and complex variants in the input using a pairwise ref/alt
+alignment followed by a heuristic, iterative left realignment process that
+shifts indel representations to their absolute leftmost (5') extent.
+
+This is
+the same procedure used in the internal left alignment in freebayes, and can be
+used when preparing VCF files for input to freebayes to decrease positional
+representation differences between the input alleles and left-realigned
+alignments.
+
+usage: vcfleftalign [options] [file]
+
+options:
+
+        -r, --reference FILE  Use this reference as a basis for realignment.
+        -w, --window N        Use a window of this many bp when left aligning (150).
+
+Left-aligns variants in the specified input file or stdin.
+Window size is determined dynamically according to the entropy of the regions flanking the indel.
+These must have entropy > 1 bit/bp, or be shorter than ~5kb.
+
+)";
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -779,7 +795,7 @@ int main(int argc, char** argv) {
         // then handle genotypes; determine the mapping between alleleic primitives and convert to phased haplotypes
         // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indecies corresponding to it
 
-        
+
 
         //for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
     }
@@ -787,4 +803,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

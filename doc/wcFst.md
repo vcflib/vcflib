@@ -1,4 +1,4 @@
-% WCFST(1) wcFst (vcflib) | wcFst (VCF unknown)
+% WCFST(1) wcFst (vcflib) | wcFst (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -34,6 +34,9 @@ required, y,type       -- argument: genotype likelihood format; genotype : GT,GL
 optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   
 optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero 
 
+Type: statistics
+
+
 ```
 
 
@@ -47,6 +50,14 @@ optional: d,deltaaf    -- argument: skip sites where the difference in allele fr
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

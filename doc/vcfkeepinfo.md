@@ -1,4 +1,4 @@
-% VCFKEEPINFO(1) vcfkeepinfo (vcflib) | vcfkeepinfo (VCF unknown)
+% VCFKEEPINFO(1) vcfkeepinfo (vcflib) | vcfkeepinfo (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+outputs each record in the vcf file, removing INFO fields not listed on the command line
 
 
 
@@ -24,6 +24,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

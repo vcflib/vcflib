@@ -37,12 +37,15 @@ vector<T> removeElems(vector<T>& a, vector<T>& b) {
 
 int main(int argc, char** argv) {
 
-    if (argc < 3) {
-        cerr << "usage: " << argv[0] << " <vcf file> [SAMPLE1] [SAMPLE2] ..." << endl
-             << "outputs each record in the vcf file, removing samples listed on the command line" << endl;
+  if (argc == 2) {
+    string h_flag = argv[1];
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << "usage: " << argv[0] << " <vcf file> [SAMPLE1] [SAMPLE2] ..." << endl << endl
+           << "outputs each record in the vcf file, removing samples listed on the command line" << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
         return 1;
     }
-
+  }
     string filename = argv[1];
 
     vector<string> samplesToRemove;
@@ -70,10 +73,10 @@ int main(int argc, char** argv) {
 
     // and restrict the output sample names in the variant to those we are keeping
     var.setOutputSampleNames(samplesToKeep);
-    
+
     // write the new header
     cout << variantFile.header << endl;
- 
+
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         cout << var << endl;
@@ -82,4 +85,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

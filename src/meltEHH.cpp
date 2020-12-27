@@ -53,30 +53,37 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "     meltEHH provides the data to plot extended haplotype homozygosity (EHH) curves. " << endl << endl;
+  cerr << "      " << endl << endl;
 
+  cerr << R"( meltEHH provides the data to plot extended haplotype homozygosity
+(EHH) curves and produces the data to generate the following plot:
+<img src="https://github.com/vcflib/vcflib/blob/master/examples/example-ehh.png?raw=true" alt="" width=400>
 
-  cerr << "Output : 4 columns :                  "    << endl;
-  cerr << "     1. seqid                         "    << endl;
-  cerr << "     2. position                      "    << endl;
-  cerr << "     3. EHH                           "    << endl;
-  cerr << "     4. ref or alt [0 == ref]         "    << endl;
+INFO: help
+INFO: description:
+     meltEHH provides the data to plot EHH curves.
+Output : 4 columns :
+     1. seqid
+     2. position
+     3. EHH
+     4. ref or alt [0 == ref]
+Usage:
+      meltEHH --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf  \
+           --region chr1:1-1000 > STDOUT 2> STDERR
 
-  cerr << "Usage:" << endl;
+Params:
+       required: t,target   <STRING>  A zero base comma separated list of target
+                                     individuals corresponding to VCF columns
+       required: r,region   <STRING>  A tabix compliant genomic range
+                                     format: "seqid:start-end" or "seqid"
+       required: f,file     <STRING>  Proper formatted and phased VCF.
+       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP
+       required: p,position <INT>     Variant position to melt.
+       optional: a,af       <DOUBLE>  Alternative alleles with frequencies less
+                                     than [0.05] are skipped.
 
-  cerr << "      meltEHH --target 0,1,2,3,4,5,6,7 --pos 10 --file my.phased.vcf  \\" << endl;
-  cerr << "           --region chr1:1-1000 > STDOUT 2> STDERR          " << endl << endl;
+)" << endl;
 
-  cerr << "Params:" << endl;
-  cerr << "       required: t,target   <STRING>  A zero base comma separated list of target" << endl;
-  cerr << "                                     individuals corresponding  to VCF columns  " << endl;
-  cerr << "       required: r,region   <STRING>  A tabix compliant genomic range           " << endl;
-  cerr << "                                     format: \"seqid:start-end\" or \"seqid\"  " << endl;
-  cerr << "       required: f,file     <STRING>  Proper formatted and phased VCF.          " << endl;
-  cerr << "       required: y,type     <STRING>  Genotype likelihood format: GT,PL,GL,GP   " << endl;
-  cerr << "       required: p,position <INT>     Variant position to melt.                 " << endl;
-  cerr << "       optional: a,af       <DOUBLE>  Alternative  alleles with frequencies less   " << endl;
-  cerr << "                                     than [0.05] are skipped.                  " << endl;
   cerr << endl << "Type: statistics" << endl << endl;
   cerr << endl;
 

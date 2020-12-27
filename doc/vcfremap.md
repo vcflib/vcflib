@@ -1,4 +1,4 @@
-% VCFREMAP(1) vcfremap (vcflib) | vcfremap (VCF unknown)
+% VCFREMAP(1) vcfremap (vcflib) | vcfremap (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+For each alternate allele, attempt to realign against the reference with lowered gap open penalty. If realignment is possible, adjust the cigar and reference/alternate alleles.
 
 
 
@@ -31,8 +31,6 @@ options:
     -R, --repeat-gap-extend N    penalize non-repeat-unit gaps in repeat sequence
     -a, --adjust-vcf TAG         supply a new cigar as TAG in the output VCF
 
-For each alternate allele, attempt to realign against the reference with lowered gap open penalty.
-If realignment is possible, adjust the cigar and reference/alternate alleles.
 
 ```
 
@@ -47,6 +45,14 @@ If realignment is possible, adjust the cigar and reference/alternate alleles.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

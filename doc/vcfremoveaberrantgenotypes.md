@@ -1,4 +1,4 @@
-% VCFREMOVEABERRANTGENOTYPES(1) vcfremoveaberrantgenotypes (vcflib) | vcfremoveaberrantgenotypes (VCF unknown)
+% VCFREMOVEABERRANTGENOTYPES(1) vcfremoveaberrantgenotypes (vcflib) | vcfremoveaberrantgenotypes (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-
+**vcfremoveaberrantgenotypes** <vcf file>
 
 # DESCRIPTION
 
-could not open -h
+strips samples which are homozygous but have observations implying heterozygosity
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 
@@ -24,6 +35,14 @@ could not open -h
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

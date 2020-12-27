@@ -1,4 +1,4 @@
-% VCFSAMPLE2INFO(1) vcfsample2info (vcflib) | vcfsample2info (VCF unknown)
+% VCFSAMPLE2INFO(1) vcfsample2info (vcflib) | vcfsample2info (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO.
 
 
 
@@ -27,8 +27,6 @@ options:
     -n, --min           Use the min
     -x, --max           Use the max
 
-Take annotations given in the per-sample fields and add the mean, median, min, or max
-to the site-level INFO.
 
 ```
 
@@ -43,6 +41,14 @@ to the site-level INFO.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

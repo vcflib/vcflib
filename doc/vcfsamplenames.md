@@ -1,4 +1,4 @@
-% VCFSAMPLENAMES(1) vcfsamplenames (vcflib) | vcfsamplenames (VCF unknown)
+% VCFSAMPLENAMES(1) vcfsamplenames (vcflib) | vcfsamplenames (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfsamplenames**
 
 # DESCRIPTION
 
+List sample names
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+      
+
+```
 
 
 
@@ -24,6 +37,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

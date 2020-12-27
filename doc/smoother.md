@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-Smoother averages a set of scores over a sliding genomic window. Smoother slides over genomic positions not the SNP indices. In other words the number of scores within a window will not be constant. The last window for each seqid can be smaller than the defined window size. Smoother automatically analyses different seqids separately.
+smoothes is a method for window smoothing many of the GPAT++ formats.
 
 
 
@@ -19,6 +19,12 @@ Smoother averages a set of scores over a sliding genomic window. Smoother slides
 
 ```
 
+
+      **smoother** averages a set of scores over a sliding genomic window.            
+      **smoother** slides over genomic positions not the SNP indices. In other words  
+      the number of scores within a window will not be constant. The last         
+      window for each seqid can be smaller than the defined window size.          
+      **smoother** automatically analyses different seqids separately.                
 Output : 4 columns :     
      1. seqid            
      2. window start     
@@ -49,6 +55,14 @@ Type: transformation
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

@@ -40,7 +40,7 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "      Summarizes genotype counts for bi-allelic SNVs and indel " << endl << endl;
+  cerr << "Generates a table of genotype counts. Summarizes genotype counts for bi-allelic SNVs and indel " << endl << endl;
 
   cerr << "INFO: output: table of genotype counts for each individual." << endl;
 

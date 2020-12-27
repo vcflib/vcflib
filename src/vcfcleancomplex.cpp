@@ -23,9 +23,11 @@ int main(int argc, char** argv) {
     string h_flag = argv[1];
     if (h_flag == "-h" || h_flag == "--help") {
       cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
+           << "Removes reference-matching sequence from complex alleles and adjusts records to reflect positional change." << endl << endl
            << "Generate a VCF stream in which 'long' non-complex"
            << "alleles have their position corrected." << endl
            << "assumes that VCF records can't overlap 5'->3'" << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
       return 1;
     }
   }

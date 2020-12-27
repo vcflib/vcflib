@@ -22,10 +22,10 @@ int main(int argc, char** argv) {
         tag = argv[1];
         if (tag == "--help" || tag == "-h") {
           cerr << "usage: " << argv[0] << " [customtagname] < [vcf file]" << endl << endl
-               << "adds a tag to each variant record which indicates the distance" << endl
+               << "Adds a tag to each variant record which indicates the distance" << endl
                << "to the nearest variant." << endl
                << "(defaults to BasesToClosestVariant if no custom tag name is given." << endl;
-          cerr << endl << "Type: transformation" << endl << endl;
+          cerr << endl << "Type: metrics" << endl << endl;
           return 1;
         }
     } else {

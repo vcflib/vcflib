@@ -22,7 +22,7 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file>]" << endl
          << endl
-         << "options:" << endl 
+         << "options:" << endl
          << "    -r, --rate RATE          base sampling probability per locus" << endl
          << "    -s, --scale-by KEY       scale sampling likelihood by this Float info field" << endl
          << "    -p, --random-seed N      use this random seed (by default read from /dev/random)" << endl
@@ -31,6 +31,8 @@ void printSummary(char** argv) {
          << "Randomly sample sites from an input VCF file, which may be provided as stdin." << endl
          << "Scale the sampling probability by the field specified in KEY.  This may be" << endl
          << "used to provide uniform sampling across allele frequencies, for instance." << endl;
+    cerr << endl << "Type: statistics" << endl << endl;
+
     exit(0);
 }
 
@@ -135,7 +137,7 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine(liness.str());
 
     cout << variantFile.header << endl;
-    
+
     // check that we can use the scaling key
     if (!scaleByKey.empty()) {
         if (variantFile.infoTypes.find(scaleByKey) == variantFile.infoTypes.end()) {

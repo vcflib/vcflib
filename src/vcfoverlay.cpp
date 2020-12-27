@@ -19,11 +19,12 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [<vcf file> ...]" << endl
          << endl
-         << "options:" << endl 
+         << "options:" << endl
          << "    -h, --help       this dialog" << endl
 	 << "    -v, --version    prints version" << endl
 	 << endl
          << "Overlays records in the input vcf files in the order in which they appear." << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
 
@@ -41,10 +42,10 @@ int main(int argc, char** argv) {
 	  {0, 0, 0, 0}
 	};
       int option_index = 0;
-      
+
       c = getopt_long (argc, argv, "hv",
 		       long_options, &option_index);
-      
+
       if (c == -1){
 	break;
       }
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
 	{
 	  printBasicVersion();
 	  exit(0);
-	} 
+	}
       case '?':
 	{
 	  printSummary(argv);
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
             cerr << "vcfoverlay encountered errors when opening " << inputFilename << endl;
         }
     }
-    
+
     cout << variantFiles.begin()->second.first->header << endl;
 
     while (!linesByPrecedence.empty()) {
@@ -116,7 +117,7 @@ int main(int argc, char** argv) {
             cout << m->second.begin()->second << endl;
         }
         linesByPrecedence[lowestChrom].erase(lowestPosition);
-        
+
         if (linesByPrecedence[lowestChrom].empty()) {
             linesByPrecedence.erase(lowestChrom);
         }
@@ -126,4 +127,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

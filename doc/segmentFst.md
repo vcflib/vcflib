@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-Creates genomic segments (bed file) for regions with high wcFst
+**segmentFst** creates genomic segments (bed file) for regions with high wcFst
 
 
 
@@ -19,6 +19,8 @@ Creates genomic segments (bed file) for regions with high wcFst
 
 ```
 
+
+**segmentFst** provides a way to find continious regions with high Fst values.  It takes the output of wcFst and produces a BED file.  These high Fst region can be permutated with 'permuteGPATwindow'
 Output : 8 columns :                 
      1. Seqid                        
      2. Start (zero based)           
@@ -48,6 +50,14 @@ Type: statistics
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

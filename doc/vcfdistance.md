@@ -1,4 +1,4 @@
-% VCFDISTANCE(1) vcfdistance (vcflib) | vcfdistance (VCF transformation)
+% VCFDISTANCE(1) vcfdistance (vcflib) | vcfdistance (VCF metrics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-adds a tag to each variant record which indicates the distance to the nearest variant. (defaults to BasesToClosestVariant if no custom tag name is given.
+Adds a tag to each variant record which indicates the distance to the nearest variant. (defaults to BasesToClosestVariant if no custom tag name is given.
 
 
 
@@ -20,7 +20,7 @@ adds a tag to each variant record which indicates the distance to the nearest va
 ```
 
 
-Type: transformation
+Type: metrics
 
 ```
 
@@ -35,6 +35,14 @@ Type: transformation
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

@@ -1,4 +1,4 @@
-% VCFRANDOMSAMPLE(1) vcfrandomsample (vcflib) | vcfrandomsample (VCF unknown)
+% VCFRANDOMSAMPLE(1) vcfrandomsample (vcflib) | vcfrandomsample (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Randomly sample sites from an input VCF file, which may be provided as stdin. Scale the sampling probability by the field specified in KEY. This may be used to provide uniform sampling across allele frequencies, for instance.
 
 
 
@@ -25,9 +25,6 @@ options:
     -p, --random-seed N      use this random seed (by default read from /dev/random)
     -q, --pseudorandom-seed  use a pseudorandom seed (by default read from /dev/random)
 
-Randomly sample sites from an input VCF file, which may be provided as stdin.
-Scale the sampling probability by the field specified in KEY.  This may be
-used to provide uniform sampling across allele frequencies, for instance.
 
 ```
 
@@ -42,6 +39,14 @@ used to provide uniform sampling across allele frequencies, for instance.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

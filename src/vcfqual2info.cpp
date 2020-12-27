@@ -17,9 +17,11 @@ int main(int argc, char** argv) {
     VariantCallFile variantFile;
 
     if (argc == 1) {
-        cerr << "usage: " << argv[0] << " [key] [vcf_file]" << endl
+      cerr << "usage: " << argv[0] << " [key] [vcf_file]" << endl << endl
              << "Puts QUAL into an info field tag keyed by [key]." << endl
-             << "The VCF file may be omitted and read from stdin." << endl;
+           << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
+
         return 1;
     }
 
@@ -50,4 +52,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

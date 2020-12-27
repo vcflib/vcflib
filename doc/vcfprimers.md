@@ -1,4 +1,4 @@
-% VCFPRIMERS(1) vcfprimers (vcflib) | vcfprimers (VCF unknown)
+% VCFPRIMERS(1) vcfprimers (vcflib) | vcfprimers (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+For each VCF record, extract the flanking sequences, and write them to stdout as FASTA records suitable for alignment.
 
 
 
@@ -23,8 +23,7 @@ options:
     -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
     -l, --primer-length    The length of the primer sequences on each side of the variant
 
-For each VCF record, extract the flanking sequences, and write them to stdout as FASTA
-records suitable for alignment.  This tool is intended for use in designing validation
+This tool is intended for use in designing validation
 experiments.  Primers extracted which would flank all of the alleles at multi-allelic
 sites.  The name of the FASTA "reads" indicates the VCF record which they apply to.
 The form is >CHROM_POS_LEFT for the 3' primer and >CHROM_POS_RIGHT for the 5' primer,
@@ -34,6 +33,9 @@ for example:
 CCATTGTATATATAGACCATAATTTCTTTATCCAATCATCTGTTGATGGA
 >20_233255_RIGHT
 ACTCAGTTGATTCCATACCTTTGCCATCATGAATCATGTTGTAATAAACA
+
+
+Type: transformation
 
 ```
 
@@ -48,6 +50,14 @@ ACTCAGTTGATTCCATACCTTTGCCATCATGAATCATGTTGTAATAAACA
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

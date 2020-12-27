@@ -20,6 +20,9 @@ General population genetic statistics for each SNP
 ```
 
 
+
+  Calculates basic population statistics at bi-allelic sites. The allele frequency is the number of non-reference alleles divided by the total number of alleles.  The expected hetrozygosity is 2*p*q, where p is the non-reference allele frequency and q is 1-p.  The observed heterozgosity is the fraction of 0/1 genotypes out of all genotypes.  The inbreeding coefficent, Fis, is the relative heterozygosity of each individual vs. compared to the target group. 
+
 Output : 9 columns :                 
      1. seqid                        
      2. position                     
@@ -51,6 +54,14 @@ Type: statistics
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

@@ -14,6 +14,38 @@ using namespace vcflib;
 
 int main(int argc, char** argv) {
 
+  if (argc == 2) {
+    string h_flag = argv[1];
+    if (h_flag == "-h" || h_flag == "--help") {
+      cerr << R"(
+Summarize by site
+
+Usage: vcfsitesummarize <vcf file>
+
+Example:
+
+vcfsitesummarize samples/sample.vcf
+
+CHROM   POS     ID      REF     QUAL    FILTER  AA      AC      AF      AN      DP      NS      DB      H2
+19      111     .       A       9.6     .                                                       0       0
+19      112     .       A       10      .                                                       0       0
+20      14370   rs6054257       G       29      PASS                    0.5             14      3       1 1
+20      17330   .       T       3       q10                     0.017           11      3       0       0
+20      1110696 rs6040355       A       67      PASS    T                               10      2       1 0
+20      1230237 .       T       47      PASS    T                               13      3       0       0
+20      1234567 microsat1       G       50      PASS    G                       6       9       3       0 0
+20      1235237 .       T       0       .                                                       0       0
+X       10      rsTest  AC      10      PASS
+
+
+Type: statistics
+
+      )";
+      exit(1);
+    }
+  }
+
+
     VariantCallFile variantFile;
 
     if (argc > 1) {
@@ -45,7 +77,7 @@ int main(int argc, char** argv) {
 
     // defaults
     cout << "CHROM\tPOS\tID\tREF\tQUAL\tFILTER";
-    
+
     // configurable info field
     for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
         cout << "\t" << *i;
@@ -92,12 +124,11 @@ int main(int argc, char** argv) {
             cout << 0;
 	    }
 	}
-	
+
 	cout << endl;
-	
+
     }
-    
+
     return 0;
 
 }
-

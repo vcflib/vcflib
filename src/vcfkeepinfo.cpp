@@ -19,8 +19,9 @@ using namespace vcflib;
 int main(int argc, char** argv) {
 
     if (argc < 3) {
-        cerr << "usage: " << argv[0] << " <vcf file> [FIELD1] [FIELD2] ..." << endl
+      cerr << "usage: " << argv[0] << " <vcf file> [FIELD1] [FIELD2] ..." << endl << endl
              << "outputs each record in the vcf file, removing INFO fields not listed on the command line" << endl;
+      cerr << endl << "Type: transformation" << endl << endl;
         return 1;
     }
 
@@ -55,7 +56,7 @@ int main(int argc, char** argv) {
 
     // write the header
     cout << variantFile.header << endl;
- 
+
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
@@ -74,4 +75,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

@@ -27,7 +27,7 @@ void printSummary(char** argv) {
          << "    -w, --window-size      Size of the window over which to calculate entropy" << endl
          << endl
          << endl;
-    cerr << endl << "Type: transformation" << endl << endl;
+    cerr << endl << "Type: metrics" << endl << endl;
     exit(0);
 }
 

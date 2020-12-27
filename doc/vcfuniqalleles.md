@@ -1,4 +1,4 @@
-% VCFUNIQALLELES(1) vcfuniqalleles (vcflib) | vcfuniqalleles (VCF unknown)
+% VCFUNIQALLELES(1) vcfuniqalleles (vcflib) | vcfuniqalleles (VCF filter)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfuniqalleles** <vcf file>
 
 # DESCRIPTION
 
+List unique alleles For each record, remove any duplicate alternate alleles that may have resulted from merging separate VCF files.
 
+
+
+# OPTIONS
+
+```
+
+
+Type: filter
+
+      
+
+```
 
 
 
@@ -24,6 +37,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

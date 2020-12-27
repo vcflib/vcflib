@@ -1,4 +1,4 @@
-% VCFLEFTALIGN(1) vcfleftalign (vcflib) | vcfleftalign (VCF unknown)
+% VCFLEFTALIGN(1) vcfleftalign (vcflib) | vcfleftalign (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Left-align indels and complex variants in the input using a pairwise ref/alt alignment followed by a heuristic, iterative left realignment process that shifts indel representations to their absolute leftmost (5') extent.
 
 
 
@@ -19,13 +19,24 @@
 
 ```
 
-options:
-    -r, --reference FILE  Use this reference as a basis for realignment.
-    -w, --window N        Use a window of this many bp when left aligning (150).
 
-Left-aligns variants in the specified input file or stdin.  Window size is determined
-dynamically according to the entropy of the regions flanking the indel.  These must have
-entropy > 1 bit/bp, or be shorter than ~5kb.
+This is
+the same procedure used in the internal left alignment in freebayes, and can be
+used when preparing VCF files for input to freebayes to decrease positional
+representation differences between the input alleles and left-realigned
+alignments.
+
+options:
+
+        -r, --reference FILE  Use this reference as a basis for realignment.
+        -w, --window N        Use a window of this many bp when left aligning (150).
+
+Left-aligns variants in the specified input file or stdin.
+Window size is determined dynamically according to the entropy of the regions flanking the indel.
+These must have entropy > 1 bit/bp, or be shorter than ~5kb.
+
+
+Type: transformation
 
 ```
 
@@ -40,6 +51,14 @@ entropy > 1 bit/bp, or be shorter than ~5kb.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

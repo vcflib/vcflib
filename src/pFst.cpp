@@ -33,6 +33,19 @@ void printHelp(void){
   cerr << "INFO: description:" << endl;
   cerr << "     pFst is a probabilistic approach for detecting differences in allele frequencies between two populations." << endl << endl;
 
+  cerr << R"(
+
+pFst is a likelihood ratio test (LRT) quantifying allele frequency
+differences between populations.  The LRT by default uses the binomial
+distribution.  If Genotype likelihoods are provided it uses a modified
+binomial that weights each allele count by its certainty.  If type is
+set to 'PO' the LRT uses a beta distribution to fit the allele
+frequency spectrum of the target and background.  PO requires the AD
+and DP genotype fields and requires at least two pools for the target
+and background.  The p-value calculated in pFst is based on the
+chi-squared distribution with one degree of freedom.
+
+)" << endl ;
 
   cerr << "Output : 3 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;

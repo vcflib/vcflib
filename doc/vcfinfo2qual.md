@@ -1,4 +1,4 @@
-% VCFINFO2QUAL(1) vcfinfo2qual (vcflib) | vcfinfo2qual (VCF unknown)
+% VCFINFO2QUAL(1) vcfinfo2qual (vcflib) | vcfinfo2qual (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,22 @@
 
 # SYNOPSIS
 
-**vcfinfo2qual** [key] [vcf_file] Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values.
+**vcfinfo2qual** [key] [vcf_file]
 
 # DESCRIPTION
 
+Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values.
 
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 
@@ -24,6 +35,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

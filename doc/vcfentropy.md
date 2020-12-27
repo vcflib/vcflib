@@ -1,4 +1,4 @@
-% VCFENTROPY(1) vcfentropy (vcflib) | vcfentropy (VCF transformation)
+% VCFENTROPY(1) vcfentropy (vcflib) | vcfentropy (VCF metrics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -25,7 +25,7 @@ options:
 
 
 
-Type: transformation
+Type: metrics
 
 ```
 
@@ -40,6 +40,14 @@ Type: transformation
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

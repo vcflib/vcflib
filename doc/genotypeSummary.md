@@ -11,7 +11,7 @@ genotypeSummmary --type PL --target 0,1,2,3,4,5,6,7 --file my.vcf --snp
 
 # DESCRIPTION
 
-Summarizes genotype counts for bi-allelic SNVs and indel
+Generates a table of genotype counts. Summarizes genotype counts for bi-allelic SNVs and indel
 
 
 
@@ -44,6 +44,14 @@ Type: statistics
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

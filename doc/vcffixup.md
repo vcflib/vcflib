@@ -20,6 +20,19 @@ Generates a VCF stream where AC and NS have been generated for each record using
 ```
 
 
+
+
+Count the allele frequencies across alleles present in each record in the VCF file. (Similar to vcftools --freq.)
+
+Uses genotypes from the VCF file to correct AC (alternate allele count), AF
+(alternate allele frequency), NS (number of called), in the VCF records.  For
+example:
+
+    % vcfkeepsamples file.vcf NA12878 | **vcffixup** - | vcffilter -f "AC > 0"
+
+Would downsample file.vcf to only NA12878, removing sites for which the sample
+was not called as polymorphic.
+
 Type: transformation
 
 ```
@@ -35,6 +48,14 @@ Type: transformation
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

@@ -25,13 +25,14 @@ bool listContains(list<string>& l, string& v) {
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] [vcf file]" << endl
          << endl
-         << "Sorts the input (either stdin or file) using a streaming sort algorithm."
+         << "Sorts the input (either stdin or file) using a streaming sort algorithm. Guarantees that the positional order is correct provided out-of-order variants are no more than 100 positions in the VCF file apart."
          << endl
          << "options:" << endl
          << endl
          << "    -h, --help             this dialog" << endl
          << "    -w, --window N         number of sites to sort (default 10000)" << endl
          << "    -a, --all              load all sites and then sort in memory" << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
 }
 
 int main(int argc, char** argv) {
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
 
     while (true) {
         static struct option long_options[] =
-        {  
+        {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
             {"help", no_argument, 0, 'h'},
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
                 exit(1);
             }
             break;
-                
+
         case 'a':
             sortAll = true;
             break;
@@ -81,7 +82,7 @@ int main(int argc, char** argv) {
             printSummary(argv);
             exit(0);
             break;
-            
+
         default:
             break;
         }
@@ -149,4 +150,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-

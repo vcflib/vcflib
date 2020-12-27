@@ -1,4 +1,4 @@
-% VCFROC(1) vcfroc (vcflib) | vcfroc (VCF unknown)
+% VCFROC(1) vcfroc (vcflib) | vcfroc (VCF statistics)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+Generates a pseudo-ROC curve using sensitivity and specificity estimated against a putative truth set. Thresholding is provided by successive QUAL cutoffs.
 
 
 
@@ -25,8 +25,6 @@ options:
     -c, --complex             directly compare complex alleles, don't parse into primitives
     -r, --reference FILE      FASTA reference file
 
-Generates a pseudo-ROC curve using sensitivity and specificity estimated against
-a putative truth set.  Thresholding is provided by successive QUAL cutoffs.
 
 ```
 
@@ -41,6 +39,14 @@ a putative truth set.  Thresholding is provided by successive QUAL cutoffs.
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

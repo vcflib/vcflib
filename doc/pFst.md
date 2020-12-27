@@ -20,6 +20,19 @@
 ```
 
 
+
+
+**pFst** is a likelihood ratio test (LRT) quantifying allele frequency
+differences between populations.  The LRT by default uses the binomial
+distribution.  If Genotype likelihoods are provided it uses a modified
+binomial that weights each allele count by its certainty.  If type is
+set to 'PO' the LRT uses a beta distribution to fit the allele
+frequency spectrum of the target and background.  PO requires the AD
+and DP genotype fields and requires at least two pools for the target
+and background.  The p-value calculated in **pFst** is based on the
+chi-squared distribution with one degree of freedom.
+
+
 Output : 3 columns :     
      1. seqid            
      2. position         
@@ -48,6 +61,14 @@ Type: statistics
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

@@ -1,4 +1,4 @@
-% VCFUNIQ(1) vcfuniq (vcflib) | vcfuniq (VCF unknown)
+% VCFUNIQ(1) vcfuniq (vcflib) | vcfuniq (VCF filter)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -7,11 +7,24 @@
 
 # SYNOPSIS
 
-
+**vcfuniq** <vcf file>
 
 # DESCRIPTION
 
+List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same positon, ref, and alt as the previous record.
 
+
+
+# OPTIONS
+
+```
+
+
+Type: filter
+
+      
+
+```
 
 
 
@@ -24,6 +37,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 

@@ -43,11 +43,12 @@ void printHelp(void){
   cerr << endl << endl;
   cerr << "INFO: help" << endl;
   cerr << "INFO: description:" << endl;
-  cerr << "      Smoother averages a set of scores over a sliding genomic window.            " << endl;
-  cerr << "      Smoother slides over genomic positions not the SNP indices. In other words  " << endl;
+  cerr << "smoothes is a method for window smoothing many of the GPAT++ formats." << endl << endl ;
+  cerr << "      smoother averages a set of scores over a sliding genomic window.            " << endl;
+  cerr << "      smoother slides over genomic positions not the SNP indices. In other words  " << endl;
   cerr << "      the number of scores within a window will not be constant. The last         " << endl;
   cerr << "      window for each seqid can be smaller than the defined window size.          " << endl;
-  cerr << "      Smoother automatically analyses different seqids separately.                " << endl;
+  cerr << "      smoother automatically analyses different seqids separately.                " << endl;
 
   cerr << "Output : 4 columns :     "    << endl;
   cerr << "     1. seqid            "    << endl;

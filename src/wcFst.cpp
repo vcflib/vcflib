@@ -15,7 +15,7 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>  
+#include <math.h>
 #include <cmath>
 #include <stdlib.h>
 #include <time.h>
@@ -51,7 +51,7 @@ void printHelp(void){
   cerr << "INFO: required, y,type       -- argument: genotype likelihood format; genotype : GT,GL,PL,GP                                             " << endl;
   cerr << "INFO: optional: r,region     -- argument: a tabix compliant genomic range: seqid or seqid:start-end                                   " << endl;
   cerr << "INFO: optional: d,deltaaf    -- argument: skip sites where the difference in allele frequencies is less than deltaaf, default is zero " << endl;
-
+  cerr << endl << "Type: statistics" << endl << endl;
   printVersion();
 }
 
@@ -67,11 +67,11 @@ double bound(double v){
 }
 
 void loadIndices(map<int, int> & index, string set){
-  
+
   vector<string>  indviduals = split(set, ",");
 
   vector<string>::iterator it = indviduals.begin();
-  
+
   for(; it != indviduals.end(); it++){
     index[ atoi( (*it).c_str() ) ] = 1;
   }
@@ -90,17 +90,17 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
-  // using vcflib; thanks to Erik Garrison 
+  // using vcflib; thanks to Erik Garrison
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals 
-  
+  // zero based index for the target and background indivudals
+
   map<int, int> it, ib;
-  
-  // deltaaf is the difference of allele frequency we bother to look at 
+
+  // deltaaf is the difference of allele frequency we bother to look at
 
   string deltaaf ;
   double daf  = 0.00;
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   string type = "NA";
 
 
-    const struct option longopts[] = 
+    const struct option longopts[] =
       {
 	{"version"   , 0, 0, 'v'},
 	{"help"      , 0, 0, 'h'},
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     while(iarg != -1)
       {
 	iarg = getopt_long(argc, argv, "y:r:d:t:b:f:chv", longopts, &index);
-	
+
 	switch (iarg)
 	  {
 	  case 'h':
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
 	  case 'd':
 	    cerr << "INFO: only scoring sites where the allele frequency difference is greater than: " << optarg << endl;
 	    deltaaf = optarg;
-	    daf = atof(deltaaf.c_str());	    
+	    daf = atof(deltaaf.c_str());
 	    break;
 	  case 'y':
 	    type = optarg;
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 	    break;
 	  case 'r':
             cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg; 
+	    region = optarg;
 	    break;
 	  default:
 	    break;
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
     }
 
     variantFile.open(filename);
-    
+
     if(region != "NA"){
       if(! variantFile.setRegion(region)){
 	cerr << "FATAL: unable to set region" << endl;
@@ -214,15 +214,15 @@ int main(int argc, char** argv) {
     int nsamples = samples.size();
 
     while (variantFile.getNextVariant(var)) {
-        
-	// biallelic sites naturally 
+
+	// biallelic sites naturally
 
 	if(var.alt.size() > 1){
 	  continue;
 	}
-	
+
 	vector < map< string, vector<string> > > target, background, total;
-	        
+
 	int index = 0;
 
 	for(int nsamp = 0; nsamp < nsamples; nsamp++){
@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
 	      if(ib.find(index) != ib.end()){
 		background.push_back(sample);
 	      }
-	    }            
+	    }
 	    index += 1;
 	}
 
@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
 	if(target.size() < 5 || background.size() < 5){
 	  continue;
 	}
-	
+
 	genotype * populationTarget      ;
 	genotype * populationBackground  ;
 
@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
           populationTarget     = new gt();
           populationBackground = new gt();
         }
-	
+
 	populationTarget->loadPop(target, var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
@@ -291,11 +291,11 @@ int main(int argc, char** argv) {
           delete populationBackground;
           continue;
         }
-	
+
 	// pg 1360 B.S Weir and C.C. Cockerham 1984
 	double nbar = ( populationTarget->ngeno / 2 ) + (populationBackground->ngeno / 2);
 	double rn   = 2*nbar;
-	
+
 	// special case of only two populations
 	double nc   =  rn ;
 	nc -= (pow(populationTarget->ngeno,2)/rn);
@@ -303,16 +303,16 @@ int main(int argc, char** argv) {
 	// average sample frequency
 	double pbar = (populationTarget->af + populationBackground->af) / 2;
 
-	// sample variance of allele A frequences over the population 
-	
+	// sample variance of allele A frequences over the population
+
 	double s2 = 0;
 	s2 += ((populationTarget->ngeno * pow(populationTarget->af - pbar, 2))/nbar);
 	s2 += ((populationBackground->ngeno * pow(populationBackground->af - pbar, 2))/nbar);
-	
-	// average heterozygosity 
-	
+
+	// average heterozygosity
+
 	double hbar = (populationTarget->hfrq + populationBackground->hfrq) / 2;
-	
+
 	//global af var
 	double pvar = pbar * (1 - pbar);
 
@@ -322,20 +322,20 @@ int main(int argc, char** argv) {
 	double avar2 = 1 / (nbar -1) ;
 	double avar3 = pvar - (0.5*s2) - (0.25*hbar);
 	double avar  = avar1 * (s2 - (avar2 * avar3));
-	
+
 	double bvar1 = nbar / (nbar - 1);
 	double bvar2 = pvar - (0.5*s2) - (((2*nbar -1)/(4*nbar))*hbar);
 	double bvar  = bvar1 * bvar2;
 
 	double cvar = 0.5*hbar;
-	
+
 	double fst = avar / (avar+bvar+cvar);
-	
+
 	cout << var.sequenceName << "\t"  << var.position << "\t" << populationTarget->af << "\t" << populationBackground->af << "\t" << fst << endl ;
 
 	delete populationTarget;
 	delete populationBackground;
 
     }
-    return 0;		    
+    return 0;
 }

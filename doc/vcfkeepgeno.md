@@ -1,4 +1,4 @@
-% VCFKEEPGENO(1) vcfkeepgeno (vcflib) | vcfkeepgeno (VCF unknown)
+% VCFKEEPGENO(1) vcfkeepgeno (vcflib) | vcfkeepgeno (VCF transformation)
 % Erik Garrison and vcflib contributors
 
 # NAME
@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-
+outputs each record in the vcf file, removing FORMAT fields not listed on the command line from sample specifications in the output
 
 
 
@@ -24,6 +24,14 @@
 
 **not 0**
 : Failure
+
+# SEE ALSO
+
+
+
+[vcflib](./vcflib.md)(1)
+
+
 
 # OTHER
 
