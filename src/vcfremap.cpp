@@ -36,7 +36,8 @@ void printSummary(char** argv) {
          << "    -a, --adjust-vcf TAG         supply a new cigar as TAG in the output VCF" << endl
          << endl
          << "For each alternate allele, attempt to realign against the reference with lowered gap open penalty." << endl
-         << "If realignment is possible, adjust the cigar and reference/alternate alleles." << endl;
+         << "If realignment is possible, adjust the cigar and reference/alternate alleles." << endl
+         << "Observe how different alignment parameters, including context and entropy-dependent ones, influence variant classification and interpretation." << endl;
     cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }

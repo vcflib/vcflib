@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-Overlays records in the input vcf files in the order in which they appear.
+Overlay records in the input vcf files with order as precedence.
 
 
 

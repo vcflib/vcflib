@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     string h_flag = argv[1];
     if (h_flag == "-h" || h_flag == "--help") {
       cerr << "usage: " << argv[0] << " <vcf file> [FIELD1] [FIELD2] ..." << endl << endl
-           << "outputs each record in the vcf file, removing FORMAT fields not listed "
+           << "Reduce file size by removing FORMAT fields not listed "
            << "on the command line from sample specifications in the output"
            << endl;
       cerr << endl << "Type: transformation" << endl << endl;

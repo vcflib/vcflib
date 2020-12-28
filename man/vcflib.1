@@ -77,7 +77,8 @@ _
 T{
 \f[B]vcfcheck\f[R]
 T}@T{
-Verifies that the VCF REF field matches the reference as described.
+Validate integrity and identity of the VCF by verifying that the VCF
+record\[cq]s REF matches a given reference file.
 T}
 T{
 \f[B]vcfhethomratio\f[R]
@@ -87,8 +88,8 @@ T}
 T{
 \f[B]vcfhetcount\f[R]
 T}@T{
-count the number of alternate alleles in heterozygous genotypes in all
-records in the vcf file
+Calculate the heterozygosity rate: count the number of alternate alleles
+in heterozygous genotypes in all records in the vcf file
 T}
 T{
 \f[B]vcfdistance\f[R]
@@ -100,6 +101,7 @@ T}
 T{
 \f[B]vcfentropy\f[R]
 T}@T{
+Annotate VCF records with the Shannon entropy of flanking sequence.
 Anotates the output VCF file with, for each record, EntropyLeft,
 EntropyRight, EntropyCenter, which are the entropies of the sequence of
 the given window size to the left, right, and center of the record.
@@ -180,6 +182,8 @@ T}
 T{
 \f[B]vcfsamplediff\f[R]
 T}@T{
+Establish putative somatic variants using reported differences between
+germline and somatic samples.
 Tags each record where the listed sample genotypes differ with .
 The first sample is assumed to be germline, the second somatic.
 Each record is tagged with ={germline,somatic,loh} to specify the type
@@ -195,7 +199,9 @@ T{
 \f[B]vcfremoveaberrantgenotypes\f[R]
 T}@T{
 strips samples which are homozygous but have observations implying
-heterozygosity
+heterozygosity.
+Remove samples for which the reported genotype (GT) and observation
+counts disagree (AO, RO).
 T}
 T{
 \f[B]vcfglxgt\f[R]
@@ -224,9 +230,9 @@ T}
 T{
 \f[B]vcfannotategenotypes\f[R]
 T}@T{
-annotates genotypes in the first file with genotypes in the second
-adding the genotype as another flag to each sample filed in the first
-file.
+Examine genotype correspondence.
+Annotate genotypes in the first file with genotypes in the second adding
+the genotype as another flag to each sample filed in the first file.
 annotation-tag is the name of the sample flag which is added to store
 the annotation.
 also adds a `has_variant' flag for sites where the second file has a
@@ -309,14 +315,14 @@ T}
 T{
 \f[B]vcfkeepgeno\f[R]
 T}@T{
-outputs each record in the vcf file, removing FORMAT fields not listed
-on the command line from sample specifications in the output
+Reduce file size by removing FORMAT fields not listed on the command
+line from sample specifications in the output
 T}
 T{
 \f[B]vcfcombine\f[R]
 T}@T{
-Combines VCF files positionally, combining samples when sites and
-alleles are identical.
+Combine VCF files positionally, combining samples when sites and alleles
+are identical.
 Any number of VCF files may be combined.
 The INFO field and other columns are taken from one of the files which
 are combined when records in multiple files match.
@@ -362,8 +368,7 @@ T}
 T{
 \f[B]vcfkeepinfo\f[R]
 T}@T{
-outputs each record in the vcf file, removing INFO fields not listed on
-the command line
+To decrease file size remove INFO fields not listed on the command line
 T}
 T{
 \f[B]vcfgeno2haplo\f[R]
@@ -439,8 +444,8 @@ T}
 T{
 \f[B]vcf2tsv\f[R]
 T}@T{
-Converts stdin or given VCF file to tab-delimited format, using null
-string to replace empty values in the table.
+Converts VCF to per-allelle or per-genotype tab-delimited format, using
+null string to replace empty values in the table.
 Specifying -g will output one line per sample with genotype information.
 When there is more than one alt allele there will be multiple rows, one
 for each allele and, the info will match the `A' index
@@ -448,8 +453,7 @@ T}
 T{
 \f[B]vcfoverlay\f[R]
 T}@T{
-Overlays records in the input vcf files in the order in which they
-appear.
+Overlay records in the input vcf files with order as precedence.
 T}
 T{
 \f[B]vcfgenosamplenames\f[R]
@@ -469,6 +473,9 @@ For each alternate allele, attempt to realign against the reference with
 lowered gap open penalty.
 If realignment is possible, adjust the cigar and reference/alternate
 alleles.
+Observe how different alignment parameters, including context and
+entropy-dependent ones, influence variant classification and
+interpretation.
 T}
 T{
 \f[B]vcffixup\f[R]
@@ -555,7 +562,9 @@ T}
 T{
 \f[B]vcfgenotypes\f[R]
 T}@T{
-report the genotypes for each sample, for each variant in the vcf file
+Report the genotypes for each sample, for each variant in the VCF.
+Convert the numerical represenation of genotypes provided by the GT
+field to a human-readable genotype format.
 T}
 T{
 \f[B]vcfaltcount\f[R]

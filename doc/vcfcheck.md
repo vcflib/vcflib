@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-Verifies that the VCF REF field matches the reference as described.
+Validate integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file.
 
 
 

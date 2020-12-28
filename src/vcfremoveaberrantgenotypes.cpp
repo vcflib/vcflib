@@ -46,7 +46,8 @@ int main(int argc, char** argv) {
     string h_flag = argv[1];
     if (h_flag == "-h" || h_flag == "--help") {
       cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
-           << "strips samples which are homozygous but have observations implying heterozygosity" << endl;
+           << "strips samples which are homozygous but have observations implying heterozygosity." << endl
+           << "Remove samples for which the reported genotype (GT) and observation counts disagree (AO, RO)." << endl;
       cerr << endl << "Type: transformation" << endl << endl;
       return 1;
     }

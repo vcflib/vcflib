@@ -11,7 +11,18 @@
 
 # DESCRIPTION
 
-outputs each record in the vcf file, removing FORMAT fields not listed on the command line from sample specifications in the output
+Reduce file size by removing FORMAT fields not listed on the command line from sample specifications in the output
+
+
+
+# OPTIONS
+
+```
+
+
+Type: transformation
+
+```
 
 
 

@@ -482,15 +482,15 @@ bool stablyLeftAlign(string& alternateSequence, string referenceSequence, Cigar&
 void printSummary(char** argv) {
       cerr << R"(
 
-Left-align indels and complex variants in the input using a pairwise ref/alt
-alignment followed by a heuristic, iterative left realignment process that
-shifts indel representations to their absolute leftmost (5') extent.
+Left-align indels and complex variants in the input using a pairwise
+ref/alt alignment followed by a heuristic, iterative left realignment
+process that shifts indel representations to their absolute leftmost
+(5') extent.
 
-This is
-the same procedure used in the internal left alignment in freebayes, and can be
-used when preparing VCF files for input to freebayes to decrease positional
-representation differences between the input alleles and left-realigned
-alignments.
+This is the same procedure used in the internal left alignment in
+freebayes, and can be used when preparing VCF files for input to
+freebayes to decrease positional representation differences between
+the input alleles and left-realigned alignments.
 
 usage: vcfleftalign [options] [file]
 
@@ -499,9 +499,10 @@ options:
         -r, --reference FILE  Use this reference as a basis for realignment.
         -w, --window N        Use a window of this many bp when left aligning (150).
 
-Left-aligns variants in the specified input file or stdin.
-Window size is determined dynamically according to the entropy of the regions flanking the indel.
-These must have entropy > 1 bit/bp, or be shorter than ~5kb.
+Left-aligns variants in the specified input file or stdin.  Window
+size is determined dynamically according to the entropy of the regions
+flanking the indel.  These must have entropy > 1 bit/bp, or be shorter
+than ~5kb.
 
 )";
     cerr << endl << "Type: transformation" << endl << endl;

@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
     if (argc < 3) {
       cerr << "usage: " << argv[0] << " <vcf file> [FIELD1] [FIELD2] ..." << endl << endl
-             << "outputs each record in the vcf file, removing INFO fields not listed on the command line" << endl;
+             << "To decrease file size remove INFO fields not listed on the command line" << endl;
       cerr << endl << "Type: transformation" << endl << endl;
         return 1;
     }

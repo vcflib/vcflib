@@ -47,6 +47,7 @@ bool samplesDiffer(vector<string>& samples, Variant& var) {
 
 void printSummary(char** argv) {
   cerr << "usage: " << argv[0] << " [options] <tag> <sample> <sample> [ <sample> ... ] <vcf file>" << endl << endl
+       << "Establish putative somatic variants using reported differences between germline and somatic samples." << endl
        << "Tags each record where the listed sample genotypes differ with <tag>." << endl
        << "The first sample is assumed to be germline, the second somatic." << endl
        << "Each record is tagged with <tag>={germline,somatic,loh} to specify the type of" << endl

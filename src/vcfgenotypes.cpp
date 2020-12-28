@@ -19,9 +19,13 @@ using namespace vcflib;
 int main(int argc, char** argv) {
 
     if (argc != 2) {
-      cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
-           << "report the genotypes for each sample, for each variant in the vcf file" << endl;
+      cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl;
             cerr << R"(
+
+Report the genotypes for each sample, for each variant in the
+VCF. Convert the numerical represenation of genotypes provided by the
+GT field to a human-readable genotype format.
+
 Example:
 
       vcfgenotypes samples/sample.vcf

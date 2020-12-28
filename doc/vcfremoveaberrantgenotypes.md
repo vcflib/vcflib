@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-strips samples which are homozygous but have observations implying heterozygosity
+strips samples which are homozygous but have observations implying heterozygosity. Remove samples for which the reported genotype (GT) and observation counts disagree (AO, RO).
 
 
 

@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 
     if (argc != 4) {
       cerr << "usage: " << argv[0] << " <annotation-tag> <vcf file> <vcf file>" << endl << endl
-           << "annotates genotypes in the first file with genotypes in the second" << endl
+           << "Examine genotype correspondence. Annotate genotypes in the first file with genotypes in the second" << endl
            << "adding the genotype as another flag to each sample filed in the first file." << endl
            << "annotation-tag is the name of the sample flag which is added to store the annotation." << endl
            << "also adds a 'has_variant' flag for sites where the second file has a variant." << endl;

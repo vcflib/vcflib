@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
     string h_flag = argv[1];
     if (h_flag == "-h" || h_flag == "--help") {
       cerr << "usage: " << argv[0] << " <vcf file>" << endl << endl
+           << "Calculate the heterozygosity rate: " << endl
            << "count the number of alternate alleles in heterozygous genotypes in all records in the vcf file" << endl
            << "outputs a count for each individual in the file" << endl;
       cerr << endl << "Type: metrics" << endl << endl;

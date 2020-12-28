@@ -11,7 +11,18 @@
 
 # DESCRIPTION
 
-report the genotypes for each sample, for each variant in the vcf file
+Report the genotypes for each sample, for each variant in the VCF. Convert the numerical represenation of genotypes provided by the GT field to a human-readable genotype format.
+
+
+
+# OPTIONS
+
+```
+
+
+
+
+```
 
 
 

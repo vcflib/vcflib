@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-count the number of alternate alleles in heterozygous genotypes in all records in the vcf file
+Calculate the heterozygosity rate: count the number of alternate alleles in heterozygous genotypes in all records in the vcf file
 
 
 
