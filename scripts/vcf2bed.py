@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+# Transform VCF to BED file
+#
 import sys
 
 for line in sys.stdin:

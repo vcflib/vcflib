@@ -19,7 +19,7 @@ using namespace vcflib;
 void printSummary(char** argv) {
     cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
-         << "Verifies that the VCF REF field matches the reference as described." << endl
+         << "Validate integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file." << endl
          << "options:" << endl
          << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
          << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl

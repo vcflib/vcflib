@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Remove all SNPs but keep SVs
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

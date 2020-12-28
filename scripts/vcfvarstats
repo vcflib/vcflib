@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Use fastahack to get stats
 
 use IPC::Open2;
 

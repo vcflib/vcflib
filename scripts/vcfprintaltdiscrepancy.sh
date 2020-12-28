@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# Runner
+#
 tag=$1
 
 vcf2tsv \

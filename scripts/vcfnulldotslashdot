@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+# Rewrite null genotypes to ./.
+#
 import sys
 import math
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+# More multiway comparisons
 
 reference=$1
 outdir=$2

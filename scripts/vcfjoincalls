@@ -1,4 +1,5 @@
 #!/bin/bash
+# overlay files using QUAL and GT from a second VCF
 
 if [ $# -ne 5 ];
 then

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Reduce, gzip, and tabix
 
 if [ $# -ne 2 ];
 then

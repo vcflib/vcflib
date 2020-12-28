@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# annotates records in the first file with genotypes and sites from the second
+#
 if [ $# != 3 ];
 then
     echo "usage: $0 [annotation] [fileA] [fileB]"

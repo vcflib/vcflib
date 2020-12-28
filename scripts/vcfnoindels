@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Remove INDELs
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

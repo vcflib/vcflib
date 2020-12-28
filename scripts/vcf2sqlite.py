@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Push VCF file into SQLite3 database using dbname
 
 import sys
 import re

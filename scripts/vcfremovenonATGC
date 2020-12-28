@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Remove non-nucleotides in REF or ALT
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

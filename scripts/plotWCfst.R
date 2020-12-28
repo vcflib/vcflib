@@ -1,3 +1,5 @@
+# plot wcFst
+#
 #usage:  nohup R --vanilla < plotPfst --args pFst.txt
 
 cmd_args <- commandArgs(trailingOnly = TRUE)

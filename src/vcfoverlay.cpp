@@ -23,7 +23,7 @@ void printSummary(char** argv) {
          << "    -h, --help       this dialog" << endl
 	 << "    -v, --version    prints version" << endl
 	 << endl
-         << "Overlays records in the input vcf files in the order in which they appear." << endl;
+         << "Overlay records in the input vcf files with order as precedence." << endl;
     cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }

@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# Reduce VCFs using a BED File, gzip them up and create tabix index
+#
 if [ $# -ne 2 ];
 then
     echo "Usage: $0 [region file] [directory]"

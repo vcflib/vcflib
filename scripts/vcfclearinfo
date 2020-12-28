@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+# Clear INFO field
+#
 import sys
 
 for line in sys.stdin:

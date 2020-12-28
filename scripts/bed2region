@@ -1,4 +1,10 @@
 #!/usr/bin/env perl
+# convert VCF CHROM column in VCF file to region
+
+# Example
+#
+# #CHROM:POS-ID   REF     ALT     QUAL    FILTER  INFO    FORMAT  NA00001 NA00002 NA00003 ...
+# 20:1110696-rs6040355    A       G,T     67      PASS    NS=2;DP=10;AF=0.333,0.667;AA=T;DB ...
 
 while (<STDIN>) {
     $_ =~ /^(.+?)\s(.+?)\s(.+)\s*/;

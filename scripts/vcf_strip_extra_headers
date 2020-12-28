@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# Strip headers
 
 my $seen_non_header = 0;
 

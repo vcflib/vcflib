@@ -1,4 +1,6 @@
-#usage:  nohup R --vanilla < plotPfst --args pFst.txt
+# plot results of pFst 
+#
+# usage:  nohup R --vanilla < plotPfst --args pFst.txt
 
 cmd_args <- commandArgs(trailingOnly = TRUE)
 

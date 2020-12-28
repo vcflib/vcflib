@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# Reduce, gzip and tabix in a pipe
+#
 if [ $# -ne 2 ];
 then
     echo "Usage: $0 [region file] [directory]"

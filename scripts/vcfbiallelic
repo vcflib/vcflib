@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Remove anything that is not biallelic
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

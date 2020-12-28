@@ -1,3 +1,5 @@
+# plot results
+#
 #usage:  nohup R --vanilla < plotPfst --args plotHapOutput.txt
 
 cmd_args <- commandArgs(trailingOnly = TRUE)

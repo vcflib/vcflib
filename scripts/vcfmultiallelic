@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# remove anything that is not multiallelic
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

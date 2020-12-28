@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Remove biallelic SNPs
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

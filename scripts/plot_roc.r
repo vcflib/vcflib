@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
-
-
-
+# Plot ROC 
 
 require(plyr)
 require(ggplot2)

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+# Show INDELS
 
 while (<STDIN>) {
     if ($_ =~ /^#/) {

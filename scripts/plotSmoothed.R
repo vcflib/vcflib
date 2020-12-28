@@ -1,3 +1,5 @@
+# Smooth plot of wcFst, pFst or abba-baba
+#
 #usage:  nohup R --vanilla < plotPfst --args smoothedpFst.txt wcFst|pFst|abba-baba
 
 cmd_args <- commandArgs(trailingOnly = TRUE)

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Plot ALT discrepancy runner
 
 filename=$1
 tag=$2
