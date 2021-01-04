@@ -1,9 +1,11 @@
-## ChangeLog v1.0.2 (2020????)
+## ChangeLog v1.0.2 (20210104)
 
-This is a maintenance release of Freebayes:
+This is a maintenance release of vcflib, mostly improving the build
+system, CI and generating markdown docs as well as man pages.
 
 + Removed tabixpp and htslib source dependencies, i.e., we are now using
   the distro provided libraries and include files through pkg-config.
+  See also the [README](README.md#build-from-source)
 + Removed the tabixpp+htslib git submodules
 + Generalise and document the cmake build system
 + Added tests to the cmake build system and build instructions to README
