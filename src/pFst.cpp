@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include "gpatInfo.hpp"
+#include "makeUnique.h"
 
 using namespace std;
 using namespace vcflib;
@@ -273,34 +274,36 @@ int main(int argc, char** argv) {
 	index += 1;
 	}
 
-	zvar * populationTarget        ;
-	zvar * populationBackground    ;
-	zvar * populationTotal         ;
+	unique_ptr<zvar> populationTarget        ;
+	unique_ptr<zvar> populationBackground    ;
+	unique_ptr<zvar> populationTotal         ;
+
+	using Detail::makeUnique;
 
 	if(type == "PO"){
-	  populationTarget     = new pooled();
-          populationBackground = new pooled();
-          populationTotal      = new pooled();
+	  populationTarget         = makeUnique<pooled>();
+          populationBackground = makeUnique<pooled>();
+          populationTotal      = makeUnique<pooled>();
 	}
 	if(type == "PL"){
-	  populationTarget     = new pl();
-	  populationBackground = new pl();
-	  populationTotal      = new pl();
+	  populationTarget     = makeUnique<pl>();
+	  populationBackground = makeUnique<pl>();
+	  populationTotal      = makeUnique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = new gl();
-	  populationBackground = new gl();
-	  populationTotal      = new gl();
+	  populationTarget     = makeUnique<gl>();
+	  populationBackground = makeUnique<gl>();
+	  populationTotal      = makeUnique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = new gp();
-	  populationBackground = new gp();
-	  populationTotal      = new gp();
+	  populationTarget     = makeUnique<gp>();
+	  populationBackground = makeUnique<gp>();
+	  populationTotal      = makeUnique<gp>();
 	}
 	if(type == "GT"){
-          populationTarget     = new gt();
-          populationBackground = new gt();
-          populationTotal      = new gt();
+          populationTarget     = makeUnique<gt>();
+          populationBackground = makeUnique<gt>();
+          populationTotal      = makeUnique<gt>();
         }
 
 	populationTotal->loadPop(total          , var.sequenceName, var.position);
@@ -308,10 +311,6 @@ int main(int argc, char** argv) {
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
 	if(populationTarget->npop < 2 || populationBackground->npop < 2){
-          delete populationTarget;
-	  delete populationBackground;
-          delete populationTotal;
-
 	  continue;
 	}
 
@@ -320,11 +319,6 @@ int main(int argc, char** argv) {
 	populationBackground->estimatePosterior();
 
 	if(populationTarget->alpha == -1 || populationBackground->alpha == -1){
-	  delete populationTarget;
-	  delete populationBackground;
-	  delete populationTotal;
-
-
           continue;
         }
 
@@ -357,11 +351,6 @@ int main(int argc, char** argv) {
 	double l = 2 * (alt - null);
 
 	if(l <= 0){
-	  delete populationTarget;
-	  delete populationBackground;
-	  delete populationTotal;
-
-
 	  continue;
 	}
 
@@ -375,16 +364,7 @@ int main(int argc, char** argv) {
 
 	cdfchi(&which, &p, &q, &x, &df, &status, &bound );
 
-	cout << var.sequenceName << "\t"  << var.position << "\t" << 1-p << endl ;
-
-	delete populationTarget;
-	delete populationBackground;
-	delete populationTotal;
-
-	populationTarget     = NULL;
-	populationBackground = NULL;
-	populationTotal      = NULL;
-
+	cout << var.sequenceName << "\t"  << var.position << "\t" << 1-p << endl ;	
     }
     return 0;
 }

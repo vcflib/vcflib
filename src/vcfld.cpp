@@ -12,6 +12,7 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
+#include "makeUnique.h"
 
 #include <string>
 #include <iostream>
@@ -389,24 +390,26 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      genotype * populationTarget    ;
-      genotype * populationBackground;
-      genotype * populationTotal     ;
+      using Detail::makeUnique;
+
+      unique_ptr<genotype> populationTarget    ;
+      unique_ptr<genotype> populationBackground;
+      unique_ptr<genotype> populationTotal     ;
 
       if(type == "PL"){
-	populationTarget     = new pl();
-	populationBackground = new pl();
-	populationTotal      = new pl();
+	populationTarget     = makeUnique<pl>();
+	populationBackground = makeUnique<pl>();
+	populationTotal      = makeUnique<pl>();
       }
       if(type == "GL"){
-	populationTarget     = new gl();
-	populationBackground = new gl();
-	populationTotal      = new gl();
+	populationTarget     = makeUnique<gl>();
+	populationBackground = makeUnique<gl>();
+	populationTotal      = makeUnique<gl>();
       }
       if(type == "GP"){
-	populationTarget     = new gp();
-	populationBackground = new gp();
-	populationTotal      = new gp();
+	populationTarget     = makeUnique<gp>();
+	populationBackground = makeUnique<gp>();
+	populationTotal      = makeUnique<gp>();
       }
 
       populationTarget->loadPop(target,         var.sequenceName, var.position);
@@ -423,7 +426,7 @@ int main(int argc, char** argv) {
       targetAFS.push_back(populationTarget->af);
       backgroundAFS.push_back(populationBackground->af);
       positions.push_back(var.position);
-      loadPhased(haplotypes, populationTotal, nsamples);
+      loadPhased(haplotypes, populationTotal.get(), nsamples);
 
     }
 

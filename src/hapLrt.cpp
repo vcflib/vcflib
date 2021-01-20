@@ -12,6 +12,7 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
+#include "makeUnique.h"
 
 #include <string>
 #include <iostream>
@@ -559,29 +560,31 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      genotype * populationTarget    ;
-      genotype * populationBackground;
-      genotype * populationTotal     ;
+      using Detail::makeUnique;
+
+      unique_ptr<genotype> populationTarget    ;
+      unique_ptr<genotype> populationBackground;
+      unique_ptr<genotype> populationTotal     ;
 
       if(type == "PL"){
-	populationTarget     = new pl();
-	populationBackground = new pl();
-	populationTotal      = new pl();
+	populationTarget     = makeUnique<pl>();
+	populationBackground = makeUnique<pl>();
+	populationTotal      = makeUnique<pl>();
       }
       if(type == "GL"){
-	populationTarget     = new gl();
-	populationBackground = new gl();
-	populationTotal      = new gl();
+	populationTarget     = makeUnique<gl>();
+	populationBackground = makeUnique<gl>();
+	populationTotal      = makeUnique<gl>();
       }
       if(type == "GP"){
-	populationTarget     = new gp();
-	populationBackground = new gp();
-	populationTotal      = new gp();
+	populationTarget     = makeUnique<gp>();
+	populationBackground = makeUnique<gp>();
+	populationTotal      = makeUnique<gp>();
       }
       if(type == "GT"){
-        populationTarget     = new gt();
-	populationBackground = new gt();
-        populationTotal      = new gt();
+        populationTarget     = makeUnique<gt>();
+	populationBackground = makeUnique<gt>();
+        populationTotal      = makeUnique<gt>();
       }
 
 
@@ -593,13 +596,9 @@ int main(int argc, char** argv) {
 
 
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){
-	delete populationTarget;
-	delete populationBackground;
-	delete populationTotal;
-
-	populationTarget     = NULL;
-	populationBackground = NULL;
-	populationTotal      = NULL;
+	;
+	;	
+	
 	continue;
       }
 
@@ -607,26 +606,14 @@ int main(int argc, char** argv) {
 
 	afs.push_back(populationTotal->af);
 	positions.push_back(var.position);
-	loadPhased(haplotypes, populationTotal, nsamples);
+	loadPhased(haplotypes, populationTotal.get(), nsamples);
 
-	delete populationTarget;
-	delete populationBackground;
-	delete populationTotal;
-
-	populationTarget     = NULL;
-	populationBackground = NULL;
-	populationTotal      = NULL;
+	;
+	;	
+	
 
 
-    }
-
-//    delete populationTarget;
-//    delete populationBackground;
-//    delete populationTotal;
-//
-//    populationTarget     = NULL;
-//    populationBackground = NULL;
-//    populationTotal      = NULL;
+    }  
 
     calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
 

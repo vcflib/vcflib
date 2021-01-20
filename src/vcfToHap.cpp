@@ -12,6 +12,7 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
+#include "makeUnique.h"
 
 #include <string>
 #include <iostream>
@@ -394,33 +395,30 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
       
-      genotype * populationTarget    ;
+      unique_ptr<genotype> populationTarget    ;
       
       if(globalOpts.type == "PL"){
-	populationTarget     = new pl();
+	populationTarget     makeUnique<pl>();
       }
       if(globalOpts.type == "GL"){
-	populationTarget     = new gl();
+	populationTarget     makeUnique<gl>();
       }
       if(globalOpts.type == "GP"){
-	populationTarget     = new gp();
+	populationTarget     makeUnique<gp>();
       }
       if(globalOpts.type == "GT"){
-	populationTarget     = new gt();
+	populationTarget     makeUnique<gt>();
       }
 
       populationTarget->loadPop(target, var.sequenceName, var.position);
       
       if(populationTarget->af <= globalOpts.af || populationTarget->af >= (1-globalOpts.af) ){
-	delete populationTarget;
+	;
 	continue;
       }
       positions.push_back(var.position);
       afs.push_back(populationTarget->af);
-      loadPhased(haplotypes, populationTarget, populationTarget->gts.size()); 
-    
-      populationTarget = NULL;
-      delete populationTarget;
+      loadPhased(haplotypes, populationTarget.get(), populationTarget->gts.size()); 
     }
 
     if(!globalOpts.geneticMapFile.empty()){

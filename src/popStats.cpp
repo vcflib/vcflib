@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include "gpatInfo.hpp"
+#include "makeUnique.h"
 
 using namespace std;
 using namespace vcflib;
@@ -231,20 +232,22 @@ int main(int argc, char** argv) {
 	    index += 1;
 	}
 
-	genotype * populationTarget      ;
-	genotype * populationBackground  ;
+  using Detail::makeUnique;
+
+	unique_ptr<genotype> populationTarget      ;
+	unique_ptr<genotype> populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget     = new pl();
+	  populationTarget     = makeUnique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = new gl();
+	  populationTarget     = makeUnique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = new gp();
+	  populationTarget     = makeUnique<gp>();
 	}
 	if(type == "GT"){
-          populationTarget     = new gt();
+    populationTarget     = makeUnique<gt>();
 	}
 
 	populationTarget->loadPop(target, var.sequenceName, var.position);
@@ -258,7 +261,6 @@ int main(int argc, char** argv) {
 	 //cerr << "     9. target Fis                   "    << endl;
 
 	if(populationTarget->af == -1){
-	  delete populationTarget;
 	  continue;
 	}
 
@@ -272,9 +274,6 @@ int main(int argc, char** argv) {
 	     << populationTarget->nhomr << "\t"
 	     << populationTarget->nhoma << "\t"
 	     << populationTarget->fis   << endl;
-
-	delete populationTarget;
-
     }
     return 0;
 }
