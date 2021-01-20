@@ -21,6 +21,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include "makeUnique.h"
 #include "gpatInfo.hpp"
 
 using namespace std;
@@ -81,18 +82,18 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
 
   double nchooseSum = 0;
   // summing over all possible haplotypes
-  for(std::map<string, int>::iterator it = hapWin.begin();
+  for(map<string, int>::iterator it = hapWin.begin();
       it != hapWin.end(); it++){
     nchooseSum += r8_choose(it->second, 2);
   }
 
   double piSum = 0;
   // all unique pairwise
-  for(std::map<string, int>::iterator it = hapWin.begin();
+  for(map<string, int>::iterator it = hapWin.begin();
       it != hapWin.end(); it++){
 
     // advancing it
-    std::map<string, int>::iterator iz = it;
+    map<string, int>::iterator iz = it;
     iz++;
     for(;iz != hapWin.end(); iz++){
       // different bases
@@ -420,29 +421,31 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      genotype * populationTarget    ;
-      genotype * populationBackground;
-      genotype * populationTotal     ;
+      unique_ptr<genotype> populationTarget    ;
+      unique_ptr<genotype> populationBackground;
+      unique_ptr<genotype> populationTotal     ;
+
+      using Detail::makeUnique;
 
       if(type == "PL"){
-	populationTarget     = new pl();
-	populationBackground = new pl();
-	populationTotal      = new pl();
+	populationTarget     = makeUnique<pl>();
+	populationBackground = makeUnique<pl>();
+	populationTotal      = makeUnique<pl>();
       }
       if(type == "GL"){
-	populationTarget     = new gl();
-	populationBackground = new gl();
-	populationTotal      = new gl();
+	populationTarget     = makeUnique<gl>();
+	populationBackground = makeUnique<gl>();
+	populationTotal      = makeUnique<gl>();
       }
       if(type == "GP"){
-	populationTarget     = new gp();
-	populationBackground = new gp();
-	populationTotal      = new gp();
+	populationTarget     = makeUnique<gp>();
+	populationBackground = makeUnique<gp>();
+	populationTotal      = makeUnique<gp>();
       }
       if(type == "GT"){
-        populationTarget     = new gt();
-        populationBackground = new gt();
-        populationTotal      = new gt();
+  populationTarget     = makeUnique<gt>();
+  populationBackground = makeUnique<gt>();
+  populationTotal      = makeUnique<gt>();
       }
 
       populationTarget->loadPop(target,         var.sequenceName, var.position);
@@ -452,17 +455,13 @@ int main(int argc, char** argv) {
       populationTotal->loadPop(total,           var.sequenceName, var.position);
 
       if(populationTotal->af < af_filt){
-
-	delete populationTarget;
-	delete populationBackground;
-	delete populationTotal;
 	continue;
       }
 
       targetAFS.push_back(populationTarget->af);
       backgroundAFS.push_back(populationBackground->af);
       positions.push_back(var.position);
-      loadPhased(haplotypes, populationTotal, nsamples);
+      loadPhased(haplotypes, populationTotal.get(), nsamples);
 
     }
 

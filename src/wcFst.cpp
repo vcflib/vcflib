@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include "gpatInfo.hpp"
+#include "makeUnique.h"
 
 using namespace std;
 using namespace vcflib;
@@ -245,50 +246,44 @@ int main(int argc, char** argv) {
 	  continue;
 	}
 
-	genotype * populationTarget      ;
-	genotype * populationBackground  ;
+	using Detail::makeUnique;
+
+	unique_ptr<genotype> populationTarget      ;
+	unique_ptr<genotype> populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget      = new pl();
-	  populationBackground  = new pl();
+	  populationTarget      = makeUnique<pl>();
+	  populationBackground  = makeUnique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = new gl();
-	  populationBackground = new gl();
+	  populationTarget     = makeUnique<gl>();
+	  populationBackground = makeUnique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = new gp();
-	  populationBackground = new gp();
+	  populationTarget     = makeUnique<gp>();
+	  populationBackground = makeUnique<gp>();
 	}
 	if(type == "GT"){
-          populationTarget     = new gt();
-          populationBackground = new gt();
+          populationTarget     = makeUnique<gt>();
+          populationBackground = makeUnique<gt>();
         }
 
 	populationTarget->loadPop(target, var.sequenceName, var.position);
 	populationBackground->loadPop(background, var.sequenceName, var.position);
 
 	if(populationTarget->af == -1 || populationBackground->af == -1){
-	  delete populationTarget;
-	  delete populationBackground;
 	  continue;
 	}
 	if(populationTarget->af == 1 &&  populationBackground->af == 1){
-	  delete populationTarget;
-          delete populationBackground;
 	  continue;
 	}
 	if(populationTarget->af == 0 &&  populationBackground->af == 0){
-	  delete populationTarget;
-          delete populationBackground;
 	  continue;
 	}
 
 	double afdiff = abs(populationTarget->af - populationBackground->af);
 
         if(afdiff < daf){
-	  delete populationTarget;
-          delete populationBackground;
           continue;
         }
 
@@ -332,9 +327,6 @@ int main(int argc, char** argv) {
 	double fst = avar / (avar+bvar+cvar);
 
 	cout << var.sequenceName << "\t"  << var.position << "\t" << populationTarget->af << "\t" << populationBackground->af << "\t" << fst << endl ;
-
-	delete populationTarget;
-	delete populationBackground;
 
     }
     return 0;
