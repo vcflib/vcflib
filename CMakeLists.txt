@@ -30,7 +30,7 @@ set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
 find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
-pkg_check_modules(HTSLIB REQUIRED htslib)
+pkg_check_modules(HTSLIB htslib)
 pkg_check_modules(TABIXPP tabixpp) # Optional
 
 # ---- Build switches
@@ -68,7 +68,6 @@ file(GLOB INCLUDES
   src/*.h*
   multichoose/*.h*
   intervaltree/*.h*
-  # tabixpp/*.h*
   smithwaterman/*.h*
   fastahack/*.h*
   filevercmp/*.h*)
@@ -89,7 +88,6 @@ add_library(vcflib STATIC
     src/split.cpp
     src/ssw.hpp
     src/ssw_cpp.hpp
-    # tabixpp/tabix.cpp # do we need this?
     fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
     smithwaterman/Repeats.cpp
@@ -200,8 +198,8 @@ add_definitions(-DVERSION="${BUILD_NUMBER}")
 if (HTSLIB_LOCAL)
 
 ExternalProject_Add(htslib-build
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/tabixpp/htslib
-  BINARY_DIR ${CMAKE_SOURCE_DIR}/tabixpp/htslib
+  SOURCE_DIR ${HTSLIB_LOCAL}
+  BINARY_DIR ${HTSLIB_LOCAL}
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/htslib
   CONFIGURE_COMMAND ""
   BUILD_COMMAND $(MAKE) lib-static
@@ -211,7 +209,7 @@ ExternalProject_Add(htslib-build
 add_library(htslib STATIC IMPORTED)
 
 set_property(TARGET htslib PROPERTY
-  IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/tabixpp/htslib/libhts.a)
+  IMPORTED_LOCATION ${HTSLIB_LOCAL}/libhts.a)
 add_dependencies(htslib htslib-build)
 
 # If the user wants to configure our HTSlib to build with libddeflate, we need

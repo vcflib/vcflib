@@ -306,7 +306,8 @@ Executables are built into the `./build` directory in the repository.
 
 Build dependencies can be viewed in the Travis-CI and github-CI
 scripts (see badges above), as well as [guix.scm](./guix.scm) used by
-us to create the build environment. Essentially:
+us to create the build environment (for instructions see the header of
+guix.scm). Essentially:
 
 - C++ compiler
 - htslib
@@ -322,6 +323,13 @@ And for some of the VCF executables
 
 - python
 - perl
+
+### Using a different htslib
+
+Check out htslib in tabixpp (recursively) and
+
+    cmake -DHTSLIB_LOCAL:STRING=./tabixpp/htslib/ ..
+    cmake --build .
 
 ## link library
 
