@@ -53,7 +53,6 @@ endif(GPROF)
 # ---- Include files
 
 include_directories(include)
-# include_directories(tabixpp)
 include_directories(fastahack)
 include_directories(intervaltree)
 include_directories(smithwaterman)
@@ -61,7 +60,10 @@ include_directories(multichoose)
 include_directories(filevercmp)
 
 if(HTSLIB_LOCAL)
-  include_directories(tabixpp/htslib)
+  include_directories(
+  ${HTSLIB_LOCAL}
+  tabixpp/htslib
+  contrib/htslib)
 endif(HTSLIB_LOCAL)
 
 file(GLOB INCLUDES
