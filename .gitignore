@@ -126,3 +126,4 @@ build/
 *.log
 *.synctex.gz
 test/tests/main
+tabixpp/htslib
