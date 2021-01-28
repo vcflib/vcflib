@@ -117,7 +117,7 @@ e.g. [script](./scripts/vcfgtcompare.sh).
 
 | filter command | description |
 | :-------------- | :---------- |
- | [vcfuniq](./doc/vcfuniq.md) | List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same positon, ref, and alt as the previous record. |
+ | [vcfuniq](./doc/vcfuniq.md) | List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same position, ref, and alt as the previous record. |
  | [vcfuniqalleles](./doc/vcfuniqalleles.md) | List unique alleles For each record, remove any duplicate alternate alleles that may have resulted from merging separate VCF files. |
  | [vcffilter](./doc/vcffilter.md) | VCF filter the specified vcf file using the set of filters |
 

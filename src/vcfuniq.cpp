@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 Usage: vcfuniq <vcf file>
 
 List unique genotypes.  Like GNU uniq, but for VCF records.  Remove
-records which have the same positon, ref, and alt as the previous
+records which have the same position, ref, and alt as the previous
 record.
 
 Type: filter

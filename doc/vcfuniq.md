@@ -11,7 +11,7 @@
 
 # DESCRIPTION
 
-List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same positon, ref, and alt as the previous record.
+List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same position, ref, and alt as the previous record.
 
 
 
