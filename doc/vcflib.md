@@ -152,5 +152,5 @@ See the source code repository at https://github.com/vcflib/vcflib
 
 # LICENSE
 
-Copyright 2011-2020 (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-2021 (C) Erik Garrison and vcflib contributors. MIT licensed.
 

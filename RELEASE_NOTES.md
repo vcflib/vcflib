@@ -1,3 +1,9 @@
+iFor contributions
+see
+[contributors](https://github.com/vcflib/vcflib/graphs/contributors)
+and
+[commits](https://github.com/vcflib/vcflib/commits/master).
+
 ## ChangeLog v1.0.2 (20210104)
 
 This is a maintenance release of vcflib, mostly improving the build
