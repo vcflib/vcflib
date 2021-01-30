@@ -37,7 +37,7 @@ the library's utility for most users.
 
 | filter command | description |
 | :-------------- | :---------- |
- | [vcfuniq](./vcfuniq.md) | List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same positon, ref, and alt as the previous record. |
+ | [vcfuniq](./vcfuniq.md) | List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same position, ref, and alt as the previous record. |
  | [vcfuniqalleles](./vcfuniqalleles.md) | List unique alleles For each record, remove any duplicate alternate alleles that may have resulted from merging separate VCF files. |
  | [vcffilter](./vcffilter.md) | VCF filter the specified vcf file using the set of filters |
 
