@@ -62,7 +62,7 @@ options:
 
 # LICENSE
 
-Copyright 2011-2020 (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-2021 (C) Erik Garrison and vcflib contributors. MIT licensed.
 
 <!--
   Created with ./scripts/bin2md.rb scripts/bin2md-template.erb
