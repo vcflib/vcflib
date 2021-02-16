@@ -298,7 +298,7 @@ if (PANDOC)
     # note the option ALL which allows to build the docs together with the application
     add_custom_target( man
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        # COMMAND ${PANDOC} ./test/pytest/vcf2tsv.md -s -t man -o ./man/vcf2tsv.1
+        COMMAND ${PANDOC} ./test/pytest/vcfnulldotslashdot.md -s -t man -o ./man/vcfnulldotslashdot.1
         COMMAND ruby ./test/scripts/bin2md.rb --man test/scripts/bin2md-template.erb
         COMMAND ruby ./test/scripts/bin2md.rb --man --index
         COMMAND ruby ./test/scripts/md2man
