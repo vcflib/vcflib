@@ -186,6 +186,53 @@ set(BINS
     vcfinfosummarize
     )
 
+set(SCRIPTS
+    bed2region
+    bgziptabix
+    # plotBfst.R
+    # plotHaplotypes.R
+    # plotHapLrt.R
+    # plotPfst.R
+    # plot_roc.r
+    # plotSmoothed.R
+    # plotWCfst.R
+    # plotXPEHH.R
+    vcf2bed.py
+    vcf2sqlite.py
+    vcfbiallelic
+    vcfclearid
+    vcfclearinfo
+    vcfcomplex
+    vcffirstheader
+    vcfgtcompare.sh
+    vcfindelproximity
+    vcfindels
+    vcfjoincalls
+    vcfmultiallelic
+    vcfmultiway
+    vcfmultiwayscripts
+    vcfnobiallelicsnps
+    vcfnoindels
+    vcfnosnps
+    vcfnulldotslashdot
+    vcfplotaltdiscrepancy.r
+    vcfplotaltdiscrepancy.sh
+    vcfplotsitediscrepancy.r
+    vcfplottstv.sh
+    vcfprintaltdiscrepancy.r
+    vcfprintaltdiscrepancy.sh
+    vcfqualfilter
+    vcfregionreduce
+    vcfregionreduce_and_cut
+    vcfregionreduce_pipe
+    vcfregionreduce_uncompressed
+    vcfremovenonATGC
+    vcfsnps
+    vcfsort
+    vcf_strip_extra_headers
+    vcfvarstats
+    )
+
 # ---- Get version
 
 file (STRINGS "VERSION" BUILD_NUMBER)
@@ -233,6 +280,12 @@ if (NOT BUILD_ONLY_LIB)
     target_link_libraries(${BIN} vcflib tabixpp -DGIT_VERSION=0.9.0 ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
+
+  # ---- Copy scripts
+  foreach(SCRIPT ${SCRIPTS})
+    install(PROGRAMS ./scripts/${SCRIPT} DESTINATION bin RENAME ${SCRIPT})
+  endforeach(SCRIPT ${SCRIPTS})
+
 endif()
 
 enable_testing()
