@@ -15,7 +15,7 @@ for line in sys.stdin:
     alleles = len(fields[4].split(","))+1
     # assume that we have GT:GL
     # how many genotypes?  assume diploid
-    flatgls = ",".join([str(x) for x in [0]*multcoeff(alleles,2)])
+    flatgls = ",".join([str(x) for x in [0]*int(multcoeff(alleles,2))])
     for i in range(9, len(fields)):
         if fields[i] == ".":
             fields[i] = "./.:" + flatgls
