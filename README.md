@@ -347,6 +347,23 @@ a point of reference for prospective developers.  Note vcflib contains
 submodules (git repositories) comprising some dependencies. A full
 Guix development environment we use is defined [here](./guix.scm).
 
+# adding tests
+
+vcflib uses different test systems. The most important one is the
+[doctest](https://docs.python.org/3/library/doctest.html) because it
+doubles as documentation. For an example see
+[vcf2tsv.md](./test/pytest/vcf2tsv.md) which can be run from the
+command line with
+
+```sh
+cd test
+python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF pytest/vcf2tsv.md
+``
+
+# Contributing
+
+To contribute code to vcflib send a github pull request. We may ask
+you to add a working test case as described in 'adding tests'.
 
 # LICENSE
 

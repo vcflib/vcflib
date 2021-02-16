@@ -279,6 +279,7 @@ endfunction()
 
 # add_pytest(vcf2tsv-test)
 add_pydoctest(vcf2tsv)
+add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
 # add_pydoctest_fullname(../README.md)
