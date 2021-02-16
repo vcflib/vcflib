@@ -7,7 +7,12 @@ import math
 def bincoeff(n,k): return math.factorial(n) / (math.factorial(n-k)*math.factorial(k))
 def multcoeff(n,k): return bincoeff(n+k-1,k)
 
-for line in sys.stdin:
+if len(sys.argv) > 1:
+    inf = open(sys.argv[1])
+else:
+    inf = sys.stdin
+
+for line in inf:
     if line.startswith("#"):
         print(line.strip())
         continue
@@ -20,4 +25,3 @@ for line in sys.stdin:
         if fields[i] == ".":
             fields[i] = "./.:" + flatgls
     print("\t".join(fields))
-    

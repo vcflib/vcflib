@@ -17,11 +17,12 @@ def cat(cmd):
     head(cmd, -1)
 
 def head(cmd, lines=4):
-    # out = subprocess.check_output(f"{bindir}/{cmd}",shell=True)
-    cmd2 = f"{bindir}/{cmd}".split()
-    # process = Popen(cmd2, stdout=PIPE, stderr=PIPE, shell=True)
-    # out = process.communicate()[0]
-    p = Popen(cmd2, stdout=PIPE, stderr=PIPE, close_fds=True)
+    cmd2 = cmd.split()
+    cmd1 = cmd2[0]
+    if not os.path.isfile(cmd1):
+        cmd1 = f"{bindir}/{cmd}"
+    cmds = [cmd1]+cmd2[1:]
+    p = Popen(cmds, stdout=PIPE, stderr=PIPE, close_fds=True)
     output = p.communicate()
     out = output[0]
     if len(out) == 0:
