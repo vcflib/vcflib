@@ -17,10 +17,11 @@ def cat(cmd):
     head(cmd, -1)
 
 def head(cmd, lines=4):
-    cmd2 = cmd.split()
+    cmd2 = cmd.split(" ")
+    # print("-------------------->",cmd2,file=sys.stderr)
     cmd1 = cmd2[0]
     if not os.path.isfile(cmd1):
-        cmd1 = f"{bindir}/{cmd}"
+        cmd1 = f"{bindir}/{cmd1}"
     cmds = [cmd1]+cmd2[1:]
     p = Popen(cmds, stdout=PIPE, stderr=PIPE, close_fds=True)
     output = p.communicate()
