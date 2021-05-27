@@ -47,6 +47,7 @@ Short index:
 - [Build from source](#build-from-source)
 - [Development](#Development)
 - [LICENSE](#LICENSE)
+- [Credit work](#Credit)
 
 ---
 
@@ -356,14 +357,39 @@ command line with
 ```sh
 cd test
 python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF pytest/vcf2tsv.md
-``
+```
 
 # Contributing
 
 To contribute code to vcflib send a github pull request. We may ask
 you to add a working test case as described in 'adding tests'.
 
-# LICENSE
+## LICENSE
 
-This software is distributed under the free software [MIT
-LICENSE](./LICENSE).
+This software is distributed under the free software [MIT LICENSE](./LICENSE).
+
+## CREDIT
+
+Citations are the bread and butter of Science.  If you are using this
+software in your research and want to support our future work, please
+cite the following publication:
+
+Vcflib and tools for processing the VCF variant call format;
+Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins;
+doi: https://doi.org/10.1101/2021.05.21.445151
+
+## Bibtex reference
+
+```bibtex
+@article {Garrison2021.05.21.445151,
+	author = {Garrison, Erik and Kronenberg, Zev N. and Dawson, Eric T. and Pedersen, Brent S. and Prins, Pjotr},
+	title = {Vcflib and tools for processing the VCF variant call format},
+	elocation-id = {2021.05.21.445151},
+	year = {2021},
+	doi = {10.1101/2021.05.21.445151},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2021/05/23/2021.05.21.445151},
+	eprint = {https://www.biorxiv.org/content/early/2021/05/23/2021.05.21.445151.full.pdf},
+	journal = {bioRxiv}
+}
+```
