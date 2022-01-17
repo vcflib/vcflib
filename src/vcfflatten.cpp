@@ -20,28 +20,59 @@ double convertStrDbl(const string& s) {
     return r;
 }
 
+void printUsage()
+{
+    cerr << "usage: vcfflatten [options][file]" << endl
+            << "  -h --help           display this help message and exit." << endl
+            << "  -i --ignore-errors  do not flatten locus if 'AF' is not specified." << endl
+            << endl
+            << "Removes multi-allelic sites by picking the most common alternate.  Requires" << endl
+            << "allele frequency specification 'AF' and use of 'G' and 'A' to specify the" << endl
+            << "fields which vary according to the Allele or Genotype. VCF file may be" << endl
+            << "specified on the command line or piped as stdin." << endl;
+    cerr << endl << "Type: transformation" << endl << endl;
+}
+
 int main(int argc, char** argv) {
 
     int maxAlleles = 2;
+    bool ignoreErrors = false;
+    bool readFromStdin = false;
+    string filename;
 
     VariantCallFile variantFile;
 
-    if (argc > 1) {
-        string filename = argv[1];
-        if (filename == "--help" || filename == "-h") {
-            cerr << "usage: vcfflatten [file]" << endl
-                 << endl
-                 << "Removes multi-allelic sites by picking the most common alternate.  Requires" << endl
-                 << "allele frequency specification 'AF' and use of 'G' and 'A' to specify the" << endl
-                 << "fields which vary according to the Allele or Genotype. VCF file may be" << endl
-                 << "specified on the command line or piped as stdin." << endl;
-            cerr << endl << "Type: transformation" << endl << endl;
+    if (argc == 1) {
+        readFromStdin = true;
+    } else if (argc == 2) {
+        string arg1 = argv[1];
+        if (arg1 == "--help" || arg1 == "-h") {
+            printUsage();
+            exit(1);
+        } else if (arg1 == "--ignore-errors" || arg1 == "-i") {
+            ignoreErrors = true;
+            readFromStdin = true;
+        } else {
+            filename = argv[1];
+        }
+    } else if (argc == 3) {
+        string arg1 = argv[1];
+        if (arg1 == "--ignore-errors" || arg1 == "-i") {
+            ignoreErrors = true;
+            filename = argv[2];
+        } else {
+            printUsage();
             exit(1);
         }
-        variantFile.open(filename);
     } else {
-        variantFile.open(std::cin);
+        printUsage();
+        exit(1);
     }
+
+    if (readFromStdin)
+        variantFile.open(std::cin);
+    else
+        variantFile.open(filename);
 
     if (!variantFile.is_open()) {
         return 1;
@@ -54,6 +85,16 @@ int main(int argc, char** argv) {
         // count the number of alternates
         // if we have more than N, strip the lowest-frequency ones
         if (var.alleles.size() > maxAlleles) {
+            if( !var.info["AF"].size() )
+            {
+                if(ignoreErrors)
+                {
+                    cout << var << endl;
+                    continue;
+                }
+                cerr << "Error: cannot flatten line with more than 2 alleles and no 'AF' field." << endl;
+                return 1;
+            }
 
             multimap<double, string> alleleFrequencies;
 
