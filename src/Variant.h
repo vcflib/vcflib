@@ -142,7 +142,13 @@ public:
         return parsedHeader;
     }
 
-VariantCallFile(void) : usingTabix(false), parseSamples(true), justSetRegion(false), parsedHeader(false) { }
+    VariantCallFile(void) :
+        usingTabix(false),
+        parseSamples(true),
+        justSetRegion(false),
+        parsedHeader(false)
+    { }
+
     ~VariantCallFile(void) {
         if (usingTabix) {
             delete tabixFile;
@@ -213,7 +219,7 @@ public:
     vector<string> alt;      // a list of all the alternate alleles present at this locus
     vector<string> alleles;  // a list all alleles (ref + alt) at this locus
                              // the indicies are organized such that the genotype codes (0,1,2,.etc.)
-                             // correspond to the correct offest into the allelese vector.
+                             // correspond to the correct offest into the alleles vector.
                              // that is, alleles[0] = ref, alleles[1] = first alternate allele, etc.
 
     string vrepr(void);  // a comparable record of the variantion described by the record

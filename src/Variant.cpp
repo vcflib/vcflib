@@ -88,7 +88,6 @@ bool allATGCN(const string& s, bool allowLowerCase){
 
 
 void Variant::parse(string& line, bool parseSamples) {
-
     // clean up potentially variable data structures
     info.clear();
     infoFlags.clear();
@@ -2315,7 +2314,6 @@ map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
         genotypeIndexes[make_pair(j, k)] = (k * (k + 1) / 2) + j;
     }
     return genotypeIndexes;
-
 }
 
 void Variant::updateAlleleIndexes(void) {
