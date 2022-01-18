@@ -7,7 +7,7 @@
 \f[B]vcfflatten\f[R]
 .SH SYNOPSIS
 .PP
-\f[B]vcfflatten\f[R] [file]
+\f[B]vcfflatten\f[R] [options] [\fIfile\fR]
 .SH DESCRIPTION
 .PP
 Removes multi-allelic sites by picking the most common alternate.
@@ -18,9 +18,13 @@ VCF file may be specified on the command line or piped as stdin.
 .IP
 .nf
 \f[C]
-
-
-Type: transformation
+.IP "\fB\-h, --help\fR"
+.IX Item "-h, --help"
+display this help message and exit.
+.IP "\fB\-i, --ignore-errors\fR"
+.IX Item "-i, --ignore-errors"
+do not try to flatten a line if it does not contain an 'AF' field.
+.IP "\fB\Type:\fR \fItransformation\fR"
 \f[R]
 .fi
 .SH EXIT VALUES
