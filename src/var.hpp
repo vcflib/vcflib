@@ -59,7 +59,7 @@ public:
   double hfrq ;
   
   vector<int> genoIndex;
-  vector<string> gts ;
+  vector<string> gts;
   vector< vector < double > > genoLikelihoods;
   vector< vector < double > > genoLikelihoodsCDF;
 
