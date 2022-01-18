@@ -350,56 +350,56 @@ int main(int argc, char** argv) {
   string type = "NA";
 
     const struct option longopts[] =
-      {
-	{"version"   , 0, 0, 'v'},
-	{"help"      , 0, 0, 'h'},
-        {"file"      , 1, 0, 'f'},
-	{"target"    , 1, 0, 't'},
-	{"background", 1, 0, 'b'},
-	{"region"    , 1, 0, 'r'},
-	{"type"      , 1, 0, 'y'},
+    {
+      {"version"   , 0, 0, 'v'},
+      {"help"      , 0, 0, 'h'},
+      {"file"      , 1, 0, 'f'},
+      {"target"    , 1, 0, 't'},
+      {"background", 1, 0, 'b'},
+      {"region"    , 1, 0, 'r'},
+      {"type"      , 1, 0, 'y'},
 
-	{0,0,0,0}
-      };
+      {0,0,0,0}
+    };
 
     int findex;
     int iarg=0;
 
     while(iarg != -1)
-      {
-	iarg = getopt_long(argc, argv, "y:r:t:b:f:hv", longopts, &findex);
+    {
+      iarg = getopt_long(argc, argv, "y:r:t:b:f:hv", longopts, &findex);
 
-	switch (iarg)
-	  {
-	  case 'h':
-	    printHelp();
-	  case 'v':
-	    printVersion();
-	  case 'y':
-	    type = optarg;
-	    break;
-	  case 't':
-	    loadIndices(targetIndex, optarg);
-	    cerr << "INFO: there are " << targetIndex.size() << " individuals in the target" << endl;
-	    cerr << "INFO: target ids: " << optarg << endl;
-	    break;
-	  case 'b':
-	    loadIndices(backgroundIndex, optarg);
-	    cerr << "INFO: there are " << backgroundIndex.size() << " individuals in the background" << endl;
-	    cerr << "INFO: background ids: " << optarg << endl;
-	    break;
-	  case 'f':
-	    cerr << "INFO: file: " << optarg  <<  endl;
-	    filename = optarg;
-	    break;
-	  case 'r':
-            cerr << "INFO: set seqid region to : " << optarg << endl;
-	    region = optarg;
-	    break;
-	  default:
-	    break;
-	  }
+      switch (iarg)
+      {
+        case 'h':
+          printHelp();
+        case 'v':
+          printVersion();
+        case 'y':
+          type = optarg;
+          break;
+        case 't':
+          loadIndices(targetIndex, optarg);
+          cerr << "INFO: there are " << targetIndex.size() << " individuals in the target" << endl;
+          cerr << "INFO: target ids: " << optarg << endl;
+          break;
+        case 'b':
+          loadIndices(backgroundIndex, optarg);
+          cerr << "INFO: there are " << backgroundIndex.size() << " individuals in the background" << endl;
+          cerr << "INFO: background ids: " << optarg << endl;
+          break;
+        case 'f':
+          cerr << "INFO: file: " << optarg  <<  endl;
+          filename = optarg;
+          break;
+        case 'r':
+          cerr << "INFO: set seqid region to : " << optarg << endl;
+          region = optarg;
+          break;
+        default:
+          break;
       }
+    }
 
     map<string, int> okayGenotypeLikelihoods;
     okayGenotypeLikelihoods["PL"] = 1;
@@ -471,7 +471,6 @@ int main(int argc, char** argv) {
     }
 
 
-
     Variant var(variantFile);
 
     vector<string> samples = variantFile.sampleNames;
@@ -483,17 +482,17 @@ int main(int argc, char** argv) {
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
 
-      string samplename  = (*samp) ;
+      string samplename  = (*samp);
 
-      if(targetIndex.find(index) != targetIndex.end() ){
+      if(targetIndex.find(index) != targetIndex.end()){
         iti.push_back(indexi);
-	//	itot.push_back(indexi);
-	indexi++;
+        //	itot.push_back(indexi);
+        indexi++;
       }
       if(backgroundIndex.find(index) != backgroundIndex.end()){
         ibi.push_back(indexi);
-	//	itot.push_back(indexi);
-	indexi++;
+        //	itot.push_back(indexi);
+        indexi++;
       }
       index++;
     }
@@ -507,36 +506,35 @@ int main(int argc, char** argv) {
     vector<double>   afs;
 
     //string haplotypes [nsamples][2];
-	string **haplotypes = new string*[nsamples];
-	for (int i = 0; i < nsamples; i++) {
-	  haplotypes[i] = new string[2];
-	}
+    string **haplotypes = new string*[nsamples];
+    for (int i = 0; i < nsamples; i++) {
+      haplotypes[i] = new string[2];
+    }
 
     string currentSeqid = "NA";
 
     int count = 0;
     while (variantFile.getNextVariant(var)) {
       count++;
-      //cerr << count << endl;
 
       if(!var.isPhased()){
-	cerr <<"FATAL: Found an unphased variant. All genotypes must be phased!" << endl;
-	printHelp();
-	return(1);
+        cerr <<"FATAL: Found an unphased variant. All genotypes must be phased!" << endl;
+        printHelp();
+        return(1);
       }
 
-      if(var.alt.size() > 1){
-	continue;
+      if (var.alt.size() > 1){
+        continue;
       }
 
       if(currentSeqid != var.sequenceName){
-	if(haplotypes[0][0].length() > 10){
-	  calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
-	}
-	clearHaplotypes(haplotypes, nsamples);
-	positions.clear();
-	currentSeqid = var.sequenceName;
-	afs.clear();
+        if(haplotypes[0][0].length() > 10){
+          calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
+        }
+        clearHaplotypes(haplotypes, nsamples);
+        positions.clear();
+        currentSeqid = var.sequenceName;
+        afs.clear();
       }
 
       vector < map< string, vector<string> > > target, background, total;
@@ -544,26 +542,25 @@ int main(int argc, char** argv) {
       int sindex = 0;
 
       for(int nsamp = 0; nsamp < nsamples; nsamp++){
+        map<string, vector<string> > sample = var.samples[samples[nsamp]];
 
-	map<string, vector<string> > sample = var.samples[ samples[nsamp]];
+        if(targetIndex.find(sindex) != targetIndex.end() ){
+          target.push_back(sample);
+          total.push_back(sample);
+        }
+        if(backgroundIndex.find(sindex) != backgroundIndex.end()){
+          background.push_back(sample);
+          total.push_back(sample);
+        }
 
-	if(targetIndex.find(sindex) != targetIndex.end() ){
-	  target.push_back(sample);
-	  total.push_back(sample);
-	}
-	if(backgroundIndex.find(sindex) != backgroundIndex.end()){
-	  background.push_back(sample);
-	  total.push_back(sample);
-	}
-
-	sindex += 1;
+        sindex += 1;
       }
 
       using Detail::makeUnique;
 
-      unique_ptr<genotype> populationTarget    ;
+      unique_ptr<genotype> populationTarget;
       unique_ptr<genotype> populationBackground;
-      unique_ptr<genotype> populationTotal     ;
+      unique_ptr<genotype> populationTotal;
 
       if (type == "PL"){
         populationTarget     = makeUnique<pl>();
@@ -591,23 +588,12 @@ int main(int argc, char** argv) {
 
 
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){
-	;
-	;	
-	
-	continue;
+        continue;
       }
 
-
-
-	afs.push_back(populationTotal->af);
-	positions.push_back(var.position);
-	loadPhased(haplotypes, populationTotal.get(), nsamples);
-
-	;
-	;	
-	
-
-
+      afs.push_back(populationTotal->af);
+      positions.push_back(var.position);
+      loadPhased(haplotypes, populationTotal.get(), nsamples);
     }  
 
     calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
