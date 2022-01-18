@@ -566,27 +566,23 @@ int main(int argc, char** argv) {
       unique_ptr<genotype> populationBackground;
       unique_ptr<genotype> populationTotal     ;
 
-      if(type == "PL"){
-	populationTarget     = makeUnique<pl>();
-	populationBackground = makeUnique<pl>();
-	populationTotal      = makeUnique<pl>();
-      }
-      if(type == "GL"){
-	populationTarget     = makeUnique<gl>();
-	populationBackground = makeUnique<gl>();
-	populationTotal      = makeUnique<gl>();
-      }
-      if(type == "GP"){
-	populationTarget     = makeUnique<gp>();
-	populationBackground = makeUnique<gp>();
-	populationTotal      = makeUnique<gp>();
-      }
-      if(type == "GT"){
+      if (type == "PL"){
+        populationTarget     = makeUnique<pl>();
+        populationBackground = makeUnique<pl>();
+        populationTotal      = makeUnique<pl>();
+      } else if (type == "GL"){
+        populationTarget     = makeUnique<gl>();
+        populationBackground = makeUnique<gl>();
+        populationTotal      = makeUnique<gl>();
+      } else if (type == "GP"){
+        populationTarget     = makeUnique<gp>();
+        populationBackground = makeUnique<gp>();
+        populationTotal      = makeUnique<gp>();
+      } else if (type == "GT"){
         populationTarget     = makeUnique<gt>();
-	populationBackground = makeUnique<gt>();
+        populationBackground = makeUnique<gt>();
         populationTotal      = makeUnique<gt>();
       }
-
 
       populationTarget->loadPop(target,         var.sequenceName, var.position);
 
