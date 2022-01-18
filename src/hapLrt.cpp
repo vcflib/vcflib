@@ -407,14 +407,13 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["GP"] = 1;
     okayGenotypeLikelihoods["GT"] = 1;
 
-
     if(type == "NA"){
-      cerr << "FATAL: failed to specify genotype likelihood format : PL or GL" << endl;
+      cerr << "FATAL: failed to specify genotype likelihood format : PL, GL or GP" << endl;
       printHelp();
       return 1;
     }
     if(okayGenotypeLikelihoods.find(type) == okayGenotypeLikelihoods.end()){
-      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL or GL" << endl;
+      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL, GL or GP" << endl;
       printHelp();
       return 1;
     }
