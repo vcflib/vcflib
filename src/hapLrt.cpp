@@ -48,11 +48,11 @@ void printHelp(void){
   cerr << "INFO: Usage: hapLRT  --target 0,1,2,3,4,5,6,7 --background 11,12,13,16,17,19,22 --type GP --file my.vcf                                     " << endl;
   cerr << endl;
 
-  cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        " << endl;
-  cerr << "INFO: required: b,background -- argument: a zero base comma separated list of background individuals corrisponding to VCF columns    " << endl;
+  cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        " << endl;
+  cerr << "INFO: required: b,background -- argument: a zero base comma separated list of background individuals corresponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
   cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
-  cerr << "INFO: optional: r,region     -- argument: a genomice range to calculate hapLrt on in the format : \"seqid:start-end\" or \"seqid\" " << endl;
+  cerr << "INFO: optional: r,region     -- argument: a genomic range to calculate hapLrt on in the format : \"seqid:start-end\" or \"seqid\" " << endl;
   cerr << endl;
   cerr << endl << "Type: genotype" << endl << endl;
 
