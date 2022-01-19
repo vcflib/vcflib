@@ -4,7 +4,7 @@
 ;;
 ;; To get a development container (emacs shell will work)
 ;;
-;;   guix environment -C -l guix.scm
+;;   guix shell -C -D -f guix.scm
 ;;
 ;; For the tests you need /usr/bin/env. In a container create it with
 ;;
