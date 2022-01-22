@@ -1,4 +1,4 @@
-iFor contributions
+For contributions
 see
 [contributors](https://github.com/vcflib/vcflib/graphs/contributors)
 and
@@ -9,13 +9,14 @@ and
 This is a maintenance release of vcflib.
 
 + Merge intervaltree changes (thanks @jnunn and @timmassingham)
-+ Build with gcc-11
++ Built with gcc-11
 + Fix issue #251 hapLrt: fix segfault when accessing genotype field. (thanks @mphschmitt)
 + Fix vcfflatten: fix segfault when no 'AF' field is present (#47, thanks @mphschmitt)
 + Fixes on vcfnulldotslashdot #310 (thanks @WinterFor)
 + Fix issue #301: Replace raw pointer usage with std::unique_ptr #306 (thanks @Glebanister)
 + Fix man page installation #321 (thanks @alexreg)
 + Use `guix shell` instead of `guix environment` for development
++ Regenerated online docs
 + README: add matrix badge (removed gitter badge)
 
 ## ChangeLog v1.0.2 (20210104)
