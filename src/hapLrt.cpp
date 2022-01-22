@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals
+  // zero based index for the target and background individuals
 
   map<int, int> targetIndex, backgroundIndex;
 
@@ -481,7 +481,7 @@ int main(int argc, char** argv) {
 
     vector<int> ibi, iti, itot;
 
-    int index, indexi = 0;
+    int index = 0, indexi = 0;
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
 
