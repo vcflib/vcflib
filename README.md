@@ -317,6 +317,8 @@ Note, if you have an existing repo update submodules with
 
 ```sh
 git submodule update --init --recursive --progress
+cd build
+cmake --build . --target clean
 ```
 
 Build dependencies can be viewed in the Travis-CI and github-CI
