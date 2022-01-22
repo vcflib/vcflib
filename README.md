@@ -13,7 +13,11 @@ describes reference-indexed variations between individuals.  VCF
 provides a common interchange format for the description of variation
 in individuals and populations of samples, and has become the
 *de facto* standard reporting format for a wide array of genomic
-variant detectors.
+variant detectors. See also
+
+Vcflib and tools for processing the VCF variant call format;
+Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins;
+doi: https://doi.org/10.1101/2021.05.21.445151
 
 vcflib provides methods to manipulate and interpret sequence variation
 described by VCF.  It is both:
@@ -53,6 +57,8 @@ Short index:
 
 ## INSTALL
 
+For latest updates see [RELEASE NOTES](./RELEASE_NOTES.md).
+
 ### [Bioconda](https://bioconda.github.io/user/install.html)
 
 Conda installs in user land without root access
@@ -79,11 +85,13 @@ apt-get install libvcflib-tools libvcflib-dev
 
 ### [GNU Guix](https://guix.gnu.org/)
 
-We develop against guix
+We develop against guix and vcflib is packaged as
 
 ```sh
 guix package -i vcflib
 ```
+
+See also the Guix shell below.
 
 ## USAGE
 
@@ -302,6 +310,12 @@ ctest --verbose
 ```
 
 Executables are built into the `./build` directory in the repository.
+
+Note, if you have an existing repo update submodules with
+
+```sh
+git submodule update --init --recursive --progress
+```
 
 Build dependencies can be viewed in the Travis-CI and github-CI
 scripts (see badges above), as well as [guix.scm](./guix.scm) used by
