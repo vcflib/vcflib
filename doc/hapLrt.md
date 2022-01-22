@@ -28,11 +28,11 @@ Output : 4 columns :
      5. p-value from LRT                         
      6. sign                                     
 
-required: t,target     -- argument: a zero base comma separated list of target individuals corrisponding to VCF columns        
-required: b,background -- argument: a zero base comma separated list of background individuals corrisponding to VCF columns    
+required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        
+required: b,background -- argument: a zero base comma separated list of background individuals corresponding to VCF columns    
 required: f,file       -- argument: a properly formatted phased VCF file                                                       
 required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  
-optional: r,region     -- argument: a genomice range to calculate **hapLrt** on in the format : "seqid:start-end" or "seqid" 
+optional: r,region     -- argument: a genomic range to calculate **hapLrt** on in the format : "seqid:start-end" or "seqid" 
 
 
 Type: genotype
@@ -67,7 +67,7 @@ Type: genotype
 
 # LICENSE
 
-Copyright 2011-2021 (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-2022 (C) Erik Garrison and vcflib contributors. MIT licensed.
 
 <!--
   Created with ./scripts/bin2md.rb scripts/bin2md-template.erb
