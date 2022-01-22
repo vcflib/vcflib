@@ -548,16 +548,7 @@ int main(int argc, char** argv) {
       for(int nsamp = 0; nsamp < nsamples; nsamp++){
         map<string, vector<string> > sample = var.samples[samples[nsamp]];
 
-        /* Accessing to a key not defined in a map creates a default constructed
-         * value for this key.
-         * Thus, checking for key: 'type' in samples creates a default value for
-         * it if it does not exist, which changes the output of the program from
-         * -nan to very small decimal values when reading it in
-         * genotype::loadPop().
-         * We have to check from var.samples instead to make sure not to change
-         * the behavior of the program.
-         */
-        if(!var.samples[samples[nsamp]][type].size())
+        if(!sample[type].size())
         {
           cerr << "Bad file format: genotype field " << type << " is not present for: " << var.sequenceName << " " << var.position << endl;
           exit(1);
