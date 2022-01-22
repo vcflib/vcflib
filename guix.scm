@@ -23,6 +23,7 @@
   (gnu packages bioinformatics)
   (gnu packages build-tools)
   (gnu packages curl)
+  (gnu packages gcc)
   (gnu packages haskell-xyz) ; pandoc
   (gnu packages llvm)
   (gnu packages python)
@@ -50,6 +51,7 @@
     (inputs
      `(("curl" ,curl)
        ("fastahack" ,fastahack)
+       ("gcc" ,gcc-11)    ;; test against latest
        ("htslib" ,htslib)
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
