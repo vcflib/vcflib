@@ -4,6 +4,12 @@
 
 [![Github-CI](https://github.com/vcflib/vcflib/workflows/CI/badge.svg)](https://github.com/vcflib/vcflib/actions?query=workflow%3ACI) [![Travis-CI](https://travis-ci.com/vcflib/vcflib.svg?branch=master)](https://travis-ci.com/github/vcflib/vcflib) [![AnacondaBadge](https://anaconda.org/bioconda/vcflib/badges/installer/conda.svg)](https://anaconda.org/bioconda/vcflib) [![DL](https://anaconda.org/bioconda/vcflib/badges/downloads.svg)](https://anaconda.org/bioconda/vcflib) [![BrewBadge](https://img.shields.io/badge/%F0%9F%8D%BAbrew-vcflib-brightgreen.svg)](https://github.com/brewsci/homebrew-bio) [![GuixBadge](https://img.shields.io/badge/gnuguix-vcflib-brightgreen.svg)](https://www.gnu.org/software/guix/packages/V/) [![DebianBadge](https://badges.debian.net/badges/debian/testing/libvcflib-dev/version.svg)](https://packages.debian.org/testing/libvcflib-dev) [![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html) [![Chat on Matrix](https://matrix.to/img/matrix-badge.svg)](https://matrix.to/#/#vcflib:matrix.org)
 
+Vcflib and related tools are the workhorses in bioinformatics for processing the VCF variant calling format. See
+
+Vcflib and tools for processing the VCF variant call format;
+Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins;
+doi: https://doi.org/10.1101/2021.05.21.445151
+
 ## overview
 
 The [Variant Call Format
@@ -13,11 +19,7 @@ describes reference-indexed variations between individuals.  VCF
 provides a common interchange format for the description of variation
 in individuals and populations of samples, and has become the
 *de facto* standard reporting format for a wide array of genomic
-variant detectors. See also
-
-Vcflib and tools for processing the VCF variant call format;
-Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins;
-doi: https://doi.org/10.1101/2021.05.21.445151
+variant detectors.
 
 vcflib provides methods to manipulate and interpret sequence variation
 described by VCF.  It is both:
