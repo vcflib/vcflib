@@ -51,7 +51,7 @@ void printHelp(void){
   cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        " << endl;
   cerr << "INFO: required: b,background -- argument: a zero base comma separated list of background individuals corresponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
-  cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
+  cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL, GT or GP                                                  " << endl;
   cerr << "INFO: optional: r,region     -- argument: a genomic range to calculate hapLrt on in the format : \"seqid:start-end\" or \"seqid\" " << endl;
   cerr << endl;
   cerr << endl << "Type: genotype" << endl << endl;
@@ -408,12 +408,12 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["GT"] = 1;
 
     if(type == "NA"){
-      cerr << "FATAL: failed to specify genotype likelihood format : PL, GL or GP" << endl;
+      cerr << "FATAL: failed to specify genotype likelihood format : PL, GL, GT or GP" << endl;
       printHelp();
       return 1;
     }
     if(okayGenotypeLikelihoods.find(type) == okayGenotypeLikelihoods.end()){
-      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL, GL or GP" << endl;
+      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL, GL GT or GP" << endl;
       printHelp();
       return 1;
     }
