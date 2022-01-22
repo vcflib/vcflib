@@ -1,4 +1,4 @@
-;; To use this file to build HEAD of freebayes:
+;; To use this file to build HEAD of vcflib:
 ;;
 ;;   guix build -f guix.scm
 ;;
