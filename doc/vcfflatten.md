@@ -7,7 +7,7 @@
 
 # SYNOPSIS
 
-**vcfflatten** [file]
+**vcfflatten** [options][file] -h --help display this help message and exit. -i --ignore-errors do not flatten locus if 'AF' is not specified.
 
 # DESCRIPTION
 
@@ -52,7 +52,7 @@ Type: transformation
 
 # LICENSE
 
-Copyright 2011-2021 (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-2022 (C) Erik Garrison and vcflib contributors. MIT licensed.
 
 <!--
   Created with ./scripts/bin2md.rb scripts/bin2md-template.erb

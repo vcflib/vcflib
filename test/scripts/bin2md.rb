@@ -203,7 +203,7 @@ if create_index
   renderer = ERB.new(File.read("./test/scripts/index-item.erb"))
   File.open("./doc/vcflib.md","w") { |f|
     f.print <<HEADER
-% vcflib(1) vcflib | vcfilb (index)
+% vcflib(1) vcflib | vcflib (index)
 % Erik Garrison and vcflib contributors
 
 # NAME
