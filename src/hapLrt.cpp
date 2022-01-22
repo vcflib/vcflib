@@ -22,6 +22,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <limits.h>
 
 using namespace std;
 using namespace vcflib;
@@ -166,6 +167,8 @@ void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]
 
 double mean(int data[], int n){
 
+  if(!n)
+    return -std::numeric_limits<double>::quiet_NaN();
   int sum;
 
   for(int i = 0; i < n; i++){
