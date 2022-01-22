@@ -45,7 +45,7 @@
 (define-public vcflib-git
   (package
     (name "vcflib-git")
-    (version (git-version "1.0.2" "HEAD" %git-commit))
+    (version (git-version "1.0.3" "HEAD" %git-commit))
     (source (local-file %source-dir #:recursive? #t))
     (build-system cmake-build-system)
     (inputs
