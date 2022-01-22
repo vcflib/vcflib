@@ -169,7 +169,8 @@ double mean(int data[], int n){
 
   if(!n)
     return -std::numeric_limits<double>::quiet_NaN();
-  int sum;
+
+  int sum = 0;
 
   for(int i = 0; i < n; i++){
     sum += data[i];
