@@ -559,6 +559,14 @@ int main(int argc, char** argv) {
           exit(1);
         }
 
+        if((type == "GL" || type == "GP" || type == "PL") && sample[type].size() != 3)
+        {
+          cerr << "Bad file format: genotype field " << type << " should have 3 values but has only ";
+          cerr << sample[type].size() << " for: " << var.sequenceName << " " << var.position;
+          cerr << " in sample " << nsamp << endl;
+          exit(1);
+        }
+
         if(targetIndex.find(sindex) != targetIndex.end() ){
           target.push_back(sample);
           total.push_back(sample);
