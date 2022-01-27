@@ -569,7 +569,7 @@ int main(int argc, char** argv) {
     vector<string> samples = variantFile.sampleNames;
     vector<int>    target_h, background_h;
 
-    int index, indexi = 0;
+    int index = 0, indexi = 0;
 
     cerr << "INFO: there are " << samples.size() << " individuals in the VCF" << endl;
 
