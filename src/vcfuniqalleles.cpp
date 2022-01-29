@@ -46,11 +46,6 @@ Type: filter
 
     cout << variantFile.header << endl;
 
-    string lastsn;
-    long int lastpos;
-    string lastref;
-    vector<string> lastalt;
-
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         set<string> alleles;
