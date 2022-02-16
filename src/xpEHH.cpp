@@ -332,7 +332,7 @@ int main(int argc, char** argv) {
 
     vector<int> target_h, background_h;
 
-    int index, indexi = 0;
+    int index = 0, indexi = 0;
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
 
