@@ -196,7 +196,7 @@ public:
     bool isDeletion(void);
     bool isIndel(void);
     */
-    VariantAllele(string r, string a, long p)
+    VariantAllele(string const & r, string const & a, long p)
         : ref(r), alt(a), position(p)
     {
         stringstream s;
