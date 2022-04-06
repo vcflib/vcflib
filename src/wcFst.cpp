@@ -268,8 +268,8 @@ int main(int argc, char** argv) {
           populationBackground = makeUnique<gt>();
         }
 
-	populationTarget->loadPop(target, var.sequenceName, var.position);
-	populationBackground->loadPop(background, var.sequenceName, var.position);
+	populationTarget->loadPop(target, var.position);
+	populationBackground->loadPop(background, var.position);
 
 	if(populationTarget->af == -1 || populationBackground->af == -1){
 	  continue;
