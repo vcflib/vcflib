@@ -255,8 +255,6 @@ void pooled::estimatePosterior(void){
 }
 
 void genotype::loadPop( vector< map< string, vector<string> > >& group, string seqid, long int position){
-
-  seqid = seqid;
   pos   = position  ;
 
   vector< map< string, vector<string> > >::iterator targ_it = group.begin();
