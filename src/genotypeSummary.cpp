@@ -345,7 +345,7 @@ int main(int argc, char** argv) {
     populationTarget     = makeUnique<gt>();
 	}
 
-	populationTarget->loadPop(target, var.sequenceName, var.position);
+	populationTarget->loadPop(target, var.position);
 
 	for(int i = 0; i < populationTarget->genoIndex.size() ; i++){
 	  if(populationTarget->genoIndex[i] == -1){
