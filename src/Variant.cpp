@@ -1658,7 +1658,7 @@ vector<string> VariantCallFile::formatIds(void) {
     return tags;
 }
 
-void VariantCallFile::removeInfoHeaderLine(string tag) {
+void VariantCallFile::removeInfoHeaderLine(string const & tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
     string id = "ID=" + tag + ",";
@@ -1675,7 +1675,7 @@ void VariantCallFile::removeInfoHeaderLine(string tag) {
     header = join(newHeader, "\n");
 }
 
-void VariantCallFile::removeGenoHeaderLine(string tag) {
+void VariantCallFile::removeGenoHeaderLine(string const & tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
     string id = "ID=" + tag + ",";
