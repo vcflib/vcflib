@@ -598,11 +598,11 @@ int main(int argc, char** argv) {
         populationTotal      = makeUnique<gt>();
       }
 
-      populationTarget->loadPop(target,         var.sequenceName, var.position);
+      populationTarget->loadPop(target,         var.position);
 
-      populationBackground->loadPop(background, var.sequenceName, var.position);
+      populationBackground->loadPop(background, var.position);
 
-      populationTotal->loadPop(total,           var.sequenceName, var.position);
+      populationTotal->loadPop(total,           var.position);
 
 
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){

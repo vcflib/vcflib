@@ -369,7 +369,7 @@ int main(int argc, char** argv) {
 	populationTarget     = makeUnique<gt>();
       }
 
-      populationTarget->loadPop(target, var.sequenceName, var.position);
+      populationTarget->loadPop(target, var.position);
 
       positions.push_back(var.position);
       afs.push_back(populationTarget->af);

@@ -40,7 +40,7 @@ public:
   double alpha; 
   double beta ;
 
-  virtual void loadPop(vector< map< string, vector<string> > >& group, string seqid, long int position) = 0;
+  virtual void loadPop(vector< map< string, vector<string> > >& group, long int position) = 0;
   virtual void estimatePosterior() = 0 ;
   virtual ~zvar() = 0;
   void setPopName(string  popName);
@@ -64,7 +64,7 @@ public:
   vector< vector < double > > genoLikelihoodsCDF;
 
   virtual double unphred(map< string, vector<string> > & geno, int index) = 0; 
-  virtual void loadPop(vector< map< string, vector<string> > >& group, string seqid, long int position);
+  virtual void loadPop(vector< map< string, vector<string> > >& group, long int position);
   virtual ~genotype() = 0;
   void estimatePosterior();
   
@@ -81,7 +81,7 @@ public:
   vector<double> nrefs;
   vector<double> afs  ; 
 
-  void loadPop(vector< map< string, vector<string> > >& group, string seqid, long int position);
+  void loadPop(vector< map< string, vector<string> > >& group, long int position);
   void estimatePosterior();
 
   ~pooled();
