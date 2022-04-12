@@ -11,6 +11,7 @@ find_package(PkgConfig REQUIRED)
 include(FindBZip2)
 include(FindLibLZMA)
 include(FindZLIB)
+include(FindCURL) # for htslib
 
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
@@ -263,21 +264,28 @@ add_definitions(-DVERSION="${BUILD_NUMBER}")
 
 if (HTSLIB_LOCAL)
 
-#   include_directories(${HTSLIB_LOCAL})
+include_directories(${HTSLIB_LOCAL})
 
-ExternalProject_Add(htslib
+ExternalProject_Add(htslib-EXT
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/${HTSLIB_LOCAL}"
   UPDATE_COMMAND ""
+  CONFIGURE_COMMAND ""
   INSTALL_COMMAND ""
+  BUILD_IN_SOURCE ON
   BUILD_COMMAND $(MAKE) lib-static
 )
-ExternalProject_Get_property(htslib SOURCE_DIR)
+ExternalProject_Get_property(htslib-EXT SOURCE_DIR)
+ExternalProject_Get_property(htslib-EXT INSTALL_DIR)
 set(htslib_INCLUDE "${SOURCE_DIR}")
+set(htslib_static "${SOURCE_DIR}/libhts.a")
+set(htslib_lib "${htslib_static}")
 
-# add_library(htslib STATIC IMPORTED)
+add_custom_target(htslib
+  DEPENDS htslib-EXT
+  VERBATIM)
 
 set_property(TARGET htslib PROPERTY
-  IMPORTED_LOCATION ${HTSLIB_LOCAL}/libhts.a)
+   IMPORTED_LOCATION ${hstlib_lib})
 add_dependencies(htslib htslib)
 
 # If the user wants to configure our HTSlib to build with libddeflate, we need
@@ -285,18 +293,34 @@ add_dependencies(htslib htslib)
 # that, pass -DHTSLIB_EXTRA_LIBS="-ldeflate" when configuring the project with
 # cmake.
 # TODO: Stop vendoring in htslib and just use find_package
+
 set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
 set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
 endif(HTSLIB_LOCAL)
+
+set(vcflib_DEPS
+  LIBCURL
+)
+
+set(vcflib_LIBS
+  vcflib
+  ${htslib_lib}
+  ${CURL_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${LIBLZMA_LIBRARIES}
+  ${BZIP2_LIBRARIES}
+  ${TABIXPP_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
+)
 
 # ---- Build all
 
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
-    target_include_directories(${BIN} PUBLIC ${TABIXPP_LIBRARIES} ${HTSLIB_INCLUDE_DIRS})
-    target_link_libraries(${BIN} vcflib -DGIT_VERSION=0.9.0 ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+    target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
+    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS})
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
