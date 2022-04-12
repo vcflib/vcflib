@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
 project(vcflib)
+
+set(CMAKE_CXX_STANDARD 17)
 
 include(ExternalProject)
 include(FeatureSummary)
@@ -34,8 +36,17 @@ pkg_check_modules(HTSLIB htslib)
 pkg_check_modules(TABIXPP tabixpp) # Optional
 
 # ---- Build switches
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++0x -D_FILE_OFFSET_BITS=64 -Isrc -O3")
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  set(EXTRA_FLAGS "-Ofast -march=native -D_FILE_OFFSET_BITS=64")
+  set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG") # reset CXX_FLAGS to replace -O3 with -Ofast
+endif()
+
+if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
+  set (CMAKE_C_FLAGS "${OpenMP_C_FLAGS} ${EXTRA_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS} ${EXTRA_FLAGS}")
+endif ()
 
 if(OPENMP)
   find_package(OpenMP REQUIRED)
