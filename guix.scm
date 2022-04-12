@@ -52,13 +52,13 @@
      `(("curl" ,curl)
        ("fastahack" ,fastahack)
        ("gcc" ,gcc-11)    ;; test against latest
-       ("htslib" ,htslib)
+       ; ("htslib" ,htslib)
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
        ("ruby" ,ruby) ;; for generating man pages
-       ("smithwaterman" ,smithwaterman)
-       ("tabixpp" ,tabixpp)
+       ; ("smithwaterman" ,smithwaterman)
+       ; ("tabixpp" ,tabixpp)
        ("xz" ,xz)
        ("zlib" ,zlib)))
     (native-inputs

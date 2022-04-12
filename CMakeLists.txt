@@ -19,7 +19,7 @@ feature_summary(
 # ---- Options
 
 option(BUILD_DOC "Build documentation" ON)
-option(OPENMP "Enable OpenMP" OFF)
+option(OPENMP "Enable OpenMP" ON)
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 
@@ -32,8 +32,8 @@ set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
 find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
-pkg_check_modules(HTSLIB htslib)
-pkg_check_modules(TABIXPP tabixpp) # Optional
+pkg_check_modules(HTSLIB htslib)   # Optionally builds from contrib/
+pkg_check_modules(TABIXPP tabixpp) # Optionally builds from contrib/
 
 # ---- Build switches
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -70,12 +70,17 @@ include_directories(smithwaterman)
 include_directories(multichoose)
 include_directories(filevercmp)
 
-if(HTSLIB_LOCAL)
-  include_directories(
-  ${HTSLIB_LOCAL}
-  tabixpp/htslib
-  contrib/htslib)
-endif(HTSLIB_LOCAL)
+if(NOT HTSLIB_FOUND)
+  set(HTSLIB_LOCAL "contrib/tabixpp/htslib")
+endif()
+
+if (NOT TABIX_FOUND)
+  include_directories(contrib/tabixpp)
+  include_directories(contrib/htslib)
+  set(tabixpp_SOURCE
+    contrib/tabixpp/tabix.cpp
+  )
+endif()
 
 file(GLOB INCLUDES
   src/*.h*
@@ -109,6 +114,7 @@ add_library(vcflib STATIC
     smithwaterman/LeftAlign.cpp
     fsom/fsom.c
     filevercmp/filevercmp.c
+    ${tabixpp_SOURCE}
     )
 
 set(BINS
@@ -257,20 +263,22 @@ add_definitions(-DVERSION="${BUILD_NUMBER}")
 
 if (HTSLIB_LOCAL)
 
-ExternalProject_Add(htslib-build
-  SOURCE_DIR ${HTSLIB_LOCAL}
-  BINARY_DIR ${HTSLIB_LOCAL}
-  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/htslib
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND $(MAKE) lib-static
-  INSTALL_COMMAND ""
-  )
+#   include_directories(${HTSLIB_LOCAL})
 
-add_library(htslib STATIC IMPORTED)
+ExternalProject_Add(htslib
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/${HTSLIB_LOCAL}"
+  UPDATE_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_COMMAND $(MAKE) lib-static
+)
+ExternalProject_Get_property(htslib SOURCE_DIR)
+set(htslib_INCLUDE "${SOURCE_DIR}")
+
+# add_library(htslib STATIC IMPORTED)
 
 set_property(TARGET htslib PROPERTY
   IMPORTED_LOCATION ${HTSLIB_LOCAL}/libhts.a)
-add_dependencies(htslib htslib-build)
+add_dependencies(htslib htslib)
 
 # If the user wants to configure our HTSlib to build with libddeflate, we need
 # to make sure to link against libdeflate as a transitive dependency. To do
@@ -288,7 +296,7 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     target_include_directories(${BIN} PUBLIC ${TABIXPP_LIBRARIES} ${HTSLIB_INCLUDE_DIRS})
-    target_link_libraries(${BIN} vcflib tabixpp -DGIT_VERSION=0.9.0 ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
+    target_link_libraries(${BIN} vcflib -DGIT_VERSION=0.9.0 ${TABIXPP_LIBRARIES} ${HTSLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${BZIP2_LIBRARIES})
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
