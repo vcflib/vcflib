@@ -335,12 +335,6 @@ enable_testing()
 
 # ---- Test
 
-add_test(
-    NAME RunTests
-    COMMAND "make"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-)
-
 function(add_pytest TEST_FILE)
   add_test(
       NAME ${TEST_FILE}
