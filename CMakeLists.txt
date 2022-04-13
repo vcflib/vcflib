@@ -72,7 +72,7 @@ include_directories(multichoose)
 include_directories(filevercmp)
 
 if(NOT HTSLIB_FOUND)
-  set(HTSLIB_LOCAL "contrib/tabixpp/htslib")
+  set(HTSLIB_LOCAL contrib/tabixpp/htslib)
 endif()
 
 if (NOT TABIX_FOUND)
@@ -82,6 +82,8 @@ if (NOT TABIX_FOUND)
     contrib/tabixpp/tabix.cpp
   )
 endif()
+
+set(WFA_LOCAL contrib/WFA2-lib)
 
 file(GLOB INCLUDES
   src/*.h*
@@ -307,6 +309,18 @@ if (HTSLIB_LOCAL)
 
 endif(HTSLIB_LOCAL)
 
+ExternalProject_Add(wfa-EXT
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/${WFA_LOCAL}"
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_IN_SOURCE ON
+    BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 lib_wfa
+)
+add_custom_target(wfa
+    DEPENDS wfa-EXT
+    VERBATIM)
+
 set(vcflib_DEPS
   LIBCURL
 )
@@ -330,6 +344,7 @@ if (NOT BUILD_ONLY_LIB)
     target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
     target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS})
   endforeach(BIN ${BINS})
+  add_dependencies(vcfallelicprimitives wfa)
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
