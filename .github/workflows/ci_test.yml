@@ -10,7 +10,7 @@ jobs:
         python-version: [3.8]
     steps:
     - name: Install dependencies
-      run: sudo apt-get install cmake libhts-dev libtabixpp-dev libtabixpp0
+      run: sudo apt-get install cmake libhts-dev libtabixpp-dev libtabixpp0 libcurl4-openssl-dev
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v1
       with:
