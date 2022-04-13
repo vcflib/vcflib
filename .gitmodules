@@ -28,3 +28,6 @@
 [submodule "contrib/tabixpp"]
 	path = contrib/tabixpp
 	url = https://github.com/ekg/tabixpp.git
+[submodule "contrib/WFA2-lib"]
+	path = contrib/WFA2-lib
+	url = https://github.com/smarco/WFA2-lib.git
