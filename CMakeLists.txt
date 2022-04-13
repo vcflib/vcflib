@@ -91,7 +91,7 @@ file(GLOB INCLUDES
   fastahack/*.h*
   filevercmp/*.h*)
 
-add_library(vcflib STATIC
+set(vcflib_SOURCE
     src/Variant.h
     src/split.h
     src/pdflib.hpp
@@ -115,7 +115,14 @@ add_library(vcflib STATIC
     smithwaterman/LeftAlign.cpp
     fsom/fsom.c
     filevercmp/filevercmp.c
-    ${tabixpp_SOURCE}
+)
+
+if (NOT tabixpp_FOUND)
+    list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
+endif ()
+
+add_library(vcflib STATIC
+    ${vcflib_SOURCE}
     )
 
 set(BINS
@@ -264,29 +271,30 @@ add_definitions(-DVERSION="${BUILD_NUMBER}")
 
 if (HTSLIB_LOCAL)
 
-include_directories(${HTSLIB_LOCAL})
+  include_directories(${HTSLIB_LOCAL})
 
-ExternalProject_Add(htslib-EXT
-  SOURCE_DIR "${CMAKE_SOURCE_DIR}/${HTSLIB_LOCAL}"
-  UPDATE_COMMAND ""
-  CONFIGURE_COMMAND ""
-  INSTALL_COMMAND ""
-  BUILD_IN_SOURCE ON
-  BUILD_COMMAND $(MAKE) lib-static
-)
-ExternalProject_Get_property(htslib-EXT SOURCE_DIR)
-ExternalProject_Get_property(htslib-EXT INSTALL_DIR)
-set(htslib_INCLUDE "${SOURCE_DIR}")
-set(htslib_static "${SOURCE_DIR}/libhts.a")
-set(htslib_lib "${htslib_static}")
+  ExternalProject_Add(htslib-EXT
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/${HTSLIB_LOCAL}"
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_IN_SOURCE ON
+    BUILD_COMMAND $(MAKE) lib-static
+  )
+  ExternalProject_Get_property(htslib-EXT SOURCE_DIR)
+  ExternalProject_Get_property(htslib-EXT INSTALL_DIR)
+  set(htslib_INCLUDE "${SOURCE_DIR}")
+  set(htslib_static "${SOURCE_DIR}/libhts.a")
+  set(htslib_lib "${htslib_static}")
+  set(HTSLIB_LIBRARIES ${htslib_lib})
 
-add_custom_target(htslib
-  DEPENDS htslib-EXT
-  VERBATIM)
+  add_custom_target(htslib
+    DEPENDS htslib-EXT
+    VERBATIM)
 
-set_property(TARGET htslib PROPERTY
-   IMPORTED_LOCATION ${hstlib_lib})
-add_dependencies(htslib htslib)
+  set_property(TARGET htslib PROPERTY
+    IMPORTED_LOCATION ${hstlib_lib})
+  add_dependencies(htslib htslib)
 
 # If the user wants to configure our HTSlib to build with libddeflate, we need
 # to make sure to link against libdeflate as a transitive dependency. To do
@@ -294,8 +302,8 @@ add_dependencies(htslib htslib)
 # cmake.
 # TODO: Stop vendoring in htslib and just use find_package
 
-set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
-set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
+  set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
+  set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
 endif(HTSLIB_LOCAL)
 
@@ -305,7 +313,7 @@ set(vcflib_DEPS
 
 set(vcflib_LIBS
   vcflib
-  ${htslib_lib}
+  ${HTSLIB_LIBRARIES}
   ${CURL_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${LIBLZMA_LIBRARIES}
