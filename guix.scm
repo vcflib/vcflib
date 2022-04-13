@@ -9,6 +9,10 @@
 ;; For the tests you need /usr/bin/env. In a container create it with
 ;;
 ;;   mkdir -p /usr/bin ; ln -s $GUIX_ENVIRONMENT/bin/env /usr/bin/env
+;;
+;; or in one go
+;;
+;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env")
 
 
 (use-modules
@@ -27,7 +31,6 @@
   (gnu packages haskell-xyz) ; pandoc
   (gnu packages llvm)
   (gnu packages python)
-  ;; (gnu packages ninja)
   (gnu packages parallel)
   (gnu packages perl)
   (gnu packages perl6)
@@ -52,13 +55,13 @@
      `(("curl" ,curl)
        ("fastahack" ,fastahack)
        ("gcc" ,gcc-11)    ;; test against latest
-       ; ("htslib" ,htslib)
+       ("htslib" ,htslib)
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
        ("ruby" ,ruby) ;; for generating man pages
        ; ("smithwaterman" ,smithwaterman)
-       ; ("tabixpp" ,tabixpp)
+       ("tabixpp" ,tabixpp)
        ("xz" ,xz)
        ("zlib" ,zlib)))
     (native-inputs
