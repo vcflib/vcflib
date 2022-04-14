@@ -28,7 +28,7 @@
   (gnu packages build-tools)
   (gnu packages curl)
   (gnu packages gcc)
-  (gnu packages haskell-xyz) ; pandoc
+  (gnu packages haskell-xyz) ; pandoc for help files
   (gnu packages llvm)
   (gnu packages python)
   (gnu packages parallel)
