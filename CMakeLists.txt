@@ -315,7 +315,7 @@ ExternalProject_Add(wfa-EXT
     CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
-    BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 lib_wfa
+    BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa
 )
 add_custom_target(wfa
     DEPENDS wfa-EXT
