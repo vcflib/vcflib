@@ -19,14 +19,14 @@ std::string reverse_complement(const std::string& seq) {
     // The old implementation of this function forgot to null-terminate its
     // returned string. This implementation uses heavier-weight C++ stuff that
     // may be slower but should ensure that that doesn't happen again.
-    
+
     if (seq.size() == 0) {
         return seq;
     }
 
     string ret;
     ret.reserve(seq.size());
-    
+
     std::transform(seq.rbegin(), seq.rend(), std::back_inserter(ret), [](char in) -> char {
         bool lower_case = (in >= 'a' && in <= 'z');
         if (lower_case) {
@@ -39,7 +39,7 @@ std::string reverse_complement(const std::string& seq) {
         // Compute RC in terms of letter identity, and then lower-case if necessary.
         return rev_arr[((int) in) - 'A'] + (lower_case ? 32 : 0);
     });
-    
+
     return ret;
 }
 
@@ -50,12 +50,12 @@ std::string toUpper(const std::string& seq) {
 
     string ret;
     ret.reserve(seq.size());
-    
+
     std::transform(seq.begin(), seq.end(), std::back_inserter(ret), [](char in) -> char {
         // If it's lower-case, bring it down in value to upper-case.
         return (in >= 'a' && in <= 'z') ? (in - 32) : in;
     });
-    
+
     return ret;
 }
 
@@ -80,7 +80,7 @@ bool allATGCN(const string& s, bool allowLowerCase){
                 return false;
             }
         }
-        
+
     }
     return true;
 }
@@ -152,16 +152,16 @@ void Variant::parse(string& line, bool parseSamples) {
         }
         vector<string>::iterator sampleName = sampleNames.begin();
         vector<string>::iterator sample = fields.begin() + 9;
-        for (; sample != fields.end() && sampleName != sampleNames.end(); 
+        for (; sample != fields.end() && sampleName != sampleNames.end();
 	     ++sample, ++sampleName) {
 	  string& name = *sampleName;
-	  
+
 	  vector<string> samplefields = split(*sample, ':');
 	  vector<string>::iterator i = samplefields.begin();
-	  
-	  for (vector<string>::iterator f = format.begin(); 
+
+	  for (vector<string>::iterator f = format.begin();
 	       f != format.end(); ++f) {
-	    
+
 	    if(i != samplefields.end()){
 	      samples[name][*f] = split(*i, ','); ++i;
 	    }
@@ -172,7 +172,7 @@ void Variant::parse(string& line, bool parseSamples) {
 	    }
 	  }
 	}
- 
+
         if (sampleName != sampleNames.end()) {
             cerr << "error: more sample names in header than sample fields" << endl;
             cerr << "samples: " << join(sampleNames, " ") << endl;
@@ -202,9 +202,9 @@ bool Variant::hasSVTags() const{
 
 
 bool Variant::isSymbolicSV() const{
-    
+
     bool found_svtype = !getSVTYPE().empty();
-    
+
     bool ref_valid = allATGCN(this->ref);
     bool alts_valid = true;
     for (auto a : this->alt){
@@ -212,12 +212,12 @@ bool Variant::isSymbolicSV() const{
             alts_valid = false;
         }
     }
-    
+
     return (!ref_valid || !alts_valid) && (found_svtype);
 }
 
 string Variant::getSVTYPE(int altpos) const{
-    
+
     if (altpos > 0){
         // TODO: Implement multi-alt SVs
         return "";
@@ -239,7 +239,7 @@ string Variant::getSVTYPE(int altpos) const{
 int Variant::getMaxReferencePos(){
     if (this->canonical && this->info.find("END") != this->info.end()) {
         // We are cannonicalized and must have a correct END
-        
+
         int end = 0;
         for (auto s : this->info.at("END")){
             // Get the latest one defined.
@@ -247,14 +247,14 @@ int Variant::getMaxReferencePos(){
         }
         // Convert to 0-based.
         return end - 1;
-        
+
     }
 
     if (!this->isSymbolicSV()){
         // We don't necessarily have an END, but we don't need one
         return this->zeroBasedPosition() + this->ref.length() - 1;
     }
-    
+
     if (this->canonicalizable()){
         // We aren't canonical, but we could be.
         if (this->info.find("END") != this->info.end()){
@@ -266,7 +266,7 @@ int Variant::getMaxReferencePos(){
             }
             // Convert to 0-based.
             return end - 1;
-            
+
         }
         else if (this->info.find("SVLEN") != this->info.end()){
             // There's no endpoint, but we know an SVLEN.
@@ -278,9 +278,9 @@ int Variant::getMaxReferencePos(){
                     // Not a deletion, so doesn't affect any ref bases
                     continue;
                 }
-                deleted = max(-alt_len, deleted); 
+                deleted = max(-alt_len, deleted);
             }
-            
+
             // The anchoring base at POS gets added in (because it isn't
             // deleted) but then subtracted out (because we have to do that to
             // match non-SV deletions). For insertions, deleted is 0 and we
@@ -305,33 +305,33 @@ int Variant::getMaxReferencePos(){
 // or SVTYPE and SVLEN or END or SPAN or SEQ sufficient to define the variant.
 bool Variant::canonicalizable(){
     bool pre_canon = allATGCN(this->ref);
-    
+
     for (auto& a : this->alt){
         if (!allATGCN(a)){
             pre_canon = false;
         }
     }
-    
+
     if (pre_canon){
         // It came in in a fully specified way.
         // TODO: ideally, we'd check to make sure ref/alt lengths, svtypes, and ends line up right here.
         return true;
     }
-    
+
     string svtype = getSVTYPE();
-    
+
     if (svtype.empty()){
         // We have no SV type, so we can't interpret things.
         return false;
     }
-    
+
     // Check the tags
     bool has_len = this->info.count("SVLEN") && !this->info.at("SVLEN").empty();
     bool has_seq = this->info.count("SEQ") && !this->info.at("SEQ").empty();
     bool has_span = this->info.count("SPAN") && !this->info.at("SPAN").empty();
     bool has_end = this->info.count("END") && !this->info.at("END").empty();
-    
-    
+
+
     if (svtype == "INS"){
         // Insertions need a SEQ, SVLEN, or SPAN
         return has_seq || has_len || has_span;
@@ -352,34 +352,34 @@ bool Variant::canonicalizable(){
 }
 
 bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReference*> insertions, bool place_seq, int min_size){
-    
+
     // Nobody should call this without checking
     assert(canonicalizable());
-    
+
     // Nobody should call this twice
     assert(!this->canonical);
-    
+
     // Find where the inserted sequence can come from for insertions
     bool do_external_insertions = !insertions.empty();
     FastaReference* insertion_fasta;
     if (do_external_insertions){
         insertion_fasta = insertions[0];
     }
-    
+
     bool ref_valid = allATGCN(ref);
-    
+
     if (!ref_valid && !place_seq){
         // If the reference is invalid, and we aren't allowed to change the ref sequence,
         // we can't canonicalize the variant.
         return false;
     }
-    
+
     // Check the alts to see if they are not symbolic
     vector<bool> alt_i_atgcn (alt.size());
     for (int i = 0; i < alt.size(); ++i){
         alt_i_atgcn[i] = allATGCN(alt[i]);
     }
-    
+
     // Only allow single-alt variants
     bool single_alt = alt.size() == 1;
     if (!single_alt){
@@ -387,14 +387,14 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "Warning: multiple ALT alleles not yet allowed for SVs" << endl;
         return false;
     }
-    
+
     // Fill in the SV tags
     string svtype = getSVTYPE();
     bool has_len = this->info.count("SVLEN") && !this->info.at("SVLEN").empty();
     bool has_seq = this->info.count("SEQ") && !this->info.at("SEQ").empty();
     bool has_span = this->info.count("SPAN") && !this->info.at("SPAN").empty();
     bool has_end = this->info.count("END") && !this->info.at("END").empty();
-    
+
     // Where is the end, or where should it be?
     long info_end = 0;
     if (has_end) {
@@ -421,12 +421,12 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "Warning: could not set END info " << *this << endl;
         return false;
     }
-    
+
     // Commit back the END
     this->info["END"].resize(1);
     this->info["END"][0] = to_string(info_end);
     has_end = true;
-    
+
     // What is the variant length change?
     // We store it as absolute value
     long info_len = 0;
@@ -441,7 +441,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         // We always have the end by now
         // Deletion ends give you length change
         info_len = info_end - this->position;
-    } 
+    }
     else if (svtype == "INV"){
         // Inversions have 0 length change unless otherwise specified.
         info_len = 0;
@@ -454,7 +454,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "Warning: could not set SVLEN info " << *this << endl;
         return false;
     }
-    
+
     // Commit the SVLEN back
     if (svtype == "DEL"){
         // Should be saved as negative
@@ -468,7 +468,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
     }
     // Now the length change is known
     has_len = true;
-    
+
     // We also compute a span
     long info_span = 0;
     if (has_span){
@@ -489,32 +489,32 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         cerr << "Warning: could not set SPAN info " << *this << endl;
         return false;
     }
-    
+
     // Commit the SPAN back
     this->info["SPAN"].resize(1);
     this->info["SPAN"][0] = to_string(info_span);
     // Now the span change is known
     has_span = true;
-    
+
     if (info_end < this->position) {
         cerr << "Warning: SV END is before POS [canonicalize] " <<
         *this << endl << "END: " << info_end << "  " << "POS: " << this->position << endl;
         return false;
     }
-    
+
     if (has_seq) {
         // Force the SEQ to upper case, if already present
         this->info["SEQ"].resize(1);
         this->info["SEQ"][0] = toUpper(this->info["SEQ"][0]);
     }
-     
+
     // Set the other necessary SV Tags (SVTYPE, SEQ (if insertion))
     // Also check for agreement in the position tags
     if (svtype == "INS"){
         if (info_end != this->position){
             cerr << "Warning: insertion END and POS do not agree (complex insertions not canonicalizeable) [canonicalize] " <<
             *this << endl << "END: " << info_end << "  " << "POS: " << this->position << endl;
-            
+
             if (info_end == this->position + info_len) {
                 // We can probably guess what they meant here.
                 cerr << "Warning: VCF writer incorrecty produced END = POS + SVLEN for an insertion. Fixing END to POS." << endl;
@@ -524,19 +524,19 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 return false;
             }
         }
-        
+
         if (info_len != info_span){
             cerr << "Warning: insertion SVLEN and SPAN do not agree (complex insertions not canonicalizeable) [canonicalize] " <<
             *this << endl << "SVLEN: " << info_len << "  " << "SPAN: " << info_span << endl;
             return false;
         }
-       
+
         if (has_seq && allATGCN(this->info.at("SEQ")[0]) && this->info.at("SEQ")[0].size() != info_len){
             cerr << "Warning: insertion SVLEN and SEQ do not agree (complex insertions not canonicalizeable) [canonicalize] " <<
             *this << endl << "SVLEN: " << info_len << "  " << "SEQ length: " << this->info.at("SEQ")[0].size() << endl;
             return false;
         }
-       
+
         // Set REF
         string ref_base = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), 1));
         if (place_seq){
@@ -557,20 +557,20 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             if (place_seq){
                 this->alt[0].assign( ref_base + this->info.at("SEQ")[0] );
             }
-            
+
         }
         else if (alt_i_atgcn[0] && !has_seq){
             string s = this->alt[0];
             s = toUpper(s.substr(this->ref.length()));
             this->info["SEQ"].resize(1);
             this->info.at("SEQ")[0].assign(s);
-            
+
             if (s.size() != info_len){
                 cerr << "Warning: insertion SVLEN and added bases do not agree (complex insertions not canonicalizeable) [canonicalize] " <<
                 *this << endl << "SVLEN: " << info_len << "  " << "added bases: " << s.size() << endl;
                 return false;
             }
-            
+
         }
         else if (alt[0][0] == '<' && do_external_insertions){
 
@@ -588,20 +588,20 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 }
                 else {
                     cerr << "Warning: Loaded invalid alt sequence for: " << *this << endl;
-                    return false;    
+                    return false;
                 }
-                
+
                 if (ins_seq.size() != info_len){
                     cerr << "Warning: insertion SVLEN and FASTA do not agree (complex insertions not canonicalizeable) [canonicalize] " <<
                     *this << endl << "SVLEN: " << info_len << "  " << "FASTA bases: " << ins_seq.size() << endl;
                     return false;
                 }
-            } 
+            }
             else{
                 cerr << "Warning: could not locate alt sequence for: " << *this << endl;
                 return false;
             }
-            
+
         }
         else{
             cerr << "Warning: could not set SEQ [canonicalize]. " << *this << endl;
@@ -614,13 +614,13 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             "END: " << info_end << "  " << "SVLEN: " << -info_len << endl;
             return false;
         }
-    
+
         if (this->position + info_span != info_end){
             cerr << "Warning: deletion END and SPAN do not agree [canonicalize] " << *this << endl <<
             "END: " << info_end << "  " << "SPAN: " << info_span << endl;
             return false;
         }
-    
+
         // Set REF
         if (place_seq){
             string del_seq = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_len + 1));
@@ -635,11 +635,11 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             "END: " << info_end << "  " << "SPAN: " << info_span << endl;
             return false;
         }
-        
+
         if (info_len != 0){
             cerr << "Warning: inversion SVLEN specifies nonzero length change (complex inversions not canonicalizeable) [canonicalize] " <<
             *this << endl << "SVLEN: " << info_len << endl;
-            
+
             if (info_end == this->position + info_len) {
                 // We can probably guess what they meant here.
                 cerr << "Warning: VCF writer incorrecty produced END = POS + SVLEN for an inversion. Fixing SVLEN to 0." << endl;
@@ -649,7 +649,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 return false;
             }
         }
-    
+
         if (place_seq){
             string ref_seq = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_span + 1));
             // Note that inversions still need an anchoring left base at POS
@@ -1258,7 +1258,7 @@ VariantFieldType Variant::infoType(const string& key) {
 // "GT = 1/1 | GT = 0/0"
 //
 // on initialization, tokenizes the input sequence, and converts it from infix to postfix
-// on call to 
+// on call to
 //
 
 
@@ -1358,7 +1358,7 @@ VariantFieldType Variant::infoType(const string& key) {
                 }
             }
             results.push(token);
-        } 
+        }
         // apply operators to the first n elements on the stack and push the result back onto the stack
         else if (isOperator(token)) {
             //cerr << "is operator: " << token.value << endl;
@@ -2067,6 +2067,8 @@ string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
     return cigar;
 }
 
+// parsedAlternates returns a ref and a vector of alts
+
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
                                                               bool useMNPs,
                                                               bool useEntropy,
@@ -2122,9 +2124,9 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     unsigned int referencePos;
 
     string cigar;
-    
+
     for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-      
+
       string& alternate = *a;
       vector<VariantAllele>& variants = variantAlleles[alternate];
       string alternateQuery_M;
@@ -2135,11 +2137,11 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 	alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
       }
       //const unsigned int alternateLen = alternate.size();
-      
+
       if (true) {
-	CSmithWatermanGotoh sw(matchScore, 
-			       mismatchScore, 
-			       gapOpenPenalty, 
+	CSmithWatermanGotoh sw(matchScore,
+			       mismatchScore,
+			       gapOpenPenalty,
 			       gapExtendPenalty);
 	if (useEntropy) sw.EnableEntropyGapPenalty(1);
 	if (repeatGapExtendPenalty != 0){
@@ -2150,19 +2152,19 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 	StripedSmithWaterman::Aligner aligner;
 	StripedSmithWaterman::Filter sswFilter;
 	StripedSmithWaterman::Alignment alignment;
-	aligner.Align(alternateQuery_M.c_str(), 
-		      reference_M.c_str(), 
+	aligner.Align(alternateQuery_M.c_str(),
+		      reference_M.c_str(),
 		      reference_M.size(), sswFilter, &alignment);
 	cigar = alignment.cigar_string;
       }
 
       // left-realign the alignment...
-      
+
       vector<pair<int, string> > cigarData = splitCigar(cigar);
-      
-      if (cigarData.front().second != "M" 
+
+      if (cigarData.front().second != "M"
 	  || cigarData.back().second != "M"
-	  || cigarData.front().first < paddingLen 
+	  || cigarData.front().first < paddingLen
 	  || cigarData.back().first < paddingLen) {
 	cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
 	cerr << cigar << endl;
@@ -2175,35 +2177,35 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       }
       //cigarData = cleanCigar(cigarData);
       cigar = joinCigar(cigarData);
-      
+
       int altpos = 0;
       int refpos = 0;
-      
-      for (vector<pair<int, string> >::iterator e = cigarData.begin(); 
+
+      for (vector<pair<int, string> >::iterator e = cigarData.begin();
 	   e != cigarData.end(); ++e) {
-	
+
 	int len = e->first;
 	string type = e->second;
-	
+
 	switch (type.at(0)) {
 	case 'I':
 	  if (includePreviousBaseForIndels) {
-	    if (!variants.empty() && 
+	    if (!variants.empty() &&
 		variants.back().ref != variants.back().alt) {
-	      VariantAllele a = 
-		VariantAllele("", 
-			      alternate.substr(altpos, len), 
+	      VariantAllele a =
+		VariantAllele("",
+			      alternate.substr(altpos, len),
 			      refpos + position);
 	      variants.back() = variants.back() + a;
 	    } else {
-	      VariantAllele a = 
+	      VariantAllele a =
 		VariantAllele(ref.substr(refpos - 1, 1),
 			      alternate.substr(altpos - 1, len + 1),
 			      refpos + position - 1);
 	      variants.push_back(a);
 	    }
 	  } else {
-	    variants.push_back(VariantAllele("", 
+	    variants.push_back(VariantAllele("",
 					     alternate.substr(altpos, len),
 					     refpos + position));
 	  }
@@ -2213,30 +2215,30 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 	  if (includePreviousBaseForIndels) {
 	    if (!variants.empty() &&
 		variants.back().ref != variants.back().alt) {
-	      VariantAllele a 
+	      VariantAllele a
 		= VariantAllele(ref.substr(refpos, len)
 				, "", refpos + position);
 	      variants.back() = variants.back() + a;
 	      } else {
-	      VariantAllele a 
+	      VariantAllele a
 		= VariantAllele(ref.substr(refpos - 1, len + 1),
 				alternate.substr(altpos - 1, 1),
 				refpos + position - 1);
 	      variants.push_back(a);
 	    }
 	  } else {
-	    variants.push_back(VariantAllele(ref.substr(refpos, len), 
+	    variants.push_back(VariantAllele(ref.substr(refpos, len),
 					     "", refpos + position));
 	  }
 	  refpos += len;
 	  break;
 
-	  // zk has added (!variants.empty()) solves the seg fault in 
+	  // zk has added (!variants.empty()) solves the seg fault in
           // vcfstats, but need to test
 	case 'M':
 	  {
 	    for (int i = 0; i < len; ++i) {
-	      VariantAllele a 
+	      VariantAllele a
 		= VariantAllele(ref.substr(refpos + i, 1),
 				alternate.substr(altpos + i, 1),
 				(refpos + i + position));
@@ -2330,8 +2332,8 @@ void Variant::updateAlleleIndexes(void) {
   void Variant::removeAlt(const string& altAllele) {
 
     int altIndex = getAltAlleleIndex(altAllele);  // this is the alt-relative index, 0-based
-    
-    for (map<string, int>::iterator c = vcf->infoCounts.begin(); 
+
+    for (map<string, int>::iterator c = vcf->infoCounts.begin();
 	 c != vcf->infoCounts.end(); ++c) {
       int count = c->second;
       if (count == ALLELE_NUMBER) {
@@ -2341,7 +2343,7 @@ void Variant::updateAlleleIndexes(void) {
 	  vector<string>& vals = v->second;
 	  vector<string> tokeep;
 	  int i = 0;
-	  for (vector<string>::iterator a = vals.begin(); 
+	  for (vector<string>::iterator a = vals.begin();
 	       a != vals.end(); ++a, ++i) {
 	    if (i != altIndex) {
 	      tokeep.push_back(*a);
@@ -2351,13 +2353,13 @@ void Variant::updateAlleleIndexes(void) {
 	}
       }
     }
-    
-    for (map<string, int>::iterator c = vcf->formatCounts.begin(); 
+
+    for (map<string, int>::iterator c = vcf->formatCounts.begin();
 	 c != vcf->formatCounts.end(); ++c) {
       int count = c->second;
       if (count == ALLELE_NUMBER) {
             string key = c->first;
-            for (map<string, map<string, vector<string> > >::iterator 
+            for (map<string, map<string, vector<string> > >::iterator
 		   s = samples.begin(); s != samples.end(); ++s) {
 	      map<string, vector<string> >& sample = s->second;
 	      map<string, vector<string> >::iterator v = sample.find(key);
@@ -2365,7 +2367,7 @@ void Variant::updateAlleleIndexes(void) {
 		vector<string>& vals = v->second;
 		vector<string> tokeep;
 		int i = 0;
-		for (vector<string>::iterator a = vals.begin(); 
+		for (vector<string>::iterator a = vals.begin();
 		     a != vals.end(); ++a, ++i) {
 		  if (i != altIndex) {
 		    tokeep.push_back(*a);
@@ -2376,9 +2378,9 @@ void Variant::updateAlleleIndexes(void) {
             }
       }
     }
-    
+
     int altSpecIndex = altIndex + 1; // this is the genotype-spec index, ref=0, 1-based for alts
-    
+
     vector<string> newalt;
     map<int, int> alleleIndexMapping;
     // setup the new alt string

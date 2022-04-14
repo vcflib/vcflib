@@ -1,11 +1,14 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2010-2022 Erik Garrison
+    Copyright © 2020-2022 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
+
+#include "bindings/cpp/WFAligner.hpp"
+using namespace wfa;
 
 #include "Variant.h"
 #include "convert.h"
@@ -152,13 +155,14 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        // for each parsedalternate, get the position
-        // build a new vcf record for that position
-        // unless we are already at the position !
+        // for each parsedAlternate allele, get the position
+        // and build a new vcf record for that position
+        // unless we are already at the position!
         // take everything which is unique to that allele (records) and append it to the new record
-        // then handle genotypes; determine the mapping between alleleic primitives and convert to phased haplotypes
-        // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indecies corresponding to it
+        // then handle genotypes; determine the mapping between allelic primitives and convert to phased haplotypes
+        // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indexes corresponding to it
 
+        // this code does an alignment of the ALTs
         map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels, useMNPs);
         set<VariantAllele> alleles;
 

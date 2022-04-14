@@ -317,6 +317,8 @@ ExternalProject_Add(wfa-EXT
     BUILD_IN_SOURCE ON
     BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa
 )
+ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
+set(WFA_INCLUDE_DIRS "${SOURCE_DIR}")
 add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
@@ -345,6 +347,7 @@ if (NOT BUILD_ONLY_LIB)
     target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS})
   endforeach(BIN ${BINS})
   add_dependencies(vcfallelicprimitives wfa)
+  target_include_directories(vcfallelicprimitives PUBLIC ${WFA_INCLUDE_DIRS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
