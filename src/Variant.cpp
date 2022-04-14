@@ -1,8 +1,8 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2010-2022 Erik Garrison
+    Copyright © 2020-2022 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -200,6 +200,10 @@ bool Variant::hasSVTags() const{
    return found_svtype && found_len;
 }
 
+  /*
+According to the VCF spec the ALT field can be use to indicate 'imprecise' structural
+variants.
+   */
 
 bool Variant::isSymbolicSV() const{
 
@@ -2080,10 +2084,10 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               string flankingRefLeft,
                                                               string flankingRefRight) {
 
-    map<string, vector<VariantAllele> > variantAlleles;
+    map<string, vector<VariantAllele> > variantAlleles; // return type
 
     if (isSymbolicSV()){
-        // Don't ever align SVs. It just wrecks things.
+        // Don't ever align symbolic SVs. It just wrecks things.
         return this->flatAlternates();
     }
     // add the reference allele
