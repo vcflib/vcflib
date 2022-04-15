@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
         if (var.alt.size() == 1
-            || (   var.alt.front().size() == 1
+            && (   var.alt.front().size() == 1
                 || var.ref.size() == 1
                 || var.alt.front().size() > maxLength
                 || var.ref.size() > maxLength
@@ -164,11 +164,53 @@ int main(int argc, char** argv) {
 
         // this code does an alignment of the ALTs
         map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels, useMNPs);
-        set<VariantAllele> alleles;
 
+        /*
+AC 10158243:A/A
+AC 10158243:ACCCCCACCCCCAC/A
+AC 10158257:C/C
+ACA 10158243:A/A
+ACA 10158243:ACCCCCACCCC/A
+ACA 10158254:C/C
+ACA 10158255:A/A
+ACA 10158255:ACC/A
+ACC 10158243:A/A
+ACC 10158243:ACCCCCACCCCCA/A
+ACC 10158256:C/C
+ACC 10158257:C/C
+ACCCCCACC 10158243:A/A
+ACCCCCACC 10158243:ACCCCCA/A
+ACCCCCACC 10158250:C/C
+ACCCCCACC 10158251:C/C
+ACCCCCACC 10158252:C/C
+ACCCCCACC 10158253:C/C
+ACCCCCACC 10158254:C/C
+ACCCCCACC 10158255:A/A
+ACCCCCACC 10158256:C/C
+ACCCCCACC 10158257:C/C
+ACCCCCACCCCCAC 10158243:A/A
+ACCCCCACCCCCAC 10158244:C/C
+ACCCCCACCCCCAC 10158245:C/C
+ACCCCCACCCCCAC 10158246:C/C
+ACCCCCACCCCCAC 10158247:C/C
+ACCCCCACCCCCAC 10158248:C/C
+ACCCCCACCCCCAC 10158249:A/A
+ACCCCCACCCCCAC 10158250:C/C
+ACCCCCACCCCCAC 10158251:C/C
+ACCCCCACCCCCAC 10158252:C/C
+ACCCCCACCCCCAC 10158253:C/C
+ACCCCCACCCCCAC 10158254:C/C
+ACCCCCACCCCCAC 10158255:A/A
+ACCCCCACCCCCAC 10158255:AC/A
+ACCCCCACCCCCAC 10158257:C/C
+ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
+*/
+
+        set<VariantAllele> alleles;
         // collect unique alleles
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
             for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
+              cerr << (*a).first << " " << (*va).repr << endl;
                 alleles.insert(*va);
             }
         }
@@ -176,9 +218,19 @@ int main(int argc, char** argv) {
         int altcount = 0;
         for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
             if (a->ref != a->alt) {
+                cerr << a->repr << endl;
                 ++altcount;
             }
         }
+
+        /*
+10158243:ACCCCCA/A
+10158243:ACCCCCACCCC/A
+10158243:ACCCCCACCCCCA/A
+10158243:ACCCCCACCCCCAC/A
+10158255:AC/A
+10158255:ACC/A
+*/
 
         if (altcount == 1 && var.alt.size() == 1 && var.alt.front().size() == 1) { // if biallelic SNP
             cout << var << endl;

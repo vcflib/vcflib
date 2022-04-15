@@ -2071,7 +2071,9 @@ string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
     return cigar;
 }
 
-// parsedAlternates returns a ref and a vector of alts
+// parsedAlternates returns a ref and a vector of alts. In this
+// function Smith-Waterman is used with padding on both sides of a ref
+// and each alt. The method and SW are both quadratic in nature.
 
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
                                                               bool useMNPs,

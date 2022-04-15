@@ -79,7 +79,19 @@ grch38#chr4     10158243        >3655>3662      ACCCCCACCCCCACC ACC,AC,ACCCCCACC
 
 ```
 
-After aligning it reduces into two records and adjusts the genotypes accordingly:
+After aligning it reduces into two records with variant alleles
+
+```
+10158243:ACCCCCA/A
+10158243:ACCCCCACCCC/A
+10158243:ACCCCCACCCCCA/A
+10158243:ACCCCCACCCCCAC/A
+
+10158255:AC/A
+10158255:ACC/A
+```
+
+and adjusts the genotypes accordingly splitting into two records:
 
 ```python
 
