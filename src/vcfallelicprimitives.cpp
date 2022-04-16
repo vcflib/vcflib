@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
           if (debug) cerr << allele << ":" << allele.length() << "," << max_allele_length << endl;
           if (allele.length() >= max_allele_length) {
              max_allele_length = allele.length();
-             cerr << max_allele_length << endl;
+             // cerr << max_allele_length << endl;
           }
         }
 
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
         // then handle genotypes; determine the mapping between allelic primitives and convert to phased haplotypes
         // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indexes corresponding to it
 
-        // this code does an alignment of the ALTs
+        // this code does an O(n^2) alignment of the ALTs
         map<string, vector<VariantAllele> > varAlleles = var.parsedAlternates(includePreviousBaseForIndels, useMNPs);
 
         /*
@@ -223,7 +223,7 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
             for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
                 if (debug) cerr << (*a).first << " " << (*va).repr << endl;
-                alleles.insert(*va); // only inserts first unique and rejects next ones
+                alleles.insert(*va); // only inserts first unique allele and ignores next ones
             }
         }
 
