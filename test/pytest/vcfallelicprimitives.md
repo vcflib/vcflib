@@ -64,9 +64,9 @@ options:
                             VCFs, they should be usable with caution.
     -g, --keep-geno         Maintain genotype-level annotations when decomposing.  Similar
                             caution should be used for this as for --keep-info.
+    -d, --debug             debug mode.
 >
 Type: transformation
->
 
 ```
 
