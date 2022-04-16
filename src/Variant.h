@@ -234,7 +234,8 @@ public:
                                                          float gapExtendPenalty = 6.66f,
                                                          float repeatGapExtendPenalty = 0.0f,
                                                          string flankingRefLeft = "",
-                                                         string flankingRefRight = "");
+                                                         string flankingRefRight = "",
+                                                         bool debug=false);
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
 
