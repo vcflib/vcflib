@@ -220,18 +220,18 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
 
         set<VariantAllele> alleles;
         // collect unique alleles
-        for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
-            for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
-                if (debug) cerr << (*a).first << " " << (*va).repr << endl;
-                alleles.insert(*va); // only inserts first unique allele and ignores next ones
+        for (auto a: varAlleles) {
+            for (auto va: a.second) {
+                if (debug) cerr << a.first << " " << va.repr << endl;
+                alleles.insert(va); // only inserts first unique allele and ignores next ones
             }
         }
 
         int altcount = 0;
-        for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
-            if (a->ref != a->alt) {
+        for (auto a: alleles) {
+            if (a.ref != a.alt) {
                 ++altcount;
-                if (debug) cerr << altcount << "$" << a->repr << endl;
+                if (debug) cerr << altcount << "$" << a.repr << endl;
             }
         }
 
@@ -251,10 +251,10 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
 
         // collect variant allele indexed membership
         map<string, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
-        for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
-            int index = var.altAlleleIndexes[a->first] + 1; // make non-relative
-            for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
-                variantAlleleIndexes[va->repr].push_back(index);
+        for (auto a: varAlleles) {
+            int index = var.altAlleleIndexes[a.first] + 1; // make non-relative
+            for (auto va: a.second) {
+                variantAlleleIndexes[va.repr].push_back(index);
             }
         }
 
