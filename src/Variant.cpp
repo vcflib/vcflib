@@ -2127,12 +2127,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     paddingLen = flankingRefLeft.size();
   }
 
-  // passed to sw.Align
-  unsigned int referencePos;
-
-  string cigar;
-
   for (auto a: alt) { // iterate ALT strings
+    unsigned int referencePos;
     string& alternate = a;
     vector<VariantAllele>& variants = variantAlleles[alternate];
     string alternateQuery_M;
@@ -2151,11 +2147,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     if (repeatGapExtendPenalty != 0){
       sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
     }
+    string cigar;
     sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+
+    if (debug)
+      cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
     // left-realign the alignment...
     vector<pair<int, string> > cigarData = splitCigar(cigar);
 
+    // Check for matched padding (ZZZs)
     if (cigarData.front().second != "M"
         || cigarData.back().second != "M"
         || cigarData.front().first < paddingLen
@@ -2166,20 +2167,22 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       cerr << alternateQuery_M << endl;
       exit(1);
     } else {
+      // Remove the padding
       cigarData.front().first -= paddingLen;
       cigarData.back().first -= paddingLen;;
     }
-    //cigarData = cleanCigar(cigarData);
     cigar = joinCigar(cigarData);
+
+    if (debug)
+      cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
     int altpos = 0;
     int refpos = 0;
 
-    for (vector<pair<int, string> >::iterator e = cigarData.begin();
-         e != cigarData.end(); ++e) {
+    for (auto e: cigarData) {
 
-      int len = e->first;
-      string type = e->second;
+      int len = e.first;
+      string type = e.second;
 
       switch (type.at(0)) {
       case 'I':

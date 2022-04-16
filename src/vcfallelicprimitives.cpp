@@ -185,9 +185,19 @@ int main(int argc, char** argv) {
         // this code does an O(n^2) alignment of the ALTs
         map<string, vector<VariantAllele> > varAlleles =
           (algorithm == "WF" ?
-            var.parsedAlternates(includePreviousBaseForIndels, useMNPs)
-          : // SW
-            var.parsedAlternates(includePreviousBaseForIndels, useMNPs));
+           var.parsedAlternates(includePreviousBaseForIndels, useMNPs)
+           : // SW
+           var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
+                                false, // bool useEntropy = false,
+                                10.0f, // float matchScore = 10.0f,
+                                -9.0f, // float mismatchScore = -9.0f,
+                                15.0f, // float gapOpenPenalty = 15.0f,
+                                6.66f, // float gapExtendPenalty = 6.66f,
+                                0.0f,  // float repeatGapExtendPenalty = 0.0f,
+                                "",    // string flankingRefLeft = "",
+                                "",    // string flankingRefRight = "",
+                                debug));  // bool debug=false
+
 
         /*
 AC 10158243:A/A
