@@ -2085,6 +2085,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               float repeatGapExtendPenalty,
                                                               string flankingRefLeft,
                                                               string flankingRefRight,
+                                                              bool useWaveFront,
                                                               bool debug) {
 
   map<string, vector<VariantAllele> > variantAlleles; // return type
@@ -2139,19 +2140,24 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
     }
 
-    CSmithWatermanGotoh sw(matchScore,
-                           mismatchScore,
-                           gapOpenPenalty,
-                           gapExtendPenalty);
-    if (useEntropy) sw.EnableEntropyGapPenalty(1);
-    if (repeatGapExtendPenalty != 0){
-      sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
-    }
     string cigar;
-    sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+    if (useWaveFront) {
+      cerr << "Using WaveFront" << endl;
+    }
+    else {
+      CSmithWatermanGotoh sw(matchScore,
+                             mismatchScore,
+                             gapOpenPenalty,
+                             gapExtendPenalty);
+      if (useEntropy) sw.EnableEntropyGapPenalty(1);
+      if (repeatGapExtendPenalty != 0){
+        sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
+      }
+      sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+    }
 
     if (debug)
-      cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+      cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
     // left-realign the alignment...
     vector<pair<int, string> > cigarData = splitCigar(cigar);

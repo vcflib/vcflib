@@ -63,6 +63,7 @@ int main(int argc, char** argv) {
     int maxLength = 200;
     bool keepInfo = false;
     bool keepGeno = false;
+    bool useWaveFront = false;
     bool debug    = false;
 
     VariantCallFile variantFile;
@@ -96,6 +97,7 @@ int main(int argc, char** argv) {
 
 	    case 'a':
             algorithm = optarg;
+            useWaveFront = (algorithm == "WF");
             break;
 
 	    case 'm':
@@ -184,9 +186,6 @@ int main(int argc, char** argv) {
 
         // this code does an O(n^2) alignment of the ALTs
         map<string, vector<VariantAllele> > varAlleles =
-          (algorithm == "WF" ?
-           var.parsedAlternates(includePreviousBaseForIndels, useMNPs)
-           : // SW
            var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
                                 false, // bool useEntropy = false,
                                 10.0f, // float matchScore = 10.0f,
@@ -196,7 +195,8 @@ int main(int argc, char** argv) {
                                 0.0f,  // float repeatGapExtendPenalty = 0.0f,
                                 "",    // string flankingRefLeft = "",
                                 "",    // string flankingRefRight = "",
-                                debug));  // bool debug=false
+                                useWaveFront,
+                                debug);  // bool debug=false
 
 
         /*
