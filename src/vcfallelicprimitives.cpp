@@ -15,6 +15,7 @@ using namespace wfa;
 #include "join.h"
 #include "split.h"
 #include <set>
+#include <algorithm>
 #include <getopt.h>
 
 using namespace std;
@@ -45,7 +46,8 @@ void printSummary(char** argv) {
          << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
          << "                            VCFs, they should be usable with caution." << endl
          << "    -g, --keep-geno         Maintain genotype-level annotations when decomposing.  Similar" << endl
-         << "                            caution should be used for this as for --keep-info." << endl;
+         << "                            caution should be used for this as for --keep-info." << endl
+         << "    -d, --debug             debug mode." << endl;
     cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
 }
@@ -58,6 +60,7 @@ int main(int argc, char** argv) {
     int maxLength = 200;
     bool keepInfo = false;
     bool keepGeno = false;
+    bool debug    = false;
 
     VariantCallFile variantFile;
 
@@ -73,12 +76,13 @@ int main(int argc, char** argv) {
                 {"tag-parsed", required_argument, 0, 't'},
                 {"keep-info", no_argument, 0, 'k'},
                 {"keep-geno", no_argument, 0, 'g'},
+                {"debug", no_argument, 0, 'd'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hmkgt:L:",
+        c = getopt_long (argc, argv, "dhmkgt:L:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -96,6 +100,10 @@ int main(int argc, char** argv) {
 
 	    case 'g':
             keepGeno = true;
+            break;
+
+	    case 'd':
+            debug = true;
             break;
 
         case 'h':
@@ -140,16 +148,20 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
-
-
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
-        if (var.alt.size() == 1
-            && (   var.alt.front().size() == 1
-                || var.ref.size() == 1
-                || var.alt.front().size() > maxLength
-                || var.ref.size() > maxLength
-                )) {
+        int max_allele_length = 0;
+        for (auto allele: var.alt) {
+          if (debug) cerr << allele << ":" << allele.length() << "," << max_allele_length << endl;
+          if (allele.length() >= max_allele_length) {
+             max_allele_length = allele.length();
+             cerr << max_allele_length << endl;
+          }
+        }
+
+        if (max_allele_length > maxLength || max_allele_length == 1 ||
+            (var.alt.size() == 1 &&
+             (var.ref.size() == 1 || var.ref.size() > maxLength))) {
             // nothing to do
             cout << var << endl;
             continue;
@@ -210,26 +222,26 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
         // collect unique alleles
         for (map<string, vector<VariantAllele> >::iterator a = varAlleles.begin(); a != varAlleles.end(); ++a) {
             for (vector<VariantAllele>::iterator va = a->second.begin(); va != a->second.end(); ++va) {
-              cerr << (*a).first << " " << (*va).repr << endl;
-                alleles.insert(*va);
+                if (debug) cerr << (*a).first << " " << (*va).repr << endl;
+                alleles.insert(*va); // only inserts first unique and rejects next ones
             }
         }
 
         int altcount = 0;
         for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
             if (a->ref != a->alt) {
-                cerr << a->repr << endl;
                 ++altcount;
+                if (debug) cerr << altcount << "$" << a->repr << endl;
             }
         }
 
         /*
-10158243:ACCCCCA/A
-10158243:ACCCCCACCCC/A
-10158243:ACCCCCACCCCCA/A
-10158243:ACCCCCACCCCCAC/A
-10158255:AC/A
-10158255:ACC/A
+1$10158243:ACCCCCA/A
+2$10158243:ACCCCCACCCC/A
+3$10158243:ACCCCCACCCCCA/A
+4$10158243:ACCCCCACCCCCAC/A
+5$10158255:AC/A
+6$10158255:ACC/A
 */
 
         if (altcount == 1 && var.alt.size() == 1 && var.alt.front().size() == 1) { // if biallelic SNP
