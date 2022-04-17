@@ -317,12 +317,16 @@ ExternalProject_Add(wfa-EXT
     BUILD_IN_SOURCE ON
     BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa
 )
+ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
+set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
+set(WFA_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a)
 add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
 
 set(vcflib_DEPS
   LIBCURL
+  wfa
 )
 
 set(vcflib_LIBS
@@ -334,6 +338,7 @@ set(vcflib_LIBS
   ${BZIP2_LIBRARIES}
   ${TABIXPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
+  ${WFA_LIBRARIES}
 )
 
 # ---- Build all
@@ -344,7 +349,8 @@ if (NOT BUILD_ONLY_LIB)
     target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
     target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS})
   endforeach(BIN ${BINS})
-  add_dependencies(vcfallelicprimitives wfa)
+  add_dependencies(${BINS} vcflib)
+  target_include_directories(vcflib PUBLIC ${WFA_INCLUDE_DIRS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
@@ -392,6 +398,7 @@ endfunction()
 
 # add_pytest(vcf2tsv-test)
 add_pydoctest(vcf2tsv)
+add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
