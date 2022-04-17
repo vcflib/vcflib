@@ -2156,6 +2156,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       if (debug)
         cerr << "WFA output [" << cigar << "]" << endl;
       if (cigar == "") {
+        if (debug)
+          cerr << "Skipping input with WF because there is no CIGAR!" << endl;
         variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
         return variantAlleles;
       }
