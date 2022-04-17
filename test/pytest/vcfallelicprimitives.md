@@ -101,6 +101,27 @@ grch38#chr4     10158255        .       ACC     AC,A    60      .       AC=2,1;A
 
 ```
 
+With the wavefront algorithm we get a different result
+
+```
+1$10158244:CCCCCACCCCCAC/C
+2$10158244:CCCCCACCCCCACC/C
+3$10158245:CCCCACCCCCACC/C
+4$10158251:CCCCACC/C
+5$10158256:CC/C
+```
+
+```python
+
+>>> sh("../build/vcfallelicprimitives -a WF -m -L 1000 ../samples/10158243.vcf|grep -v ^\#")
+grch38#chr4	10158244	.	CCCCCACCCCCACC	CC,C	60	.	AC=1,3;AF=0.011236,0.0337079;LEN=12,13;TYPE=del,del	GT	0|0	0|0	0|0	0|0	1|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	2|0	0|2	0|0	0|0	0|0	0|0	0|0	0|0	0|2	0|0	0
+grch38#chr4	10158245	.	CCCCACCCCCACC	C	60	.	AC=64;AF=0.719101;LEN=12;TYPE=del	GT	0|0	1|1	1|1	1|0	0|1	0|0	0|1	0|1	1|1	1|1	1|1	1|1	1|1	1|1	1|1	0|0	1|1	1|1	1|1	1|0	1|0	1|0	1|0	1|1	1|1	1|0	1|1	1|1	0|0	1|0	1|1	0|1	1|1	1|1	0|1	1|0	1|1	1|1	0|1	1|1	1|1	1|0	1|0	1|1	0
+grch38#chr4	10158251	.	CCCCACC	C	60	.	AC=3;AF=0.0337079;LEN=6;TYPE=del	GT	0|0	0|0	0|0	0|0	0|0	0|1	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	1|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|1	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0
+grch38#chr4	10158256	.	CC	C	60	.	AC=2;AF=0.0224719;LEN=1;TYPE=del	GT	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|1	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	1|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0
+
+```
+
+
 ## Source code
 
 [vcfallelicprimitives.cpp](../../src/vcfallelicprimitives.cpp)
@@ -108,10 +129,10 @@ grch38#chr4     10158255        .       ACC     AC,A    60      .       AC=2,1;A
 ## Regression tests
 
 ```python
->>> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
+>> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_4.vcf">vcfallelicprimitives_4.vcf</a>
 
->>> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+>> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_5.vcf">vcfallelicprimitives_5.vcf</a>
 
 ```
