@@ -2148,13 +2148,38 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       /*
        * Gap-Affine Aligner (a.k.a Smith-Waterman-Gotoh)
        */
-      WFAlignerGapAffine aligner(4,6,2,WFAligner::Alignment,WFAligner::MemoryHigh);
-      wavefront_aligner_attr_t attributes = wavefront_aligner_attr_default;
-      attributes.alignment_scope = compute_alignment;
-      aligner.alignEnd2End(reference_M, alternateQuery_M);
+      /*
+      // the C++ WFA2-lib interface seems to be broken
+      // some hard alignments randomly fail
+      WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
+      aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
       cigar = aligner.getAlignmentCigar();
-      if (debug)
-        cerr << "WFA output [" << cigar << "]" << endl;
+      */
+      // using the C interface is still unstable, but not as wildly so
+      // differences occur due to traceback ambiguity
+      auto attributes = wavefront_aligner_attr_default;
+      attributes.memory_mode = wavefront_memory_high;
+      attributes.distance_metric = gap_affine_2p;
+      attributes.affine2p_penalties.match = 0;
+      attributes.affine2p_penalties.mismatch = 19;
+      attributes.affine2p_penalties.gap_opening1 = 39;
+      attributes.affine2p_penalties.gap_extension1 = 3;
+      attributes.affine2p_penalties.gap_opening2 = 81;
+      attributes.affine2p_penalties.gap_extension2 = 1;
+      attributes.alignment_scope = compute_alignment;
+      auto wf_aligner = wavefront_aligner_new(&attributes);
+      wavefront_aligner_set_alignment_end_to_end(wf_aligner);
+      wavefront_align(wf_aligner,
+                      reference_M.c_str(), reference_M.size(),
+                      alternateQuery_M.c_str(), alternateQuery_M.size());
+      // Fetch CIGAR
+      char* buffer = wf_aligner->cigar.operations + wf_aligner->cigar.begin_offset;
+      int buf_len = wf_aligner->cigar.end_offset - wf_aligner->cigar.begin_offset;
+      // Create string and return
+      auto cigar = std::string(buffer,buf_len);
+      wavefront_aligner_delete(wf_aligner);
+      //if (debug)
+      //    cerr << "WFA output [" << cigar << "]" << endl;
       if (cigar == "") {
         if (debug)
           cerr << "Skipping input with WF because there is no CIGAR!" << endl;
@@ -2176,8 +2201,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       cigarData = splitCigar(cigar);
     }
 
-    if (debug)
-      cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+    //if (debug)
+    //  cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
     // left-realign the alignment...
     if (cigarData.size() == 0) {
@@ -2205,8 +2230,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     }
     cigar = joinCigar(cigarData);
 
-    if (debug)
-      cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+    //if (debug)
+    //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
     int altpos = 0;
     int refpos = 0;
@@ -2560,23 +2585,23 @@ vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr) {
     vector<pair<int, string> > cigar;
     int num = 0;
     char type = cigarStr[0];
-    cerr << "[" << cigarStr << "]" << endl; // 18,12,14
+    //cerr << "[" << cigarStr << "]" << endl; // 18,12,14
     for (char c: cigarStr) {
-        cerr << "[" << c << "]";
+        //cerr << "[" << c << "]";
         if (isdigit(c)) {
           cerr << "Is this a valid unpacked CIGAR? <" << cigarStr << ">?" << endl;
           exit(1);
         }
         if (c != type) {
           cigar.push_back(make_pair(num, string(1,type)));
-          cerr << num << ":" << type << ", ";
+          //cerr << num << ":" << type << ", ";
           type = c;
           num = 0;
         }
         num += 1;
     }
     cigar.push_back(make_pair(num, string(1,type)));
-      cerr << num << ":" << type << ", ";
+    //cerr << num << ":" << type << ", ";
     return cigar;
 }
 
