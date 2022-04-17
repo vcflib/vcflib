@@ -36,6 +36,10 @@ extern "C" {
     #include "filevercmp.h"
 }
 
+#include "bindings/cpp/WFAligner.hpp"
+
+using namespace wfa;
+
 using namespace std;
 
 namespace vcflib {

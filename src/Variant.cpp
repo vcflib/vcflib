@@ -2039,6 +2039,7 @@ int ploidy(const map<int, int>& genotype) {
 }
 
 // generates cigar from allele parsed by parsedAlternates
+// Note: this function is not used in vcflib
 string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
     string cigar;
     pair<int, string> element;
@@ -2142,7 +2143,14 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     string cigar;
     if (useWaveFront) {
-      cerr << "Using WaveFront" << endl;
+      /*
+       * Gap-Affine Aligner (a.k.a Smith-Waterman-Gotoh)
+       */
+      WFAlignerGapAffine aligner(4,6,2,WFAligner::Alignment,WFAligner::MemoryHigh);
+      wavefront_aligner_attr_t attributes = wavefront_aligner_attr_default;
+      attributes.alignment_scope = compute_alignment;
+      aligner.alignEnd2End(reference_M, alternateQuery_M);
+      cigar = aligner.getAlignmentCigar();
     }
     else {
       CSmithWatermanGotoh sw(matchScore,
@@ -2161,6 +2169,16 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     // left-realign the alignment...
     vector<pair<int, string> > cigarData = splitCigar(cigar);
+    if (cigarData.size() == 0) {
+      cerr << "Algorithm error: CIGAR <" << cigar << "> is empty for "
+           << reference_M << ","
+           << alternateQuery_M << endl;
+        // Retrieve CIGAR
+      char* const cigar_str = malloc(cigar->end_offset-cigar->begin_offset);
+      cigar_sprint(cigar_str,cigar,true);
+
+      exit(1);
+    }
 
     // Check for matched padding (ZZZs)
     if (cigarData.front().second != "M"
