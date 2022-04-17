@@ -2142,6 +2142,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     }
 
     string cigar;
+    vector<pair<int, string> > cigarData;
+
     if (useWaveFront) {
       /*
        * Gap-Affine Aligner (a.k.a Smith-Waterman-Gotoh)
@@ -2151,6 +2153,13 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       attributes.alignment_scope = compute_alignment;
       aligner.alignEnd2End(reference_M, alternateQuery_M);
       cigar = aligner.getAlignmentCigar();
+      if (debug)
+        cerr << "WFA output [" << cigar << "]" << endl;
+      if (cigar == "") {
+        variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+        return variantAlleles;
+      }
+      cigarData = splitUnpackedCigar(cigar);
     }
     else {
       CSmithWatermanGotoh sw(matchScore,
@@ -2162,20 +2171,17 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
       }
       sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+      cigarData = splitCigar(cigar);
     }
 
     if (debug)
       cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
     // left-realign the alignment...
-    vector<pair<int, string> > cigarData = splitCigar(cigar);
     if (cigarData.size() == 0) {
       cerr << "Algorithm error: CIGAR <" << cigar << "> is empty for "
            << reference_M << ","
            << alternateQuery_M << endl;
-        // Retrieve CIGAR
-      char* const cigar_str = malloc(cigar->end_offset-cigar->begin_offset);
-      cigar_sprint(cigar_str,cigar,true);
 
       exit(1);
     }
@@ -2186,9 +2192,9 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         || cigarData.front().first < paddingLen
         || cigarData.back().first < paddingLen) {
       cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
-      cerr << cigar << endl;
-      cerr << reference_M << endl;
-      cerr << alternateQuery_M << endl;
+      cerr << "cigar: " << cigar << endl;
+      cerr << "ref:   " << reference_M << endl;
+      cerr << "allele:" << alternateQuery_M << endl;
       exit(1);
     } else {
       // Remove the padding
@@ -2546,6 +2552,30 @@ string mergeCigar(const string& c1, const string& c2) {
         cigar1.push_back(*c);
     }
     return joinCigar(cigar1);
+}
+
+vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr) {
+    vector<pair<int, string> > cigar;
+    int num = 0;
+    char type = cigarStr[0];
+    cerr << "[" << cigarStr << "]" << endl; // 18,12,14
+    for (char c: cigarStr) {
+        cerr << "[" << c << "]";
+        if (isdigit(c)) {
+          cerr << "Is this a valid unpacked CIGAR? <" << cigarStr << ">?" << endl;
+          exit(1);
+        }
+        if (c != type) {
+          cigar.push_back(make_pair(num, string(1,type)));
+          cerr << num << ":" << type << ", ";
+          type = c;
+          num = 0;
+        }
+        num += 1;
+    }
+    cigar.push_back(make_pair(num, string(1,type)));
+      cerr << num << ":" << type << ", ";
+    return cigar;
 }
 
 vector<pair<int, string> > splitCigar(const string& cigarStr) {

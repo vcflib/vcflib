@@ -576,6 +576,7 @@ vector<string>& unique(vector<string>& strings);
 
 string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
 string mergeCigar(const string& c1, const string& c2);
+vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr);
 vector<pair<int, string> > splitCigar(const string& cigarStr);
 list<pair<int, string> > splitCigarList(const string& cigarStr);
 int cigarRefLen(const vector<pair<int, char> >& cigar);
