@@ -364,12 +364,22 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
                 // ref allele
                 continue;
             }
+            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
             string type;
             int len = 0;
             if (a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
                 if (a->ref.size() > a->alt.size()) {
                     type = "del";
                     len = a->ref.size() - a->alt.size();
+                    // special case
+                    // a deletion implies we should be ALLELE_NULL on this haplotype
+                    // until the end of the deletion
+                    // save the range in a new map which we'll iterate over
+                    for (auto i : originalIndexes) {
+                        // TODO check if it should be len
+                        //auto d = (*deletions)[i];
+                        //d.push_back(make_pair(0, 0));
+                    }
                 } else if (a->ref.size() < a->alt.size()) {
                     len = a->alt.size() - a->ref.size();
                     type = "ins";
@@ -436,7 +446,6 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
             v.alt.push_back(a->alt);
 
             int alleleIndex = v.alt.size();
-            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
             for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
                 unpackedAlleleIndexes[*i][v.position] = alleleIndex;
             }
@@ -445,6 +454,29 @@ ACCCCCACCCCCACC 10158243:ACCCCCACCCCCACC/ACCCCCACCCCCACC
 
         }
 
+        // handle deletions
+        /*
+        for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
+            int len = 0;
+            if (a->ref.at(0) == a->alt.at(0)
+                && a->ref.size() > a->alt.size()) {
+                len = a->ref.size() - a->alt.size();
+            } else {
+                continue;
+            }
+            assert(len > 0);
+            // nullify all the variants inside of the deletion range
+            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
+            auto begin = variants.upper_bound(a->position);
+            auto end = variants.upper_bound(a->position + a->ref.size());
+            for (auto i : originalIndexes) {
+                for (auto x = begin; x != end; ++x) {
+                    unpackedAlleleIndexes[i][x->second.position] = ALLELE_NULL;
+                }
+            }
+        }
+        */
+        
         // genotypes
         for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
             string& sampleName = *s;
