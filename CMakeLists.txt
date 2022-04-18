@@ -23,6 +23,7 @@ option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" ON)
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
+option(ASAN "Use address sanitiser" OFF)
 
 # ---- Dependencies
 
@@ -48,6 +49,16 @@ if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWit
   set (CMAKE_C_FLAGS "${OpenMP_C_FLAGS} ${EXTRA_FLAGS}")
   set (CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS} ${EXTRA_FLAGS}")
 endif ()
+
+if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+endif ()
+
+if (ASAN)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address  -fno-omit-frame-pointer -fno-common")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address  -fno-omit-frame-pointer -fno-common")
+endif(ASAN)
 
 if(OPENMP)
   find_package(OpenMP REQUIRED)
@@ -309,28 +320,36 @@ if (HTSLIB_LOCAL)
 
 endif(HTSLIB_LOCAL)
 
+if (ASAN)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa)
+else()
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa)
+endif()
+
 ExternalProject_Add(wfa-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/${WFA_LOCAL}"
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
-    BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa
+    # BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa
+    BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
 set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
-set(WFA_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a)
+set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a ${SOURCE_DIR}/lib/libwfa.a)
 add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
 
+include_directories(${WFA_INCLUDE_DIRS})
+
 set(vcflib_DEPS
-  LIBCURL
+  CURL::libcurl
   wfa
 )
 
 set(vcflib_LIBS
-  vcflib
   ${HTSLIB_LIBRARIES}
   ${CURL_LIBRARIES}
   ${ZLIB_LIBRARIES}
@@ -338,19 +357,22 @@ set(vcflib_LIBS
   ${BZIP2_LIBRARIES}
   ${TABIXPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
-  ${WFA_LIBRARIES}
+  ${WFA_LINK_LIBRARIES}
 )
+
+target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
+add_dependencies(vcflib ${vcflib_DEPS})
 
 # ---- Build all
 
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
-    target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
-    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS})
+    # target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
+    add_dependencies(${BIN} vcflib)
+    target_link_libraries(${BIN} PUBLIC vcflib ${vcflib_LIBS})
   endforeach(BIN ${BINS})
-  add_dependencies(${BINS} vcflib)
-  target_include_directories(vcflib PUBLIC ${WFA_INCLUDE_DIRS})
+  # add_dependencies(${BINS} vcflib)
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
