@@ -132,8 +132,10 @@ grch38#chr4	10158256	.	CC	C	60	.	AC=2;AF=0.0224719;LEN=1;TYPE=del	GT	0|0	0|0	0|0
 >>> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_5.vcf">vcfallelicprimitives_5.vcf</a>
 
->> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
-output in <a href="../data/regression/vcfallelicprimitives_5.vcf">vcfallelicprimitives_5.vcf</a>
+>>> run_stdout("vcfallelicprimitives -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+output in <a href="../data/regression/vcfallelicprimitives_6.vcf">vcfallelicprimitives_6.vcf</a>
+
+# WF is non-deterministic at this point, so disabled
 
 >> run_stdout("vcfallelicprimitives -a WF -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_6.vcf">vcfallelicprimitives_6.vcf</a>
