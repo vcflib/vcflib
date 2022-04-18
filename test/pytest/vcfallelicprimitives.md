@@ -13,11 +13,9 @@ vcfallelicprimitives - Converts stdin or given VCF file and reduces alleles.
 
 **vcfallelicprimitives** converts stdin or given VCF file to tab-delimited format,
 
-If multiple allelic primitives (gaps or mismatches) are specified in a
-single VCF record, split the record into multiple lines, but drop all
-INFO fields. Does not handle genotypes (yet). MNPs are split into
-multiple SNPs unless the -m flag is provided.
-
+Realign reference and alternate alleles with WFA, parsing out the primitive alleles
+into multiple VCF records. New records have IDs that reference the source record ID.
+Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes.
 
 ## Options
 
