@@ -42,7 +42,7 @@ void printSummary(char** argv) {
          << "    -m, --use-mnps          Retain MNPs as separate events (default: false)." << endl
          << "    -t, --tag-parsed FLAG   Tag records which are split apart of a complex allele with this flag." << endl
          << "    -L, --max-length LEN    Do not manipulate records in which either the ALT or" << endl
-         << "                            REF is longer than LEN (default: 200)." << endl
+         << "                            REF is longer than LEN (default: SW:200 WF:0)." << endl
          << "    -k, --keep-info         Maintain site and allele-level annotations when decomposing." << endl
          << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
          << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     bool useMNPs = false;
     string parseFlag;
     string algorithm = "SW";
-    int maxLength = 200;
+    int maxLength = -1;
     bool keepInfo = false;
     bool keepGeno = false;
     bool useWaveFront = false;
@@ -138,6 +138,9 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (maxLength == -1) // set default
+      maxLength = (useWaveFront ? 0 : 200);
+
     if (optind < argc) {
         string filename = argv[optind];
         variantFile.open(filename);
@@ -169,9 +172,9 @@ int main(int argc, char** argv) {
           }
         }
 
-        if (max_allele_length > maxLength || max_allele_length == 1 ||
+        if ((maxLength && max_allele_length > maxLength) || max_allele_length == 1 ||
             (var.alt.size() == 1 &&
-             (var.ref.size() == 1 || var.ref.size() > maxLength))) {
+             (var.ref.size() == 1 || (maxLength && var.ref.size() > maxLength)))) {
             // nothing to do
             cout << var << endl;
             continue;
