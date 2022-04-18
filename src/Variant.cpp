@@ -2107,7 +2107,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
   // padding is used to ensure a stable alignment of the alternates to the reference
   // without having to go back and look at the full reference sequence
-  int paddingLen = max(10, (int) (ref.size()));  // dynamically determine optimum padding length
+  int paddingLen = 10; //max(10, (int) (ref.size()));  // dynamically determine optimum padding length
   for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
     string& alternate = *a;
     paddingLen = max(paddingLen, (int) (alternate.size()));
@@ -2144,61 +2144,59 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     string cigar;
     vector<pair<int, string> > cigarData;
 
-    if (useWaveFront) {
+    {
       /*
-       * Gap-Affine Aligner (a.k.a Smith-Waterman-Gotoh)
+       * WFA2-lib
        */
       /*
-      // the C++ WFA2-lib interface seems to be broken
-      // some hard alignments randomly fail
+      // the C++ WFA2-lib interface is not yet stable due to heuristic initialization issues
       WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
       aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
       cigar = aligner.getAlignmentCigar();
       */
-      // using the C interface is still unstable, but not as wildly so
-      // differences occur due to traceback ambiguity
       auto attributes = wavefront_aligner_attr_default;
       attributes.memory_mode = wavefront_memory_high;
       attributes.distance_metric = gap_affine_2p;
       attributes.affine2p_penalties.match = 0;
-      attributes.affine2p_penalties.mismatch = 19;
-      attributes.affine2p_penalties.gap_opening1 = 39;
-      attributes.affine2p_penalties.gap_extension1 = 3;
-      attributes.affine2p_penalties.gap_opening2 = 81;
+      attributes.affine2p_penalties.mismatch = 4;
+      attributes.affine2p_penalties.gap_opening1 = 6;
+      attributes.affine2p_penalties.gap_extension1 = 2;
+      attributes.affine2p_penalties.gap_opening2 = 26;
       attributes.affine2p_penalties.gap_extension2 = 1;
       attributes.alignment_scope = compute_alignment;
       auto wf_aligner = wavefront_aligner_new(&attributes);
+      wavefront_aligner_set_heuristic_none(wf_aligner);
       wavefront_aligner_set_alignment_end_to_end(wf_aligner);
       wavefront_align(wf_aligner,
                       reference_M.c_str(), reference_M.size(),
                       alternateQuery_M.c_str(), alternateQuery_M.size());
+      //cerr << "WFA_input\t" << ">
+      /*
+      cigar_print_pretty(stderr,
+                         reference_M.c_str(), reference_M.size(),
+                         alternateQuery_M.c_str(), alternateQuery_M.size(),
+                         &wf_aligner->cigar,wf_aligner->mm_allocator);
+      */
       // Fetch CIGAR
       char* buffer = wf_aligner->cigar.operations + wf_aligner->cigar.begin_offset;
       int buf_len = wf_aligner->cigar.end_offset - wf_aligner->cigar.begin_offset;
       // Create string and return
-      auto cigar = std::string(buffer,buf_len);
+      cigar = std::string(buffer,buf_len);
       wavefront_aligner_delete(wf_aligner);
       //if (debug)
       //    cerr << "WFA output [" << cigar << "]" << endl;
       if (cigar == "") {
-        if (debug)
-          cerr << "Skipping input with WF because there is no CIGAR!" << endl;
-        variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
-        return variantAlleles;
+          if (debug) {
+              cerr << "Skipping input with WF because there is no CIGAR!" << endl;
+          }
+          cerr << ">fail.pattern" << endl
+               << reference_M << endl
+               << ">fail.query" << endl
+               << alternateQuery_M << endl;
+          variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+          return variantAlleles;
       }
       cigarData = splitUnpackedCigar(cigar);
-    }
-    else {
-      CSmithWatermanGotoh sw(matchScore,
-                             mismatchScore,
-                             gapOpenPenalty,
-                             gapExtendPenalty);
-      if (useEntropy) sw.EnableEntropyGapPenalty(1);
-      if (repeatGapExtendPenalty != 0){
-        sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
-      }
-      sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
-      cigarData = splitCigar(cigar);
     }
 
     //if (debug)

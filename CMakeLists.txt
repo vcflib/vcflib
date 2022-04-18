@@ -41,7 +41,7 @@ pkg_check_modules(TABIXPP tabixpp) # Optionally builds from contrib/
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  set(EXTRA_FLAGS "-Ofast -march=native -D_FILE_OFFSET_BITS=64")
+  set(EXTRA_FLAGS "-O3 -march=native -flto -D_FILE_OFFSET_BITS=64")
   set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG") # reset CXX_FLAGS to replace -O3 with -Ofast
 endif()
 
@@ -321,9 +321,9 @@ if (HTSLIB_LOCAL)
 endif(HTSLIB_LOCAL)
 
 if (ASAN)
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa release)
 else()
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa release)
 endif()
 
 ExternalProject_Add(wfa-EXT
