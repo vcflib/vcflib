@@ -1,8 +1,8 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2010-2022 Erik Garrison
+    Copyright © 2020-2022 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -35,6 +35,10 @@
 extern "C" {
     #include "filevercmp.h"
 }
+
+#include "bindings/cpp/WFAligner.hpp"
+
+using namespace wfa;
 
 using namespace std;
 
@@ -234,7 +238,9 @@ public:
                                                          float gapExtendPenalty = 6.66f,
                                                          float repeatGapExtendPenalty = 0.0f,
                                                          string flankingRefLeft = "",
-                                                         string flankingRefRight = "");
+                                                         string flankingRefRight = "",
+                                                         bool useWaveFront=true,
+                                                         bool debug=false);
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
 
@@ -570,6 +576,7 @@ vector<string>& unique(vector<string>& strings);
 
 string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
 string mergeCigar(const string& c1, const string& c2);
+vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr);
 vector<pair<int, string> > splitCigar(const string& cigarStr);
 list<pair<int, string> > splitCigarList(const string& cigarStr);
 int cigarRefLen(const vector<pair<int, char> >& cigar);

@@ -23,6 +23,10 @@ option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" ON)
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
+option(ASAN "Use address sanitiser" OFF)
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT supported OUTPUT error)
 
 # ---- Dependencies
 
@@ -38,16 +42,32 @@ pkg_check_modules(TABIXPP tabixpp) # Optionally builds from contrib/
 
 # ---- Build switches
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+          "Choose the type of build, options are: Release|Debug|RelWithDebInfo (for distros)." FORCE)
+endif()
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  set(EXTRA_FLAGS "-Ofast -march=native -D_FILE_OFFSET_BITS=64")
-  set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG") # reset CXX_FLAGS to replace -O3 with -Ofast
+  set(EXTRA_FLAGS "-march=native -D_FILE_OFFSET_BITS=64")
+  # set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG") # reset CXX_FLAGS to replace -O3 with -Ofast
 endif()
 
 if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
   set (CMAKE_C_FLAGS "${OpenMP_C_FLAGS} ${EXTRA_FLAGS}")
   set (CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS} ${EXTRA_FLAGS}")
 endif ()
+
+if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+endif ()
+
+if (ASAN)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address  -fno-omit-frame-pointer -fno-common")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address  -fno-omit-frame-pointer -fno-common")
+endif(ASAN)
 
 if(OPENMP)
   find_package(OpenMP REQUIRED)
@@ -309,24 +329,40 @@ if (HTSLIB_LOCAL)
 
 endif(HTSLIB_LOCAL)
 
+if (ASAN)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa)
+else()
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa)
+endif()
+
+if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
+  set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS} release)
+endif()
+
 ExternalProject_Add(wfa-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/${WFA_LOCAL}"
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
-    BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa
+    # BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa
+    BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
 )
+ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
+set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
+set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a ${SOURCE_DIR}/lib/libwfa.a)
 add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
 
+include_directories(${WFA_INCLUDE_DIRS})
+
 set(vcflib_DEPS
-  LIBCURL
+  CURL::libcurl
+  wfa
 )
 
 set(vcflib_LIBS
-  vcflib
   ${HTSLIB_LIBRARIES}
   ${CURL_LIBRARIES}
   ${ZLIB_LIBRARIES}
@@ -334,17 +370,22 @@ set(vcflib_LIBS
   ${BZIP2_LIBRARIES}
   ${TABIXPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
+  ${WFA_LINK_LIBRARIES}
 )
+
+target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
+add_dependencies(vcflib ${vcflib_DEPS})
 
 # ---- Build all
 
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
-    target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
-    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS})
+    # target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
+    add_dependencies(${BIN} vcflib)
+    target_link_libraries(${BIN} PUBLIC vcflib ${vcflib_LIBS})
   endforeach(BIN ${BINS})
-  add_dependencies(vcfallelicprimitives wfa)
+  # add_dependencies(${BINS} vcflib)
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
@@ -392,6 +433,7 @@ endfunction()
 
 # add_pytest(vcf2tsv-test)
 add_pydoctest(vcf2tsv)
+add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)

@@ -13,6 +13,13 @@
 ;; or in one go
 ;;
 ;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env")
+;;
+;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
+;;   cmake --build .
+;;
+;; debug example
+;;
+;;   env LD_LIBRARY_PATH=$GUIX_ENVIRONMENT/lib gdb --args vcfallelicprimitives -m ../samples/10158243.vcf
 
 
 (use-modules
@@ -28,7 +35,8 @@
   (gnu packages build-tools)
   (gnu packages curl)
   (gnu packages gcc)
-  (gnu packages haskell-xyz) ; pandoc
+  (gnu packages gdb)
+  (gnu packages haskell-xyz) ; pandoc for help files
   (gnu packages llvm)
   (gnu packages python)
   (gnu packages parallel)
@@ -55,6 +63,7 @@
      `(("curl" ,curl)
        ("fastahack" ,fastahack)
        ("gcc" ,gcc-11)    ;; test against latest
+       ("gdb" ,gdb)
        ("htslib" ,htslib)
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
