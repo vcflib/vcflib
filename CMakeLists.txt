@@ -44,6 +44,11 @@ pkg_check_modules(TABIXPP tabixpp) # Optionally builds from contrib/
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+          "Choose the type of build, options are: Release|Debug|RelWithDebInfo (for distros)." FORCE)
+endif()
+
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   set(EXTRA_FLAGS "-march=native -D_FILE_OFFSET_BITS=64")
   # set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG") # reset CXX_FLAGS to replace -O3 with -Ofast
