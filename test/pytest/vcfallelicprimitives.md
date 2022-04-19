@@ -90,14 +90,13 @@ After aligning it reduces into two records with variant alleles
 10158255:ACC/A
 ```
 
-and adjusts the genotypes accordingly splitting into two records:
+and adjusts the genotypes accordingly splitting into two records using the original (but arguably OBSOLETE) SW algorithm:
 
 ```python
 
 >>> sh("../build/vcfallelicprimitives -a SW -m -L 1000 ../samples/10158243.vcf|grep -v ^\#")
-grch38#chr4     10158243        >3655>3662_1    ACCCCCACCCCCAC  ACCCCCAC,ACAC,AC,A      60      .       AC=3,1,64,3;AF=0.0337079,0.011236,0.719101,0.0337079;LEN=6,10,12,13;ORIGIN=grch38#chr410158243,grch38#chr410158243,grch38#chr410158243,grch38#chr410158243;TYPE=del,del,del,del GT      0|0     3|3     3|3     3|0     2|3     0|1     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     1|0     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|1     3|3     3|3     0|0     3|0     3|3     0|3     3|3     3|3     4|3     3|4     3|3     3|3     0|3     3|3     3|3     3|0     3|4     3|3     0
-grch38#chr4     10158255        >3655>3662_2    ACC     AC,A    60      .       AC=2,1;AF=0.0224719,0.011236;LEN=1,2;ORIGIN=grch38#chr410158243,grch38#chr410158243;TYPE=del,del        GT      0|0     .|.     .|.     .|0     2|.     0|0     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     0|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|0     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
-
+grch38#chr4     10158243        >3655>3662_1    ACCCCCACCCCCAC  ACCCCCAC,ACAC,AC,A      60      .       AC=3,1,64,3;AF=0.0337079,0.011236,0.719101,0.0337079;LEN=6,10,12,13;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243,grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del,del,del     GT      0|0     3|3     3|3     3|0     2|3     0|1     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     1|0     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|1     3|3     3|3     0|0     3|0     3|3     0|3     3|3     3|3     4|3     3|4     3|3     3|3     0|3     3|3     3|3     3|0     3|4     3|3     0
+grch38#chr4     10158255        >3655>3662_2    ACC     AC,A    60      .       AC=2,1;AF=0.0224719,0.011236;LEN=1,2;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del      GT      0|0     .|.     .|.     .|0     2|.     0|0     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     0|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|0     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
 
 ```
 
@@ -114,11 +113,10 @@ With the default wavefront algorithm we get a different result
 ```python
 
 >>> sh("../build/vcfallelicprimitives -m -L 1000 ../samples/10158243.vcf|grep -v ^\#")
-grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C    60      .       AC=1,3;AF=0.011236,0.0337079;LEN=12,13;ORIGIN=grch38#chr410158243,grch38#chr410158243;TYPE=del,del     GT      0|0     0|0     0|0     0|0     1|0   0|0      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0   0|0      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     2|0   0|2      0|0     0|0     0|0     0|0     0|0     0|0     0|2     0|0     0
-grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;LEN=12;ORIGIN=grch38#chr410158243;TYPE=del   GT      0|0     1|1     1|1     1|0     .|1     0|0     0|1     0|1     1|1     1|1   1|1      1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1   1|0      1|1     1|1     0|0     1|0     1|1     0|1     1|1     1|1     .|1     1|.     1|1     1|1     0|1     1|1   1|1      1|0     1|.     1|1     0
-grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;LEN=6;ORIGIN=grch38#chr410158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|1     0|.     0|.     .|.     .|.     .|.   .|.      .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1   .|.      .|.     0|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.   .|0      .|.     .|.     0
-grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       AC=2;AF=0.0224719;LEN=1;ORIGIN=grch38#chr410158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|.     0|.     0|.     .|.     .|.     .|.   .|.      .|.     .|.     .|.     .|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.   .|.      .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.   .|0      .|.     .|.     0
-
+grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C    60      .       AC=1,3;AF=0.011236,0.0337079;LEN=12,13;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del    GT      0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     2|0     0|2     0|0     0|0     0|0     0|0     0|0     0|0     0|2     0|0     0
+grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;LEN=12;ORIGIN=grch38#chr4:10158243;TYPE=del   GT      0|0     1|1     1|1     1|0     .|1     0|0     0|1     0|1     1|1     1|1     1|1     1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1     1|0     1|1     1|1     0|0     1|0     1|1     0|1     1|1     1|1     .|1     1|.     1|1     1|1     0|1     1|1     1|1     1|0     1|.     1|1     0
+grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|1     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
+grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       AC=2;AF=0.0224719;LEN=1;ORIGIN=grch38#chr4:10158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|.     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
 
 ```
 
@@ -128,6 +126,8 @@ grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       
 [vcfallelicprimitives.cpp](../../src/vcfallelicprimitives.cpp)
 
 ## Regression tests
+
+Note the wave front version has no problem with longer sequences:
 
 ```python
 >>> run_stdout("vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
@@ -139,7 +139,7 @@ output in <a href="../data/regression/vcfallelicprimitives_6.vcf">vcfallelicprim
 >>> run_stdout("vcfallelicprimitives -L 10000 -m ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_7.vcf">vcfallelicprimitives_7.vcf</a>
 
->> run_stdout("vcfallelicprimitives -m ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+>>> run_stdout("vcfallelicprimitives -m ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_8.vcf">vcfallelicprimitives_8.vcf</a>
 
 ```
