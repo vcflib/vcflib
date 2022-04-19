@@ -2156,7 +2156,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       cigar = aligner.getAlignmentCigar();
       */
       auto attributes = wavefront_aligner_attr_default;
-      attributes.memory_mode = wavefront_memory_high;
+      attributes.memory_mode = wavefront_memory_low;
       attributes.distance_metric = gap_affine_2p;
       attributes.affine2p_penalties.match = 0;
       attributes.affine2p_penalties.mismatch = 4;
