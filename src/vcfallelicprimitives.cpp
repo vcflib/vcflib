@@ -351,7 +351,7 @@ int main(int argc, char** argv) {
             Variant& v = variants[a->position]; // guaranteed to exist
 
             if (!parseFlag.empty()) {
-                v.info[parseFlag].push_back(var.sequenceName + std::to_string(var.position));
+                v.info[parseFlag].push_back(var.sequenceName + ":" + std::to_string(var.position));
             }
             v.quality = var.quality;
             v.filter = var.filter;
