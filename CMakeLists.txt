@@ -25,6 +25,9 @@ option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT supported OUTPUT error)
+
 # ---- Dependencies
 
 find_package(ZLIB)
@@ -39,9 +42,10 @@ pkg_check_modules(TABIXPP tabixpp) # Optionally builds from contrib/
 
 # ---- Build switches
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  set(EXTRA_FLAGS "-O3 -march=native -flto -D_FILE_OFFSET_BITS=64")
+  set(EXTRA_FLAGS "-O3 -march=native -D_FILE_OFFSET_BITS=64")
   set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG") # reset CXX_FLAGS to replace -O3 with -Ofast
 endif()
 
@@ -321,9 +325,13 @@ if (HTSLIB_LOCAL)
 endif(HTSLIB_LOCAL)
 
 if (ASAN)
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa release)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa)
 else()
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa release)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup lib_wfa)
+endif()
+
+if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
+  set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS} release)
 endif()
 
 ExternalProject_Add(wfa-EXT
