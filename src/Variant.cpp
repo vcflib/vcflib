@@ -2107,7 +2107,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
   // padding is used to ensure a stable alignment of the alternates to the reference
   // without having to go back and look at the full reference sequence
-  int paddingLen = 10; //max(10, (int) (ref.size()));  // dynamically determine optimum padding length
+  int paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));  // dynamically determine optimum padding length
   for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
     string& alternate = *a;
     paddingLen = max(paddingLen, (int) (alternate.size()));
@@ -2144,6 +2144,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     string cigar;
     vector<pair<int, string> > cigarData;
 
+    if (useWaveFront)
     {
       /*
        * WFA2-lib
@@ -2198,6 +2199,18 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       }
       cigarData = splitUnpackedCigar(cigar);
     }
+    else {
+      CSmithWatermanGotoh sw(matchScore,
+                             mismatchScore,
+                             gapOpenPenalty,
+                             gapExtendPenalty);
+      if (useEntropy) sw.EnableEntropyGapPenalty(1);
+      if (repeatGapExtendPenalty != 0){
+        sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
+      }
+      sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+      cigarData = splitCigar(cigar);
+    }
 
     //if (debug)
     //  cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
@@ -2205,8 +2218,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     // left-realign the alignment...
     if (cigarData.size() == 0) {
       cerr << "Algorithm error: CIGAR <" << cigar << "> is empty for "
-           << reference_M << ","
-           << alternateQuery_M << endl;
+           << "ref " << reference_M << ","
+           << "allele " << alternateQuery_M << endl;
 
       exit(1);
     }
@@ -2216,7 +2229,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         || cigarData.back().second != "M"
         || cigarData.front().first < paddingLen
         || cigarData.back().first < paddingLen) {
-      cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
+      cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
+      cerr << "pos: " << position << endl;
       cerr << "cigar: " << cigar << endl;
       cerr << "ref:   " << reference_M << endl;
       cerr << "allele:" << alternateQuery_M << endl;

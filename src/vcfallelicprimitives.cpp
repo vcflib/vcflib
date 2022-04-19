@@ -37,6 +37,8 @@ void printSummary(char** argv) {
          << "Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes." << endl
          << endl
          << "options:" << endl
+         << "    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman" << endl
+         << "                            [WF|SW] algorithm" << endl
          << "    -m, --use-mnps          Retain MNPs as separate events (default: false)." << endl
          << "    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position" << endl
          << "                            (default: ORIGIN)." << endl
@@ -46,8 +48,6 @@ void printSummary(char** argv) {
          << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
          << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
          << "                            VCFs, they should be usable with caution." << endl
-//         << "    -g, --keep-geno         Maintain genotype-level annotations when decomposing.  Similar" << endl
-//         << "                            caution should be used for this as for --keep-info." << endl
          << "    -d, --debug             debug mode." << endl;
     cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
@@ -59,10 +59,10 @@ int main(int argc, char** argv) {
     bool useMNPs = false;
     string parseFlag = "ORIGIN";
     string algorithm = "WF";
-    int maxLength = std::numeric_limits<int>::max();
+    int maxLength = 0;
     bool keepInfo = false;
     bool keepGeno = false;
-    bool useWaveFront = false;
+    bool useWaveFront = true;
     bool debug    = false;
 
     VariantCallFile variantFile;
@@ -74,6 +74,7 @@ int main(int argc, char** argv) {
                 /* These options set a flag. */
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
+                {"algorithm", required_argument, 0, 'a'},
                 {"use-mnps", no_argument, 0, 'm'},
                 {"max-length", required_argument, 0, 'L'},
                 {"tag-parsed", required_argument, 0, 't'},
@@ -85,13 +86,19 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "dhmkgt:L:",
+        c = getopt_long (argc, argv, "dhmkt:L:a:",
                          long_options, &option_index);
 
         if (c == -1)
             break;
 
         switch (c) {
+
+        case 'a':
+            algorithm = optarg;
+            useWaveFront = (algorithm == "WF");
+            break;
+
 
 	    case 'm':
             useMNPs = true;
@@ -145,7 +152,10 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
     if (!parseFlag.empty()) {
+      if (useWaveFront)
         variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfallelicprimitives and alignment with WFA2-lib.\">");
+      else
+        variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfallelicprimitives and alignment with obsolete SW.\">");
     }
     cout << variantFile.header << endl;
 
@@ -421,7 +431,7 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        
+
         // genotypes
         for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
             string& sampleName = *s;
