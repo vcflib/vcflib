@@ -239,7 +239,7 @@ public:
                                                          float repeatGapExtendPenalty = 0.0f,
                                                          string flankingRefLeft = "",
                                                          string flankingRefRight = "",
-                                                         bool useWaveFront=false,
+                                                         bool useWaveFront=true,
                                                          bool debug=false);
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
