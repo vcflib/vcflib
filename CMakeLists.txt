@@ -449,17 +449,24 @@ add_doctest(doc/vcffilter)
 
 find_program(PANDOC pandoc)
 
+set(pytest vcfnulldotslashdot vcfallelicprimitives)
+
 if (PANDOC)
     # note the option ALL which allows to build the docs together with the application
     add_custom_target( man
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND ${PANDOC} ./test/pytest/vcfnulldotslashdot.md -s -t man -o ./man/vcfnulldotslashdot.1
         COMMAND ruby ./test/scripts/bin2md.rb --man test/scripts/bin2md-template.erb
         COMMAND ruby ./test/scripts/bin2md.rb --man --index
+        # overwrite markdown from tests
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
+        # generate man pages from markdown
         COMMAND ruby ./test/scripts/md2man
         # regenerate to allow for URLs in markdown docs
         COMMAND ruby ./test/scripts/bin2md.rb test/scripts/bin2md-template.erb
         COMMAND ruby ./test/scripts/bin2md.rb --index
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
     )
 else (PANDOC)
   message("Pandoc needs to be installed to generate the man pages")

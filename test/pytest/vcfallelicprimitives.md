@@ -1,4 +1,4 @@
-% VCFALLELICPRIMITIVES(1) vcfallelicprimitives | Convert VCF to TSV
+% VCFALLELICPRIMITIVES(1) vcfallelicprimitives (vcflib) | vcfallelicprimitives (VCF transformation)
 % Erik Garrison, Pjotr Prins and other vcflib contributors
 
 # NAME
