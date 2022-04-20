@@ -31,7 +31,7 @@ Output : 4 columns :
 required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        
 required: b,background -- argument: a zero base comma separated list of background individuals corresponding to VCF columns    
 required: f,file       -- argument: a properly formatted phased VCF file                                                       
-required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  
+required: y,type       -- argument: type of genotype likelihood: PL, GL, GT or GP                                                  
 optional: r,region     -- argument: a genomic range to calculate **hapLrt** on in the format : \[dq]seqid:start-end\[dq] or \[dq]seqid\[dq] 
 
 
@@ -47,7 +47,7 @@ Success
 Failure
 .SH SEE ALSO
 .PP
-vcflib(1)
+\f[B]vcflib\f[R](1)
 .SH OTHER
 .SH LICENSE
 .PP
