@@ -14,7 +14,7 @@ doi: https://doi.org/10.1101/2021.05.21.445151
 
 2022-04-20: vcflib has just gone pangenome!
 
-By introducing the wavefront algorithm we can now realign long sequences and reduce call complexity introduced by pangenome variant callers using the [vcfallelicprimitives](./test/pytest/vcfallelicprimitives.md) tool.
+By introducing the wavefront algorithm we can now realign long sequences and reduce call complexity introduced by pangenome variant callers using the [vcfallelicprimitives](./doc/vcfallelicprimitives.md) tool.
 
 See also [RELEASE_NOTES.md](./RELEASE_NOTES.md)
 

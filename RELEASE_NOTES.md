@@ -8,7 +8,7 @@ and
 
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete.
 
-+ Added realignment using the wavefront algorithm (now the default)
++ Added realignment using the wavefront algorithm (now the default). See [vcfallelicprimitives](./doc/vcfallelicprimitives.md).
 + Improved CMake configuration
 + Fix -L switch for vcfallelicprimitives
 + Added libasan support
