@@ -412,8 +412,13 @@ function(add_pydoctest TEST_FILE)
       NAME ${TEST_FILE}
       COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF pytest/${TEST_FILE}.md
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+      # ENVIRONMENT suppressions=../test/libasan-suppress.txt
   )
+  SET_TESTS_PROPERTIES(${TEST_FILE}
+      # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt")
 endfunction()
+
 
 function(add_doctest TEST_FILE)
   add_test(
