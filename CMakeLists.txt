@@ -336,7 +336,7 @@ else()
 endif()
 
 if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
-  set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS} release)
+  set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS})
 endif()
 
 ExternalProject_Add(wfa-EXT

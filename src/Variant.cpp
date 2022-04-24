@@ -2150,19 +2150,19 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
        * WFA2-lib
        */
       /*
-      // the C++ WFA2-lib interface is not yet stable due to heuristic initialization issues
+      // the C++ WFA2-lib interface is not yet stable due to heuristic mode initialization issues
       WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
       aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
       cigar = aligner.getAlignmentCigar();
       */
       auto attributes = wavefront_aligner_attr_default;
-      attributes.memory_mode = wavefront_memory_low;
+      attributes.memory_mode = wavefront_memory_ultralow;
       attributes.distance_metric = gap_affine_2p;
       attributes.affine2p_penalties.match = 0;
-      attributes.affine2p_penalties.mismatch = 4;
-      attributes.affine2p_penalties.gap_opening1 = 6;
-      attributes.affine2p_penalties.gap_extension1 = 2;
-      attributes.affine2p_penalties.gap_opening2 = 26;
+      attributes.affine2p_penalties.mismatch = 19;
+      attributes.affine2p_penalties.gap_opening1 = 39;
+      attributes.affine2p_penalties.gap_extension1 = 3;
+      attributes.affine2p_penalties.gap_opening2 = 81;
       attributes.affine2p_penalties.gap_extension2 = 1;
       attributes.alignment_scope = compute_alignment;
       auto wf_aligner = wavefront_aligner_new(&attributes);
