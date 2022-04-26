@@ -7,6 +7,7 @@ include(ExternalProject)
 include(FeatureSummary)
 
 find_package(PkgConfig REQUIRED)
+find_package(pybind11 CONFIG)
 
 include(FindBZip2)
 include(FindLibLZMA)
@@ -16,6 +17,8 @@ include(FindCURL) # for htslib
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
   WHAT REQUIRED_PACKAGES_NOT_FOUND)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
 
 # ---- Options
 
@@ -395,9 +398,15 @@ if (NOT BUILD_ONLY_LIB)
 
 endif()
 
-enable_testing()
+# ---- Python bindings - mostly for testing at this stage
+pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
+add_dependencies(pyvcflib ${vcflib_DEPS})
+target_link_libraries(pyvcflib PUBLIC vcflib "${vcflib_LIBS}")
+install(TARGETS pyvcflib LIBRARY DESTINATION lib)
 
 # ---- Test
+
+enable_testing()
 
 function(add_pytest TEST_FILE)
   add_test(
@@ -416,7 +425,7 @@ function(add_pydoctest TEST_FILE)
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
 endfunction()
 
 
@@ -437,6 +446,7 @@ function(add_pydoctest_fullname TEST_FILE)
 endfunction()
 
 # add_pytest(vcf2tsv-test)
+add_pydoctest(pyvcflib)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfnulldotslashdot)

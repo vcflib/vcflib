@@ -38,11 +38,12 @@
   (gnu packages gdb)
   (gnu packages haskell-xyz) ; pandoc for help files
   (gnu packages llvm)
-  (gnu packages python)
   (gnu packages parallel)
   (gnu packages perl)
   (gnu packages perl6)
   (gnu packages pkg-config)
+  (gnu packages python)
+  (gnu packages python-xyz) ; for pybind11
   (gnu packages ruby)
   (srfi srfi-1)
   (ice-9 popen)
@@ -62,12 +63,13 @@
     (inputs
      `(("curl" ,curl)
        ("fastahack" ,fastahack)
-       ("gcc" ,gcc-11)    ;; test against latest
+       ;; ("gcc" ,gcc-11)    ;; test against latest
        ("gdb" ,gdb)
        ("htslib" ,htslib)
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
+       ("pybind11" ,pybind11)
        ("ruby" ,ruby) ;; for generating man pages
        ; ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
