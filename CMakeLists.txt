@@ -412,9 +412,11 @@ enable_testing()
 function(add_pytest TEST_FILE)
   add_test(
       NAME ${TEST_FILE}
-      COMMAND python3 pytest/${TEST_FILE}.py
+      COMMAND python3 tests/${TEST_FILE}.py
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
+  SET_TESTS_PROPERTIES(${TEST_FILE}
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
 endfunction()
 
 function(add_pydoctest TEST_FILE)
@@ -422,7 +424,6 @@ function(add_pydoctest TEST_FILE)
       NAME ${TEST_FILE}
       COMMAND python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF pytest/${TEST_FILE}.md
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-      # ENVIRONMENT suppressions=../test/libasan-suppress.txt
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
@@ -446,7 +447,7 @@ function(add_pydoctest_fullname TEST_FILE)
   )
 endfunction()
 
-# add_pytest(vcf2tsv-test)
+add_pytest(realign)
 add_pydoctest(pyvcflib)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
