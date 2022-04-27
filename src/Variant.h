@@ -241,6 +241,14 @@ public:
                                                          string flankingRefRight = "",
                                                          bool useWaveFront=true,
                                                          bool debug=false);
+    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels,
+                                                         bool useMNPs,
+                                                         bool useEntropy,
+                                                         string flankingRefLeft,
+                                                         string flankingRefRight,
+                                                         bool useWaveFront,
+                                                         wavefront_aligner_attr_t* wfaParams,
+                                                         bool debug);
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
 
