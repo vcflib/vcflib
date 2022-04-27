@@ -12,7 +12,8 @@ matrix:
             - libcurl4-openssl-dev
             - libtabixpp-dev 
             - libtabixpp0
-            - python-all-dev
+            - python3
+            - python3-all-dev
             - pybind11-dev
 script:
     - pkg-config --list-all
