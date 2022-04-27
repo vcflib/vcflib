@@ -4,7 +4,7 @@
 
 We are building up a Python FFI for vcflib using the brilliant Python pybind11 module. Mostly for (our) testing purposes, so we are not aiming for complete coverage. See below for adding new bindings.
 
-## Setting it up
+## Setting it up and example
 
 First import the module. It may require setting the `PYTHONPATH` to the shared library `pyvcflib.cpython-39-x86_64-linux-gnu.so`.
 

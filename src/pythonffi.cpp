@@ -17,17 +17,21 @@ using namespace vcflib;
 PYBIND11_MODULE(pyvcflib, m)
 {
   m.doc() = "This is a Python binding of C++ vcflib Library";
+  py::class_<VariantAllele>(m, "VariantAllele", "VCF alleles")
+      .def_readonly("repr", &VariantAllele::repr)
+      ;
   py::class_<Variant>(m, "Variant", "VCF record")
-    .def(py::init<VariantCallFile &>() )
-    .def_readwrite("name", &Variant::sequenceName)
-    .def_readwrite("pos", &Variant::position)
-    .def_readwrite("ref", &Variant::ref)
-    .def_readwrite("alt", &Variant::alt)
-    .def_readwrite("alleles", &Variant::alleles)
-    ;
+      .def(py::init<VariantCallFile &>() )
+      .def_readwrite("name", &Variant::sequenceName)
+      .def_readwrite("pos", &Variant::position)
+      .def_readwrite("ref", &Variant::ref)
+      .def_readwrite("alt", &Variant::alt)
+      .def_readwrite("alleles", &Variant::alleles)
+      .def("legacy_parsedAlternates", &Variant::legacy_parsedAlternates)
+      ;
   py::class_<VariantCallFile>(m, "VariantCallFile", "VCF file")
-    .def(py::init())
-    .def("openFile",&VariantCallFile::openFile,"Open the VCF")
-    .def("getNextVariant",&VariantCallFile::getNextVariant,"Iterate VCF records")
-    ;
+      .def(py::init())
+      .def("openFile",&VariantCallFile::openFile,"Open the VCF")
+      .def("getNextVariant",&VariantCallFile::getNextVariant,"Iterate VCF records")
+      ;
 }
