@@ -483,6 +483,8 @@ if (PANDOC)
         COMMAND ruby ./test/scripts/bin2md.rb --index
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
+        # Documented test cases for Python bindings
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/pyvcflib.md ./doc/pyvcflib.md
     )
 else (PANDOC)
   message("Pandoc needs to be installed to generate the man pages")

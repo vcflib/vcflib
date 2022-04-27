@@ -12,7 +12,7 @@ doi: https://doi.org/10.1101/2021.05.21.445151
 
 ## news
 
-2022-04-20: vcflib has just gone pangenome!
+April 2022: vcflib has just gone pangenome!
 
 By introducing the wavefront algorithm we can now realign long sequences and reduce call complexity introduced by pangenome variant callers using the [vcfallelicprimitives](./doc/vcfallelicprimitives.md) tool.
 
@@ -57,6 +57,7 @@ Short index:
   * [Transformation](#transformation)
   * [Statistics](#statistics)
   * [Scripts](#scripts)
+  * [Python bindings](#python)
 - [Link library](#link-library)
 - [Build from source](#build-from-source)
 - [Development](#Development)
@@ -296,6 +297,10 @@ Click on the link to see the source code.
 | [vcf2bed.py](./scripts/vcf2bed.py) | transform VCF to BED file |
 | [vcfjoincalls](./scripts/vcfjoincalls) | overlay files using QUAL and GT from a second VCF |
 | [vcf2sqlite.py](./scripts/vcf2sqlite.py) | push VCF file into SQLite3 database using dbname |
+
+## python
+
+vcflib has rudimentary python bindings, but the are easy to build up on. See [pyvcflib](./test/pytest/pyvcflib.md).
 
 # Development
 
