@@ -184,6 +184,10 @@ private:
 
 };
 
+/*
+    A VariantAllele simply tracks [position,ref,alt] and has a string representation in 'repr'
+*/
+
 class VariantAllele {
     friend ostream& operator<<(ostream& out, VariantAllele& var);
     friend bool operator<(const VariantAllele& a, const VariantAllele& b);

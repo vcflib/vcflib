@@ -2072,9 +2072,14 @@ string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
     return cigar;
 }
 
-// parsedAlternates returns a ref and a vector of alts. In this
-// function Smith-Waterman is used with padding on both sides of a ref
-// and each alt. The method and SW are both quadratic in nature.
+// parsedAlternates returns a hash of 'ref' and a vector of alts. A
+// single record may be split into multiple records with new
+// 'refs'. In this function Smith-Waterman is used with padding on
+// both sides of a ref and each alt. The SW method quadratic in nature
+// and painful with long sequences. Recently WFA is introduced with
+// runs in linear time.
+//
+// Returns map of [REF,ALTs] with attached VariantAllele records
 
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
                                                               bool useMNPs,
@@ -2086,7 +2091,6 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               float repeatGapExtendPenalty,
                                                               string flankingRefLeft,
                                                               string flankingRefRight,
-                                                              bool useWaveFront,
                                                               bool debug) {
 
   map<string, vector<VariantAllele> > variantAlleles; // return type
@@ -2335,6 +2339,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
   }
   return variantAlleles;
 }
+
 
 map<string, vector<VariantAllele> > Variant::flatAlternates(void) {
     map<string, vector<VariantAllele> > variantAlleles;
