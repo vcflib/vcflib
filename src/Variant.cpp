@@ -2093,6 +2093,41 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               string flankingRefRight,
                                                               bool debug) {
 
+    auto wfa_params = wavefront_aligner_attr_default;
+    wfa_params.memory_mode = wavefront_memory_ultralow;
+    wfa_params.distance_metric = gap_affine_2p;
+    wfa_params.affine2p_penalties.match = 0;
+    wfa_params.affine2p_penalties.mismatch = 19;
+    wfa_params.affine2p_penalties.gap_opening1 = 39;
+    wfa_params.affine2p_penalties.gap_extension1 = 3;
+    wfa_params.affine2p_penalties.gap_opening2 = 81;
+    wfa_params.affine2p_penalties.gap_extension2 = 1;
+    wfa_params.alignment_scope = compute_alignment;
+
+    return parsedAlternates(includePreviousBaseForIndels,
+                            useMNPs,
+                            useEntropy,
+                            flankingRefLeft,
+                            flankingRefRight,
+                            useWaveFront,
+                            &wfa_params,
+                            debug);
+
+}
+
+// parsedAlternates returns a ref and a vector of alts. In this
+// function Smith-Waterman is used with padding on both sides of a ref
+// and each alt. The method and SW are both quadratic in nature.
+
+map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
+                                                              bool useMNPs,
+                                                              bool useEntropy,
+                                                              string flankingRefLeft,
+                                                              string flankingRefRight,
+                                                              bool useWaveFront,
+                                                              wavefront_aligner_attr_t* wfaParams,
+                                                              bool debug) {
+
   map<string, vector<VariantAllele> > variantAlleles; // return type
 
   if (isSymbolicSV()){
@@ -2111,7 +2146,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
   // padding is used to ensure a stable alignment of the alternates to the reference
   // without having to go back and look at the full reference sequence
-  int paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));  // dynamically determine optimum padding length
+  int paddingLen = 2;
   for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
     string& alternate = *a;
     paddingLen = max(paddingLen, (int) (alternate.size()));
@@ -2136,6 +2171,14 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
   for (auto a: alt) { // iterate ALT strings
     unsigned int referencePos;
     string& alternate = a;
+    // create the variants slot
+    vector<VariantAllele>& variants = variantAlleles[alternate];
+  }
+
+#pragma omp parallel for 
+  for (auto a: alt) { // iterate ALT strings
+    unsigned int referencePos;
+    string& alternate = a;
     vector<VariantAllele>& variants = variantAlleles[alternate];
     string alternateQuery_M;
     if (flankingRefLeft.empty() && flankingRefRight.empty()) {
@@ -2154,22 +2197,12 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
        * WFA2-lib
        */
       /*
-      // the C++ WFA2-lib interface is not yet stable due to heuristic initialization issues
+      // the C++ WFA2-lib interface is not yet stable due to heuristic mode initialization issues
       WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
       aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
       cigar = aligner.getAlignmentCigar();
       */
-      auto attributes = wavefront_aligner_attr_default;
-      attributes.memory_mode = wavefront_memory_low;
-      attributes.distance_metric = gap_affine_2p;
-      attributes.affine2p_penalties.match = 0;
-      attributes.affine2p_penalties.mismatch = 4;
-      attributes.affine2p_penalties.gap_opening1 = 6;
-      attributes.affine2p_penalties.gap_extension1 = 2;
-      attributes.affine2p_penalties.gap_opening2 = 26;
-      attributes.affine2p_penalties.gap_extension2 = 1;
-      attributes.alignment_scope = compute_alignment;
-      auto wf_aligner = wavefront_aligner_new(&attributes);
+      auto wf_aligner = wavefront_aligner_new(wfaParams);
       wavefront_aligner_set_heuristic_none(wf_aligner);
       wavefront_aligner_set_alignment_end_to_end(wf_aligner);
       wavefront_align(wf_aligner,
@@ -2199,21 +2232,10 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                << ">fail.query" << endl
                << alternateQuery_M << endl;
           variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
-          return variantAlleles;
+          exit(1);
+          //return variantAlleles;
       }
       cigarData = splitUnpackedCigar(cigar);
-    }
-    else {
-      CSmithWatermanGotoh sw(matchScore,
-                             mismatchScore,
-                             gapOpenPenalty,
-                             gapExtendPenalty);
-      if (useEntropy) sw.EnableEntropyGapPenalty(1);
-      if (repeatGapExtendPenalty != 0){
-        sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
-      }
-      sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
-      cigarData = splitCigar(cigar);
     }
 
     //if (debug)
