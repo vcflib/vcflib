@@ -270,7 +270,7 @@ int main(int argc, char** argv) {
                 ++biallelics;
             }
             map<string, vector<VariantAllele> > alternates
-	      = var.parsedAlternates(includePreviousBaseForIndels,
+	      = var.legacy_parsedAlternates(includePreviousBaseForIndels,
 				     useMNPs,
 				     useEntropy,
 				     matchScore,

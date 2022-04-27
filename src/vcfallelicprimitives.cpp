@@ -218,7 +218,6 @@ int main(int argc, char** argv) {
                                 false, // bool useEntropy = false,
                                 "",    // string flankingRefLeft = "",
                                 "",    // string flankingRefRight = "",
-                                useWaveFront,
                                 &wfa_params,
                                 debug);  // bool debug=false
 

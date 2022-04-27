@@ -2081,50 +2081,12 @@ string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
 //
 // Returns map of [REF,ALTs] with attached VariantAllele records
 
-map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
-                                                              bool useMNPs,
-                                                              bool useEntropy,
-                                                              float matchScore,
-                                                              float mismatchScore,
-                                                              float gapOpenPenalty,
-                                                              float gapExtendPenalty,
-                                                              float repeatGapExtendPenalty,
-                                                              string flankingRefLeft,
-                                                              string flankingRefRight,
-                                                              bool debug) {
-
-    auto wfa_params = wavefront_aligner_attr_default;
-    wfa_params.memory_mode = wavefront_memory_ultralow;
-    wfa_params.distance_metric = gap_affine_2p;
-    wfa_params.affine2p_penalties.match = 0;
-    wfa_params.affine2p_penalties.mismatch = 19;
-    wfa_params.affine2p_penalties.gap_opening1 = 39;
-    wfa_params.affine2p_penalties.gap_extension1 = 3;
-    wfa_params.affine2p_penalties.gap_opening2 = 81;
-    wfa_params.affine2p_penalties.gap_extension2 = 1;
-    wfa_params.alignment_scope = compute_alignment;
-
-    return parsedAlternates(includePreviousBaseForIndels,
-                            useMNPs,
-                            useEntropy,
-                            flankingRefLeft,
-                            flankingRefRight,
-                            useWaveFront,
-                            &wfa_params,
-                            debug);
-
-}
-
-// parsedAlternates returns a ref and a vector of alts. In this
-// function Smith-Waterman is used with padding on both sides of a ref
-// and each alt. The method and SW are both quadratic in nature.
 
 map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
                                                               bool useMNPs,
                                                               bool useEntropy,
                                                               string flankingRefLeft,
                                                               string flankingRefRight,
-                                                              bool useWaveFront,
                                                               wavefront_aligner_attr_t* wfaParams,
                                                               bool debug) {
 
@@ -2175,7 +2137,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     vector<VariantAllele>& variants = variantAlleles[alternate];
   }
 
-#pragma omp parallel for 
+#pragma omp parallel for
   for (auto a: alt) { // iterate ALT strings
     unsigned int referencePos;
     string& alternate = a;
@@ -2191,8 +2153,6 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     string cigar;
     vector<pair<int, string> > cigarData;
 
-    if (useWaveFront)
-    {
       /*
        * WFA2-lib
        */
@@ -2236,7 +2196,6 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
           //return variantAlleles;
       }
       cigarData = splitUnpackedCigar(cigar);
-    }
 
     //if (debug)
     //  cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;

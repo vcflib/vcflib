@@ -132,6 +132,7 @@ set(vcflib_SOURCE
     src/split.cpp
     src/ssw.hpp
     src/ssw_cpp.hpp
+    src/legacy.cpp
     fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
     smithwaterman/Repeats.cpp
@@ -334,14 +335,14 @@ endif(HTSLIB_LOCAL)
 
 # FIXME: hard-coded compile switches need to be fixed upstream
 if (ASAN)
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC_FLAGS="-Wall -g -fPIC" setup asan lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC_FLAGS=-fPIC setup asan lib_wfa)
 else()
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC_FLAGS="-Wall -g -fPIC" setup lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC_FLAGS=-fPIC setup lib_wfa)
 endif()
 
-if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
-  set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS})
-endif()
+# if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
+#   set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS})
+# endif()
 
 ExternalProject_Add(wfa-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/${WFA_LOCAL}"
@@ -349,7 +350,6 @@ ExternalProject_Add(wfa-EXT
     CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
-    # BUILD_COMMAND $(MAKE) BUILD_TOOLS=0 BUILD_EXAMPLES=0 setup asan lib_wfa
     BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)

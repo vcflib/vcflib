@@ -293,7 +293,7 @@ int main(int argc, char** argv) {
             if (complex) {
                 parsedAlleles[*v] = variant.flatAlternates();
             } else {
-                parsedAlleles[*v] = variant.parsedAlternates();
+                parsedAlleles[*v] = variant.legacy_parsedAlternates();
             }
 
             map<string, vector<VariantAllele> >& parsedAlts = parsedAlleles[*v];

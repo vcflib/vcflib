@@ -233,26 +233,31 @@ public:
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
-    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
-                                                         bool useMNPs = false,
-                                                         bool useEntropy = false,
-                                                         float matchScore = 10.0f,
-                                                         float mismatchScore = -9.0f,
-                                                         float gapOpenPenalty = 15.0f,
-                                                         float gapExtendPenalty = 6.66f,
-                                                         float repeatGapExtendPenalty = 0.0f,
-                                                         string flankingRefLeft = "",
-                                                         string flankingRefRight = "",
-                                                         bool useWaveFront=true,
-                                                         bool debug=false);
-    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels,
-                                                         bool useMNPs,
-                                                         bool useEntropy,
-                                                         string flankingRefLeft,
-                                                         string flankingRefRight,
-                                                         bool useWaveFront,
-                                                         wavefront_aligner_attr_t* wfaParams,
-                                                         bool debug);
+
+    map<string, vector<VariantAllele> > parsedAlternates(
+           bool includePreviousBaseForIndels = false,
+           bool useMNPs = false,
+           bool useEntropy = false,
+           string flankingRefLeft = "",
+           string flankingRefRight = "",
+           wavefront_aligner_attr_t* wfaParams = NULL,
+           bool debug = false);
+
+    // Legacy version of parsedAlterneates:
+    map<string, vector<VariantAllele> > legacy_parsedAlternates(
+           bool includePreviousBaseForIndels = false,
+           bool useMNPs = false,
+           bool useEntropy = false,
+           float matchScore = 10.0f,
+           float mismatchScore = -9.0f,
+           float gapOpenPenalty = 15.0f,
+           float gapExtendPenalty = 6.66f,
+           float repeatGapExtendPenalty = 0.0f,
+           string flankingRefLeft = "",
+           string flankingRefRight = "",
+           bool useWaveFront=true,
+           bool debug=false);
+
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
 
