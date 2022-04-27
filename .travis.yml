@@ -1,3 +1,4 @@
+# disabled because of a python dependency
 matrix:
   include:
     - os: linux
