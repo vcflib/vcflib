@@ -267,7 +267,7 @@ int main(int argc, char** argv) {
         if (complex) {
             parsedAlleles[&*v] = variant.flatAlternates();
         } else {
-            parsedAlleles[&*v] = variant.parsedAlternates();
+            parsedAlleles[&*v] = variant.legacy_parsedAlternates();
         }
         // unique alleles are false negatives regardless of cutoff
         for (vector<string*>::iterator a = uniqueAlleles.begin(); a != uniqueAlleles.end(); ++a) {

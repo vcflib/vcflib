@@ -201,6 +201,7 @@ set(BINS
     vcfintersect
     vcfannotate
     vcfallelicprimitives
+    vcfwave
     vcfoverlay
     vcfaddinfo
     vcfkeepinfo
@@ -453,6 +454,7 @@ add_pytest(realign)
 add_pydoctest(pyvcflib)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
+add_pydoctest(vcfwave)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
@@ -468,7 +470,7 @@ add_doctest(doc/vcffilter)
 
 find_program(PANDOC pandoc)
 
-set(pytest vcfnulldotslashdot vcfallelicprimitives)
+set(pytest vcfnulldotslashdot vcfallelicprimitives vcfwave)
 
 if (PANDOC)
     # note the option ALL which allows to build the docs together with the application
@@ -479,6 +481,7 @@ if (PANDOC)
         # overwrite markdown from tests
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfwave.md ./doc/vcfwave.md
         # generate man pages from markdown
         COMMAND ruby ./test/scripts/md2man
         # regenerate to allow for URLs in markdown docs
@@ -486,6 +489,7 @@ if (PANDOC)
         COMMAND ruby ./test/scripts/bin2md.rb --index
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfwave.md ./doc/vcfwave.md
         # Documented test cases for Python bindings
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/pyvcflib.md ./doc/pyvcflib.md
     )

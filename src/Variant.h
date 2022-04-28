@@ -235,7 +235,7 @@ public:
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
 
-    map<string, vector<VariantAllele> > parsedAlternates(
+    map<string, pair<vector<VariantAllele>,bool> > parsedAlternates(
            bool includePreviousBaseForIndels = false,
            bool useMNPs = false,
            bool useEntropy = false,
@@ -244,7 +244,6 @@ public:
            wavefront_aligner_attr_t* wfaParams = NULL,
            int invKmerLen = 17,
            int invMinLen = 1000,
-           vector<bool>* alt_is_inv = nullptr,
            bool debug = false);
 
     // Legacy version of parsedAlterneates:

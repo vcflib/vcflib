@@ -35,7 +35,7 @@ void printSummary(char** argv) {
          << endl
          << "Realign reference and alternate alleles with WFA, parsing out the primitive alleles" << endl
          << "into multiple VCF records. New records have IDs that reference the source record ID." << endl
-         << "Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes." << endl
+         << "Genotypes are handled. Deletions generate haploid/missing genotypes at overlapping sites." << endl
          << endl
          << "options:" << endl
          << "    -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)" << endl
@@ -45,6 +45,8 @@ void printSummary(char** argv) {
          << "                            (default: ORIGIN)." << endl
          << "    -L, --max-length LEN    Do not manipulate records in which either the ALT or" << endl
          << "                            REF is longer than LEN (default: unlimited)." << endl
+         << "    -K, --inv-kmer K        Length of k-mer to use for inversion detection sketching (default: 17)." << endl
+         << "    -I, --inv-min LEN       Minimum allele length to consider for inverted alignment (default: 64)." << endl
          << "    -k, --keep-info         Maintain site and allele-level annotations when decomposing." << endl
          << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
          << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
@@ -68,6 +70,8 @@ int main(int argc, char** argv) {
     bool useWaveFront = true;
     bool debug    = false;
     int thread_count = 1;
+    int inv_sketch_kmer = 17;
+    int min_inv_len = 64;
 
     VariantCallFile variantFile;
 
@@ -81,6 +85,8 @@ int main(int argc, char** argv) {
                 {"wf-params", required_argument, 0, 'p'},
                 {"use-mnps", no_argument, 0, 'm'},
                 {"max-length", required_argument, 0, 'L'},
+                {"inv-kmer", required_argument, 0, 'K'},
+                {"inv-min", required_argument, 0, 'I'},
                 {"tag-parsed", required_argument, 0, 't'},
                 {"keep-info", no_argument, 0, 'k'},
                 {"keep-geno", no_argument, 0, 'g'},
@@ -91,7 +97,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "dhmkt:L:p:j:",
+        c = getopt_long (argc, argv, "dhmkt:L:p:j:K:I:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -135,6 +141,14 @@ int main(int argc, char** argv) {
             maxLength = atoi(optarg);
             break;
 
+        case 'K':
+            inv_sketch_kmer = atoi(optarg);
+            break;
+
+        case 'I':
+            min_inv_len = atoi(optarg);
+            break;
+
         case '?':
             printSummary(argv);
             exit(1);
@@ -174,17 +188,10 @@ int main(int argc, char** argv) {
     wfa_params.affine2p_penalties.gap_extension2 = p[5];
     wfa_params.alignment_scope = compute_alignment;
     
-    int inv_sketch_kmer = 17;
-    int min_inv_len = 256;
-
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
-    if (!parseFlag.empty()) {
-      if (useWaveFront)
-        variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfallelicprimitives and alignment with WFA2-lib.\">");
-      else
-        variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfallelicprimitives and alignment with obsolete SW.\">");
-    }
+    variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfwave and alignment with WFA2-lib.\">");
+    variantFile.addHeaderLine("##INFO=<ID=INV,Number=.,Type=String,Description=\"Haplotypes decomposed in the inverted orientation using vcflib vcfwave.\">");
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
@@ -216,15 +223,20 @@ int main(int argc, char** argv) {
         // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indexes corresponding to it
 
         // this code does an O(n^2) alignment of the ALTs
-        vector<bool> alt_is_inv;
-        map<string, vector<VariantAllele> > varAlleles =
-           var.legacy_parsedAlternates(includePreviousBaseForIndels, useMNPs,
-                                       false);
+        map<string, pair<vector<VariantAllele>, bool> > varAlleles =
+           var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
+                                false, // bool useEntropy = false,
+                                "",    // string flankingRefLeft = "",
+                                "",    // string flankingRefRight = "",
+                                &wfa_params,
+                                inv_sketch_kmer,
+                                min_inv_len,
+                                debug);  // bool debug=false
 
         set<VariantAllele> alleles;
         // collect unique alleles
         for (auto a: varAlleles) {
-            for (auto va: a.second) {
+            for (auto va: a.second.first) {
                 if (debug) cerr << a.first << " " << va.repr << endl;
                 alleles.insert(va); // only inserts first unique allele and ignores next ones
             }
@@ -247,7 +259,7 @@ int main(int argc, char** argv) {
         map<string, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
         for (auto a: varAlleles) {
             int index = var.altAlleleIndexes[a.first] + 1; // make non-relative
-            for (auto va: a.second) {
+            for (auto va: a.second.first) {
                 variantAlleleIndexes[va.repr].push_back(index);
             }
         }
@@ -263,7 +275,7 @@ int main(int argc, char** argv) {
         if (var.info.find("AF") != var.info.end()) {
             hasAf = true;
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                vector<VariantAllele>& vars = varAlleles[*a];
+                vector<VariantAllele>& vars = varAlleles[*a].first;
                 for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
                     double freq;
                     try {
@@ -281,7 +293,7 @@ int main(int argc, char** argv) {
         if (var.info.find("AC") != var.info.end()) {
             hasAc = true;
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                vector<VariantAllele>& vars = varAlleles[*a];
+                vector<VariantAllele>& vars = varAlleles[*a].first;
                 for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
                     int freq;
                     try {
@@ -300,7 +312,7 @@ int main(int argc, char** argv) {
                  infoit != var.info.end(); ++infoit) {
                 string key = infoit->first;
                 for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                    vector<VariantAllele>& vars = varAlleles[*a];
+                    vector<VariantAllele>& vars = varAlleles[*a].first;
                     for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
                         string val;
                         vector<string>& vals = var.info[key];

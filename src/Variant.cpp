@@ -2082,7 +2082,7 @@ string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
 // Returns map of [REF,ALTs] with attached VariantAllele records
 
 
-map<string, vector<VariantAllele> > Variant::parsedAlternates(
+map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     bool includePreviousBaseForIndels,
     bool useMNPs,
     bool useEntropy,
@@ -2091,27 +2091,26 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
     wavefront_aligner_attr_t* wfaParams,
     int invKmerLen,
     int invMinLen,
-    vector<bool>* alt_is_inv,
     bool debug) {
 
-    map<string, vector<VariantAllele> > variantAlleles; // return type
+    map<string, pair<vector<VariantAllele>,bool> > variantAlleles; // return type
 
     if (isSymbolicSV()){
         // Don't ever align symbolic SVs. It just wrecks things.
-        return this->flatAlternates();
+        for (auto& f : this->flatAlternates()) {
+            variantAlleles[f.first] = make_pair(f.second, false);
+        }
+        return variantAlleles;
     }
     // add the reference allele
-    variantAlleles[ref].push_back(VariantAllele(ref, ref, position));
+    variantAlleles[ref].first.push_back(VariantAllele(ref, ref, position));
 
     // single SNP case, no ambiguity possible, no need to spend a lot of
     // compute aligning ref and alt fields
     if (alt.size() == 1 && ref.size() == 1 && alt.front().size() == 1) {
-        variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+        variantAlleles[alt.front()].first.push_back(VariantAllele(ref, alt.front(), position));
         return variantAlleles;
     }
-
-    assert(alt_is_inv != nullptr);
-    alt_is_inv->resize(alt.size(), false);
 
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
@@ -2156,19 +2155,21 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
         unsigned int referencePos;
         string& alternate = a;
         // create the variants slot
-        vector<VariantAllele>& variants = variantAlleles[alternate];
+        vector<VariantAllele>& variants = variantAlleles[alternate].first;
     }
 
 
 #pragma omp parallel for
-    //for (auto a: alt) { // iterate ALT strings
-    for (uint64_t idx = 0; idx < alt.size(); ++idx) {
-        auto& a = alt[idx];
+    for (auto a: alt) { // iterate ALT strings
+        //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
+        //auto& a = alt[idx];
         unsigned int referencePos;
         string alternate = a;
-        vector<VariantAllele>& variants = variantAlleles[alternate];
+        pair<vector<VariantAllele>, bool>& _v = variantAlleles[alternate];
+        vector<VariantAllele>& variants = _v.first;
+        bool& is_inv = _v.second = false;
+        //bool& is_inv = (*alt_is_inv)[alternate];
         // get the alt/ref mapping in inversion space
-        bool is_inv = false;
         if (invKmerLen && alternate.size() >= invKmerLen
             && alternate.size() >= invMinLen
             && ref.size() >= invKmerLen
@@ -2181,8 +2182,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
                 > rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen)) {
                 is_inv = true;
                 // flip the alt
-                cerr << "flippin the alt" << endl;
-                string alternate = reverse_complement(alternate);
+                string alternate_rev = reverse_complement(alternate);
+                std::swap(alternate, alternate_rev);
             }
             /*
             cerr << "comparing "
@@ -2190,8 +2191,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
                  << " vs rev " << rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen) << endl;
             */
         }
-        alt_is_inv->at(idx) = is_inv;
-        
+
         string alternateQuery_M;
         if (flankingRefLeft.empty() && flankingRefRight.empty()) {
             alternateQuery_M = padding + alternate + padding;
@@ -2241,7 +2241,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
                  << reference_M << endl
                  << ">fail.query" << endl
                  << alternateQuery_M << endl;
-            variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+            variantAlleles[alt.front()].first.push_back(VariantAllele(ref, alt.front(), position));
             exit(1);
             //return variantAlleles;
         }
