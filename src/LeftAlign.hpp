@@ -42,7 +42,7 @@ class AltAlignment {
 public:
     unsigned int pos;
     string seq;
-    vector<pair<int, string> > cigar;
+    vector<pair<int, char> > cigar;
     AltAlignment(unsigned int& p,
                  string& s,
                  string& c) {

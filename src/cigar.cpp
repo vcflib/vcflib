@@ -37,21 +37,21 @@ string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
 }
 
 string mergeCigar(const string& c1, const string& c2) {
-    vector<pair<int, string> > cigar1 = splitCigar(c1);
-    vector<pair<int, string> > cigar2 = splitCigar(c2);
+    vector<pair<int, char> > cigar1 = splitCigar(c1);
+    vector<pair<int, char> > cigar2 = splitCigar(c2);
     // check if the middle elements are the same
     if (cigar1.back().second == cigar2.front().second) {
         cigar1.back().first += cigar2.front().first;
         cigar2.erase(cigar2.begin());
     }
-    for (vector<pair<int, string> >::iterator c = cigar2.begin(); c != cigar2.end(); ++c) {
+    for (vector<pair<int, char> >::iterator c = cigar2.begin(); c != cigar2.end(); ++c) {
         cigar1.push_back(*c);
     }
     return joinCigar(cigar1);
 }
 
-vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr) {
-    vector<pair<int, string> > cigar;
+vector<pair<int, char> > splitUnpackedCigar(const string& cigarStr) {
+    vector<pair<int, char> > cigar;
     int num = 0;
     char type = cigarStr[0];
     //cerr << "[" << cigarStr << "]" << endl; // 18,12,14
@@ -62,75 +62,75 @@ vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr) {
           exit(1);
         }
         if (c != type) {
-          cigar.push_back(make_pair(num, string(1,type)));
+          cigar.push_back(make_pair(num, type));
           //cerr << num << ":" << type << ", ";
           type = c;
           num = 0;
         }
         num += 1;
     }
-    cigar.push_back(make_pair(num, string(1,type)));
+    cigar.push_back(make_pair(num, type));
     //cerr << num << ":" << type << ", ";
     return cigar;
 }
 
-vector<pair<int, string> > splitCigar(const string& cigarStr) {
-    vector<pair<int, string> > cigar;
+vector<pair<int, char> > splitCigar(const string& cigarStr) {
+    vector<pair<int, char> > cigar;
     string number;
-    string type;
+    char type = '\0';
     // strings go [Number][Type] ...
     for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
         char c = *s;
         if (isdigit(c)) {
-            if (type.empty()) {
+            if (type == '\0') {
                 number += c;
             } else {
                 // signal for next token, push back the last pair, clean up
                 cigar.push_back(make_pair(atoi(number.c_str()), type));
                 number.clear();
-                type.clear();
+                type = '\0';
                 number += c;
             }
         } else {
-            type += c;
+            type = c;
         }
     }
-    if (!number.empty() && !type.empty()) {
+    if (!number.empty() && type != '\0') {
         cigar.push_back(make_pair(atoi(number.c_str()), type));
     }
     return cigar;
 }
 
-list<pair<int, string> > splitCigarList(const string& cigarStr) {
-    list<pair<int, string> > cigar;
+list<pair<int, char> > splitCigarList(const string& cigarStr) {
+    list<pair<int, char> > cigar;
     string number;
-    string type;
+    char type = '\0';
     // strings go [Number][Type] ...
     for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
         char c = *s;
         if (isdigit(c)) {
-            if (type.empty()) {
+            if (type == '\0') {
                 number += c;
             } else {
                 // signal for next token, push back the last pair, clean up
                 cigar.push_back(make_pair(atoi(number.c_str()), type));
                 number.clear();
-                type.clear();
+                type = '\0';
                 number += c;
             }
         } else {
-            type += c;
+            type = c;
         }
     }
-    if (!number.empty() && !type.empty()) {
+    if (!number.empty() && type != '\0') {
         cigar.push_back(make_pair(atoi(number.c_str()), type));
     }
     return cigar;
 }
 
-vector<pair<int, string> > cleanCigar(const vector<pair<int, string> >& cigar) {
-    vector<pair<int, string> > cigarClean;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+vector<pair<int, char> > cleanCigar(const vector<pair<int, char> >& cigar) {
+    vector<pair<int, char> > cigarClean;
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
         if (c->first > 0) {
             cigarClean.push_back(*c);
         }
@@ -138,9 +138,9 @@ vector<pair<int, string> > cleanCigar(const vector<pair<int, string> >& cigar) {
     return cigarClean;
 }
 
-string joinCigar(const vector<pair<int, string> >& cigar) {
+string joinCigar(const vector<pair<int, char> >& cigar) {
     string cigarStr;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
         if (c->first) {
             cigarStr += convert(c->first) + c->second;
         }
@@ -148,19 +148,9 @@ string joinCigar(const vector<pair<int, string> >& cigar) {
     return cigarStr;
 }
 
-string joinCigar(const vector<pair<int, char> >& cigar) {
+string joinCigarList(const list<pair<int, char> >& cigar) {
     string cigarStr;
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->first) {
-            cigarStr += convert(c->first) + string(1, c->second);
-        }
-    }
-    return cigarStr;
-}
-
-string joinCigarList(const list<pair<int, string> >& cigar) {
-    string cigarStr;
-    for (list<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+    for (list<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
         cigarStr += convert(c->first) + c->second;
     }
     return cigarStr;
@@ -176,17 +166,7 @@ int cigarRefLen(const vector<pair<int, char> >& cigar) {
     return len;
 }
 
-int cigarRefLen(const vector<pair<int, string> >& cigar) {
-    int len = 0;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->second == "M" || c->second == "D" || c->second == "X") {
-            len += c->first;
-        }
-    }
-    return len;
-}
-
-bool isEmptyCigarElement(const pair<int, string>& elem) {
+bool isEmptyCigarElement(const pair<int, char>& elem) {
     return elem.first == 0;
 }
 

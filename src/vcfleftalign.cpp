@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
             bool leadingSNP = false;
 
             while (c != a->cigar.end()) {
-                char op = c->second[0];
+                char op = c->second;
                 if (c == a->cigar.begin()) {
                     if (op != 'M') {
                         cerr << "alignment does not start on matched sequence" << endl;

@@ -106,10 +106,10 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
     string softEnd;
 
     stringstream cigar_before, cigar_after;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin();
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin();
         c != cigar.end(); ++c) {
         unsigned int l = c->first;
-        char t = c->second.at(0);
+        char t = c->second;
 
         cigar_before << l << t;
         if (t == 'M') { // match or mismatch
@@ -301,16 +301,16 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
     Cigar newCigar;
 
     if (!softBegin.empty()) {
-        newCigar.push_back(make_pair(softBegin.size(), "S"));
+        newCigar.push_back(make_pair(softBegin.size(), 'S'));
     }
 
     vector<VCFIndelAllele>::iterator id = indels.begin();
     VCFIndelAllele last = *id++;
     if (last.position > 0) {
-        newCigar.push_back(make_pair(last.position, "M"));
-        newCigar.push_back(make_pair(last.length, (last.insertion ? "I" : "D")));
+        newCigar.push_back(make_pair(last.position, 'M'));
+        newCigar.push_back(make_pair(last.length, (last.insertion ? 'I' : 'D')));
     } else {
-        newCigar.push_back(make_pair(last.length, (last.insertion ? "I" : "D")));
+        newCigar.push_back(make_pair(last.length, (last.insertion ? 'I' : 'D')));
     }
     int lastend = last.insertion ? last.position : (last.position + last.length);
     VCFLEFTALIGN_DEBUG(last << ",");
@@ -323,32 +323,32 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
                  << referenceSequence << endl << alternateSequence << endl;
             exit(1);
         } else if (indel.position == lastend && indel.insertion == last.insertion) {
-            pair<int, string>& op = newCigar.back();
+            pair<int, char>& op = newCigar.back();
             op.first += indel.length;
         } else if (indel.position >= lastend) {  // also catches differential indels, but with the same position
-            newCigar.push_back(make_pair(indel.position - lastend, "M"));
-            newCigar.push_back(make_pair(indel.length, (indel.insertion ? "I" : "D")));
+            newCigar.push_back(make_pair(indel.position - lastend, 'M'));
+            newCigar.push_back(make_pair(indel.length, (indel.insertion ? 'I' : 'D')));
         }
         last = *id;
         lastend = last.insertion ? last.position : (last.position + last.length);
     }
 
     if (lastend < alignedLength) {
-        newCigar.push_back(make_pair(alignedLength - lastend, "M"));
+        newCigar.push_back(make_pair(alignedLength - lastend, 'M'));
     }
 
     if (!softEnd.empty()) {
-        newCigar.push_back(make_pair(softEnd.size(), "S"));
+        newCigar.push_back(make_pair(softEnd.size(), 'S'));
     }
 
     VCFLEFTALIGN_DEBUG(endl);
 
     cigar = newCigar;
 
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin();
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin();
         c != cigar.end(); ++c) {
         unsigned int l = c->first;
-        char t = c->second.at(0);
+        char t = c->second;
         cigar_after << l << t;
     }
 
