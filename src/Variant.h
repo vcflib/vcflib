@@ -32,6 +32,7 @@
 #include "convert.h"
 #include "multichoose.h"
 #include "rkmh.hpp"
+#include "LeftAlign.hpp"
 #include <Fasta.h>
 extern "C" {
     #include "filevercmp.h"
@@ -65,7 +66,6 @@ VariantFieldType typeStrToFieldType(string& typeStr);
 ostream& operator<<(ostream& out, VariantFieldType type);
 
 typedef map<string, map<string, vector<string> > > Samples;
-typedef vector<pair<int, string> > Cigar;
 
 /// Compute a reverse complement. Supports both upper-case and lower-case input characters.
 std::string reverse_complement(const std::string& seq);
@@ -183,35 +183,6 @@ private:
     ifstream _file;
     bool parsedHeader;
 
-};
-
-/*
-    A VariantAllele simply tracks [position,ref,alt] and has a string representation in 'repr'
-*/
-
-class VariantAllele {
-    friend ostream& operator<<(ostream& out, VariantAllele& var);
-    friend bool operator<(const VariantAllele& a, const VariantAllele& b);
-    friend VariantAllele operator+(const VariantAllele& a, const VariantAllele& b);
-public:
-    string ref;
-    string alt;
-    string repr;
-    long position;
-    /* // TODO
-    bool isSNP(void);
-    bool isMNP(void);
-    bool isInsertion(void);
-    bool isDeletion(void);
-    bool isIndel(void);
-    */
-    VariantAllele(string const & r, string const & a, long p)
-        : ref(r), alt(a), position(p)
-    {
-        stringstream s;
-        s << position << ":" << ref << "/" << alt;
-        repr = s.str();
-    }
 };
 
 class Variant {
@@ -593,19 +564,6 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts);
 map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMapping, vector<int>& altsToRemove);
 
 vector<string>& unique(vector<string>& strings);
-
-string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
-string mergeCigar(const string& c1, const string& c2);
-vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr);
-vector<pair<int, string> > splitCigar(const string& cigarStr);
-list<pair<int, string> > splitCigarList(const string& cigarStr);
-int cigarRefLen(const vector<pair<int, char> >& cigar);
-int cigarRefLen(const vector<pair<int, string> >& cigar);
-vector<pair<int, string> > cleanCigar(const vector<pair<int, string> >& cigar);
-string joinCigar(const vector<pair<int, string> >& cigar);
-string joinCigar(const vector<pair<int, char> >& cigar);
-string joinCigarList(const list<pair<int, string> >& cigar);
-bool isEmptyCigarElement(const pair<int, string>& elem);
 
 // for sorting, generating maps ordered by chromosome name
 class ChromNameCompare {

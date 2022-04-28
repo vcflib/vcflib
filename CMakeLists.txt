@@ -135,6 +135,9 @@ set(vcflib_SOURCE
     src/legacy.cpp
     src/rkmh.cpp
     src/murmur3.cpp
+    src/LeftAlign.cpp
+    src/cigar.cpp
+    src/allele.cpp
     fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
     smithwaterman/Repeats.cpp

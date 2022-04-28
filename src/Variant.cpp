@@ -2038,38 +2038,274 @@ int ploidy(const map<int, int>& genotype) {
     return i;
 }
 
-// generates cigar from allele parsed by parsedAlternates
-// Note: this function is not used in vcflib
-string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
-    string cigar;
-    pair<int, string> element;
-    for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
-        VariantAllele& va = *v;
-        if (va.ref != va.alt) {
-            if (element.second == "M") {
-                cigar += convert(element.first) + element.second;
-                element.second = ""; element.first = 0;
-            }
-            if (va.ref.size() == va.alt.size()) {
-                cigar += convert(va.ref.size()) + (xForMismatch ? "X" : "M");
-            } else if (va.ref.size() > va.alt.size()) {
-                cigar += convert(va.ref.size() - va.alt.size()) + "D";
-            } else {
-                cigar += convert(va.alt.size() - va.ref.size()) + "I";
-            }
+// legacy_parsedAlternates returns a hash of 'ref' and a vector of alts. A
+// single record may be split into multiple records with new
+// 'refs'. In this function Smith-Waterman is used with padding on
+// both sides of a ref and each alt. The SW method quadratic in nature
+// and painful with long sequences. Recently WFA is introduced with
+// runs in linear time.
+//
+// Returns map of [REF,ALTs] with attached VariantAllele records
+
+map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
+    bool includePreviousBaseForIndels,
+    bool useMNPs,
+    bool useEntropy,
+    float matchScore,
+    float mismatchScore,
+    float gapOpenPenalty,
+    float gapExtendPenalty,
+    float repeatGapExtendPenalty,
+    string flankingRefLeft,
+    string flankingRefRight,
+    bool useWaveFront,
+    bool debug) {
+
+    map<string, vector<VariantAllele> > variantAlleles; // return type
+
+    if (isSymbolicSV()){
+        // Don't ever align symbolic SVs. It just wrecks things.
+        return this->flatAlternates();
+    }
+    // add the reference allele
+    variantAlleles[ref].push_back(VariantAllele(ref, ref, position));
+
+    // single SNP case, no ambiguity possible, no need to spend a lot of
+    // compute aligning ref and alt fields
+    if (alt.size() == 1 && ref.size() == 1 && alt.front().size() == 1) {
+        variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+        return variantAlleles;
+    }
+
+    // padding is used to ensure a stable alignment of the alternates to the reference
+    // without having to go back and look at the full reference sequence
+    int paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));  // dynamically determine optimum padding length
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+        string& alternate = *a;
+        paddingLen = max(paddingLen, (int) (alternate.size()));
+    }
+    char padChar = 'Z';
+    char anchorChar = 'Q';
+    string padding(paddingLen, padChar);
+
+    // this 'anchored' string is done for stability
+    // the assumption is that there should be a positional match in the first base
+    // this is true for VCF 4.1, and standard best practices
+    // using the anchor char ensures this without other kinds of realignment
+    string reference_M;
+    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+        reference_M = padding + ref + padding;
+        reference_M[paddingLen] = anchorChar;
+    } else {
+        reference_M = flankingRefLeft + ref + flankingRefRight;
+        paddingLen = flankingRefLeft.size();
+    }
+
+    for (auto a: alt) { // iterate ALT strings
+        unsigned int referencePos;
+        string& alternate = a;
+        vector<VariantAllele>& variants = variantAlleles[alternate];
+        string alternateQuery_M;
+        if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+            alternateQuery_M = padding + alternate + padding;
+            alternateQuery_M[paddingLen] = anchorChar;
         } else {
-            if (element.second == "M") {
-                element.first += va.ref.size();
-            } else {
-                element = make_pair(va.ref.size(), "M");
+            alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
+        }
+
+        string cigar;
+        vector<pair<int, string> > cigarData;
+
+        if (useWaveFront)
+        {
+            /*
+             * WFA2-lib
+             */
+            /*
+            // the C++ WFA2-lib interface is not yet stable due to heuristic initialization issues
+            WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
+            aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
+            cigar = aligner.getAlignmentCigar();
+            */
+            auto attributes = wavefront_aligner_attr_default;
+            attributes.memory_mode = wavefront_memory_low;
+            attributes.distance_metric = gap_affine_2p;
+            attributes.affine2p_penalties.match = 0;
+            attributes.affine2p_penalties.mismatch = 4;
+            attributes.affine2p_penalties.gap_opening1 = 6;
+            attributes.affine2p_penalties.gap_extension1 = 2;
+            attributes.affine2p_penalties.gap_opening2 = 26;
+            attributes.affine2p_penalties.gap_extension2 = 1;
+            attributes.alignment_scope = compute_alignment;
+            auto wf_aligner = wavefront_aligner_new(&attributes);
+            wavefront_aligner_set_heuristic_none(wf_aligner);
+            wavefront_aligner_set_alignment_end_to_end(wf_aligner);
+            wavefront_align(wf_aligner,
+                            reference_M.c_str(), reference_M.size(),
+                            alternateQuery_M.c_str(), alternateQuery_M.size());
+            //cerr << "WFA_input\t" << ">
+            /*
+              cigar_print_pretty(stderr,
+              reference_M.c_str(), reference_M.size(),
+              alternateQuery_M.c_str(), alternateQuery_M.size(),
+              &wf_aligner->cigar,wf_aligner->mm_allocator);
+            */
+            // Fetch CIGAR
+            char* buffer = wf_aligner->cigar.operations + wf_aligner->cigar.begin_offset;
+            int buf_len = wf_aligner->cigar.end_offset - wf_aligner->cigar.begin_offset;
+            // Create string and return
+            cigar = std::string(buffer,buf_len);
+            wavefront_aligner_delete(wf_aligner);
+            //if (debug)
+            //    cerr << "WFA output [" << cigar << "]" << endl;
+            if (cigar == "") {
+                if (debug) {
+                    cerr << "Skipping input with WF because there is no CIGAR!" << endl;
+                }
+                cerr << ">fail.pattern" << endl
+                     << reference_M << endl
+                     << ">fail.query" << endl
+                     << alternateQuery_M << endl;
+                variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+                return variantAlleles;
+            }
+            cigarData = splitUnpackedCigar(cigar);
+        }
+        else {
+            CSmithWatermanGotoh sw(matchScore,
+                                   mismatchScore,
+                                   gapOpenPenalty,
+                                   gapExtendPenalty);
+            if (useEntropy) sw.EnableEntropyGapPenalty(1);
+            if (repeatGapExtendPenalty != 0){
+                sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
+            }
+            sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+            cigarData = splitCigar(cigar);
+        }
+
+        //if (debug)
+        //  cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+
+        // left-realign the alignment...
+        if (cigarData.size() == 0) {
+            cerr << "Algorithm error: CIGAR <" << cigar << "> is empty for "
+                 << "ref " << reference_M << ","
+                 << "allele " << alternateQuery_M << endl;
+
+            exit(1);
+        }
+
+        // Check for matched padding (ZZZs)
+        if (cigarData.front().second != "M"
+            || cigarData.back().second != "M"
+            || cigarData.front().first < paddingLen
+            || cigarData.back().first < paddingLen) {
+            cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
+            cerr << "pos: " << position << endl;
+            cerr << "cigar: " << cigar << endl;
+            cerr << "ref:   " << reference_M << endl;
+            cerr << "allele:" << alternateQuery_M << endl;
+            exit(1);
+        } else {
+            // Remove the padding
+            cigarData.front().first -= paddingLen;
+            cigarData.back().first -= paddingLen;;
+        }
+        cigar = joinCigar(cigarData);
+
+        //if (debug)
+        //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+
+        int altpos = 0;
+        int refpos = 0;
+
+        for (auto e: cigarData) {
+
+            int len = e.first;
+            string type = e.second;
+
+            switch (type.at(0)) {
+            case 'I':
+                if (includePreviousBaseForIndels) {
+                    if (!variants.empty() &&
+                        variants.back().ref != variants.back().alt) {
+                        VariantAllele a =
+                            VariantAllele("",
+                                          alternate.substr(altpos, len),
+                                          refpos + position);
+                        variants.back() = variants.back() + a;
+                    } else {
+                        VariantAllele a =
+                            VariantAllele(ref.substr(refpos - 1, 1),
+                                          alternate.substr(altpos - 1, len + 1),
+                                          refpos + position - 1);
+                        variants.push_back(a);
+                    }
+                } else {
+                    variants.push_back(VariantAllele("",
+                                                     alternate.substr(altpos, len),
+                                                     refpos + position));
+                }
+                altpos += len;
+                break;
+            case 'D':
+                if (includePreviousBaseForIndels) {
+                    if (!variants.empty() &&
+                        variants.back().ref != variants.back().alt) {
+                        VariantAllele a
+                            = VariantAllele(ref.substr(refpos, len)
+                                            , "", refpos + position);
+                        variants.back() = variants.back() + a;
+                    } else {
+                        VariantAllele a
+                            = VariantAllele(ref.substr(refpos - 1, len + 1),
+                                            alternate.substr(altpos - 1, 1),
+                                            refpos + position - 1);
+                        variants.push_back(a);
+                    }
+                } else {
+                    variants.push_back(VariantAllele(ref.substr(refpos, len),
+                                                     "", refpos + position));
+                }
+                refpos += len;
+                break;
+
+                // zk has added (!variants.empty()) solves the seg fault in
+                // vcfstats, but need to test
+            case 'M':
+            {
+                for (int i = 0; i < len; ++i) {
+                    VariantAllele a
+                        = VariantAllele(ref.substr(refpos + i, 1),
+                                        alternate.substr(altpos + i, 1),
+                                        (refpos + i + position));
+                    if (useMNPs && (!variants.empty()) &&
+                        variants.back().ref.size() == variants.back().alt.size()
+                        && variants.back().ref != variants.back().alt) {
+                        variants.back() = variants.back() + a;
+                    } else {
+                        variants.push_back(a);
+                    }
+                }
+            }
+            refpos += len;
+            altpos += len;
+            break;
+            case 'S':
+            {
+                refpos += len;
+                altpos += len;
+                break;
+            }
+            default:
+            {
+                break;
+            }
             }
         }
     }
-    if (element.second == "M") {
-        cigar += convert(element.first) + element.second;
-    }
-    element.second = ""; element.first = 0;
-    return cigar;
+    return variantAlleles;
 }
 
 // parsedAlternates returns a hash of 'ref' and a vector of alts. A
@@ -2145,7 +2381,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         string fer = reverse_complement(ref);
         ref_sketch_rev = rkmh::hash_sequence(
             fer.c_str(), fer.size(), invKmerLen, fer.size()-invKmerLen+1);
-        
+
     }
 
     //cerr << endl;
@@ -2387,19 +2623,6 @@ set<string> Variant::altSet(void) {
     return altset;
 }
 
-ostream& operator<<(ostream& out, VariantAllele& var) {
-    out << var.position << " " << var.ref << " -> " << var.alt;
-    return out;
-}
-
-VariantAllele operator+(const VariantAllele& a, const VariantAllele& b) {
-    return VariantAllele(a.ref + b.ref, a.alt + b.alt, a.position);
-}
-
-bool operator<(const VariantAllele& a, const VariantAllele& b) {
-    return a.repr < b.repr;
-}
-
 map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
 
     map<pair<int, int>, int> genotypeIndexes;
@@ -2613,160 +2836,6 @@ string unionInfoHeaderLines(string& s1, string& s2) {
     }
     result.push_back(lastHeaderLine);
     return join(result, "\n");
-}
-
-string mergeCigar(const string& c1, const string& c2) {
-    vector<pair<int, string> > cigar1 = splitCigar(c1);
-    vector<pair<int, string> > cigar2 = splitCigar(c2);
-    // check if the middle elements are the same
-    if (cigar1.back().second == cigar2.front().second) {
-        cigar1.back().first += cigar2.front().first;
-        cigar2.erase(cigar2.begin());
-    }
-    for (vector<pair<int, string> >::iterator c = cigar2.begin(); c != cigar2.end(); ++c) {
-        cigar1.push_back(*c);
-    }
-    return joinCigar(cigar1);
-}
-
-vector<pair<int, string> > splitUnpackedCigar(const string& cigarStr) {
-    vector<pair<int, string> > cigar;
-    int num = 0;
-    char type = cigarStr[0];
-    //cerr << "[" << cigarStr << "]" << endl; // 18,12,14
-    for (char c: cigarStr) {
-        //cerr << "[" << c << "]";
-        if (isdigit(c)) {
-          cerr << "Is this a valid unpacked CIGAR? <" << cigarStr << ">?" << endl;
-          exit(1);
-        }
-        if (c != type) {
-          cigar.push_back(make_pair(num, string(1,type)));
-          //cerr << num << ":" << type << ", ";
-          type = c;
-          num = 0;
-        }
-        num += 1;
-    }
-    cigar.push_back(make_pair(num, string(1,type)));
-    //cerr << num << ":" << type << ", ";
-    return cigar;
-}
-
-vector<pair<int, string> > splitCigar(const string& cigarStr) {
-    vector<pair<int, string> > cigar;
-    string number;
-    string type;
-    // strings go [Number][Type] ...
-    for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
-        char c = *s;
-        if (isdigit(c)) {
-            if (type.empty()) {
-                number += c;
-            } else {
-                // signal for next token, push back the last pair, clean up
-                cigar.push_back(make_pair(atoi(number.c_str()), type));
-                number.clear();
-                type.clear();
-                number += c;
-            }
-        } else {
-            type += c;
-        }
-    }
-    if (!number.empty() && !type.empty()) {
-        cigar.push_back(make_pair(atoi(number.c_str()), type));
-    }
-    return cigar;
-}
-
-list<pair<int, string> > splitCigarList(const string& cigarStr) {
-    list<pair<int, string> > cigar;
-    string number;
-    string type;
-    // strings go [Number][Type] ...
-    for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
-        char c = *s;
-        if (isdigit(c)) {
-            if (type.empty()) {
-                number += c;
-            } else {
-                // signal for next token, push back the last pair, clean up
-                cigar.push_back(make_pair(atoi(number.c_str()), type));
-                number.clear();
-                type.clear();
-                number += c;
-            }
-        } else {
-            type += c;
-        }
-    }
-    if (!number.empty() && !type.empty()) {
-        cigar.push_back(make_pair(atoi(number.c_str()), type));
-    }
-    return cigar;
-}
-
-vector<pair<int, string> > cleanCigar(const vector<pair<int, string> >& cigar) {
-    vector<pair<int, string> > cigarClean;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->first > 0) {
-            cigarClean.push_back(*c);
-        }
-    }
-    return cigarClean;
-}
-
-string joinCigar(const vector<pair<int, string> >& cigar) {
-    string cigarStr;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->first) {
-            cigarStr += convert(c->first) + c->second;
-        }
-    }
-    return cigarStr;
-}
-
-string joinCigar(const vector<pair<int, char> >& cigar) {
-    string cigarStr;
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->first) {
-            cigarStr += convert(c->first) + string(1, c->second);
-        }
-    }
-    return cigarStr;
-}
-
-string joinCigarList(const list<pair<int, string> >& cigar) {
-    string cigarStr;
-    for (list<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        cigarStr += convert(c->first) + c->second;
-    }
-    return cigarStr;
-}
-
-int cigarRefLen(const vector<pair<int, char> >& cigar) {
-    int len = 0;
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->second == 'M' || c->second == 'D' || c->second == 'X') {
-            len += c->first;
-        }
-    }
-    return len;
-}
-
-int cigarRefLen(const vector<pair<int, string> >& cigar) {
-    int len = 0;
-    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->second == "M" || c->second == "D" || c->second == "X") {
-            len += c->first;
-        }
-    }
-    return len;
-}
-
-bool isEmptyCigarElement(const pair<int, string>& elem) {
-    return elem.first == 0;
 }
 
 list<list<int> > _glorder(int ploidy, int alts) {
