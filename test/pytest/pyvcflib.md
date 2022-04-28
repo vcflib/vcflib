@@ -38,4 +38,6 @@ True
 
 ```
 
+So the one input record shows it has a ref of 'ACCCCCACCCCCACC' and six alleles ['ACCCCCACCCCCACC', 'ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA'].
+
 This works fine! It may be the case you want additional bindings that we have not included yet. See vcflib's [pythonffi.cpp](../../src/pythonffi.cpp) for the existing bindings and [Variant.h](../../src/Variant.h) for the classes and accessors.

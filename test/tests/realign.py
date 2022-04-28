@@ -12,8 +12,10 @@ class RealignTest(unittest.TestCase):
         rec = Variant(vcf)
         vcf.getNextVariant(rec)
         self.assertEqual(rec.name,"grch38#chr4")
+        self.assertEqual(rec.ref,'ACCCCCACCCCCACC')
+        self.assertEqual(rec.alt,['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA'])
+
         newvcf = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,True)
-        # print(newvcf)
         for key, value in newvcf.items():
             print(f'Key: {key}: ')
             for a in value:
