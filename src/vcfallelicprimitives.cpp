@@ -173,6 +173,9 @@ int main(int argc, char** argv) {
     wfa_params.affine2p_penalties.gap_opening2 = p[4];
     wfa_params.affine2p_penalties.gap_extension2 = p[5];
     wfa_params.alignment_scope = compute_alignment;
+    
+    int inv_sketch_kmer = 17;
+    int min_inv_len = 256;
 
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
@@ -213,12 +216,16 @@ int main(int argc, char** argv) {
         // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indexes corresponding to it
 
         // this code does an O(n^2) alignment of the ALTs
+        vector<bool> alt_is_inv;
         map<string, vector<VariantAllele> > varAlleles =
            var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
                                 false, // bool useEntropy = false,
                                 "",    // string flankingRefLeft = "",
                                 "",    // string flankingRefRight = "",
                                 &wfa_params,
+                                inv_sketch_kmer,
+                                min_inv_len,
+                                &alt_is_inv,
                                 debug);  // bool debug=false
 
         set<VariantAllele> alleles;

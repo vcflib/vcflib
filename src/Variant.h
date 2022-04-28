@@ -31,6 +31,7 @@
 #include "ssw_cpp.hpp"
 #include "convert.h"
 #include "multichoose.h"
+#include "rkmh.hpp"
 #include <Fasta.h>
 extern "C" {
     #include "filevercmp.h"
@@ -241,6 +242,9 @@ public:
            string flankingRefLeft = "",
            string flankingRefRight = "",
            wavefront_aligner_attr_t* wfaParams = NULL,
+           int invKmerLen = 17,
+           int invMinLen = 1000,
+           vector<bool>* alt_is_inv = nullptr,
            bool debug = false);
 
     // Legacy version of parsedAlterneates:

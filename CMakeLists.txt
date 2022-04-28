@@ -133,6 +133,8 @@ set(vcflib_SOURCE
     src/ssw.hpp
     src/ssw_cpp.hpp
     src/legacy.cpp
+    src/rkmh.cpp
+    src/murmur3.cpp
     fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
     smithwaterman/Repeats.cpp

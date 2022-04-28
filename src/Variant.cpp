@@ -2089,6 +2089,9 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
     string flankingRefLeft,
     string flankingRefRight,
     wavefront_aligner_attr_t* wfaParams,
+    int invKmerLen,
+    int invMinLen,
+    vector<bool>* alt_is_inv,
     bool debug) {
 
     map<string, vector<VariantAllele> > variantAlleles; // return type
@@ -2106,6 +2109,9 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
         variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
         return variantAlleles;
     }
+
+    assert(alt_is_inv != nullptr);
+    alt_is_inv->resize(alt.size(), false);
 
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
@@ -2131,6 +2137,21 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
         paddingLen = flankingRefLeft.size();
     }
 
+    std::vector<rkmh::hash_t> ref_sketch_fwd;
+    std::vector<rkmh::hash_t> ref_sketch_rev;
+    if (invKmerLen && ref.size() >= invKmerLen
+        && ref.size() >= invMinLen) {
+        ref_sketch_fwd = rkmh::hash_sequence(
+            ref.c_str(), ref.size(), invKmerLen, ref.size()-invKmerLen+1);
+        string fer = reverse_complement(ref);
+        ref_sketch_rev = rkmh::hash_sequence(
+            fer.c_str(), fer.size(), invKmerLen, fer.size()-invKmerLen+1);
+        
+    }
+
+    //cerr << endl;
+    //cerr << "ref is " << ref << endl;
+
     for (auto a: alt) { // iterate ALT strings
         unsigned int referencePos;
         string& alternate = a;
@@ -2138,11 +2159,39 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(
         vector<VariantAllele>& variants = variantAlleles[alternate];
     }
 
+
 #pragma omp parallel for
-    for (auto a: alt) { // iterate ALT strings
+    //for (auto a: alt) { // iterate ALT strings
+    for (uint64_t idx = 0; idx < alt.size(); ++idx) {
+        auto& a = alt[idx];
         unsigned int referencePos;
-        string& alternate = a;
+        string alternate = a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
+        // get the alt/ref mapping in inversion space
+        bool is_inv = false;
+        if (invKmerLen && alternate.size() >= invKmerLen
+            && alternate.size() >= invMinLen
+            && ref.size() >= invKmerLen
+            && ref.size() >= invMinLen
+            && max((int)ref.size(), (int)alt.size()) > invMinLen) {
+            // check if it's more likely for us to align as an inversion
+            auto alt_sketch = rkmh::hash_sequence(
+                a.c_str(), a.size(), invKmerLen, a.size()-invKmerLen+1);
+            if (rkmh::compare(alt_sketch, ref_sketch_fwd, invKmerLen)
+                > rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen)) {
+                is_inv = true;
+                // flip the alt
+                cerr << "flippin the alt" << endl;
+                string alternate = reverse_complement(alternate);
+            }
+            /*
+            cerr << "comparing "
+                 << " vs ref fwd " << rkmh::compare(alt_sketch, ref_sketch_fwd, invKmerLen)
+                 << " vs rev " << rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen) << endl;
+            */
+        }
+        alt_is_inv->at(idx) = is_inv;
+        
         string alternateQuery_M;
         if (flankingRefLeft.empty() && flankingRefRight.empty()) {
             alternateQuery_M = padding + alternate + padding;
