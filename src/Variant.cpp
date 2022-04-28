@@ -2511,11 +2511,13 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;;
         }
-        cigar = joinCigar(cigarData);
 
         // now left align!
         //
-        //stablyLeftAlign(alternateQuery_M, cigar, reference_M);
+        // TODO: currently broken! it seems to mess up our indel alleles (they become length 0 on ref or alt)
+        //stablyLeftAlign(alternateQuery_M, reference_M, cigarData, 5, true);
+
+        cigar = joinCigar(cigarData);
 
         //if (debug)
         //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;

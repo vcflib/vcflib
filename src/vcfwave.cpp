@@ -364,7 +364,8 @@ int main(int argc, char** argv) {
             vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
             string type;
             int len = 0;
-            if (a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
+            if (a->ref.size() && a->alt.size()
+                && a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
                 if (a->ref.size() > a->alt.size()) {
                     type = "del";
                     len = a->ref.size() - a->alt.size();
@@ -458,7 +459,7 @@ int main(int argc, char** argv) {
         // handle deletions
         for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
             int len = 0;
-            if (a->ref.at(0) == a->alt.at(0)
+            if (a->ref.size() && a->alt.size() && a->ref.at(0) == a->alt.at(0)
                 && a->ref.size() > a->alt.size()) {
                 len = a->ref.size() - a->alt.size();
             } else {
