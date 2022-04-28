@@ -187,11 +187,11 @@ int main(int argc, char** argv) {
     wfa_params.affine2p_penalties.gap_opening2 = p[4];
     wfa_params.affine2p_penalties.gap_extension2 = p[5];
     wfa_params.alignment_scope = compute_alignment;
-    
+
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
     variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfwave and alignment with WFA2-lib.\">");
-    variantFile.addHeaderLine("##INFO=<ID=INV,Number=.,Type=String,Description=\"Haplotypes decomposed in the inverted orientation using vcflib vcfwave.\">");
+    variantFile.addHeaderLine("##INFO=<ID=INV,Number=A,Type=String,Description=\"Count of haplotypes which are aligned in the inverted orientation using vcflib vcfwave.\">");
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
@@ -267,9 +267,18 @@ int main(int argc, char** argv) {
         struct var_info_t {
             double freq = 0;
             int count = 0;
+            int in_inv = 0;
             map<string, string> info;
         };
         map<VariantAllele, var_info_t> alleleStuff;
+
+        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+            vector<VariantAllele>& vars = varAlleles[*a].first;
+            bool is_inv = varAlleles[*a].second;
+            for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+                alleleStuff[*va].in_inv += is_inv;
+            }
+        }
 
         bool hasAf = false;
         if (var.info.find("AF") != var.info.end()) {
@@ -342,6 +351,7 @@ int main(int argc, char** argv) {
 
         // from old allele index to a new series across the unpacked positions
         map<int, map<long unsigned int, int> > unpackedAlleleIndexes;
+        map<int, bool> unpackedAlleleInversions;
 
         map<long unsigned int, Variant> variants;
         int varidx = 0;
@@ -406,6 +416,7 @@ int main(int argc, char** argv) {
             v.format = gtonlyformat;
             v.info["TYPE"].push_back(type);
             v.info["LEN"].push_back(convert(len));
+            v.info["INV"].push_back(convert(alleleStuff[*a].in_inv));
             if (hasAf) {
                 v.info["AF"].push_back(convert(alleleStuff[*a].freq));
             }
@@ -437,6 +448,7 @@ int main(int argc, char** argv) {
             int alleleIndex = v.alt.size();
             for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
                 unpackedAlleleIndexes[*i][v.position] = alleleIndex;
+                //unpackedAlleleInversions[*i] = v.inv
             }
             // add null allele
             unpackedAlleleIndexes[ALLELE_NULL][v.position] = ALLELE_NULL;
