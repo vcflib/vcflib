@@ -2467,25 +2467,6 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             exit(1);
         }
 
-        // Check for matched padding (ZZZs)
-        /*
-        if (cigarData.front().second != 'M'
-            || cigarData.back().second != 'M'
-            || cigarData.front().first < paddingLen
-            || cigarData.back().first < paddingLen) {
-            cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
-            cerr << "pos: " << position << endl;
-            cerr << "cigar: " << cigar << endl;
-            cerr << "ref:   " << reference_M << endl;
-            cerr << "allele:" << alternateQuery_M << endl;
-            exit(1);
-        } else {
-            // Remove the padding
-            cigarData.front().first -= paddingLen;
-            cigarData.back().first -= paddingLen;;
-        }
-        */
-
         // now left align!
         //
         // TODO: currently broken! it seems to mess up our indel alleles (they become length 0 on ref or alt)
