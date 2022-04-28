@@ -2348,25 +2348,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         return variantAlleles;
     }
 
-    // padding is used to ensure a stable alignment of the alternates to the reference
-    // without having to go back and look at the full reference sequence
-    int paddingLen = 2;
-    char padChar = 'Z';
-    char anchorChar = 'Q';
-    string padding(paddingLen, padChar);
-
-    // this 'anchored' string is done for stability
-    // the assumption is that there should be a positional match in the first base
-    // this is true for VCF 4.1, and standard best practices
-    // using the anchor char ensures this without other kinds of realignment
-    string reference_M;
-    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-        reference_M = padding + ref + padding;
-        reference_M[paddingLen] = anchorChar;
-    } else {
-        reference_M = flankingRefLeft + ref + flankingRefRight;
-        paddingLen = flankingRefLeft.size();
-    }
+    const string& reference_M = ref;
 
     std::vector<rkmh::hash_t> ref_sketch_fwd;
     std::vector<rkmh::hash_t> ref_sketch_rev;
@@ -2424,13 +2406,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             */
         }
 
-        string alternateQuery_M;
-        if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-            alternateQuery_M = padding + alternate + padding;
-            alternateQuery_M[paddingLen] = anchorChar;
-        } else {
-            alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
-        }
+        const string& alternateQuery_M = alternate;
 
         string cigar;
         vector<pair<int, char> > cigarData;
@@ -2492,6 +2468,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
 
         // Check for matched padding (ZZZs)
+        /*
         if (cigarData.front().second != 'M'
             || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
@@ -2507,6 +2484,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;;
         }
+        */
 
         // now left align!
         //
