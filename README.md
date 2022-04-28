@@ -334,7 +334,7 @@ cd build
 cmake --build . --target clean
 ```
 
-Build dependencies can be viewed in the Travis-CI and github-CI
+Build dependencies can be viewed in the github-CI
 scripts (see badges above), as well as [guix.scm](./guix.scm) used by
 us to create the build environment (for instructions see the header of
 guix.scm). Essentially:
@@ -342,6 +342,7 @@ guix.scm). Essentially:
 - C++ compiler
 - htslib
 - tabixpp
+- WFA2
 
 For include files add
 
