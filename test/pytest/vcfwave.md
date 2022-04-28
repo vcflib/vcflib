@@ -103,9 +103,9 @@ This test case includes one that was introduced by building a variation graph wi
 ```python
 
 >> sh("../build/vcfwave ../test/data/regression/z.vcf|grep -v ^\#")
-a       293     >1>9_1  A       T       60      .       AC=1;AF=1;LEN=1;ORIGIN=a:281;TYPE=snp   GT      1
-a       310     >1>9_2  T       C       60      .       AC=1;AF=1;LEN=1;ORIGIN=a:281;TYPE=snp   GT      1
-a       329     >1>9_3  T       A       60      .       AC=1;AF=1;LEN=1;ORIGIN=a:281;TYPE=snp   GT      1
+a       293     >1>9_1  A       T       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
+a       310     >1>9_2  T       C       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
+a       329     >1>9_3  T       A       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 
 ```
 
