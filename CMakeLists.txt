@@ -354,7 +354,14 @@ ExternalProject_Add(wfa-EXT
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
 set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
-set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a ${SOURCE_DIR}/lib/libwfa.a)
+set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a)
+link_directories($SOURCE_DIR}/lib)
+MESSAGE(STATUS ${WFA_LINK_LIBRARIES})
+
+add_library(WAFCPP_STATIC_LIB STATIC IMPORTED)
+set_target_properties(WAFCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${WFA_LINK_LIBRARIES})
+add_dependencies(WAFCPP_STATIC_LIB wfa-EXT)
+
 add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
