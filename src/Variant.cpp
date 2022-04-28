@@ -2513,6 +2513,10 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
         cigar = joinCigar(cigarData);
 
+        // now left align!
+        //
+        //stablyLeftAlign(alternateQuery_M, cigar, reference_M);
+
         //if (debug)
         //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
