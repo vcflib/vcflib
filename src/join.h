@@ -15,6 +15,7 @@
 #include <vector>
 #include <sstream>
 #include <string.h>
+#include <list>
 
 // join a vector of elements by a delimiter object.  ostream<< must be defined
 // for both class S and T and an ostream, as it is e.g. in the case of strings
