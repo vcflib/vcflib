@@ -8,8 +8,10 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
-#include "Variant.h"
 #include <utility>
+#include "Variant.h"
+#include "allele.hpp"
+#include "cigar.hpp"
 
 namespace vcflib {
 
@@ -104,7 +106,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         */
 
         string cigar;
-        vector<pair<int, string> > cigarData;
+        vector<pair<int, char> > cigarData;
 
         if (useWaveFront)
         {
@@ -187,8 +189,8 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         }
 
         // Check for matched padding (ZZZs)
-        if (cigarData.front().second != "M"
-            || cigarData.back().second != "M"
+        if (cigarData.front().second != 'M'
+            || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
             || cigarData.back().first < paddingLen) {
             cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
@@ -213,9 +215,9 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         for (auto e: cigarData) {
 
             int len = e.first;
-            string type = e.second;
+            char type = e.second;
 
-            switch (type.at(0)) {
+            switch (type) {
             case 'I':
                 if (includePreviousBaseForIndels) {
                     if (!variants.empty() &&
