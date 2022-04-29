@@ -28,8 +28,8 @@ option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
 
-include(CheckIPOSupported)
-check_ipo_supported(RESULT supported OUTPUT error)
+include(CheckIPOSupported) # adds lto
+check_ipo_supported(RESULT ipo_supported OUTPUT output)
 
 # ---- Dependencies
 
@@ -45,7 +45,7 @@ pkg_check_modules(TABIXPP tabixpp) # Optionally builds from contrib/
 
 # ---- Build switches
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ipo_supported})
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING
