@@ -31,29 +31,35 @@ double convertStrDbl(const string& s) {
 }
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] [file]" << endl
-         << endl
-         << "Realign reference and alternate alleles with WFA, parsing out the primitive alleles" << endl
-         << "into multiple VCF records. New records have IDs that reference the source record ID." << endl
-         << "Genotypes are handled. Deletions generate haploid/missing genotypes at overlapping sites." << endl
-         << endl
-         << "options:" << endl
-         << "    -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)" << endl
-         << "                            format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext" << endl
-         << "    -m, --use-mnps          Retain MNPs as separate events (default: false)." << endl
-         << "    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position" << endl
-         << "                            (default: ORIGIN)." << endl
-         << "    -L, --max-length LEN    Do not manipulate records in which either the ALT or" << endl
-         << "                            REF is longer than LEN (default: unlimited)." << endl
-         << "    -K, --inv-kmer K        Length of k-mer to use for inversion detection sketching (default: 17)." << endl
-         << "    -I, --inv-min LEN       Minimum allele length to consider for inverted alignment (default: 64)." << endl
-         << "    -k, --keep-info         Maintain site and allele-level annotations when decomposing." << endl
-         << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
-         << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
-         << "                            VCFs, they should be usable with caution." << endl
-         << "    -j, --threads N         use this many threads for variant decomposition" << endl
-         << "    -d, --debug             debug mode." << endl;
-    cerr << endl << "Type: transformation" << endl << endl;
+    std::string text = R"(
+usage: vcfwave [options] [file]
+
+Realign reference and alternate alleles with WFA, parsing out the primitive alleles
+into multiple VCF records. New records have IDs that reference the source record ID.
+Genotypes are handled. Deletions generate haploid/missing genotypes at overlapping sites.
+
+options:
+    -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
+                            format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext
+    -m, --use-mnps          Retain MNPs as separate events (default: false).
+    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
+                            (default: ORIGIN).
+    -L, --max-length LEN    Do not manipulate records in which either the ALT or
+                            REF is longer than LEN (default: unlimited).
+    -K, --inv-kmer K        Length of k-mer to use for inversion detection sketching (default: 17).
+    -I, --inv-min LEN       Minimum allele length to consider for inverted alignment (default: 64).
+    -k, --keep-info         Maintain site and allele-level annotations when decomposing.
+                            Note that in many cases, such as multisample VCFs, these won't
+                            be valid post-decomposition.  For biallelic loci in single-sample
+                            VCFs, they should be usable with caution.
+    -j, --threads N         use this many threads for variant decomposition
+    -d, --debug             debug mode.
+
+Type: transformation
+)";
+
+    cerr << text;
+
     exit(0);
 }
 

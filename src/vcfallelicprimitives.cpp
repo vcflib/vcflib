@@ -30,26 +30,31 @@ double convertStrDbl(const string& s) {
 }
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] [file]" << endl
-         << endl
-         << "Realign reference and alternate alleles with WFA, parsing out the primitive alleles" << endl
-         << "into multiple VCF records. New records have IDs that reference the source record ID." << endl
-         << "Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes." << endl
-         << endl
-         << "options:" << endl
-         << "    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman" << endl
-         << "                            [WF|SW] algorithm" << endl
-         << "    -m, --use-mnps          Retain MNPs as separate events (default: false)." << endl
-         << "    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position" << endl
-         << "                            (default: ORIGIN)." << endl
-         << "    -L, --max-length LEN    Do not manipulate records in which either the ALT or" << endl
-         << "                            REF is longer than LEN (default: unlimited)." << endl
-         << "    -k, --keep-info         Maintain site and allele-level annotations when decomposing." << endl
-         << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
-         << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
-         << "                            VCFs, they should be usable with caution." << endl
-         << "    -d, --debug             debug mode." << endl;
-    cerr << endl << "Type: transformation" << endl << endl;
+    std::string text = R"(
+usage: ./vcfallelicprimitives [options] [file]
+
+Realign reference and alternate alleles with WFA, parsing out the primitive alleles
+into multiple VCF records. New records have IDs that reference the source record ID.
+Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes.
+
+options:
+    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman
+                            [WF|SW] algorithm
+    -m, --use-mnps          Retain MNPs as separate events (default: false).
+    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
+                            (default: ORIGIN).
+    -L, --max-length LEN    Do not manipulate records in which either the ALT or
+                            REF is longer than LEN (default: unlimited).
+    -k, --keep-info         Maintain site and allele-level annotations when decomposing.
+                            Note that in many cases, such as multisample VCFs, these won't
+                            be valid post-decomposition.  For biallelic loci in single-sample
+                            VCFs, they should be usable with caution.
+    -d, --debug             debug mode.
+
+Type: transformation
+)";
+
+    cerr << text;
     exit(0);
 }
 
@@ -189,7 +194,7 @@ int main(int argc, char** argv) {
 
         // this code does an O(n^2) alignment of the ALTs
         map<string, vector<VariantAllele> > varAlleles =
-           var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
+           var.legacy_parsedAlternates(includePreviousBaseForIndels, useMNPs,
                                 false, // bool useEntropy = false,
                                 10.0f, // float matchScore = 10.0f,
                                 -9.0f, // float mismatchScore = -9.0f,

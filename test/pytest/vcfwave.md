@@ -46,7 +46,8 @@ See more below.
 
 ```
 
->>> head("vcfwave -h",24)
+>>> head("vcfwave -h",25)
+>
 usage: vcfwave [options] [file]
 >
 Realign reference and alternate alleles with WFA, parsing out the primitive alleles

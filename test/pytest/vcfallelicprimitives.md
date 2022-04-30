@@ -45,15 +45,16 @@ See more below.
 ```
 
 >>> head("vcfallelicprimitives -h",22)
-usage: vcfallelicprimitives [options] [file]
+>
+usage: ./vcfallelicprimitives [options] [file]
 >
 Realign reference and alternate alleles with WFA, parsing out the primitive alleles
 into multiple VCF records. New records have IDs that reference the source record ID.
 Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes.
 >
 options:
-    -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
-                            format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext
+    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman
+                            [WF|SW] algorithm
     -m, --use-mnps          Retain MNPs as separate events (default: false).
     -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
                             (default: ORIGIN).
@@ -63,7 +64,6 @@ options:
                             Note that in many cases, such as multisample VCFs, these won't
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
-    -j, --threads N         use this many threads for variant decomposition
     -d, --debug             debug mode.
 >
 Type: transformation

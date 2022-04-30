@@ -6,15 +6,12 @@ and
 
 ## ChangeLog v1.0.4-pre
 
-Before new release:
-
-+ Fix local build for tabixpp+htslib
-
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete.
 
 + Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md)
 + vcfallelicprimitives now considered legacy/obsolete
 + Improved CMake configuration
++ Fixed local build for tabixpp+htslib - note that htslib should be an upstream released version (currently 1.15.1). Unfortunately git submodule does not handle tags.
 + Fix -L switch for vcfallelicprimitives
 + Added libasan and lto support
 + Removed useless googletest submodule
