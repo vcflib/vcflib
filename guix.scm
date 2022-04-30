@@ -70,14 +70,14 @@
        ("fastahack" ,fastahack)
        ;; ("gcc" ,gcc-11)    ;; test against latest
        ("gdb" ,gdb)
-       ; ("htslib" ,htslib)
+       ("htslib" ,htslib)
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
        ("pybind11" ,pybind11)
        ("ruby" ,ruby) ;; for generating man pages
        ("smithwaterman" ,smithwaterman)
-       ; ("tabixpp" ,tabixpp)
+       ("tabixpp" ,tabixpp)
        ("xz" ,xz)
        ("zlib" ,zlib)))
     (native-inputs
