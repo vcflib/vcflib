@@ -385,7 +385,7 @@ include_directories(${WFA_INCLUDE_DIRS})
 set(vcflib_DEPS
   CURL::libcurl
   wfa
-  # htslib
+  htslib
 )
 
 set(vcflib_LIBS
