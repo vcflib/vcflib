@@ -14,7 +14,6 @@ using namespace wfa;
 #include "convert.h"
 #include "join.h"
 #include "split.h"
-#include <omp.h>
 #include <set>
 #include <algorithm>
 #include <getopt.h>
@@ -38,8 +37,8 @@ void printSummary(char** argv) {
          << "Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes." << endl
          << endl
          << "options:" << endl
-         << "    -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)" << endl
-         << "                            format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext" << endl
+         << "    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman" << endl
+         << "                            [WF|SW] algorithm" << endl
          << "    -m, --use-mnps          Retain MNPs as separate events (default: false)." << endl
          << "    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position" << endl
          << "                            (default: ORIGIN)." << endl
@@ -49,7 +48,6 @@ void printSummary(char** argv) {
          << "                            Note that in many cases, such as multisample VCFs, these won't" << endl
          << "                            be valid post-decomposition.  For biallelic loci in single-sample" << endl
          << "                            VCFs, they should be usable with caution." << endl
-         << "    -j, --threads N         use this many threads for variant decomposition" << endl
          << "    -d, --debug             debug mode." << endl;
     cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
@@ -61,13 +59,11 @@ int main(int argc, char** argv) {
     bool useMNPs = false;
     string parseFlag = "ORIGIN";
     string algorithm = "WF";
-    string paramString = "0,19,39,3,81,1";
     int maxLength = 0;
     bool keepInfo = false;
     bool keepGeno = false;
     bool useWaveFront = true;
     bool debug    = false;
-    int thread_count = 1;
 
     VariantCallFile variantFile;
 
@@ -78,26 +74,31 @@ int main(int argc, char** argv) {
                 /* These options set a flag. */
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
-                {"wf-params", required_argument, 0, 'p'},
+                {"algorithm", required_argument, 0, 'a'},
                 {"use-mnps", no_argument, 0, 'm'},
                 {"max-length", required_argument, 0, 'L'},
                 {"tag-parsed", required_argument, 0, 't'},
                 {"keep-info", no_argument, 0, 'k'},
                 {"keep-geno", no_argument, 0, 'g'},
-                {"threads", required_argument, 0, 'j'},
                 {"debug", no_argument, 0, 'd'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "dhmkt:L:p:j:",
+        c = getopt_long (argc, argv, "dhmkt:L:a:",
                          long_options, &option_index);
 
         if (c == -1)
             break;
 
         switch (c) {
+
+        case 'a':
+            algorithm = optarg;
+            useWaveFront = (algorithm == "WF");
+            break;
+
 
 	    case 'm':
             useMNPs = true;
@@ -109,14 +110,6 @@ int main(int argc, char** argv) {
 
 	    case 'g':
             keepGeno = true;
-            break;
-
-        case 'p':
-            paramString = optarg;
-            break;
-
-        case 'j':
-            thread_count = atoi(optarg);
             break;
 
 	    case 'd':
@@ -145,8 +138,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    omp_set_num_threads(thread_count);
-
     if (optind < argc) {
         string filename = argv[optind];
         variantFile.open(filename);
@@ -157,25 +148,6 @@ int main(int argc, char** argv) {
     if (!variantFile.is_open()) {
         return 1;
     }
-
-    // parse the alignment parameters
-    vector<string> p_str = split(paramString, ',');
-    vector<int> p;
-    for (auto& s : p_str) { p.push_back(atoi(s.c_str())); }
-
-    auto wfa_params = wavefront_aligner_attr_default;
-    wfa_params.memory_mode = wavefront_memory_ultralow;
-    wfa_params.distance_metric = gap_affine_2p;
-    wfa_params.affine2p_penalties.match = p[0];
-    wfa_params.affine2p_penalties.mismatch = p[1];
-    wfa_params.affine2p_penalties.gap_opening1 = p[2];
-    wfa_params.affine2p_penalties.gap_extension1 = p[3];
-    wfa_params.affine2p_penalties.gap_opening2 = p[4];
-    wfa_params.affine2p_penalties.gap_extension2 = p[5];
-    wfa_params.alignment_scope = compute_alignment;
-    
-    int inv_sketch_kmer = 17;
-    int min_inv_len = 256;
 
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
@@ -216,10 +188,18 @@ int main(int argc, char** argv) {
         // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indexes corresponding to it
 
         // this code does an O(n^2) alignment of the ALTs
-        vector<bool> alt_is_inv;
         map<string, vector<VariantAllele> > varAlleles =
-           var.legacy_parsedAlternates(includePreviousBaseForIndels, useMNPs,
-                                       false);
+           var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
+                                false, // bool useEntropy = false,
+                                10.0f, // float matchScore = 10.0f,
+                                -9.0f, // float mismatchScore = -9.0f,
+                                15.0f, // float gapOpenPenalty = 15.0f,
+                                6.66f, // float gapExtendPenalty = 6.66f,
+                                0.0f,  // float repeatGapExtendPenalty = 0.0f,
+                                "",    // string flankingRefLeft = "",
+                                "",    // string flankingRefRight = "",
+                                useWaveFront,
+                                debug);  // bool debug=false
 
         set<VariantAllele> alleles;
         // collect unique alleles
