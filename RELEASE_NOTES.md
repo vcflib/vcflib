@@ -4,15 +4,22 @@ see
 and
 [commits](https://github.com/vcflib/vcflib/commits/master).
 
-## ChangeLog v1.0.4 (20220420)
+## ChangeLog v1.0.4-pre
+
+Before new release:
+
++ Fix local build for tabixpp+htslib
 
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete.
 
-+ Added realignment using the wavefront algorithm (now the default). See [vcfallelicprimitives](./doc/vcfallelicprimitives.md).
++ Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md)
++ vcfallelicprimitives now considered legacy/obsolete
 + Improved CMake configuration
 + Fix -L switch for vcfallelicprimitives
-+ Added libasan support
++ Added libasan and lto support
 + Removed useless googletest submodule
++ Added python bindings with pybind11
++ Added python testing frame work
 + Added tabixpp back in as a submodule, fixes https://github.com/vcflib/vcflib/issues/305
 + Optimizations and bug fixes. (thanks @mphschmitt)
 
