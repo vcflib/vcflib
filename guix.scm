@@ -29,6 +29,7 @@
   (guix git-download)
   (guix build-system cmake)
   (gnu packages algebra)
+  (gnu packages autotools)
   (gnu packages base)
   (gnu packages compression)
   (gnu packages bioinformatics)
@@ -45,6 +46,7 @@
   (gnu packages python)
   (gnu packages python-xyz) ; for pybind11
   (gnu packages ruby)
+  (gnu packages tls)
   (srfi srfi-1)
   (ice-9 popen)
   (ice-9 rdelim))
@@ -61,7 +63,10 @@
     (source (local-file %source-dir #:recursive? #t))
     (build-system cmake-build-system)
     (inputs
-     `(("curl" ,curl)
+     `(("autoconf" ,autoconf) ;; htslib build requirement
+       ("automake" ,automake) ;; htslib build requirement
+       ("openssl" ,openssl) ;; htslib build requirement
+       ("curl" ,curl) ;; htslib build requirement
        ("fastahack" ,fastahack)
        ;; ("gcc" ,gcc-11)    ;; test against latest
        ("gdb" ,gdb)
@@ -71,7 +76,7 @@
        ("python" ,python)
        ("pybind11" ,pybind11)
        ("ruby" ,ruby) ;; for generating man pages
-       ; ("smithwaterman" ,smithwaterman)
+       ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
        ("xz" ,xz)
        ("zlib" ,zlib)))

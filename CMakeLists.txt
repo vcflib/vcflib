@@ -65,6 +65,7 @@ endif ()
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+  add_definitions(-Wfatal-errors)
 endif ()
 
 if (ASAN)
@@ -96,11 +97,12 @@ include_directories(filevercmp)
 
 if(NOT HTSLIB_FOUND)
   set(HTSLIB_LOCAL contrib/tabixpp/htslib)
+  set(TABIX_FOUND OFF) # also build tabixpp if htslib is missing
 endif()
 
 if (NOT TABIX_FOUND)
+  set(TABIXPP_LOCAL contrib/tabixpp)
   include_directories(contrib/tabixpp)
-  include_directories(contrib/htslib)
   set(tabixpp_SOURCE
     contrib/tabixpp/tabix.cpp
   )
@@ -148,9 +150,9 @@ set(vcflib_SOURCE
     filevercmp/filevercmp.c
 )
 
-if (NOT tabixpp_FOUND)
+if (TABIXPP_LOCAL) # add the tabixpp source file
     list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
-endif ()
+endif()
 
 add_library(vcflib STATIC
     ${vcflib_SOURCE}
@@ -296,37 +298,43 @@ file (STRINGS "VERSION" BUILD_NUMBER)
 add_definitions(-DVCFLIB_VERSION="${BUILD_NUMBER}")
 add_definitions(-DVERSION="${BUILD_NUMBER}")
 
+
 # ---- Build htslib
 #
 # Note by default we use the distributed htslib! These are
-# the old instructions:
+# the older instructions which allow for a local build from
+# git submodules
 
 if (HTSLIB_LOCAL)
 
   include_directories(${HTSLIB_LOCAL})
 
+  set(flags "-O2 -g -fPIC")
   ExternalProject_Add(htslib-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/${HTSLIB_LOCAL}"
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
+    UPDATE_COMMAND autoreconf -i
+    CONFIGURE_COMMAND ./configure --disable-s3
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
-    BUILD_COMMAND $(MAKE) lib-static
+    BUILD_COMMAND $(MAKE) CFLAGS=${flags} lib-static
   )
   ExternalProject_Get_property(htslib-EXT SOURCE_DIR)
   ExternalProject_Get_property(htslib-EXT INSTALL_DIR)
   set(htslib_INCLUDE "${SOURCE_DIR}")
   set(htslib_static "${SOURCE_DIR}/libhts.a")
   set(htslib_lib "${htslib_static}")
-  set(HTSLIB_LIBRARIES ${htslib_lib})
+  set(HTSLIB_LINK_LIBRARIES "${htslib_static}")
 
   add_custom_target(htslib
     DEPENDS htslib-EXT
     VERBATIM)
 
-  set_property(TARGET htslib PROPERTY
-    IMPORTED_LOCATION ${hstlib_lib})
-  add_dependencies(htslib htslib)
+  # set_property(TARGET htslib PROPERTY IMPORTED_LOCATION ${hstlib_lib})
+  # add_dependencies(htslib htslib-EXT)
+
+  add_library(HTSLIB_LIBRARIES STATIC IMPORTED)
+  set_target_properties(HTSLIB_LIBRARIES PROPERTIES IMPORTED_LOCATION ${htslib_lib})
+  add_dependencies(HTSLIB_LIBRARIES htslib-EXT)
 
 # If the user wants to configure our HTSlib to build with libddeflate, we need
 # to make sure to link against libdeflate as a transitive dependency. To do
@@ -334,8 +342,8 @@ if (HTSLIB_LOCAL)
 # cmake.
 # TODO: Stop vendoring in htslib and just use find_package
 
-  set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
-  set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
+  # set(HTSLIB_EXTRA_LIBS "-lcurl" CACHE STRING "Library flags needed to link with htslib's dependencies, for chosen configuration")
+  # set_property(TARGET htslib PROPERTY INTERFACE_LINK_LIBRARIES ${HTSLIB_EXTRA_LIBS})
 
 endif(HTSLIB_LOCAL)
 
@@ -377,6 +385,7 @@ include_directories(${WFA_INCLUDE_DIRS})
 set(vcflib_DEPS
   CURL::libcurl
   wfa
+  # htslib
 )
 
 set(vcflib_LIBS
@@ -388,6 +397,7 @@ set(vcflib_LIBS
   ${TABIXPP_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
   ${WFA_LINK_LIBRARIES}
+  ${HTSLIB_LINK_LIBRARIES}
 )
 
 target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
@@ -398,11 +408,9 @@ add_dependencies(vcflib ${vcflib_DEPS})
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
-    # target_include_directories(${BIN} PUBLIC ${HTSLIB_INCLUDE_DIRS})
     add_dependencies(${BIN} vcflib)
     target_link_libraries(${BIN} PUBLIC vcflib ${vcflib_LIBS})
   endforeach(BIN ${BINS})
-  # add_dependencies(${BINS} vcflib)
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
