@@ -25,10 +25,10 @@
 [submodule "src/simde"]
 	path = src/simde
 	url = https://github.com/simd-everywhere/simde-no-tests.git
-[submodule "contrib/tabixpp"]
-	path = contrib/tabixpp
-	url = https://github.com/ekg/tabixpp.git
 [submodule "contrib/WFA2-lib"]
 	path = contrib/WFA2-lib
 	url = https://github.com/smarco/WFA2-lib.git
 	branch = development
+[submodule "contrib/tabixpp"]
+	path = contrib/tabixpp
+	url = https://github.com/vcflib/tabixpp.git
