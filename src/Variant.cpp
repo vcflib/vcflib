@@ -163,7 +163,8 @@ void Variant::parse(string& line, bool parseSamples) {
 	       f != format.end(); ++f) {
 
 	    if(i != samplefields.end()){
-	      samples[name][*f] = split(*i, ','); ++i;
+	      samples[name][*f] = split(*i, ',');
+              ++i;
 	    }
 	    else{
 	      std::vector<string> missing;

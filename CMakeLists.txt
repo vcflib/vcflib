@@ -186,6 +186,7 @@ set(BINS
     permuteSmooth
     normalize-iHS
     meltEHH
+    vcfnullgenofields
     vcfaltcount
     vcfhetcount
     vcfhethomratio
