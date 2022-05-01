@@ -1,3 +1,14 @@
+/*
+    vcflib C++ library for parsing and manipulating VCF files
+
+    Copyright © 2010-2022 Erik Garrison
+    Copyright © 2020-2022 Pjotr Prins
+    Copyright © 2015-2022 Travis Collier
+
+    This software is published under the MIT License. See the LICENSE file.
+*/
+
+
 #include "Variant.h"
 #include "split.h"
 #include <getopt.h>
@@ -8,19 +19,22 @@ using namespace std;
 using namespace vcflib;
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
-         << endl
-         << "options:" << endl
-         << "    -p, --ploidy N   the polidy of missing/null GT fields (default=2)"
-         << "    -L, --expand_GL  fill in missing GL fields with 0 values (eg: 0,0,0 for diploid 2 alleles)"
-         << endl
-         << "Makes the FORMAT for each variant line the same (uses all the FORMAT fields described in the header)."
-         << endl
-         << "Fills out per-sample fields to match FORMAT."
-         << endl
-         << "Expands GT values of '.' with number of alleles based on ploidy (eg: './.' for dipolid)."
-            
-         << endl;
+    cout << "usage: " << argv[0] << " [options] <vcf file>";
+    std::string text = R"(
+
+Makes the FORMAT for each variant line the same (uses all the FORMAT
+fields described in the header). Fills out per-sample fields to match
+FORMAT. Expands GT values of '.' with number of alleles based on
+ploidy (eg: './.' for dipolid).
+
+options:
+
+    -p, --ploidy N   the polidy of missing/null GT fields (default=2)
+    -L, --expand_GL  fill in missing GL fields with 0 values (eg: 0,0,0 for diploid 2 alleles)
+
+Type: transformation
+)";
+    cout << text;
     exit(0);
 }
 
@@ -150,4 +164,3 @@ int main(int argc, char** argv) {
     return 0;
 
 }
-
