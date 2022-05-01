@@ -23,7 +23,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
 # ---- Options
 
 option(BUILD_DOC "Build documentation" ON)
-option(OPENMP "Enable OpenMP" ON)
+option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
@@ -32,6 +32,12 @@ include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
 
 # ---- Dependencies
+
+if(OPENMP)
+  include(FindOpenMP)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif(OPENMP)
 
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
@@ -74,7 +80,7 @@ if (ASAN)
 endif(ASAN)
 
 if(OPENMP)
-  find_package(OpenMP REQUIRED)
+  # find_package(OpenMP REQUIRED)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif(OPENMP)
 

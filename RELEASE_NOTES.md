@@ -11,6 +11,7 @@ Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW.
 + Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md)
 + vcfallelicprimitives now considered legacy/obsolete
 + Improved CMake configuration
++ vcflib compiles with both gcc and clang++ and tests pass - though git submodules such as WFA2-lib still override to gcc
 + Fixed local build for tabixpp+htslib - note that htslib should be an upstream released version (currently 1.15.1). Unfortunately git submodule does not handle tags.
 + Fix -L switch for vcfallelicprimitives
 + Added libasan and lto support
