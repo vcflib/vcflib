@@ -82,7 +82,7 @@ options:
     -p, --prefix PREFIX     Affix this output prefix to each file, none by default
     -P, --default-ploidy N  Set a default ploidy for samples which do not have
                             information in the first record (2).
-    -n VAL                  Set value to output for missing calls
+    -n VAL                  Set string value to output for missing calls
 
 Type: transformation
 )";
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
             defaultPloidy = atoi(optarg);
             break;
 
-	    case 'n':
+        case 'n':
             nullAlleleString = optarg;
             break;
 
