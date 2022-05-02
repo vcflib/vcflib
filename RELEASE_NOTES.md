@@ -6,7 +6,7 @@ and
 
 ## ChangeLog v1.0.4-pre
 
-Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete.
+Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 
 + Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md)
 + vcfallelicprimitives now considered legacy/obsolete

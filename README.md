@@ -14,7 +14,7 @@ doi: https://doi.org/10.1101/2021.05.21.445151
 
 April 2022: vcflib has just gone pangenome!
 
-By introducing the wavefront algorithm we can now realign long sequences and reduce call complexity introduced by pangenome variant callers using the [vcfallelicprimitives](./doc/vcfallelicprimitives.md) tool.
+By introducing the wavefront algorithm we can now realign long sequences and reduce call complexity introduced by pangenome variant callers using the new [vcfwave](./doc/vcfwave.md) tool.
 
 See also [RELEASE_NOTES.md](./RELEASE_NOTES.md)
 
@@ -43,6 +43,8 @@ read and write VCF files.  Extensions and applications of the library
 provided in the included utilities (*.cpp) comprise the vast bulk of
 the library's utility.
 
+We have also added infrastructure to write Python bindings. See [below](#python).
+
 ---
 
 Short index:
@@ -63,6 +65,7 @@ Short index:
 - [Development](#Development)
 - [LICENSE](#LICENSE)
 - [Credit work](#Credit)
+  * [Bibtex reference](#Bibtex-reference)
 
 ---
 
