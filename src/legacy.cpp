@@ -24,20 +24,12 @@ namespace vcflib {
 //
 // Returns map of [REF,ALTs] with attached VariantAllele records
 
-// legacy_parsedAlternates returns a hash of 'ref' and a vector of alts. A
-// single record may be split into multiple records with new
-// 'refs'. In this function Smith-Waterman is used with padding on
-// both sides of a ref and each alt. The SW method quadratic in nature
-// and painful with long sequences. Recently WFA is introduced with
-// runs in linear time.
-//
-// Returns map of [REF,ALTs] with attached VariantAllele records
-
 map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     bool includePreviousBaseForIndels,
     bool useMNPs,
     bool useEntropy,
     float matchScore,
+
     float mismatchScore,
     float gapOpenPenalty,
     float gapExtendPenalty,
@@ -63,41 +55,57 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         return variantAlleles;
     }
 
-    // padding is used to ensure a stable alignment of the alternates to the reference
-    // without having to go back and look at the full reference sequence
-    int paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));  // dynamically determine optimum padding length
-    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string& alternate = *a;
-        paddingLen = max(paddingLen, (int) (alternate.size()));
+    // Padding is used to ensure a stable alignment of the alternates to the reference
+    // without having to go back and look at the full reference sequence.
+    // Dynamically determine optimum padding length; if the ref is
+    // larger than 10 we take a larger size for SW (the largest of ref
+    // and alt, see below)
+    string lpadding, rpadding;
+    int paddingLen = -1;
+    char anchorChar = 'Q'; // overwrites first pos of sequence
+
+    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+        paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));
+        for (auto a: alt) {
+            paddingLen = max(paddingLen, (int) (a.size()));
+        }
+        char padChar = 'Z';
+        rpadding = string(paddingLen, padChar); // repeat padChar
+        lpadding = rpadding;
     }
-    char padChar = 'Z';
-    char anchorChar = 'Q';
-    string padding(paddingLen, padChar);
+    else {
+        rpadding = flankingRefRight;
+        lpadding = flankingRefLeft;
+        paddingLen = lpadding.size();
+    }
 
     // this 'anchored' string is done for stability
     // the assumption is that there should be a positional match in the first base
     // this is true for VCF 4.1, and standard best practices
     // using the anchor char ensures this without other kinds of realignment
-    string reference_M;
-    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-        reference_M = padding + ref + padding;
-        reference_M[paddingLen] = anchorChar;
-    } else {
-        reference_M = flankingRefLeft + ref + flankingRefRight;
-        paddingLen = flankingRefLeft.size();
-    }
+    string reference_M = lpadding + ref + rpadding;
+    reference_M[paddingLen-1] = anchorChar; // patch sequence with anchor
+
+    cout << "====>" << reference_M << endl;
+    exit(1);
+    // ACCCCCACCCCCACC
+    // padded ref ZZZZZZZZZZZZZZZQACCCCCACCCCCACCZZZZZZZZZZZZZZZ
 
     for (auto a: alt) { // iterate ALT strings
         unsigned int referencePos;
         string& alternate = a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
-        string alternateQuery_M;
-        if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-            alternateQuery_M = padding + alternate + padding;
-            alternateQuery_M[paddingLen] = anchorChar;
-        } else {
-            alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
-        }
+        string alternateQuery_M = lpadding + alternate + rpadding;
+        alternateQuery_M[paddingLen] = anchorChar; // patch sequence with anchor
+
+        cout << a << " => " << alternateQuery_M << endl;
+        /* ['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA']
+           1: ACC => ZZZZZZZZZZZZZZZQCCZZZZZZZZZZZZZZZ
+           1: AC => ZZZZZZZZZZZZZZZQCZZZZZZZZZZZZZZZ
+           1: ACCCCCACCCCCAC => ZZZZZZZZZZZZZZZQCCCCCACCCCCACZZZZZZZZZZZZZZZ
+           1: ACCCCCACC => ZZZZZZZZZZZZZZZQCCCCCACCZZZZZZZZZZZZZZZ
+           1: ACA => ZZZZZZZZZZZZZZZQCAZZZZZZZZZZZZZZZ
+        */
 
         string cigar;
         vector<pair<int, char> > cigarData;
@@ -293,6 +301,5 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     }
     return variantAlleles;
 }
-
 
 } // namespace vcflib
