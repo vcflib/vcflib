@@ -182,6 +182,7 @@ set(BINS
     vcfld
     plotHaps
     abba-baba
+    legacy
     permuteGPAT++
     permuteSmooth
     normalize-iHS
