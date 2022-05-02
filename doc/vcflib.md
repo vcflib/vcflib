@@ -37,19 +37,19 @@ the library's utility for most users.
 
 | filter command | description |
 | :-------------- | :---------- |
- | [vcffilter](./vcffilter.md) | VCF filter the specified vcf file using the set of filters |
  | [vcfuniqalleles](./vcfuniqalleles.md) | List unique alleles For each record, remove any duplicate alternate alleles that may have resulted from merging separate VCF files. |
+ | [vcffilter](./vcffilter.md) | VCF filter the specified vcf file using the set of filters |
  | [vcfuniq](./vcfuniq.md) | List unique genotypes. Like GNU uniq, but for VCF records. Remove records which have the same position, ref, and alt as the previous record. |
 
 ## metrics
 
 | metrics command | description |
 | :-------------- | :---------- |
+ | [vcfentropy](./vcfentropy.md) | Annotate VCF records with the Shannon entropy of flanking sequence. Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight, EntropyCenter, which are the entropies of the sequence of the given window size to the left, right, and center of the record. Also adds EntropyRef and EntropyAlt for each alt. |
+ | [vcfcheck](./vcfcheck.md) | Validate integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file. |
+ | [vcfhethomratio](./vcfhethomratio.md) | Generates the het/hom ratio for each individual in the file |
  | [vcfhetcount](./vcfhetcount.md) | Calculate the heterozygosity rate: count the number of alternate alleles in heterozygous genotypes in all records in the vcf file |
  | [vcfdistance](./vcfdistance.md) | Adds a tag to each variant record which indicates the distance to the nearest variant. (defaults to BasesToClosestVariant if no custom tag name is given. |
- | [vcfcheck](./vcfcheck.md) | Validate integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file. |
- | [vcfentropy](./vcfentropy.md) | Annotate VCF records with the Shannon entropy of flanking sequence. Anotates the output VCF file with, for each record, EntropyLeft, EntropyRight, EntropyCenter, which are the entropies of the sequence of the given window size to the left, right, and center of the record. Also adds EntropyRef and EntropyAlt for each alt. |
- | [vcfhethomratio](./vcfhethomratio.md) | Generates the het/hom ratio for each individual in the file |
 
 ## phenotype
 
@@ -61,90 +61,92 @@ the library's utility for most users.
 
 | genotype command | description |
 | :-------------- | :---------- |
+ | [hapLrt](./hapLrt.md) | HapLRT is a likelihood ratio test for haplotype lengths. The lengths are modeled with an exponential distribution. The sign denotes if the target has longer haplotypes (1) or the background (-1). |
  | [normalize-iHS](./normalize-iHS.md) | normalizes iHS or XP-EHH scores. |
  | [abba-baba](./abba-baba.md) | **abba-baba** calculates the tree pattern for four indviduals. This tool assumes reference is ancestral and ignores non **abba-baba** sites. The output is a boolian value: 1 = true , 0 = false for abba and baba. the tree argument should be specified from the most basal taxa to the most derived. |
- | [hapLrt](./hapLrt.md) | HapLRT is a likelihood ratio test for haplotype lengths. The lengths are modeled with an exponential distribution. The sign denotes if the target has longer haplotypes (1) or the background (-1). |
 
 ## transformation
 
 | transformation command | description |
 | :-------------- | :---------- |
- | [vcfcat](./vcfcat.md) | Concatenates VCF files |
- | [smoother](./smoother.md) | smoothes is a method for window smoothing many of the GPAT++ formats. |
- | [vcfcommonsamples](./vcfcommonsamples.md) | Generates each record in the first file, removing samples not present in the second |
- | [vcfremovesamples](./vcfremovesamples.md) | outputs each record in the vcf file, removing samples listed on the command line |
- | [vcfinfosummarize](./vcfinfosummarize.md) | Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO. |
- | [vcflength](./vcflength.md) | Add length info field |
- | [vcfoverlay](./vcfoverlay.md) | Overlay records in the input vcf files with order as precedence. |
- | [vcfannotategenotypes](./vcfannotategenotypes.md) | Examine genotype correspondence. Annotate genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant. |
- | [vcfld](./vcfld.md) | Compute LD |
- | [vcfallelicprimitives](./vcfallelicprimitives.md) | Realign reference and alternate alleles with WFA, parsing out the primitive alleles into multiple VCF records. New records have IDs that reference the source record ID. Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes. |
- | [vcfcreatemulti](./vcfcreatemulti.md) | If overlapping alleles are represented across multiple records, merge them into a single record. Currently only for indels. |
- | [vcfcleancomplex](./vcfcleancomplex.md) | Removes reference-matching sequence from complex alleles and adjusts records to reflect positional change. |
- | [vcfleftalign](./vcfleftalign.md) | Left-align indels and complex variants in the input using a pairwise ref/alt alignment followed by a heuristic, iterative left realignment process that shifts indel representations to their absolute leftmost (5') extent. |
- | [vcffixup](./vcffixup.md) | Generates a VCF stream where AC and NS have been generated for each record using sample genotypes |
- | [vcfqual2info](./vcfqual2info.md) | Puts QUAL into an info field tag keyed by [key]. |
- | [vcfnumalt](./vcfnumalt.md) | outputs a VCF stream where NUMALT has been generated for each record using sample genotypes |
- | [vcfevenregions](./vcfevenregions.md) | Generates a list of regions, e.g. chr20:10..30 using the variant density information provided in the VCF file to ensure that the regions have even numbers of variants. This can be use to reduce the variance in runtime when dividing variant detection or genotyping by genomic coordinates. |
- | [vcfafpath](./vcfafpath.md) | Display genotype paths |
- | [vcfglxgt](./vcfglxgt.md) | Set genotypes using the maximum genotype likelihood for each sample. |
- | [vcfkeepgeno](./vcfkeepgeno.md) | Reduce file size by removing FORMAT fields not listed on the command line from sample specifications in the output |
- | [vcfclassify](./vcfclassify.md) | Creates a new VCF where each variant is tagged by allele class: snp, ts/tv, indel, mnp |
- | [vcfgeno2haplo](./vcfgeno2haplo.md) | Convert genotype-based phased alleles within --window-size into haplotype alleles. Will break haplotype construction when encountering non-phased genotypes on input. |
- | [vcfsample2info](./vcfsample2info.md) | Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO. |
- | [vcfprimers](./vcfprimers.md) | For each VCF record, extract the flanking sequences, and write them to stdout as FASTA records suitable for alignment. |
- | [vcfintersect](./vcfintersect.md) | VCF set analysis |
- | [vcfgenosamplenames](./vcfgenosamplenames.md) | Get samplenames |
- | [vcfkeepsamples](./vcfkeepsamples.md) | outputs each record in the vcf file, removing samples not listed on the command line |
- | [vcfcombine](./vcfcombine.md) | Combine VCF files positionally, combining samples when sites and alleles are identical. Any number of VCF files may be combined. The INFO field and other columns are taken from one of the files which are combined when records in multiple files match. Alleles must have identical ordering to be combined into one record. If they do not, multiple records will be emitted. |
  | [vcfecho](./vcfecho.md) | Echo VCF to stdout (simple demo) |
- | [vcfgeno2alleles](./vcfgeno2alleles.md) | modifies the genotypes field to provide the literal alleles rather than indexes |
- | [vcfremap](./vcfremap.md) | For each alternate allele, attempt to realign against the reference with lowered gap open penalty. If realignment is possible, adjust the cigar and reference/alternate alleles. Observe how different alignment parameters, including context and entropy-dependent ones, influence variant classification and interpretation. |
- | [vcfannotate](./vcfannotate.md) | Intersect the records in the VCF file with targets provided in a BED file. Intersections are done on the reference sequences in the VCF file. If no VCF filename is specified on the command line (last argument) the VCF read from stdin. |
- | [vcfkeepinfo](./vcfkeepinfo.md) | To decrease file size remove INFO fields not listed on the command line |
- | [vcfflatten](./vcfflatten.md) | Removes multi-allelic sites by picking the most common alternate. Requires allele frequency specification 'AF' and use of 'G' and 'A' to specify the fields which vary according to the Allele or Genotype. VCF file may be specified on the command line or piped as stdin. |
- | [vcfindex](./vcfindex.md) | Adds an index number to the INFO field (id=position) |
- | [vcfremoveaberrantgenotypes](./vcfremoveaberrantgenotypes.md) | strips samples which are homozygous but have observations implying heterozygosity. Remove samples for which the reported genotype (GT) and observation counts disagree (AO, RO). |
- | [vcfaddinfo](./vcfaddinfo.md) | Adds info fields from the second file which are not present in the first vcf file. |
- | [vcfsamplediff](./vcfsamplediff.md) | Establish putative somatic variants using reported differences between germline and somatic samples. Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples. |
- | [vcf2tsv](./vcf2tsv.md) | Converts VCF to per-allelle or per-genotype tab-delimited format, using null string to replace empty values in the table. Specifying -g will output one line per sample with genotype information. When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index |
- | [vcfinfo2qual](./vcfinfo2qual.md) | Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values. |
- | [vcfstreamsort](./vcfstreamsort.md) | Sorts the input (either stdin or file) using a streaming sort algorithm. Guarantees that the positional order is correct provided out-of-order variants are no more than 100 positions in the VCF file apart. |
- | [vcf2dag](./vcf2dag.md) | Modify VCF to be able to build a directed acyclic graph (DAG) |
- | [vcfbreakmulti](./vcfbreakmulti.md) | If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields. |
- | [vcf2fasta](./vcf2fasta.md) | Generates sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]. Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined. |
- | [vcfsamplenames](./vcfsamplenames.md) | List sample names |
- | [dumpContigsFromHeader](./dumpContigsFromHeader.md) | Dump contigs from header |
  | [vcfglbound](./vcfglbound.md) | Adjust GLs so that the maximum GL is 0 by dividing all GLs for each sample by the max. |
+ | [vcfkeepgeno](./vcfkeepgeno.md) | Reduce file size by removing FORMAT fields not listed on the command line from sample specifications in the output |
+ | [vcfcreatemulti](./vcfcreatemulti.md) | If overlapping alleles are represented across multiple records, merge them into a single record. Currently only for indels. |
+ | [vcfbreakmulti](./vcfbreakmulti.md) | If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields. |
+ | [vcfwave](./vcfwave.md) | Realign reference and alternate alleles with WFA, parsing out the primitive alleles into multiple VCF records. New records have IDs that reference the source record ID. Genotypes are handled. Deletions generate haploid/missing genotypes at overlapping sites. |
+ | [vcfkeepinfo](./vcfkeepinfo.md) | To decrease file size remove INFO fields not listed on the command line |
+ | [vcfglxgt](./vcfglxgt.md) | Set genotypes using the maximum genotype likelihood for each sample. |
+ | [vcfsamplenames](./vcfsamplenames.md) | List sample names |
+ | [vcfremovesamples](./vcfremovesamples.md) | outputs each record in the vcf file, removing samples listed on the command line |
+ | [vcf2dag](./vcf2dag.md) | Modify VCF to be able to build a directed acyclic graph (DAG) |
+ | [vcfgenosamplenames](./vcfgenosamplenames.md) | Get samplenames |
+ | [vcfqual2info](./vcfqual2info.md) | Puts QUAL into an info field tag keyed by [key]. |
+ | [vcfflatten](./vcfflatten.md) | Removes multi-allelic sites by picking the most common alternate. Requires allele frequency specification 'AF' and use of 'G' and 'A' to specify the fields which vary according to the Allele or Genotype. VCF file may be specified on the command line or piped as stdin. |
+ | [vcfnumalt](./vcfnumalt.md) | outputs a VCF stream where NUMALT has been generated for each record using sample genotypes |
+ | [vcfclassify](./vcfclassify.md) | Creates a new VCF where each variant is tagged by allele class: snp, ts/tv, indel, mnp |
+ | [vcfkeepsamples](./vcfkeepsamples.md) | outputs each record in the vcf file, removing samples not listed on the command line |
+ | [vcfcat](./vcfcat.md) | Concatenates VCF files |
+ | [vcfstreamsort](./vcfstreamsort.md) | Sorts the input (either stdin or file) using a streaming sort algorithm. Guarantees that the positional order is correct provided out-of-order variants are no more than 100 positions in the VCF file apart. |
+ | [vcflength](./vcflength.md) | Add length info field |
+ | [vcfannotate](./vcfannotate.md) | Intersect the records in the VCF file with targets provided in a BED file. Intersections are done on the reference sequences in the VCF file. If no VCF filename is specified on the command line (last argument) the VCF read from stdin. |
+ | [vcfinfo2qual](./vcfinfo2qual.md) | Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values. |
+ | [vcfevenregions](./vcfevenregions.md) | Generates a list of regions, e.g. chr20:10..30 using the variant density information provided in the VCF file to ensure that the regions have even numbers of variants. This can be use to reduce the variance in runtime when dividing variant detection or genotyping by genomic coordinates. |
+ | [vcfcombine](./vcfcombine.md) | Combine VCF files positionally, combining samples when sites and alleles are identical. Any number of VCF files may be combined. The INFO field and other columns are taken from one of the files which are combined when records in multiple files match. Alleles must have identical ordering to be combined into one record. If they do not, multiple records will be emitted. |
+ | [vcfgeno2haplo](./vcfgeno2haplo.md) | Convert genotype-based phased alleles within --window-size into haplotype alleles. Will break haplotype construction when encountering non-phased genotypes on input. |
+ | [dumpContigsFromHeader](./dumpContigsFromHeader.md) | Dump contigs from header |
+ | [smoother](./smoother.md) | smoothes is a method for window smoothing many of the GPAT++ formats. |
+ | [vcf2fasta](./vcf2fasta.md) | Generates sample_seq:N.fa for each sample, reference sequence, and chromosomal copy N in [0,1... ploidy]. Each sequence in the fasta file is named using the same pattern used for the file name, allowing them to be combined. |
+ | [vcfintersect](./vcfintersect.md) | VCF set analysis |
+ | [vcfremoveaberrantgenotypes](./vcfremoveaberrantgenotypes.md) | strips samples which are homozygous but have observations implying heterozygosity. Remove samples for which the reported genotype (GT) and observation counts disagree (AO, RO). |
+ | [vcfcommonsamples](./vcfcommonsamples.md) | Generates each record in the first file, removing samples not present in the second |
+ | [vcffixup](./vcffixup.md) | Generates a VCF stream where AC and NS have been generated for each record using sample genotypes |
+ | [vcfleftalign](./vcfleftalign.md) | Left-align indels and complex variants in the input using a pairwise ref/alt alignment followed by a heuristic, iterative left realignment process that shifts indel representations to their absolute leftmost (5') extent. |
+ | [vcfallelicprimitives](./vcfallelicprimitives.md) | Note that this tool is considered legacy and will emit a warning! Use [vcfwave](./vcfwave.md) instead. |
+ | [vcfoverlay](./vcfoverlay.md) | Overlay records in the input vcf files with order as precedence. |
+ | [vcfindex](./vcfindex.md) | Adds an index number to the INFO field (id=position) |
+ | [vcfsamplediff](./vcfsamplediff.md) | Establish putative somatic variants using reported differences between germline and somatic samples. Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples. |
+ | [vcfsample2info](./vcfsample2info.md) | Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO. |
+ | [vcfnullgenofields](./vcfnullgenofields.md) | Makes the FORMAT for each variant line the same (uses all the FORMAT fields described in the header). Fills out per-sample fields to match FORMAT. Expands GT values of '.' with number of alleles based on ploidy (eg: './.' for dipolid). |
+ | [vcfannotategenotypes](./vcfannotategenotypes.md) | Examine genotype correspondence. Annotate genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant. |
+ | [vcfaddinfo](./vcfaddinfo.md) | Adds info fields from the second file which are not present in the first vcf file. |
+ | [vcfprimers](./vcfprimers.md) | For each VCF record, extract the flanking sequences, and write them to stdout as FASTA records suitable for alignment. |
+ | [vcf2tsv](./vcf2tsv.md) | Converts VCF to per-allelle or per-genotype tab-delimited format, using null string to replace empty values in the table. Specifying -g will output one line per sample with genotype information. When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index |
+ | [vcfld](./vcfld.md) | Compute LD |
+ | [vcfremap](./vcfremap.md) | For each alternate allele, attempt to realign against the reference with lowered gap open penalty. If realignment is possible, adjust the cigar and reference/alternate alleles. Observe how different alignment parameters, including context and entropy-dependent ones, influence variant classification and interpretation. |
+ | [vcfgeno2alleles](./vcfgeno2alleles.md) | modifies the genotypes field to provide the literal alleles rather than indexes |
+ | [vcfinfosummarize](./vcfinfosummarize.md) | Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO. |
+ | [vcfafpath](./vcfafpath.md) | Display genotype paths |
+ | [vcfcleancomplex](./vcfcleancomplex.md) | Removes reference-matching sequence from complex alleles and adjusts records to reflect positional change. |
 
 ## statistics
 
 | statistics command | description |
 | :-------------- | :---------- |
- | [vcfroc](./vcfroc.md) | Generates a pseudo-ROC curve using sensitivity and specificity estimated against a putative truth set. Thresholding is provided by successive QUAL cutoffs. |
- | [vcfrandom](./vcfrandom.md) | Generate a random VCF file |
+ | [plotHaps](./plotHaps.md) | **plotHaps** provides the formatted output that can be used with 'bin/plotHaplotypes.R'. |
+ | [vcfrandomsample](./vcfrandomsample.md) | Randomly sample sites from an input VCF file, which may be provided as stdin. Scale the sampling probability by the field specified in KEY. This may be used to provide uniform sampling across allele frequencies, for instance. |
  | [pVst](./pVst.md) | **pVst** calculates vst, a measure of CNV stratification. |
- | [vcfstats](./vcfstats.md) | Prints statistics about variants in the input VCF file. |
- | [vcfgenotypecompare](./vcfgenotypecompare.md) | adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>. use this after vcfannotategenotypes to get correspondence statistics for two vcfs. |
- | [sequenceDiversity](./sequenceDiversity.md) | The **sequenceDiversity** program calculates two popular metrics of haplotype diversity: pi and extended haplotype homozygoisty (eHH). Pi is calculated using the Nei and Li 1979 formulation. eHH a convenient way to think about haplotype diversity. When eHH = 0 all haplotypes in the window are unique and when eHH = 1 all haplotypes in the window are identical. |
- | [vcfparsealts](./vcfparsealts.md) | Alternate allele parsing method. This method uses pairwise alignment of REF and ALTs to determine component allelic primitives for each alternate allele. |
- | [pFst](./pFst.md) | **pFst** is a probabilistic approach for detecting differences in allele frequencies between two populations. |
- | [genotypeSummary](./genotypeSummary.md) | Generates a table of genotype counts. Summarizes genotype counts for bi-allelic SNVs and indel |
  | [iHS](./iHS.md) | **iHS** calculates the integrated haplotype score which measures the relative decay of extended haplotype homozygosity (EHH) for the reference and alternative alleles at a site (see: voight et al. 2006, Spiech & Hernandez 2014). |
+ | [vcfparsealts](./vcfparsealts.md) | Alternate allele parsing method. This method uses pairwise alignment of REF and ALTs to determine component allelic primitives for each alternate allele. |
+ | [genotypeSummary](./genotypeSummary.md) | Generates a table of genotype counts. Summarizes genotype counts for bi-allelic SNVs and indel |
+ | [vcfcountalleles](./vcfcountalleles.md) | Count alleles |
+ | [vcfgenosummarize](./vcfgenosummarize.md) | Adds summary statistics to each record summarizing qualities reported in called genotypes. Uses: RO (reference observation count), QR (quality sum reference observations) AO (alternate observation count), QA (quality sum alternate observations) |
  | [segmentFst](./segmentFst.md) | **segmentFst** creates genomic segments (bed file) for regions with high wcFst |
  | [meltEHH](./meltEHH.md) |  |
- | [wcFst](./wcFst.md) | **wcFst** is Weir & Cockerham's Fst for two populations. Negative values are VALID, they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. Specifically **wcFst** uses equations 1,2,3,4. |
- | [segmentIhs](./segmentIhs.md) | Creates genomic segments (bed file) for regions with high wcFst |
- | [vcfaltcount](./vcfaltcount.md) | count the number of alternate alleles in all records in the vcf file |
- | [plotHaps](./plotHaps.md) | **plotHaps** provides the formatted output that can be used with 'bin/plotHaplotypes.R'. |
- | [vcfgenosummarize](./vcfgenosummarize.md) | Adds summary statistics to each record summarizing qualities reported in called genotypes. Uses: RO (reference observation count), QR (quality sum reference observations) AO (alternate observation count), QA (quality sum alternate observations) |
- | [popStats](./popStats.md) | General population genetic statistics for each SNP |
- | [vcfrandomsample](./vcfrandomsample.md) | Randomly sample sites from an input VCF file, which may be provided as stdin. Scale the sampling probability by the field specified in KEY. This may be used to provide uniform sampling across allele frequencies, for instance. |
  | [bFst](./bFst.md) | **bFst** is a Bayesian approach to Fst. Importantly **bFst** accounts for genotype uncertainty in the model using genotype likelihoods. For a more detailed description see: `A Bayesian approach to inferring population structure from dominant markers' by Holsinger et al. Molecular Ecology Vol 11, issue 7 2002. The likelihood function has been modified to use genotype likelihoods provided by variant callers. There are five free parameters estimated in the model: each subpopulation's allele frequency and Fis (fixation index, within each subpopulation), a free parameter for the total population's allele frequency, and Fst. |
- | [vcfsitesummarize](./vcfsitesummarize.md) | Summarize by site |
  | [vcfgenotypes](./vcfgenotypes.md) | Report the genotypes for each sample, for each variant in the VCF. Convert the numerical represenation of genotypes provided by the GT field to a human-readable genotype format. |
+ | [segmentIhs](./segmentIhs.md) | Creates genomic segments (bed file) for regions with high wcFst |
+ | [popStats](./popStats.md) | General population genetic statistics for each SNP |
+ | [vcfgenotypecompare](./vcfgenotypecompare.md) | adds statistics to the INFO field of the vcf file describing the amount of discrepancy between the genotypes (GT) in the vcf file and the genotypes reported in the <other-genotype-tag>. use this after vcfannotategenotypes to get correspondence statistics for two vcfs. |
+ | [vcfsitesummarize](./vcfsitesummarize.md) | Summarize by site |
+ | [vcfroc](./vcfroc.md) | Generates a pseudo-ROC curve using sensitivity and specificity estimated against a putative truth set. Thresholding is provided by successive QUAL cutoffs. |
+ | [sequenceDiversity](./sequenceDiversity.md) | The **sequenceDiversity** program calculates two popular metrics of haplotype diversity: pi and extended haplotype homozygoisty (eHH). Pi is calculated using the Nei and Li 1979 formulation. eHH a convenient way to think about haplotype diversity. When eHH = 0 all haplotypes in the window are unique and when eHH = 1 all haplotypes in the window are identical. |
+ | [vcfrandom](./vcfrandom.md) | Generate a random VCF file |
+ | [pFst](./pFst.md) | **pFst** is a probabilistic approach for detecting differences in allele frequencies between two populations. |
  | [permuteSmooth](./permuteSmooth.md) | **permuteSmooth** is a method for adding empirical p-values smoothed wcFst scores. |
- | [vcfcountalleles](./vcfcountalleles.md) | Count alleles |
+ | [wcFst](./wcFst.md) | **wcFst** is Weir & Cockerham's Fst for two populations. Negative values are VALID, they are sites which can be treated as zero Fst. For more information see Evolution, Vol. 38 N. 6 Nov 1984. Specifically **wcFst** uses equations 1,2,3,4. |
+ | [vcfaltcount](./vcfaltcount.md) | count the number of alternate alleles in all records in the vcf file |
+ | [vcfstats](./vcfstats.md) | Prints statistics about variants in the input VCF file. |
 
 # SOURCE CODE
 

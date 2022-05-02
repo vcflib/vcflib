@@ -39,6 +39,8 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     bool useWaveFront,
     bool debug) {
 
+    bool OLDPADDING = true; // we want to use the first bp for alignment
+
     map<string, vector<VariantAllele> > variantAlleles; // return type
 
     if (isSymbolicSV()){
@@ -83,8 +85,11 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     // the assumption is that there should be a positional match in the first base
     // this is true for VCF 4.1, and standard best practices
     // using the anchor char ensures this without other kinds of realignment
-    string reference_M = lpadding + ref + rpadding;
-    reference_M[paddingLen] = anchorChar; // patch sequence with anchor
+    string reference_M = lpadding + anchorChar + ref + rpadding;
+    if (OLDPADDING) {
+        reference_M = lpadding + ref + rpadding;
+        reference_M[paddingLen] = anchorChar; // patch sequence with anchor
+    }
 
     if (debug) cerr << "====>" << reference_M << endl;
     // ACCCCCACCCCCACC
@@ -94,8 +99,14 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         unsigned int referencePos;
         string& alternate = a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
-        string alternateQuery_M = lpadding + alternate + rpadding;
-        alternateQuery_M[paddingLen] = anchorChar; // patch sequence with anchor
+        string alternateQuery_M;
+        if (OLDPADDING) {
+          alternateQuery_M = lpadding + alternate + rpadding;
+          alternateQuery_M[paddingLen] = anchorChar; // patch sequence with anchor
+        }
+        else
+            alternateQuery_M = lpadding + anchorChar + alternate + rpadding;
+
         if (debug) cerr << a << " => " << alternateQuery_M << endl;
 
         /* ['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA']
@@ -201,11 +212,13 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             cerr << "allele:" << alternateQuery_M << endl;
             exit(1);
         } else {
-            // Remove the padding
+            // Remove the padding and anchor character
             cigarData.front().first -= paddingLen;
-            cigarData.back().first -= paddingLen;;
+            cigarData.back().first -= paddingLen;
+            if (!OLDPADDING) cigarData.front().first -= 1;
         }
         cigar = joinCigar(cigarData);
+        cerr << "Have a Cigar" << cigar << endl;
 
         //if (debug)
         //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
