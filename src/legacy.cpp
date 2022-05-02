@@ -84,10 +84,9 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     // this is true for VCF 4.1, and standard best practices
     // using the anchor char ensures this without other kinds of realignment
     string reference_M = lpadding + ref + rpadding;
-    reference_M[paddingLen-1] = anchorChar; // patch sequence with anchor
+    reference_M[paddingLen] = anchorChar; // patch sequence with anchor
 
-    cout << "====>" << reference_M << endl;
-    exit(1);
+    if (debug) cerr << "====>" << reference_M << endl;
     // ACCCCCACCCCCACC
     // padded ref ZZZZZZZZZZZZZZZQACCCCCACCCCCACCZZZZZZZZZZZZZZZ
 
@@ -98,7 +97,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         string alternateQuery_M = lpadding + alternate + rpadding;
         alternateQuery_M[paddingLen] = anchorChar; // patch sequence with anchor
 
-        cout << a << " => " << alternateQuery_M << endl;
+        if (debug) cerr << a << " => " << alternateQuery_M << endl;
         /* ['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA']
            1: ACC => ZZZZZZZZZZZZZZZQCCZZZZZZZZZZZZZZZ
            1: AC => ZZZZZZZZZZZZZZZQCZZZZZZZZZZZZZZZ

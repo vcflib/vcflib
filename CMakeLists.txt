@@ -125,6 +125,7 @@ file(GLOB INCLUDES
   filevercmp/*.h*)
 
 set(vcflib_SOURCE
+    src/legacy.cpp
     src/Variant.h
     src/split.h
     src/pdflib.hpp
@@ -182,7 +183,6 @@ set(BINS
     vcfld
     plotHaps
     abba-baba
-    legacy
     permuteGPAT++
     permuteSmooth
     normalize-iHS
