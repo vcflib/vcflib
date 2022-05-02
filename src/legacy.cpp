@@ -96,8 +96,8 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         vector<VariantAllele>& variants = variantAlleles[alternate];
         string alternateQuery_M = lpadding + alternate + rpadding;
         alternateQuery_M[paddingLen] = anchorChar; // patch sequence with anchor
-
         if (debug) cerr << a << " => " << alternateQuery_M << endl;
+
         /* ['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA']
            1: ACC => ZZZZZZZZZZZZZZZQCCZZZZZZZZZZZZZZZ
            1: AC => ZZZZZZZZZZZZZZZQCZZZZZZZZZZZZZZZ
@@ -153,7 +153,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             //    cerr << "WFA output [" << cigar << "]" << endl;
             if (cigar == "") {
                 if (debug) {
-                    cerr << "Skipping input with WF because there is no CIGAR!" << endl;
+                    cerr << "Warning: skipping input with WF because there is no CIGAR!" << endl;
                 }
                 cerr << ">fail.pattern" << endl
                      << reference_M << endl
@@ -177,10 +177,9 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             cigarData = splitCigar(cigar);
         }
 
-        //if (debug)
-        //  cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+        if (debug)
+          cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
-        // left-realign the alignment...
         if (cigarData.size() == 0) {
             cerr << "Algorithm error: CIGAR <" << cigar << "> is empty for "
                  << "ref " << reference_M << ","
@@ -197,6 +196,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
             cerr << "pos: " << position << endl;
             cerr << "cigar: " << cigar << endl;
+            cerr << "cigardata: " << joinCigar(cigarData) << endl;
             cerr << "ref:   " << reference_M << endl;
             cerr << "allele:" << alternateQuery_M << endl;
             exit(1);
@@ -209,6 +209,8 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
 
         //if (debug)
         //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+
+        // left-realign the alignment...
 
         int altpos = 0;
         int refpos = 0;

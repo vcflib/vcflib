@@ -103,7 +103,7 @@ This test case includes one that was introduced by building a variation graph wi
 
 ```python
 
->> sh("../build/vcfwave ../test/data/regression/z.vcf|grep -v ^\#")
+>>> sh("../build/vcfwave ../test/data/regression/z.vcf|grep -v ^\#")
 a       293     >1>9_1  A       T       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 a       310     >1>9_2  T       C       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 a       329     >1>9_3  T       A       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
@@ -116,14 +116,14 @@ a       329     >1>9_3  T       A       60      .       AC=1;AF=1;INV=1;LEN=1;OR
 
 ## Regression tests
 
-The bidirectional wavefront (BiWFA) version has no problem with longer sequences:
+The bidirectional wavefront (BiWFA) version has no problem with longer sequences (10_000bps is almost instant):
 
 ```python
->> run_stdout("vcfwave -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
-output in <a href="../data/regression/vcfallelicprimitives_5.vcf">vcfallelicprimitives_5.vcf</a>
+>>> run_stdout("vcfwave -m -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
+output in <a href="../data/regression/vcfwave_4.vcf">vcfwave_4.vcf</a>
 
->> run_stdout("vcfwave -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
-output in <a href="../data/regression/vcfallelicprimitives_6.vcf">vcfallelicprimitives_6.vcf</a>
+>>> run_stdout("vcfwave -m -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+output in <a href="../data/regression/vcfwave_5.vcf">vcfwave_5.vcf</a>
 
 ```
 
