@@ -33,22 +33,28 @@ void printSummary(char** argv) {
     std::string text = R"(
 usage: ./vcfallelicprimitives [options] [file]
 
-Realign reference and alternate alleles with WFA, parsing out the primitive alleles
-into multiple VCF records. New records have IDs that reference the source record ID.
-Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes.
+Note that this tool is considered legacy and will emit a warning!  Use
+[vcfwave](./vcfwave.md) instead.
+
+Realign reference and alternate alleles with WFA or SW, parsing out
+the primitive alleles into multiple VCF records. New records have IDs
+that reference the source record ID.  Genotypes are handled. Deletion
+alleles will result in haploid (missing allele) genotypes.
 
 options:
-    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman
-                            [WF|SW] algorithm
+    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete)
+                            Smith-Waterman [WF|SW] algorithm
     -m, --use-mnps          Retain MNPs as separate events (default: false).
-    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
-                            (default: ORIGIN).
+    -t, --tag-parsed FLAG   Annotate decomposed records with the source record
+                            position (default: ORIGIN).
     -L, --max-length LEN    Do not manipulate records in which either the ALT or
                             REF is longer than LEN (default: unlimited).
-    -k, --keep-info         Maintain site and allele-level annotations when decomposing.
-                            Note that in many cases, such as multisample VCFs, these won't
-                            be valid post-decomposition.  For biallelic loci in single-sample
-                            VCFs, they should be usable with caution.
+    -k, --keep-info         Maintain site and allele-level annotations when
+                            decomposing.  Note that in many cases,
+                            such as multisample VCFs, these won't be
+                            valid post decomposition.  For biallelic
+                            loci in single-sample VCFs, they should be
+                            used with caution.
     -d, --debug             debug mode.
 
 Type: transformation
@@ -65,6 +71,7 @@ int main(int argc, char** argv) {
     string parseFlag = "ORIGIN";
     string algorithm = "WF";
     int maxLength = 0;
+    size_t global_max_length = 0;
     bool keepInfo = false;
     bool keepGeno = false;
     bool useWaveFront = true;
@@ -109,7 +116,7 @@ int main(int argc, char** argv) {
             useMNPs = true;
             break;
 
-	    case 'k':
+    case 'k':
             keepInfo = true;
             break;
 
@@ -171,6 +178,7 @@ int main(int argc, char** argv) {
         int max_allele_length = 0;
         for (auto allele: var.alt) {
           if (debug) cerr << allele << ":" << allele.length() << "," << max_allele_length << endl;
+          global_max_length = max(allele.length(),global_max_length);
           if (allele.length() >= max_allele_length) {
              max_allele_length = allele.length();
              // cerr << max_allele_length << endl;
@@ -497,6 +505,9 @@ int main(int argc, char** argv) {
         for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
             cout << v->second << endl;
         }
+    }
+    if (global_max_length > 100) {
+        cerr << "WARNING: this tool is considered legacy. This VCF file contains sequences longer than 100 bps. Please use vcfwave instead!" << endl;
     }
 
     return 0;

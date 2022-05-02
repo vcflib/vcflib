@@ -44,26 +44,32 @@ See more below.
 
 ```
 
->>> head("vcfallelicprimitives -h",22)
+>>> head("vcfallelicprimitives -h",28)
 >
 usage: ./vcfallelicprimitives [options] [file]
 >
-Realign reference and alternate alleles with WFA, parsing out the primitive alleles
-into multiple VCF records. New records have IDs that reference the source record ID.
-Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes.
+Note that this tool is considered legacy and will emit a warning!  Use
+[vcfwave](./vcfwave.md) instead.
+>
+Realign reference and alternate alleles with WFA or SW, parsing out
+the primitive alleles into multiple VCF records. New records have IDs
+that reference the source record ID.  Genotypes are handled. Deletion
+alleles will result in haploid (missing allele) genotypes.
 >
 options:
-    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete) Smith-Waterman
-                            [WF|SW] algorithm
+    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete)
+                            Smith-Waterman [WF|SW] algorithm
     -m, --use-mnps          Retain MNPs as separate events (default: false).
-    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
-                            (default: ORIGIN).
+    -t, --tag-parsed FLAG   Annotate decomposed records with the source record
+                            position (default: ORIGIN).
     -L, --max-length LEN    Do not manipulate records in which either the ALT or
                             REF is longer than LEN (default: unlimited).
-    -k, --keep-info         Maintain site and allele-level annotations when decomposing.
-                            Note that in many cases, such as multisample VCFs, these won't
-                            be valid post-decomposition.  For biallelic loci in single-sample
-                            VCFs, they should be usable with caution.
+    -k, --keep-info         Maintain site and allele-level annotations when
+                            decomposing.  Note that in many cases,
+                            such as multisample VCFs, these won't be
+                            valid post decomposition.  For biallelic
+                            loci in single-sample VCFs, they should be
+                            used with caution.
     -d, --debug             debug mode.
 >
 Type: transformation
