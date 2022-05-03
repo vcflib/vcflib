@@ -232,6 +232,21 @@ grch38#chr4     {+10134518      >2125>2211_7    AATCCCAATTGATGGAGAATCCCAATTGATGG
 
 ```
 
+Another problem case
+
+```
+grch38#chr8_36353854-36453166.vcf:grch38#chr8   36382847        >721>726        GT      GC,AC
+
+SW
+
+vcfallelicprimitives_5.vcf:grch38#chr8  36382847        >721>726_1      GT      AC
+vcfallelicprimitives_5.vcf:grch38#chr8  36382848        >721>726_2      T       C
+
+WF
+
+vcfwave_4.vcf:grch38#chr8       36382847        >721>726_1      G       A
+```
+
 # LICENSE
 
 Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
