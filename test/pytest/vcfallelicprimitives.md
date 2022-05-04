@@ -247,6 +247,21 @@ WF
 vcfwave_4.vcf:grch38#chr8       36382847        >721>726_1      G       A
 ```
 
+Let's look at some longer sequences:
+
+The original
+
+```
+grch38#chr4_10083863-10181258.vcf:grch38#chr4   10134514        >2136>2148      GGAGAATCCCAATTGATGG     GTAGCATCCCAAGTGATGT,GTAGAATCCCAATTGATGT,GGAGCATCCCAATTGATGG,GG     60      .       AC=11,7,1,3;AF=0.125,0.0795455,0.0113636,0.0340909;AN=88;AT=>2136>2138>2139>2141>2142>2144>2145>2147>2148,>2136>2137>2139>2140>2142>2143>2145>2146>2148,>2136>2137>2139>2141>2142>2144>2145>2146>2148,>2136>2138>2139>2140>2142>2144>2145>2147>2148,>2136>2138>2148;NS=45;LV=1;PS=>2125>2211     GT      0|1     1|0     0|0     0|1     0|0     1|0     1|01|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     2|2     0|0     4|0     0|0     0|1     0|10|1     0|2     0|0     4|0     0|2     0|0     0|0     2|0     0|0     0|0     0|0     0|0     0|0     2|04|1     0|0     0|0     0|0     0|0     0|3     0|0     0|2     0|0     1
+# translates to SW
+vcfallelicprimitives_6.vcf:grch38#chr4  10134514        >2136>2148_1    GGAGAATCCCAATTGATG      G       60.AC=3;AF=0.0340909;LEN=17;ORIGIN=grch38#chr4:10134514;TYPE=del   GT      0|0     0|0     0|0     0|0     0|00|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     0|0     0|0     1|0     0|00|0     0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|00|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
+vcfallelicprimitives_6.vcf:grch38#chr4  10134515        >2136>2148_2    GAGAATCCCAATTGATGG      TAGAATCCCAATTGATGT,TAGCATCCCAAGTGATGT      60      .       AC=7,11;AF=0.0795455,0.125;LEN=18,18;ORIGIN=grch38#chr4:10134514,grch38#chr4:10134514;TYPE=mnp,mnp GT      0|2     2|0     0|0     0|2     0|0     2|0     2|0     2|00|0     0|0     0|0     0|0     0|0     0|.     0|0     1|1     0|0     .|0     0|0     0|2     0|2     0|20|1     0|0     .|0     0|1     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     1|0     .|20|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     2
+vcfallelicprimitives_6.vcf:grch38#chr4  10134518        >2136>2148_3    AATCCCAATTGATGG CATCCCAATTGATGG 60.AC=1;AF=0.0113636;LEN=15;ORIGIN=grch38#chr4:10134514;TYPE=mnp   GT      0|0     0|0     0|0     0|0     0|00|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     0|0     0|0     .|0     0|00|0     0|0     0|0     0|0     0|0     .|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|00|0     0|0     .|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0
+# and WFA
+vcfallelicprimitives_8.vcf:grch38#chr4  10134515        >2136>2148_1    GAGAATCCCAATTGATGG      TAGCATCCCAAGTGATGG,TAGAATCCCAATTGATGG,G    60      .       AC=11,7,3;AF=0.125,0.0795455,0.0340909;LEN=14,16,17;ORIGIN=grch38#chr4:10134514,grch38#chr4:10134514,grch38#chr4:10134514;TYPE=mnp,mnp,del GT      0|1     1|0     0|00|1     0|0     1|0     1|0     1|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     2|2     0|03|0     0|0     0|1     0|1     0|1     0|2     0|0     3|0     0|2     0|0     0|0     2|0     0|0     0|00|0     0|0     0|0     2|0     3|1     0|0     0|0     0|0     0|0     0|0     0|0     0|2     0|0     1
+vcfallelicprimitives_8.vcf:grch38#chr4  10134518        >2136>2148_2    AATCCCAATTGATG  CATCCCAATTGATG  60.AC=1;AF=0.0113636;LEN=14;ORIGIN=grch38#chr4:10134514;TYPE=mnp   GT      0|0     0|0     0|0     0|0     0|00|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     0|0     0|0     .|0     0|00|0     0|0     0|0     0|0     0|0     .|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|00|0     0|0     .|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0
+```
+
 # LICENSE
 
 Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
