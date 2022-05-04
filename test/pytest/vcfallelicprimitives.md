@@ -155,7 +155,7 @@ Another diff example where the first is SW and the second WFA2 showing:
 
 ```python
 >>> sh("diff data/regression/vcfallelicprimitives_6.vcf data/regression/vcfallelicprimitives_8.vcf|tail -6")
-1661c1633,1635
+1670c1639,1641
 < grch38#chr4   10180508        >4593>4597_1    CTT     CTTT,CT,C       60      .       AC=7,47,1;AF=0.0786517,0.52809,0.011236;LEN=1,1,2;ORIGIN=grch38#chr4:10180508,grch38#chr4:10180508,grch38#chr4:10180508;TYPE=ins,del,del        GT      2|0     0|2     2|2     2|0     2|2     0|0     0|2     0|2     2|2     2|2     2|0     2|0     0|2     2|0     2|2     2|0     2|2     2|2     2|2     2|0     0|1     0|0     2|1     2|2     0|2     2|2     2|0     0|2     0|3     2|1     0|2     0|0     2|0     1|2     2|2     0|1     2|2     0|0     0|0     1|0     0|1     2|0     0|0     2|2     2
 ---
 > grch38#chr4   10180508        >4593>4597_1    CTT     C       60      .       AC=1;AF=0.011236;LEN=2;ORIGIN=grch38#chr4:10180508;TYPE=del     GT      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0

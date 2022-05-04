@@ -218,7 +218,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             if (!OLDPADDING) cigarData.front().first -= 1;
         }
         cigar = joinCigar(cigarData);
-        cerr << "Have a Cigar" << cigar << endl;
+        if (debug) cerr << "Have a Cigar" << cigar << endl;
 
         //if (debug)
         //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
