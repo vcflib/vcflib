@@ -262,6 +262,26 @@ vcfallelicprimitives_8.vcf:grch38#chr4  10134515        >2136>2148_1    GAGAATCC
 vcfallelicprimitives_8.vcf:grch38#chr4  10134518        >2136>2148_2    AATCCCAATTGATG  CATCCCAATTGATG  60.AC=1;AF=0.0113636;LEN=14;ORIGIN=grch38#chr4:10134514;TYPE=mnp   GT      0|0     0|0     0|0     0|0     0|00|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     0|0     0|0     .|0     0|00|0     0|0     0|0     0|0     0|0     .|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|00|0     0|0     .|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0
 ```
 
+To describe the bug we get for grch38#chr4 10134514 (or: original, sw:, wf:)
+
+```
+or: GGAGAATCCCAATTGATGG->GG
+sw: GGAGAATCCCAATTGATG ->G
+wf:  GAGAATCCCAATTGATGG->G
+
+or: GGAGAATCCCAATTGATGG->GTAGCATCCCAAGTGATGT
+sw:  GAGAATCCCAATTGATGG-> TAGAATCCCAATTGATGT
+wf:  GAGAATCCCAATTGATGG-> TAGAATCCCAATTGATGG <-
+
+or: GGAGAATCCCAATTGATGG->GTAGAATCCCAATTGATGT
+sw:  GAGAATCCCAATTGATGG-> TAGCATCCCAAGTGATGT
+wf:  GAGAATCCCAATTGATGG-> TAGCATCCCAAGTGATGG <-
+
+or: GGAGAATCCCAATTGATGG->GGAGCATCCCAATTGATGG
+sw:     AATCCCAATTGATGG->    CATCCCAATTGATGG
+wf:     AATCCCAATTGATG ->    CATCCCAATTGATG
+```
+
 # LICENSE
 
 Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.

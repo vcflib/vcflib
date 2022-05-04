@@ -95,9 +95,9 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     // ACCCCCACCCCCACC
     // padded ref ZZZZZZZZZZZZZZZQACCCCCACCCCCACCZZZZZZZZZZZZZZZ
 
-    for (auto a: alt) { // iterate ALT strings
+    for (auto alternate: alt) { // iterate ALT strings
         unsigned int referencePos;
-        string& alternate = a;
+        // string& alternate = a;
         vector<VariantAllele>& variants = variantAlleles[alternate];
         string alternateQuery_M;
         if (OLDPADDING) {
@@ -107,7 +107,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         else
             alternateQuery_M = lpadding + anchorChar + alternate + rpadding;
 
-        if (debug) cerr << a << " => " << alternateQuery_M << endl;
+        if (debug) cerr << alternate << " => " << alternateQuery_M << endl;
 
         /* ['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA']
            1: ACC => ZZZZZZZZZZZZZZZQCCZZZZZZZZZZZZZZZ
@@ -222,7 +222,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         if (debug)
           cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
-        // left-realign the alignment...
+        // Build up variantAlleles as a list of nucleotides
 
         int altpos = 0;
         int refpos = 0;
