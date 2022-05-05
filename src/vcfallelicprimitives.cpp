@@ -330,19 +330,20 @@ int main(int argc, char** argv) {
 
         map<long unsigned int, Variant> variants;
         int varidx = 0;
-        //vector<Variant> variants;
-        for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
-            if (a->ref == a->alt) {
-                // ref allele
+        for (auto a: alleles) {
+            const auto ref = a.ref;
+            const auto alt = a.alt;
+
+            if (a.ref == a.alt)
                 continue;
-            }
-            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
+
+            vector<int>& originalIndexes = variantAlleleIndexes[a.repr];
             string type;
             int len = 0;
-            if (a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
-                if (a->ref.size() > a->alt.size()) {
+            if (ref.at(0) == alt.at(0)) { // well-behaved indels
+                if (ref.size() > alt.size()) {
                     type = "del";
-                    len = a->ref.size() - a->alt.size();
+                    len = ref.size() - alt.size();
                     // special case
                     // a deletion implies we should be ALLELE_NULL on this haplotype
                     // until the end of the deletion
@@ -352,30 +353,30 @@ int main(int argc, char** argv) {
                         //auto d = (*deletions)[i];
                         //d.push_back(make_pair(0, 0));
                     }
-                } else if (a->ref.size() < a->alt.size()) {
-                    len = a->alt.size() - a->ref.size();
+                } else if (ref.size() < alt.size()) {
+                    len = alt.size() - ref.size();
                     type = "ins";
                 }
             } else {
-                if (a->ref.size() == a->alt.size()) {
-                    len = a->ref.size();
-                    if (a->ref.size() == 1) {
+                if (ref.size() == alt.size()) {
+                    len = ref.size();
+                    if (ref.size() == 1) {
                         type = "snp";
                     } else {
                         type = "mnp";
                     }
                 } else {
-                    len = abs((int) a->ref.size() - (int) a->alt.size());
+                    len = abs((int) ref.size() - (int) alt.size());
                     type = "complex";
                 }
             }
 
-            if (variants.find(a->position) == variants.end()) {
+            if (variants.find(a.position) == variants.end()) {
                 Variant newvar(variantFile);
-                variants[a->position] = newvar;
+                variants[a.position] = newvar;
             }
 
-            Variant& v = variants[a->position]; // guaranteed to exist
+            Variant& v = variants[a.position]; // guaranteed to exist
 
             if (!parseFlag.empty()) {
                 v.info[parseFlag].push_back(var.sequenceName + ":" + std::to_string(var.position));
@@ -392,17 +393,17 @@ int main(int argc, char** argv) {
             v.info["TYPE"].push_back(type);
             v.info["LEN"].push_back(convert(len));
             if (hasAf) {
-                v.info["AF"].push_back(convert(alleleStuff[*a].freq));
+                v.info["AF"].push_back(convert(alleleStuff[a].freq));
             }
             if (hasAc) {
-                v.info["AC"].push_back(convert(alleleStuff[*a].count));
+                v.info["AC"].push_back(convert(alleleStuff[a].count));
             }
             if (keepInfo) {
                 for (map<string, vector<string> >::iterator infoit = var.info.begin();
                      infoit != var.info.end(); ++infoit) {
                     string key = infoit->first;
                     if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
-                        v.info[key].push_back(alleleStuff[*a].info[key]);
+                        v.info[key].push_back(alleleStuff[a].info[key]);
                     }
                 }
             }
@@ -410,14 +411,14 @@ int main(int argc, char** argv) {
             // now, keep all the other infos if we are asked to
 
             v.sequenceName = var.sequenceName;
-            v.position = a->position; // ... by definition, this should be == if the variant was found
-            if (v.ref.size() < a->ref.size()) {
+            v.position = a.position; // ... by definition, this should be == if the variant was found
+            if (v.ref.size() < ref.size()) {
                 for (vector<string>::iterator va = v.alt.begin(); va != v.alt.end(); ++va) {
-                    *va += a->ref.substr(v.ref.size());
+                    *va += ref.substr(v.ref.size());
                 }
-                v.ref = a->ref;
+                v.ref = ref;
             }
-            v.alt.push_back(a->alt);
+            v.alt.push_back(alt);
 
             int alleleIndex = v.alt.size();
             for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
