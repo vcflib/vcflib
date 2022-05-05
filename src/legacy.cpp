@@ -228,7 +228,6 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
         for (auto e: cigarData) {
             int  mlen  = e.first;  // CIGAR matchlen
             char mtype = e.second; // CIGAR matchtype
-            bool is_first = variants.empty();
 
             switch (mtype) {
             case 'I': // CIGAR INSERT
@@ -278,7 +277,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                 refpos += mlen;
                 break;
 
-                // zk has added (!variants.empty()) solves the seg fault in
+                // zk has added !is_first solves the seg fault in
                 // vcfstats, but need to test
             case 'M': // CIGAR MATCH
             {
@@ -287,15 +286,19 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                         = VariantAllele(ref.substr(refpos + i, 1),
                                         alternate.substr(altpos + i, 1),
                                         (refpos + i + position));
-                    auto &tail = variants.back();
-                    if (useMNPs && (!variants.empty()) &&
-                        tail.ref.size() == tail.alt.size()
-                        && tail.ref != tail.alt) {
-                        // elongate last variant as MNP
-                        tail = tail + a;
-                    } else {
-                        // Inject variants as a single nucleotides
-                        variants.push_back(a);
+                    if (useMNPs) {
+                        auto &tail = variants.back();
+                        auto &ref = tail.ref;
+                        auto &alt = tail.alt;
+                        bool is_first = variants.empty();
+
+                        if (!is_first && ref.size() == alt.size() && ref != alt) {
+                            // elongate last variant as MNP
+                            tail = tail + a;
+                        } else {
+                            // Inject variants as a single nucleotides
+                            variants.push_back(a);
+                        }
                     }
                 }
             }
