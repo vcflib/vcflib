@@ -219,10 +219,11 @@ int main(int argc, char** argv) {
         for (auto a: varAlleles) {
             for (auto va: a.second) {
                 if (debug) cerr << a.first << " " << va.repr << endl;
-                alleles.insert(va); // only inserts first unique allele and ignores next ones
+                alleles.insert(va); // only inserts first unique allele and ignores if two are the same
             }
         }
 
+        // count unique alleles
         int altcount = 0;
         for (auto a: alleles) {
             if (a.ref != a.alt) {
@@ -231,7 +232,8 @@ int main(int argc, char** argv) {
             }
         }
 
-        if (altcount == 1 && var.alt.size() == 1 && var.alt.front().size() == 1) { // if biallelic SNP
+        if (altcount == 1 && var.alt.size() == 1 && var.alt.front().size() == 1) {
+            // stop processing if biallelic SNP
             cout << var << endl;
             continue;
         }
@@ -245,6 +247,7 @@ int main(int argc, char** argv) {
             }
         }
 
+        // Here we correct the fields in the VCF record
         struct var_info_t {
             double freq = 0;
             int count = 0;
@@ -252,16 +255,17 @@ int main(int argc, char** argv) {
         };
         map<VariantAllele, var_info_t> alleleStuff;
 
+        // AF: Allele frequency field
         bool hasAf = false;
         if (var.info.find("AF") != var.info.end()) {
             hasAf = true;
-            for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                vector<VariantAllele>& vars = varAlleles[*a];
-                for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+            for (auto a: var.alt) {
+                auto& vars = varAlleles[a];
+                for (auto va: vars) {
                     double freq;
                     try {
-                        convert(var.info["AF"].at(var.altAlleleIndexes[*a]), freq);
-                        alleleStuff[*va].freq += freq;
+                        convert(var.info["AF"].at(var.altAlleleIndexes[a]), freq);
+                        alleleStuff[va].freq += freq;
                     } catch (...) {
                         cerr << "vcfallelicprimitives WARNING: AF does not have count == alts @ "
                              << var.sequenceName << ":" << var.position << endl;
@@ -270,6 +274,7 @@ int main(int argc, char** argv) {
             }
         }
 
+        // AC: Allele count field
         bool hasAc = false;
         if (var.info.find("AC") != var.info.end()) {
             hasAc = true;
@@ -289,21 +294,20 @@ int main(int argc, char** argv) {
         }
 
         if (keepInfo) {
-            for (map<string, vector<string> >::iterator infoit = var.info.begin();
-                 infoit != var.info.end(); ++infoit) {
-                string key = infoit->first;
-                for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                    vector<VariantAllele>& vars = varAlleles[*a];
-                    for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+            for (auto infoit: var.info) {
+                string key = infoit.first;
+                for (auto a: var.alt) {
+                    vector<VariantAllele>& vars = varAlleles[a];
+                    for (auto va: vars) {
                         string val;
                         vector<string>& vals = var.info[key];
                         if (vals.size() == var.alt.size()) { // allele count for info
-                            val = vals.at(var.altAlleleIndexes[*a]);
+                            val = vals.at(var.altAlleleIndexes[a]);
                         } else if (vals.size() == 1) { // site-wise count
                             val = vals.front();
                         } // don't handle other multiples... how would we do this without going crazy?
                         if (!val.empty()) {
-                            alleleStuff[*va].info[key] = val;
+                            alleleStuff[va].info[key] = val;
                         }
                     }
                 }
