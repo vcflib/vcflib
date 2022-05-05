@@ -1,5 +1,8 @@
-# cd test
-# env PYTHONPATH=../build python3 tests/realign.py
+#   run as ctest .
+#
+# or
+#
+#   cd ../test ; env PYTHONPATH=../build python3 tests/realign.py ; cd ../build
 
 import unittest
 from pyvcflib import *
