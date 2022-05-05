@@ -2119,7 +2119,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         unsigned int referencePos;
         string& alternate = a;
         // create the variants slot
-        vector<VariantAllele>& variants = variantAlleles[alternate].first;
+        // vector<VariantAllele>& variants = variantAlleles[alternate].first;
     }
 
 
@@ -2130,7 +2130,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         unsigned int referencePos;
         string alternate = a;
         pair<vector<VariantAllele>, bool>& _v = variantAlleles[alternate];
-        vector<VariantAllele>& variants = _v.first;
+        // vector<VariantAllele>& variants = _v.first;
         bool& is_inv = _v.second = false;
         //bool& is_inv = (*alt_is_inv)[alternate];
         // get the alt/ref mapping in inversion space
@@ -2252,94 +2252,104 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         //if (debug)
         //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
+        // Walk the CIGAR for one alternate and build up variantAlleles
+        vector<VariantAllele> &variants = variantAlleles[alternate].first;
         int altpos = 0;
         int refpos = 0;
 
         for (auto e: cigarData) {
+            int  mlen  = e.first;  // CIGAR matchlen
+            char mtype = e.second; // CIGAR matchtype
 
-            int len = e.first;
-            char type = e.second;
-
-            switch (type) {
-            case 'I':
+            switch (mtype) {
+            case 'I': // CIGAR INSERT
                 if (includePreviousBaseForIndels) {
                     if (!variants.empty() &&
                         variants.back().ref != variants.back().alt) {
                         VariantAllele a =
                             VariantAllele("",
-                                          alternate.substr(altpos, len),
+                                          alternate.substr(altpos, mlen),
                                           refpos + position);
                         variants.back() = variants.back() + a;
                     } else {
                         VariantAllele a =
                             VariantAllele(ref.substr(refpos - 1, 1),
-                                          alternate.substr(altpos - 1, len + 1),
+                                          alternate.substr(altpos - 1, mlen + 1),
                                           refpos + position - 1);
                         variants.push_back(a);
                     }
                 } else {
+                    // inject insertion from allele
                     variants.push_back(VariantAllele("",
-                                                     alternate.substr(altpos, len),
+                                                     alternate.substr(altpos, mlen),
                                                      refpos + position));
                 }
-                altpos += len;
+                altpos += mlen;
                 break;
-            case 'D':
+            case 'D': // CIGAR DELETE
                 if (includePreviousBaseForIndels) {
                     if (!variants.empty() &&
                         variants.back().ref != variants.back().alt) {
                         VariantAllele a
-                            = VariantAllele(ref.substr(refpos, len)
+                            = VariantAllele(ref.substr(refpos, mlen)
                                             , "", refpos + position);
                         variants.back() = variants.back() + a;
                     } else {
                         VariantAllele a
-                            = VariantAllele(ref.substr(refpos - 1, len + 1),
+                            = VariantAllele(ref.substr(refpos - 1, mlen + 1),
                                             alternate.substr(altpos - 1, 1),
                                             refpos + position - 1);
                         variants.push_back(a);
                     }
                 } else {
-                    variants.push_back(VariantAllele(ref.substr(refpos, len),
+                    // inject deletion from ref
+                    variants.push_back(VariantAllele(ref.substr(refpos, mlen),
                                                      "", refpos + position));
                 }
-                refpos += len;
+                refpos += mlen;
                 break;
-
-                // zk has added (!variants.empty()) solves the seg fault in
-                // vcfstats, but need to test
-            case 'M':
+            case 'M': // CIGAR match and variant
+            case 'X':
             {
-                for (int i = 0; i < len; ++i) {
+                for (int i = 0; i < mlen; ++i) {
                     VariantAllele a
                         = VariantAllele(ref.substr(refpos + i, 1),
                                         alternate.substr(altpos + i, 1),
                                         (refpos + i + position));
-                    if (useMNPs && (!variants.empty()) &&
-                        variants.back().ref.size() == variants.back().alt.size()
-                        && variants.back().ref != variants.back().alt) {
-                        variants.back() = variants.back() + a;
-                    } else {
-                        variants.push_back(a);
+                    if (useMNPs) {
+                        bool is_first = variants.empty();
+                        auto &tail = variants.back(); // note that with is_first tail is undefined
+                        auto &ref = tail.ref;
+                        auto &alt = tail.alt;
+
+                        if (!is_first && ref.size() == alt.size() && ref != alt) {
+                            // elongate last variant as MNP
+                            tail = tail + a;
+                        } else {
+                            // Inject variants as a single nucleotides
+                            variants.push_back(a);
+                        }
                     }
                 }
             }
-            refpos += len;
-            altpos += len;
+            refpos += mlen;
+            altpos += mlen;
             break;
-            case 'S':
-            {
-                refpos += len;
-                altpos += len;
+            case 'S': // S operations specify segments at the start
+                      // and/or end of the query that do not appear in
+                      // a local alignment
+                refpos += mlen;
+                altpos += mlen;
                 break;
-            }
-            default:
-            {
+
+            default: // Ignore N, H
+                cerr << "Hit unexpected CIGAR " << mtype << endl;
+                // exit(1);
                 break;
-            }
-            }
+            } // switch mtype
         }
     }
+
     return variantAlleles;
 }
 

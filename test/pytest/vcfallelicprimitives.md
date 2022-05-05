@@ -138,7 +138,7 @@ grch38#chr4     10158257        >3655>3662_5    C       A       60      .       
 Note the wave front version has no problem with longer sequences:
 
 ```python
-# vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf > ../data/regression/vcfallelicprimitives_5.vcf
+# ./vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfallelicprimitives_5.vcf
 >>> run_stdout("vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_5.vcf">vcfallelicprimitives_5.vcf</a>
 
