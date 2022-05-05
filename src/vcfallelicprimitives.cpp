@@ -451,8 +451,8 @@ int main(int argc, char** argv) {
         }
 
         // genotypes
-        for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
-            string& sampleName = *s;
+        for (auto s: var.sampleNames) {
+            string& sampleName = s;
             if (var.samples.find(sampleName) == var.samples.end()) {
                 continue;
             }
@@ -463,17 +463,17 @@ int main(int argc, char** argv) {
             string& genotype = sample["GT"].front();
             vector<string> genotypeStrs = split(genotype, "|/");
             vector<int> genotypeIndexes;
-            for (vector<string>::iterator s = genotypeStrs.begin(); s != genotypeStrs.end(); ++s) {
+            for (auto gs: genotypeStrs) {
                 int i;
-                if (!convert(*s, i)) {
+                if (!convert(gs, i)) {
                     genotypeIndexes.push_back(ALLELE_NULL);
                 } else {
                     genotypeIndexes.push_back(i);
                 }
             }
             map<long unsigned int, vector<int> > positionIndexes;
-            for (vector<int>::iterator g = genotypeIndexes.begin(); g != genotypeIndexes.end(); ++g) {
-                int oldIndex = *g;
+            for (auto g: genotypeIndexes) {
+                int oldIndex = g;
                 for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
                     const long unsigned int& p = v->first;
                     if (oldIndex == 0) { // reference
@@ -483,13 +483,13 @@ int main(int argc, char** argv) {
                     }
                 }
             }
-            for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-                Variant& variant = v->second;
-                vector<int>& gtints = positionIndexes[v->first];
+            for (auto &v: variants) {
+                Variant& variant = v.second;
+                vector<int>& gtints = positionIndexes[v.first];
                 vector<string> gtstrs;
-                for (vector<int>::iterator i = gtints.begin(); i != gtints.end(); ++i) {
-                    if (*i != ALLELE_NULL) {
-                        gtstrs.push_back(convert(*i));
+                for (auto i: gtints) {
+                    if (i != ALLELE_NULL) {
+                        gtstrs.push_back(convert(i));
                     } else {
                         gtstrs.push_back(".");
                     }
@@ -506,9 +506,8 @@ int main(int argc, char** argv) {
             }
         }
 
-        //for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-        for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-            cout << v->second << endl;
+        for (auto v: variants) {
+            cout << v.second << endl;
         }
     }
     if (global_max_length > 100) {
