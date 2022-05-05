@@ -46,7 +46,7 @@ See more below.
 
 ```
 
->>> head("vcfwave -h",25)
+>>> head("vcfwave -h",24)
 >
 usage: vcfwave [options] [file]
 >
@@ -57,7 +57,6 @@ Genotypes are handled. Deletions generate haploid/missing genotypes at overlappi
 options:
     -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
                             format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext
-    -m, --use-mnps          Retain MNPs as separate events (default: false).
     -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
                             (default: ORIGIN).
     -L, --max-length LEN    Do not manipulate records in which either the ALT or
@@ -88,7 +87,7 @@ This aligns and adjusts the genotypes accordingly splitting into multiple record
 
 ```python
 
->>> sh("../build/vcfwave -m -L 1000 ../samples/10158243.vcf|grep -v ^\#")
+>>> sh("../build/vcfwave -L 1000 ../samples/10158243.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  C       60      .       AC=3;AF=0.0337079;INV=0;LEN=13;ORIGIN=grch38#chr4:10158243;TYPE=del     GT      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     1|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0
 grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   A,C     60      .       AC=1,64;AF=0.011236,0.719101;INV=0,0;LEN=12,12;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=complex,del        GT      0|0     2|2     2|2     2|0     1|2     0|0     0|2     0|2     2|2     2|2     2|2     2|2     2|2     2|2     2|2     0|0     2|2     2|2     2|2     2|0     2|0     2|0     2|0     2|2     2|2     2|0     2|2     2|2     0|0     2|0     2|2     0|2     2|2     2|2     .|2     2|.     2|2     2|2     0|2     2|2     2|2     2|0     2|.     2|2     0
 grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;INV=0;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del      GT      0|0     .|.     .|.     .|0     0|.     0|1     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
@@ -108,12 +107,12 @@ These are currently not left aligned. Stay tuned...
 The bidirectional wavefront (BiWFA) version has no problem with longer sequences (10_000bps is almost instant):
 
 ```python
-# ./vcfwave -m -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfwave_4.vcf
->>> run_stdout("vcfwave -m -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
+# ./vcfwave -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfwave_4.vcf
+>>> run_stdout("vcfwave -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfwave_4.vcf">vcfwave_4.vcf</a>
 
-# ./vcfwave -m -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf > ../test/data/regression/vcfwave_5.vcf
->>> run_stdout("vcfwave -m -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+# ./vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf > ../test/data/regression/vcfwave_5.vcf
+>>> run_stdout("vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfwave_5.vcf">vcfwave_5.vcf</a>
 
 ```
@@ -132,7 +131,7 @@ a       281     >1>9    AGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAAT
 To
 
 ```python
->>> sh("../build/vcfwave -m ../samples/inversion.vcf|grep -v ^\#|head -1")
+>>> sh("../build/vcfwave ../samples/inversion.vcf|grep -v ^\#|head -1")
 a       293     >1>9_1  AAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAATCCTGCAAAAGACAG      TAGTTCTTCCTTGAATGCGGTCATCTGCATTTCAGCACAGGAATCCTGCAAAAGACAG      60      .       AC=0;AF=0;INV=0;LEN=58;ORIGIN=a:281;TYPE=mnp    GT      1
 
 ```
