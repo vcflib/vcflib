@@ -399,9 +399,8 @@ int main(int argc, char** argv) {
                 v.info["AC"].push_back(convert(alleleStuff[a].count));
             }
             if (keepInfo) {
-                for (map<string, vector<string> >::iterator infoit = var.info.begin();
-                     infoit != var.info.end(); ++infoit) {
-                    string key = infoit->first;
+                for (auto infoit: var.info) {
+                    string key = infoit.first;
                     if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
                         v.info[key].push_back(alleleStuff[a].info[key]);
                     }
@@ -409,20 +408,19 @@ int main(int argc, char** argv) {
             }
 
             // now, keep all the other infos if we are asked to
-
             v.sequenceName = var.sequenceName;
             v.position = a.position; // ... by definition, this should be == if the variant was found
             if (v.ref.size() < ref.size()) {
-                for (vector<string>::iterator va = v.alt.begin(); va != v.alt.end(); ++va) {
-                    *va += ref.substr(v.ref.size());
+                for (auto &va: v.alt) {
+                    va += ref.substr(v.ref.size());
                 }
                 v.ref = ref;
             }
             v.alt.push_back(alt);
 
             int alleleIndex = v.alt.size();
-            for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
-                unpackedAlleleIndexes[*i][v.position] = alleleIndex;
+            for (auto i: originalIndexes) {
+                unpackedAlleleIndexes[i][v.position] = alleleIndex;
             }
             // add null allele
             unpackedAlleleIndexes[ALLELE_NULL][v.position] = ALLELE_NULL;
@@ -430,19 +428,21 @@ int main(int argc, char** argv) {
         }
 
         // handle deletions
-        for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
+        for (auto a: alleles) {
+            const auto ref = a.ref;
+            const auto alt = a.alt;
             int len = 0;
-            if (a->ref.at(0) == a->alt.at(0)
-                && a->ref.size() > a->alt.size()) {
-                len = a->ref.size() - a->alt.size();
+            if (ref.at(0) == alt.at(0)
+                && ref.size() > alt.size()) {
+                len = ref.size() - alt.size();
             } else {
                 continue;
             }
             assert(len > 0);
             // nullify all the variants inside of the deletion range
-            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
-            auto begin = variants.upper_bound(a->position);
-            auto end = variants.upper_bound(a->position + a->ref.size());
+            vector<int>& originalIndexes = variantAlleleIndexes[a.repr];
+            auto begin = variants.upper_bound(a.position);
+            auto end = variants.upper_bound(a.position + ref.size());
             for (auto i : originalIndexes) {
                 for (auto x = begin; x != end; ++x) {
                     unpackedAlleleIndexes[i][x->second.position] = ALLELE_NULL;
