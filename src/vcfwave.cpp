@@ -41,7 +41,6 @@ Genotypes are handled. Deletions generate haploid/missing genotypes at overlappi
 options:
     -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
                             format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext
-    -m, --use-mnps          Retain MNPs as separate events (default: false).
     -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
                             (default: ORIGIN).
     -L, --max-length LEN    Do not manipulate records in which either the ALT or
@@ -66,7 +65,7 @@ Type: transformation
 int main(int argc, char** argv) {
 
     bool includePreviousBaseForIndels = true;
-    bool useMNPs = false;
+    bool useMNPs = true;
     string parseFlag = "ORIGIN";
     string algorithm = "WF";
     string paramString = "0,19,39,3,81,1";
@@ -89,7 +88,6 @@ int main(int argc, char** argv) {
                 //{"verbose", no_argument,       &verbose_flag, 1},
                 {"help", no_argument, 0, 'h'},
                 {"wf-params", required_argument, 0, 'p'},
-                {"use-mnps", no_argument, 0, 'm'},
                 {"max-length", required_argument, 0, 'L'},
                 {"inv-kmer", required_argument, 0, 'K'},
                 {"inv-min", required_argument, 0, 'I'},
@@ -103,17 +101,13 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "dhmkt:L:p:j:K:I:",
+        c = getopt_long (argc, argv, "dhkt:L:p:j:K:I:",
                          long_options, &option_index);
 
         if (c == -1)
             break;
 
         switch (c) {
-
-	    case 'm':
-            useMNPs = true;
-            break;
 
 	    case 'k':
             keepInfo = true;
