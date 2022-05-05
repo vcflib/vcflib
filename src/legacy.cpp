@@ -312,8 +312,12 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                 break;
 
             default: // Ignore N, H
-                cerr << "Hit unexpected CIGAR " << mtype << endl;
-                // exit(1);
+                cerr << "Hit unexpected CIGAR " << mtype << " in " << endl;
+                cerr << "pos: " << position << endl;
+                cerr << "cigar: " << cigar << endl;
+                cerr << "ref:   " << reference_M << endl;
+                cerr << "allele:" << alternateQuery_M << endl;
+                if (debug) exit(1);
                 break;
             } // switch mtype
         }
