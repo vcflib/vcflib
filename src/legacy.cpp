@@ -183,7 +183,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                 sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
             }
             sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
-            cerr << "SW CIGAR " << cigar << endl;
+            if (debug) cerr << "SW CIGAR " << cigar << endl;
             cigarData = splitCigar(cigar);
         }
 

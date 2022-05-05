@@ -124,6 +124,7 @@ grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C    60      
 grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;LEN=12;ORIGIN=grch38#chr4:10158243;TYPE=del   GT      0|0     1|1     1|1     1|0     .|1     0|0     0|1     0|1     1|1     1|1     1|1     1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1     1|0     1|1     1|1     0|0     1|0     1|1     0|1     1|1     1|1     .|1     1|.     1|1     1|1     0|1     1|1     1|1     1|0     1|.     1|1     0
 grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|1     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
 grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       AC=2;AF=0.0224719;LEN=1;ORIGIN=grch38#chr4:10158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|.     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
+grch38#chr4     10158257        >3655>3662_5    C       A       60      .       AC=1;AF=0.011236;LEN=1;ORIGIN=grch38#chr4:10158243;TYPE=snp     GT      0|0     .|.     .|.     .|0     .|.     0|.     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.     .|.     .|.     .|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
 
 ```
 
@@ -137,15 +138,20 @@ grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       
 Note the wave front version has no problem with longer sequences:
 
 ```python
+# vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf > ../data/regression/vcfallelicprimitives_5.vcf
 >>> run_stdout("vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_5.vcf">vcfallelicprimitives_5.vcf</a>
 
+# ./vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf > ../test/data/regression/vcfallelicprimitives_6.vcf
+/regression/vcfallelicprimitives_6.vcf
 >>> run_stdout("vcfallelicprimitives -a SW -m -L 1000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_6.vcf">vcfallelicprimitives_6.vcf</a>
 
+# ./vcfallelicprimitives -L 10000 -m ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfallelicprimitives_7.vcf
 >>> run_stdout("vcfallelicprimitives -L 10000 -m ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_7.vcf">vcfallelicprimitives_7.vcf</a>
 
+# ./vcfallelicprimitives -m ../samples/grch38#chr4_10083863-10181258.vcf > ../test/data/regression/vcfallelicprimitives_8.vcf
 >>> run_stdout("vcfallelicprimitives -m ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfallelicprimitives_8.vcf">vcfallelicprimitives_8.vcf</a>
 
@@ -155,7 +161,7 @@ Another diff example where the first is SW and the second WFA2 showing:
 
 ```python
 >>> sh("diff data/regression/vcfallelicprimitives_6.vcf data/regression/vcfallelicprimitives_8.vcf|tail -6")
-1670c1639,1641
+1670c1680,1682
 < grch38#chr4   10180508        >4593>4597_1    CTT     CTTT,CT,C       60      .       AC=7,47,1;AF=0.0786517,0.52809,0.011236;LEN=1,1,2;ORIGIN=grch38#chr4:10180508,grch38#chr4:10180508,grch38#chr4:10180508;TYPE=ins,del,del        GT      2|0     0|2     2|2     2|0     2|2     0|0     0|2     0|2     2|2     2|2     2|0     2|0     0|2     2|0     2|2     2|0     2|2     2|2     2|2     2|0     0|1     0|0     2|1     2|2     0|2     2|2     2|0     0|2     0|3     2|1     0|2     0|0     2|0     1|2     2|2     0|1     2|2     0|0     0|0     1|0     0|1     2|0     0|0     2|2     2
 ---
 > grch38#chr4   10180508        >4593>4597_1    CTT     C       60      .       AC=1;AF=0.011236;LEN=2;ORIGIN=grch38#chr4:10180508;TYPE=del     GT      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
@@ -168,51 +174,6 @@ shows how WFA2 is doing a better job at taking things apart.
 
 Even so, this record is wrong. From grch38#chr4_10083863-10181258.vcf
 
-```
-grch38#chr4 10084924  >33>38  AC  CC,CT 60  . AC=25,1;AF=0.280899,0.011236;AN=89;AT=>33>36>37>38,>33>34>37>
-38,>33>34>35>38;NS=45;LV=0 GT  1|1 1|0 0|0 0|1 0|0 1|0 1|1 1|0 0|0 0|0 0|1 0|0 0|0 0|1 0|0 1|0 0|0 0|0 0|0
-0|1 1|2 0|1 0|0 0|0 0|0 0|1 0|1 0|0 0|1 0|1 1|0 1|0 0|0 0|0 1|0 0|1 0|0 1|1 0|0 0|0 0|0 0|1 0|0 0|0 0
-```
-
-SW vs WFA2 makes it in
-
-```
-diff vcfallelicprimitives_6.vcf vcfallelicprimitives_8.vcf
-< grch38#chr4   10084924        >33>38_1        AC      CC,CT   60      .       AC=25,1;AF=0.280899,0.011236;LEN=2,2;ORIGIN=grch38#chr4:10084924,grch38#chr4:10084924;TYPE=mnp,mnp      GT      1|1     1|0     0|0
-     0|1     0|0     1|0     1|1     1|0     0|0     0|0     0|1     0|0     0|0     0|1     0|0     1|0
-     0|0     0|0     0|0     0|1     1|2     0|1     0|0     0|0     0|0     0|1     0|1     0|0     0|1
-     0|1     1|0     1|0     0|0     0|0     1|0     0|1     0|0     1|1     0|0     0|0     0|0     0|1
-     0|0     0|0     0
----
-> grch38#chr4   10084924        >33>38_1        AC      CC,CC   60      .       AC=1,25;AF=0.011236,0.280899;LEN=1,2;ORIGIN=grch38#chr4:10084924,grch38#chr4:10084924;TYPE=snp,mnp      GT      2|2     2|0     0|0
-     0|2     0|0     2|0     2|2     2|0     0|0     0|0     0|2     0|0     0|0     0|2     0|0     2|0
-     0|0     0|0     0|0     0|2     2|1     0|2     0|0     0|0     0|0     0|2     0|2     0|0     0|2
-     0|2     2|0     2|0     0|0     0|0     2|0     0|2     0|0     2|2     0|0     0|0     0|0     0|2
-     0|0     0|0     0
-```
-
-Where does the `CC` come from? and biWFA does
-
-```
-grep 10084924 *
-vcfallelicprimitives_6.vcf:grch38#chr4  10084924        >33>38_1        AC      CC,CT   60      .       AC=25,1;AF=0.280899,0.011236;LEN=2,2;ORIGIN=grch38#chr4:10084924,grch38#chr4:10084924;TYPE=mnp,mnp GT      1|11|0     0|0     0|1     0|0     1|0     1|1     1|0     0|0     0|0     0|1     0|0     0|0     0|1     0|01|0     0|0     0|0     0|0     0|1     1|2     0|1     0|0     0|0     0|0     0|1     0|1     0|0     0|10|1     1|0     1|0     0|0     0|0     1|0     0|1     0|0     1|1     0|0     0|0     0|0     0|1     0|00|0     0
-vcfallelicprimitives_8.vcf:grch38#chr4  10084924        >33>38_1        AC      CC,CC   60      .       AC=1,25;AF=0.011236,0.280899;LEN=1,2;ORIGIN=grch38#chr4:10084924,grch38#chr4:10084924;TYPE=snp,mnp GT      2|22|0     0|0     0|2     0|0     2|0     2|2     2|0     0|0     0|0     0|2     0|0     0|0     0|2     0|02|0     0|0     0|0     0|0     0|2     2|1     0|2     0|0     0|0     0|0     0|2     0|2     0|0     0|20|2     2|0     2|0     0|0     0|0     2|0     0|2     0|0     2|2     0|0     0|0     0|0     0|2     0|00|0     0
-vcfwave_5.vcf:grch38#chr4       10084924        >33>38_1        AC      CC,CC   60      .       AC=1,25;AF=0.011236,0.280899;INV=0,0;LEN=1,2;ORIGIN=grch38#chr4:10084924,grch38#chr4:10084924;TYPE=snp,mnp GT      2|22|0     0|0     0|2     0|0     2|0     2|2     2|0     0|0     0|0     0|2     0|0     0|0     0|2     0|02|0     0|0     0|0     0|0     0|2     2|1     0|2     0|0     0|0     0|0     0|2     0|2     0|0     0|20|2     2|0     2|0     0|0     0|0     2|0     0|2     0|0     2|2     0|0     0|0     0|0     0|2     0|00|0     0
-```
-
-where
-
-* SW: vcfallelicprimitives_6.vcf
-* WFA2: vcfallelicprimitives_8.vcf
-* biWFA: vcfwave_5.vcf
-
-Other examples are:
-
-```
-grch38#chr4     10089307        >164>169_1      CC      [-AC,AT-]       {+AC,AC+}
-grch38#chr4     10121758        >1309>1314_1    TC      [-AC,AT-]       {+AC,AC+}
-grch38#chr4     10164726        >3894>3899_1    GC      [-AC,AT-]       {+AC,AC+}
-```
 
 Differences between WFA and biWFA:
 
@@ -232,7 +193,7 @@ grch38#chr4     {+10134518      >2125>2211_7    AATCCCAATTGATGGAGAATCCCAATTGATGG
 
 ```
 
-Another problem case
+Another problem case fixed with fb7365b07f832bcfcc6ddb693ddfc4a01a25cfbb
 
 ```
 grch38#chr8_36353854-36453166.vcf:grch38#chr8   36382847        >721>726        GT      GC,AC
@@ -262,7 +223,7 @@ vcfallelicprimitives_8.vcf:grch38#chr4  10134515        >2136>2148_1    GAGAATCC
 vcfallelicprimitives_8.vcf:grch38#chr4  10134518        >2136>2148_2    AATCCCAATTGATG  CATCCCAATTGATG  60.AC=1;AF=0.0113636;LEN=14;ORIGIN=grch38#chr4:10134514;TYPE=mnp   GT      0|0     0|0     0|0     0|0     0|00|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|.     0|0     0|0     0|0     .|0     0|00|0     0|0     0|0     0|0     0|0     .|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|00|0     0|0     .|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0
 ```
 
-To describe the bug we get for grch38#chr4 10134514 (or: original, sw:, wf:)
+To describe the bug we get for grch38#chr4 10134514 (or: original, sw:, wf:). It was fixed with commit fb7365b07f832bcfcc6ddb693ddfc4a01a25cfbb.
 
 ```
 ori: GGAGAATCCCAATTGATGG->GG
