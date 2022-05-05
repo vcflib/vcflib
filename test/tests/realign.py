@@ -45,5 +45,26 @@ class RealignTest(unittest.TestCase):
                 print(f'WF allele: {a.repr} ')
 
 
+    def test_zvcf(self):
+        vcf = VariantCallFile()
+        vcf.openFile("../samples/z.vcf")
+        rec = Variant(vcf)
+        vcf.getNextVariant(rec)
+        self.assertEqual(rec.name,"grch38#chr4_10083863-10181258.vcf:grch38#chr4")
+        self.assertEqual(rec.ref,'GGAGAATCCCAATTGATGG')
+        self.assertEqual(rec.alt,['GTAGCATCCCAAGTGATGT', 'GTAGAATCCCAATTGATGT', 'GGAGCATCCCAATTGATGG', 'GG'])
+        sw = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,True)
+        for key, value in sw.items():
+            print(f'SW allele key: {key}: ')
+            for a in value:
+                print(f'SW allele: {a.repr} ')
+        # note wf ignores paramaters
+        wf = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",True,True)
+        for key, value in sw.items():
+            print(f'WF allele key: {key}: ')
+            for a in value:
+                print(f'WF allele: {a.repr} ')
+
+
 if __name__ == '__main__':
     unittest.main()

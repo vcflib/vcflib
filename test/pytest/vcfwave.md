@@ -98,19 +98,6 @@ grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       
 
 These are currently not left aligned. Stay tuned...
 
-We can also handle inversions.
-This test case includes one that was introduced by building a variation graph with an inversion and then decomposing it into a VCF with `vg deconstruct` and finally "popping" the inversion variant with [`vcfbub`](https://github.com/pangenome/vcfbub).
-
-FIXME: the following fails after our CIGAR fix:
-
-```python
-
->> sh("../build/vcfwave ../test/data/regression/z.vcf|grep -v ^\#")
-a       293     >1>9_1  A       T       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
-a       310     >1>9_2  T       C       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
-a       329     >1>9_3  T       A       60      .       AC=1;AF=1;INV=1;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
-
-```
 
 ## Source code
 
@@ -130,6 +117,26 @@ output in <a href="../data/regression/vcfwave_4.vcf">vcfwave_4.vcf</a>
 output in <a href="../data/regression/vcfwave_5.vcf">vcfwave_5.vcf</a>
 
 ```
+
+## Inversions
+
+We can also handle inversions.
+This test case includes one that was introduced by building a variation graph with an inversion and then decomposing it into a VCF with `vg deconstruct` and finally "popping" the inversion variant with [`vcfbub`](https://github.com/pangenome/vcfbub).
+
+From
+
+```
+a       281     >1>9    AGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAATCCTGCAAAAGACAG  CTGTCTTTTGCAGGATTCCTGTGCTGAAATGCAGATGACCGCATTCAAGGAAGAACTATCTGCCCCGGCT     60      .       AC=1;AF=1;AN=1;AT=>1>2>3>4>5>6>7>8>9,>1<8>10<6>11<4>12<2>9;NS=1;LV=0       GT      1
+```
+
+To
+
+```python
+>>> sh("../build/vcfwave -m ../samples/inversion.vcf|grep -v ^\#|head -1")
+a       293     >1>9_1  AAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAATCCTGCAAAAGACAG      TAGTTCTTCCTTGAATGCGGTCATCTGCATTTCAGCACAGGAATCCTGCAAAAGACAG      60      .       AC=0;AF=0;INV=0;LEN=58;ORIGIN=a:281;TYPE=mnp    GT      1
+
+```
+
 
 # LICENSE
 
