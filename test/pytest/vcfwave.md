@@ -46,7 +46,7 @@ See more below.
 
 ```
 
->>> head("vcfwave -h",25)
+>>> head("vcfwave -h",24)
 >
 usage: vcfwave [options] [file]
 >
