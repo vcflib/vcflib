@@ -36,13 +36,13 @@ class RealignTest(unittest.TestCase):
         for key, value in sw.items():
             print(f'SW allele key: {key}: ')
             for a in value:
-                print(f'SW allele: {a.repr} ')
+                print(f'               {a.repr} ')
         # note wf ignores paramaters
         wf = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",True,True)
-        for key, value in sw.items():
+        for key, value in wf.items():
             print(f'WF allele key: {key}: ')
             for a in value:
-                print(f'WF allele: {a.repr} ')
+                print(f'               {a.repr} ')
 
 
 if __name__ == '__main__':

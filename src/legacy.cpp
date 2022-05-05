@@ -223,6 +223,11 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
 
         // Walk the CIGAR for one alternate and build up variantAlleles
         vector<VariantAllele> &variants = variantAlleles[alternate];
+        if (!variants.empty()) {
+            cerr << "Found duplicate allele and ignoring it! " << alternate << endl;
+            cerr << "pos: " << position << endl;
+            continue;
+        }
         int altpos = 0;
         int refpos = 0;
 
