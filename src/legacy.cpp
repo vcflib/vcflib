@@ -183,6 +183,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                 sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
             }
             sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+            cerr << "SW CIGAR " << cigar << endl;
             cigarData = splitCigar(cigar);
         }
 
@@ -276,10 +277,8 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                 }
                 refpos += mlen;
                 break;
-
-                // zk has added !is_first solves the seg fault in
-                // vcfstats, but need to test
-            case 'M': // CIGAR MATCH
+            case 'M': // CIGAR match and variant
+            case 'X':
             {
                 for (int i = 0; i < mlen; ++i) {
                     VariantAllele a
@@ -287,10 +286,10 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
                                         alternate.substr(altpos + i, 1),
                                         (refpos + i + position));
                     if (useMNPs) {
-                        auto &tail = variants.back();
+                        bool is_first = variants.empty();
+                        auto &tail = variants.back(); // note that with is_first tail is undefined
                         auto &ref = tail.ref;
                         auto &alt = tail.alt;
-                        bool is_first = variants.empty();
 
                         if (!is_first && ref.size() == alt.size() && ref != alt) {
                             // elongate last variant as MNP
@@ -305,18 +304,17 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             refpos += mlen;
             altpos += mlen;
             break;
-            case 'S': // S operations specify segments at the start and/or end of the query that do not appear in a local alignment
-            {
+            case 'S': // S operations specify segments at the start
+                      // and/or end of the query that do not appear in
+                      // a local alignment
                 refpos += mlen;
                 altpos += mlen;
                 break;
-            }
-            default: // Ignore N, H, X, =
-            {
+
+            default: // Ignore N, H
                 cerr << "Hit unexpected CIGAR " << mtype << endl;
                 // exit(1);
                 break;
-            }
             } // switch mtype
         }
     }
