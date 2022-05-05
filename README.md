@@ -342,10 +342,12 @@ scripts (see badges above), as well as [guix.scm](./guix.scm) used by
 us to create the build environment (for instructions see the header of
 guix.scm). Essentially:
 
+- cmake
 - C++ compiler
 - htslib
 - tabixpp
 - WFA2
+- pybind11 (for testing)
 
 For include files add
 
@@ -362,7 +364,7 @@ And for some of the VCF executables
 
 Check out htslib in tabixpp (recursively) and
 
-    cmake -DHTSLIB_LOCAL:STRING=./tabixpp/htslib/ ..
+    cmake -DHTSLIB_LOCAL:STRING=./htslib/ ..
     cmake --build .
 
 ## link library
@@ -393,6 +395,8 @@ command line with
 cd test
 python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF pytest/vcf2tsv.md
 ```
+
+We also added support for python bindings and unit tests. See [realign.py](./test/tests/realign.py) for an example.
 
 # Contributing
 
