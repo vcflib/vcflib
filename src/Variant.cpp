@@ -100,7 +100,7 @@ void Variant::parse(string& line, bool parseSamples) {
     vector<string> fields = split(line, '\t');
     if (fields.size() < 7) {
         cerr << "broken VCF record (less than 7 fields)" << endl
-             << line << endl;
+             << "Input line: " << line << endl;
         exit(1);
     }
 
@@ -2061,7 +2061,9 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     int invMinLen,
     bool debug) {
 
-    map<string, pair<vector<VariantAllele>,bool> > variantAlleles; // return type
+    // return type is a hash of allele containing a list of variants and a
+    // boolean value signifying an inversion of the variant
+    map<string, pair<vector<VariantAllele>,bool> > variantAlleles;
 
     if (isSymbolicSV()){
         // Don't ever align symbolic SVs. It just wrecks things.
@@ -2082,7 +2084,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
 
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
-    int paddingLen = 2;
+    int paddingLen = 10;
     char padChar = 'Z';
     char anchorChar = 'Q';
     string padding(paddingLen, padChar);
@@ -2118,19 +2120,15 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     for (auto a: alt) { // iterate ALT strings
         unsigned int referencePos;
         string& alternate = a;
-        // create the variants slot
-        // vector<VariantAllele>& variants = variantAlleles[alternate].first;
     }
 
-
-#pragma omp parallel for
+// #pragma omp parallel for
     for (auto a: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
         unsigned int referencePos;
         string alternate = a;
         pair<vector<VariantAllele>, bool>& _v = variantAlleles[alternate];
-        // vector<VariantAllele>& variants = _v.first;
         bool& is_inv = _v.second = false;
         //bool& is_inv = (*alt_is_inv)[alternate];
         // get the alt/ref mapping in inversion space
@@ -2195,8 +2193,6 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         // Create string and return
         cigar = std::string(buffer,buf_len);
         wavefront_aligner_delete(wf_aligner);
-        //if (debug)
-        //    cerr << "WFA output [" << cigar << "]" << endl;
         if (cigar == "") {
             if (debug) {
                 cerr << "Skipping input with WF because there is no CIGAR!" << endl;
@@ -2211,8 +2207,8 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
         cigarData = splitUnpackedCigar(cigar);
 
-        //if (debug)
-        //  cerr << (useWaveFront ? "WF=" : "SW=") << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+        if (debug)
+            cerr << "biWF=" << referencePos << ":" << cigar << "/" << joinCigar(cigarData) << ":" << reference_M << "," << alternateQuery_M << endl;
 
         // left-realign the alignment...
         if (cigarData.size() == 0) {
@@ -2224,7 +2220,6 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
 
         // Check for matched padding (ZZZs)
-        /*
         if (cigarData.front().second != 'M'
             || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
@@ -2232,15 +2227,16 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
             cerr << "pos: " << position << endl;
             cerr << "cigar: " << cigar << endl;
+            cerr << "cigardata: " << joinCigar(cigarData) << endl;
             cerr << "ref:   " << reference_M << endl;
             cerr << "allele:" << alternateQuery_M << endl;
             exit(1);
         } else {
+            // Remove the padding and anchor character
+            cigarData.front().first -= paddingLen;
+            cigarData.back().first -= paddingLen;
         }
-        */
-        // Remove the padding
-        cigarData.front().first -= paddingLen;
-        cigarData.back().first -= paddingLen;;
+        cigar = joinCigar(cigarData);
 
         // now left align!
         //
