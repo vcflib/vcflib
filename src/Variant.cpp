@@ -2120,9 +2120,10 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     for (auto a: alt) { // iterate ALT strings
         // unsigned int referencePos;
         string& alternate = a;
+        variantAlleles[alternate]; // create the slot
     }
 
-// #pragma omp parallel for
+#pragma omp parallel for
     for (auto a: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
@@ -2174,7 +2175,15 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
         cigar = aligner.getAlignmentCigar();
         */
-        auto wf_aligner = wavefront_aligner_new(wfaParams);
+        auto wfp = *wfaParams;
+        size_t max_len = max(reference_M.size(), alternateQuery_M.size());
+        if (max_len > 1000) {
+            wfp.memory_mode = wavefront_memory_ultralow;
+        } else {
+            wfp.memory_mode = wavefront_memory_high;
+        }
+        auto wf_aligner = wavefront_aligner_new(&wfp);
+
         wavefront_aligner_set_heuristic_none(wf_aligner);
         wavefront_aligner_set_alignment_end_to_end(wf_aligner);
         wavefront_align(wf_aligner,
