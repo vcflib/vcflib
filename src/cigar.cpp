@@ -54,9 +54,9 @@ vector<pair<int, char> > splitUnpackedCigar(const string& cigarStr) {
     vector<pair<int, char> > cigar;
     int num = 0;
     char type = cigarStr[0];
-    //cerr << "[" << cigarStr << "]" << endl; // 18,12,14
+    // cerr << "[" << cigarStr << "]" << endl; // 18,12,14
     for (char c: cigarStr) {
-        //cerr << "[" << c << "]";
+        // cerr << "[" << c << "]";
         if (isdigit(c)) {
           cerr << "Is this a valid unpacked CIGAR? <" << cigarStr << ">?" << endl;
           exit(1);
@@ -140,11 +140,17 @@ vector<pair<int, char> > cleanCigar(const vector<pair<int, char> >& cigar) {
 
 string joinCigar(const vector<pair<int, char> >& cigar) {
     string cigarStr;
+    bool has_error = false;
     for (auto c: cigar) {
-        cerr << c.first << ":" << c.second << " ";
-        if (c.first) {
-            cigarStr += convert(c.first) + c.second;
+        auto len = c.first;
+        if (len < 0) has_error = true;
+        if (len != 0) {
+            cigarStr += convert(len) + c.second;
         }
+    }
+    if (has_error) {
+        cerr << "ERROR: joinCigar creates illegal cigar " << cigarStr << endl;
+        exit(1);
     }
     return cigarStr;
 }

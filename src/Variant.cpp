@@ -2210,7 +2210,6 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         if (debug)
             cerr << "biWF= " << position << ":" << cigar << "/" << joinCigar(cigarData) << ":" << reference_M << "," << alternateQuery_M << endl;
 
-        // left-realign the alignment...
         if (cigarData.size() == 0) {
             cerr << "Algorithm error: CIGAR <" << cigar << "> is empty for "
                  << "ref " << reference_M << ","
@@ -2220,7 +2219,6 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
 
         // Check for matched padding (ZZZs)
-        /*
         if (cigarData.front().second != 'M'
             || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
@@ -2233,11 +2231,10 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             cerr << "allele:" << alternateQuery_M << endl;
             exit(1);
         } else {
-        */
             // Remove the padding and anchor character
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;
-            // }
+        }
 
         // now left align!
         //
