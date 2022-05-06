@@ -2082,6 +2082,12 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         return variantAlleles;
     }
 
+    // Calculate max_size of ref and alts
+    int max_seq_size = ref.length();
+    for (auto a: alt) {
+        max_seq_size = max(max_seq_size,(int)a.length());
+    }
+
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
     int paddingLen = 10;
@@ -2168,12 +2174,9 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         /*
          * WFA2-lib
          */
-        /*
-        // the C++ WFA2-lib interface is not yet stable due to heuristic mode initialization issues
-        WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
-        aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
-        cigar = aligner.getAlignmentCigar();
-        */
+        if (max_seq_size < 1000)
+           wfaParams->memory_mode = wavefront_memory_high;
+
         auto wf_aligner = wavefront_aligner_new(wfaParams);
         wavefront_aligner_set_heuristic_none(wf_aligner);
         wavefront_aligner_set_alignment_end_to_end(wf_aligner);
