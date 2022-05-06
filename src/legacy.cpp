@@ -157,6 +157,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             int buf_len = wf_aligner->cigar.end_offset - wf_aligner->cigar.begin_offset;
             // Create string and return
             cigar = std::string(buffer,buf_len);
+            if (debug) cerr << "Have a CIGAR " << cigar << endl;
             wavefront_aligner_delete(wf_aligner);
             //if (debug)
             //    cerr << "WFA output [" << cigar << "]" << endl;
