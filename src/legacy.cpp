@@ -204,7 +204,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
             || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
             || cigarData.back().first < paddingLen) {
-            cerr << "parsedAlternates: alignment does not start or end with match over padded sequence" << endl;
+            cerr << "parsedAlternates: alignment does not start or end with match over padded  sequence" << endl;
             cerr << "pos: " << position << endl;
             cerr << "cigar: " << cigar << endl;
             cerr << "cigardata: " << joinCigar(cigarData) << endl;
