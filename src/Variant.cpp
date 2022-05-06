@@ -2118,7 +2118,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     //cerr << "ref is " << ref << endl;
 
     for (auto a: alt) { // iterate ALT strings
-        unsigned int referencePos;
+        // unsigned int referencePos;
         string& alternate = a;
     }
 
@@ -2126,7 +2126,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     for (auto a: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
-        unsigned int referencePos;
+        // unsigned int referencePos;
         string alternate = a;
         pair<vector<VariantAllele>, bool>& _v = variantAlleles[alternate];
         bool& is_inv = _v.second = false;
@@ -2208,7 +2208,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         cigarData = splitUnpackedCigar(cigar);
 
         if (debug)
-            cerr << "biWF=" << referencePos << ":" << cigar << "/" << joinCigar(cigarData) << ":" << reference_M << "," << alternateQuery_M << endl;
+            cerr << "biWF= " << position << ":" << cigar << "/" << joinCigar(cigarData) << ":" << reference_M << "," << alternateQuery_M << endl;
 
         // left-realign the alignment...
         if (cigarData.size() == 0) {
@@ -2220,6 +2220,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
 
         // Check for matched padding (ZZZs)
+        /*
         if (cigarData.front().second != 'M'
             || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
@@ -2232,11 +2233,11 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             cerr << "allele:" << alternateQuery_M << endl;
             exit(1);
         } else {
+        */
             // Remove the padding and anchor character
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;
-        }
-        cigar = joinCigar(cigarData);
+            // }
 
         // now left align!
         //
@@ -2245,8 +2246,8 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
 
         cigar = joinCigar(cigarData);
 
-        //if (debug)
-        //  cerr << referencePos << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+        if (debug)
+            cerr << position << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
 
         // Walk the CIGAR for one alternate and build up variantAlleles
         vector<VariantAllele> &variants = variantAlleles[alternate].first;
