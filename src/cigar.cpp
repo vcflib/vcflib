@@ -140,9 +140,10 @@ vector<pair<int, char> > cleanCigar(const vector<pair<int, char> >& cigar) {
 
 string joinCigar(const vector<pair<int, char> >& cigar) {
     string cigarStr;
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
-        if (c->first) {
-            cigarStr += convert(c->first) + c->second;
+    for (auto c: cigar) {
+        cerr << c.first << ":" << c.second << " ";
+        if (c.first) {
+            cigarStr += convert(c.first) + c.second;
         }
     }
     return cigarStr;
