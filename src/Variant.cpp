@@ -2126,9 +2126,10 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     for (auto a: alt) { // iterate ALT strings
         // unsigned int referencePos;
         string& alternate = a;
+        variantAlleles[alternate]; // create the slot
     }
 
-// #pragma omp parallel for
+#pragma omp parallel for
     for (auto a: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
@@ -2174,10 +2175,21 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         /*
          * WFA2-lib
          */
-        if (max_seq_size < 1000)
-           wfaParams->memory_mode = wavefront_memory_high;
+        /*
+        // the C++ WFA2-lib interface is not yet stable due to heuristic mode initialization issues
+        WFAlignerGapAffine2Pieces aligner(19,39,3,81,1,WFAligner::Alignment,WFAligner::MemoryHigh);
+        aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
+        cigar = aligner.getAlignmentCigar();
+        */
+        auto wfp = *wfaParams;
+        size_t max_len = max(reference_M.size(), alternateQuery_M.size());
+        if (max_len > 1000) {
+            wfp.memory_mode = wavefront_memory_ultralow;
+        } else {
+            wfp.memory_mode = wavefront_memory_high;
+        }
+        auto wf_aligner = wavefront_aligner_new(&wfp);
 
-        auto wf_aligner = wavefront_aligner_new(wfaParams);
         wavefront_aligner_set_heuristic_none(wf_aligner);
         wavefront_aligner_set_alignment_end_to_end(wf_aligner);
         wavefront_align(wf_aligner,
