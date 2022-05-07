@@ -34,7 +34,11 @@ void shift_mid_left(VariantAllele& a, VariantAllele& b) {
         b.ref = b.ref.substr(1);
         ++b.position;
     } else {
-
+        a.alt.append(b.alt);
+        a.ref.append(b.ref);
+        b.alt.clear();
+        b.ref.clear();
+        b.position = 0;
     }
 }
 
@@ -46,6 +50,11 @@ void shift_mid_right(VariantAllele& a, VariantAllele& b) {
         a.ref = a.ref.substr(0,a.alt.size()-1);
         --b.position;
     } else {
+        b.alt = a.alt + b.alt;
+        b.ref = a.ref + b.ref;
+        a.alt.clear();
+        a.ref.clear();
+        a.position = 0;
     }
 }
 

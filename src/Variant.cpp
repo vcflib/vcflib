@@ -2290,6 +2290,8 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                         if (i == variants.size()-1) {
                             // if not-- panic
                             cerr << "allele base fail: no subsequent alleles to indel" << endl;
+                            cerr << v << endl;
+                            cerr << "variant at " << position << endl;
                             exit(1);
                         }
                         // else
@@ -2305,6 +2307,8 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                         // panic if we reach the end of the variants
                         if (j == variants.size() && v.is_pure_indel()) {
                             cerr << "allele base fail: can't get an additional base next" << endl;
+                            cerr << v << endl;
+                            cerr << "variant at " << position << endl;
                             exit(1);
                         }
                     } else {
@@ -2332,6 +2336,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                         if (j <= 0 && v.is_pure_indel()) {
                             cerr << "allele base fail: can't get an additional base prev" << endl;
                             cerr << v << endl;
+                            cerr << "variant at " << position << endl;
                             exit(1);
                         }
                         // while the previous allele is an indel
