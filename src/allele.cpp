@@ -14,7 +14,16 @@ VariantAllele operator+(const VariantAllele& a, const VariantAllele& b) {
 }
 
 bool operator<(const VariantAllele& a, const VariantAllele& b) {
-    return a.repr < b.repr;
+    return std::tie(a.position, a.ref, a.alt) < std::tie(b.position, b.ref, b.alt);
+
+}
+
+bool operator==(const VariantAllele& a, const VariantAllele& b) {
+    return a.ref == b.ref && a.alt == b.alt && a.position == b.position;
+}
+
+bool VariantAllele::is_pure_indel(void) {
+    return ref.size() > 0 &&  alt == "" || alt.size() > 0 && ref == "";
 }
 
 }
