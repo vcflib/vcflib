@@ -57,7 +57,7 @@ Genotypes are handled. Deletions generate haploid/missing genotypes at overlappi
 options:
     -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
                             format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext
-    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
+    -f, --tag-parsed FLAG   Annotate decomposed records with the source record position
                             (default: ORIGIN).
     -L, --max-length LEN    Do not manipulate records in which either the ALT or
                             REF is longer than LEN (default: unlimited).
@@ -67,7 +67,7 @@ options:
                             Note that in many cases, such as multisample VCFs, these won't
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
-    -j, --threads N         use this many threads for variant decomposition
+    -t, --threads N         use this many threads for variant decomposition
     -d, --debug             debug mode.
 >
 Type: transformation
@@ -88,10 +88,11 @@ This aligns and adjusts the genotypes accordingly splitting into multiple record
 ```python
 
 >>> sh("../build/vcfwave -L 1000 ../samples/10158243.vcf|grep -v ^\#")
-grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  C       60      .       AC=3;AF=0.0337079;INV=0;LEN=13;ORIGIN=grch38#chr4:10158243;TYPE=del     GT      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     1|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0
-grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   A,C     60      .       AC=1,64;AF=0.011236,0.719101;INV=0,0;LEN=12,12;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=complex,del        GT      0|0     2|2     2|2     2|0     1|2     0|0     0|2     0|2     2|2     2|2     2|2     2|2     2|2     2|2     2|2     0|0     2|2     2|2     2|2     2|0     2|0     2|0     2|0     2|2     2|2     2|0     2|2     2|2     0|0     2|0     2|2     0|2     2|2     2|2     .|2     2|.     2|2     2|2     0|2     2|2     2|2     2|0     2|.     2|2     0
-grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;INV=0;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del      GT      0|0     .|.     .|.     .|0     0|.     0|1     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
-grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       AC=2;AF=0.0224719;INV=0;LEN=1;ORIGIN=grch38#chr4:10158243;TYPE=del      GT      0|0     .|.     .|.     .|0     0|.     0|.     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
+grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C    60      .       AC=1,3;AF=0.011236,0.0337079;INV=0,0;LEN=12,13;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del    GT      0|0   0|0      0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0   0|0      0|0     0|0     0|0     0|0     0|0     2|0     0|2     0|0     0|0     0|0     0|0     0|0     0|0     0|2     0|0     0
+grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;INV=0;LEN=12;ORIGIN=grch38#chr4:10158243;TYPE=del     GT      0|0     1|1     1|1     1|0     .|1     0|0   0|1      0|1     1|1     1|1     1|1     1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1     1|0     1|1     1|1     0|0     1|0     1|1     0|1     1|1   1|1      .|1     1|.     1|1     1|1     0|1     1|1     1|1     1|0     1|.     1|1     0
+grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;INV=0;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del      GT      0|0     .|.     .|.     .|0     .|.     0|1     0|.   0|.      .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.   .|.      .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
+grch38#chr4     10158256        >3655>3662_4    CC      C       60      .       AC=2;AF=0.0224719;INV=0;LEN=1;ORIGIN=grch38#chr4:10158243;TYPE=del      GT      0|0     .|.     .|.     .|0     .|.     0|.     0|.   0|.      .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.   .|.      .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
+grch38#chr4     10158257        >3655>3662_5    C       A       60      .       AC=1;AF=0.011236;INV=0;LEN=1;ORIGIN=grch38#chr4:10158243;TYPE=snp       GT      0|0     .|.     .|.     .|0     .|.     0|.     0|.   0|.      .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|.     .|.     .|.     .|0     .|0     .|.     0|.     .|.     .|.   .|.      .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
 
 ```
 
