@@ -41,7 +41,7 @@ Genotypes are handled. Deletions generate haploid/missing genotypes at overlappi
 options:
     -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
                             format=match,mismatch,gap1-open,gap1-ext,gap2-open,gap2-ext
-    -t, --tag-parsed FLAG   Annotate decomposed records with the source record position
+    -f, --tag-parsed FLAG   Annotate decomposed records with the source record position
                             (default: ORIGIN).
     -L, --max-length LEN    Do not manipulate records in which either the ALT or
                             REF is longer than LEN (default: unlimited).
@@ -51,7 +51,7 @@ options:
                             Note that in many cases, such as multisample VCFs, these won't
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
-    -j, --threads N         use this many threads for variant decomposition
+    -t, --threads N         use this many threads for variant decomposition
     -d, --debug             debug mode.
 
 Type: transformation
@@ -91,17 +91,17 @@ int main(int argc, char** argv) {
                 {"max-length", required_argument, 0, 'L'},
                 {"inv-kmer", required_argument, 0, 'K'},
                 {"inv-min", required_argument, 0, 'I'},
-                {"tag-parsed", required_argument, 0, 't'},
+                {"tag-parsed", required_argument, 0, 'f'},
                 {"keep-info", no_argument, 0, 'k'},
                 {"keep-geno", no_argument, 0, 'g'},
-                {"threads", required_argument, 0, 'j'},
+                {"threads", required_argument, 0, 't'},
                 {"debug", no_argument, 0, 'd'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "dhkt:L:p:j:K:I:",
+        c = getopt_long (argc, argv, "dhkt:L:p:t:K:I:f:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
             paramString = optarg;
             break;
 
-        case 'j':
+        case 't':
             thread_count = atoi(optarg);
             break;
 
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
             printSummary(argv);
             break;
 
-	    case 't':
+	    case 'f':
             parseFlag = optarg;
             break;
 
@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
         // collect unique alleles
         for (auto a: varAlleles) {
             for (auto va: a.second.first) {
-                if (debug) cerr << a.first << " " << va.repr << endl;
+                if (debug) cerr << a.first << " " << va << endl;
                 alleles.insert(va); // only inserts first unique allele and ignores next ones
             }
         }
@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
         for (auto a: alleles) {
             if (a.ref != a.alt) {
                 ++altcount;
-                if (debug) cerr << altcount << "$" << a.repr << endl;
+                if (debug) cerr << altcount << "$" << a << endl;
             }
         }
 
@@ -256,11 +256,11 @@ int main(int argc, char** argv) {
         }
 
         // collect variant allele indexed membership
-        map<string, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
+        map<VariantAllele, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
         for (auto a: varAlleles) {
             int index = var.altAlleleIndexes[a.first] + 1; // make non-relative
             for (auto va: a.second.first) {
-                variantAlleleIndexes[va.repr].push_back(index);
+                variantAlleleIndexes[va].push_back(index);
             }
         }
 
@@ -361,7 +361,7 @@ int main(int argc, char** argv) {
                 // ref allele
                 continue;
             }
-            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
+            vector<int>& originalIndexes = variantAlleleIndexes[*a];
             string type;
             int len = 0;
             if (a->ref.size() && a->alt.size()
@@ -467,7 +467,7 @@ int main(int argc, char** argv) {
             }
             assert(len > 0);
             // nullify all the variants inside of the deletion range
-            vector<int>& originalIndexes = variantAlleleIndexes[a->repr];
+            vector<int>& originalIndexes = variantAlleleIndexes[*a];
             auto begin = variants.upper_bound(a->position);
             auto end = variants.upper_bound(a->position + a->ref.size());
             for (auto i : originalIndexes) {
