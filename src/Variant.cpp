@@ -2298,13 +2298,13 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                         while (j < variants.size()
                                // stop when we have sequence in both ref or alt
                                && v.is_pure_indel()) {
-                            auto q = v[j++];
+                            auto q = variants[j++];
                             // merge with us
-                            v = v + q;
+                            shift_mid_left(v, q);
                         }
                         // panic if we reach the end of the variants
                         if (j == variants.size() && v.is_pure_indel()) {
-                            cerr << "allele base fail: can't get an additional base" << endl;
+                            cerr << "allele base fail: can't get an additional base next" << endl;
                             exit(1);
                         }
                     } else {
@@ -2319,17 +2319,19 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                         */
                         // else
                         // while the next allele is an indel
-                        auto j = i+1;
-                        while (j < variants.size()
+                        int j = i-1;
+                        while (j >= 0
                                // stop when we have sequence in both ref or alt
                                && v.is_pure_indel()) {
-                            auto q = v[j++];
+                            auto q = variants[j--];
                             // merge with us
-                            v = v + q;
+                            //v = v + q;
+                            shift_mid_right(q, v);
                         }
                         // panic if we reach the end of the variants
-                        if (j == variants.size() && v.is_pure_indel()) {
-                            cerr << "allele base fail: can't get an additional base" << endl;
+                        if (j <= 0 && v.is_pure_indel()) {
+                            cerr << "allele base fail: can't get an additional base prev" << endl;
+                            cerr << v << endl;
                             exit(1);
                         }
                         // while the previous allele is an indel
@@ -2399,19 +2401,6 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                     // ok
                 }
             }
-            for (auto& v : variants) {
-                // reset .repr fields
-                // XXX this is a horrible design
-                // we should use a tie for sorting
-                v = VariantAllele(v.ref, v.alt, v.position);
-            }
-            variants.erase(
-                std::remove_if(variants.begin(),
-                               variants.end(),
-                               [&empty_allele](const VariantAllele& v) {
-                                   return (v == empty_allele || v.ref == v.alt);
-                               }),
-                variants.end());
         }
         */
     }

@@ -18,7 +18,9 @@ PYBIND11_MODULE(pyvcflib, m)
 {
   m.doc() = "This is a Python binding of C++ vcflib Library";
   py::class_<VariantAllele>(m, "VariantAllele", "VCF alleles")
-      .def_readonly("repr", &VariantAllele::repr)
+      .def_readonly("position", &VariantAllele::position)
+      .def_readonly("ref", &VariantAllele::ref)
+      .def_readonly("alt", &VariantAllele::alt)
       ;
   py::class_<Variant>(m, "Variant", "VCF record")
       .def(py::init<VariantCallFile &>() )

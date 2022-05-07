@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
         // collect unique alleles
         for (auto a: varAlleles) {
             for (auto va: a.second) {
-                if (debug) cerr << a.first << " " << va.repr << endl;
+                if (debug) cerr << a.first << " " << va << endl;
                 alleles.insert(va); // only inserts first unique allele and ignores if two are the same
             }
         }
@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
         for (auto a: alleles) {
             if (a.ref != a.alt) {
                 ++altcount;
-                if (debug) cerr << altcount << "$" << a.repr << endl;
+                if (debug) cerr << altcount << "$" << a << endl;
             }
         }
 
@@ -239,11 +239,11 @@ int main(int argc, char** argv) {
         }
 
         // collect variant allele indexed membership
-        map<string, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
+        map<VariantAllele, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
         for (auto a: varAlleles) {
             int index = var.altAlleleIndexes[a.first] + 1; // make non-relative
             for (auto va: a.second) {
-                variantAlleleIndexes[va.repr].push_back(index);
+                variantAlleleIndexes[va].push_back(index);
             }
         }
 
@@ -337,7 +337,7 @@ int main(int argc, char** argv) {
             if (a.ref == a.alt)
                 continue;
 
-            vector<int>& originalIndexes = variantAlleleIndexes[a.repr];
+            vector<int>& originalIndexes = variantAlleleIndexes[a];
             string type;
             int len = 0;
             if (ref.at(0) == alt.at(0)) { // well-behaved indels
@@ -440,7 +440,7 @@ int main(int argc, char** argv) {
             }
             assert(len > 0);
             // nullify all the variants inside of the deletion range
-            vector<int>& originalIndexes = variantAlleleIndexes[a.repr];
+            vector<int>& originalIndexes = variantAlleleIndexes[a];
             auto begin = variants.upper_bound(a.position);
             auto end = variants.upper_bound(a.position + ref.size());
             for (auto i : originalIndexes) {
