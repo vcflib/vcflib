@@ -26,6 +26,7 @@ bool VariantAllele::is_pure_indel(void) {
     return ref.size() > 0 &&  alt == "" || alt.size() > 0 && ref == "";
 }
 
+// shift 1bp in between the two variants to be in the "left" (first) allele
 void shift_mid_left(VariantAllele& a, VariantAllele& b) {
     if (!b.is_pure_indel()) {
         a.alt.append(b.alt.substr(0,1));
@@ -42,6 +43,7 @@ void shift_mid_left(VariantAllele& a, VariantAllele& b) {
     }
 }
 
+// shift 1bp in between the two variants to be in the "right" (second) allele
 void shift_mid_right(VariantAllele& a, VariantAllele& b) {
     if (!a.is_pure_indel()) {
         b.alt = a.alt.substr(a.alt.size()-1,1) + b.alt;
@@ -50,6 +52,13 @@ void shift_mid_right(VariantAllele& a, VariantAllele& b) {
         a.ref = a.ref.substr(0,a.alt.size()-1);
         --b.position;
     } else {
+        // a is pure indel
+        // if del, the position will shift when merging
+        if (a.ref.size() && !a.alt.size()) {
+            b.position = a.position;
+        }
+        // else if pure ins, no change in position
+        // but in any case we will combine
         b.alt = a.alt + b.alt;
         b.ref = a.ref + b.ref;
         a.alt.clear();
