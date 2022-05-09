@@ -2244,18 +2244,32 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
 
             switch (mtype) {
             case 'I': // CIGAR INSERT
+            {
+                auto allele = VariantAllele("",
+                                            alternate.substr(altpos, mlen),
+                                            refpos + position);
                 // inject insertion from allele
-                variants.push_back(VariantAllele("",
-                                                 alternate.substr(altpos, mlen),
-                                                 refpos + position));
+                if (variants.size() && variants.back().is_pure_indel()) {
+                    variants.back() = variants.back() + allele;
+                } else {
+                    variants.push_back(allele);
+                }
                 altpos += mlen;
-                break;
+            }
+            break;
             case 'D': // CIGAR DELETE
+            {
+                auto allele = VariantAllele(ref.substr(refpos, mlen),
+                                            "", refpos + position);
                 // inject deletion from ref
-                variants.push_back(VariantAllele(ref.substr(refpos, mlen),
-                                                 "", refpos + position));
+                if (variants.size() && variants.back().is_pure_indel()) {
+                    variants.back() = variants.back() + allele;
+                } else {
+                    variants.push_back(allele);
+                }
                 refpos += mlen;
-                break;
+            }
+            break;
             case 'M': // CIGAR match and variant
             case 'X':
                 variants.push_back(VariantAllele(ref.substr(refpos, mlen),
@@ -2312,24 +2326,15 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                             exit(1);
                         }
                     } else {
-                        // we're internal
-                        // do we have a prev allele?
-                        /*
-                        if (i == variants.size()-1) {
-                            // if not-- panic
-                            cerr << "allele base fail: no subsequent alleles to indel" << endl;
-                            exit(1);
-                        }
-                        */
-                        // else
                         // while the next allele is an indel
-                        int j = i-1;
+                        int j = i-1; // i is guaranteed >=1
                         while (j >= 0
                                // stop when we have sequence in both ref or alt
                                && v.is_pure_indel()) {
                             auto q = variants[j--];
-                            // merge with us
-                            //v = v + q;
+                            // move the middle base between the alleles
+                            // to be at the start of v
+                            // or merge if both are pure indels
                             shift_mid_right(q, v);
                         }
                         // panic if we reach the end of the variants
