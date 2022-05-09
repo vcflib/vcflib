@@ -19,10 +19,6 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(rec.ref,'ACCCCCACCCCCACC')
         self.assertEqual(rec.alt,['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA'])
         newvcf = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,True)
-        # for key, value in newvcf.items():
-        #     print(f'Key: {key}: ')
-        #     for a in value:
-        #         print(f'{a.repr} ')
 
     def test_wftailbug(self):
         vcf = VariantCallFile()
@@ -36,13 +32,13 @@ class RealignTest(unittest.TestCase):
         for key, value in sw.items():
             print(f'SW allele key: {key}: ')
             for a in value:
-                print(f'               {a.repr} ')
+                print(f'               {a.position}/{a.ref}/{a.alt} ')
         # note wf ignores paramaters
         wf = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",True,True)
         for key, value in wf.items():
             print(f'WF allele key: {key}: ')
             for a in value:
-                print(f'               {a.repr} ')
+                print(f'               {a.position}/{a.ref}/{a.alt} ')
 
 
 if __name__ == '__main__':
