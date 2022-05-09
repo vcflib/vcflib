@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 namespace vcflib {
 
@@ -16,25 +17,16 @@ class VariantAllele {
     friend ostream& operator<<(ostream& out, VariantAllele& var);
     friend bool operator<(const VariantAllele& a, const VariantAllele& b);
     friend VariantAllele operator+(const VariantAllele& a, const VariantAllele& b);
+    friend bool operator==(const VariantAllele& a, const VariantAllele& b);
+    friend void shift_mid_left(VariantAllele& a, VariantAllele& b);
+    friend void shift_mid_right(VariantAllele& a, VariantAllele& b);
 public:
     string ref;
     string alt;
-    string repr;
     long position;
-    /* // TODO
-    bool isSNP(void);
-    bool isMNP(void);
-    bool isInsertion(void);
-    bool isDeletion(void);
-    bool isIndel(void);
-    */
     VariantAllele(string const & r, string const & a, long p)
-        : ref(r), alt(a), position(p)
-    {
-        stringstream s;
-        s << position << ":" << ref << "/" << alt;
-        repr = s.str();
-    }
+        : ref(r), alt(a), position(p) { }
+    bool is_pure_indel(void);
 };
 
 }

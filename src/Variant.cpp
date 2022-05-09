@@ -2082,25 +2082,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         return variantAlleles;
     }
 
-    // padding is used to ensure a stable alignment of the alternates to the reference
-    // without having to go back and look at the full reference sequence
-    int paddingLen = 10;
-    char padChar = 'Z';
-    char anchorChar = 'Q';
-    string padding(paddingLen, padChar);
-
-    // this 'anchored' string is done for stability
-    // the assumption is that there should be a positional match in the first base
-    // this is true for VCF 4.1, and standard best practices
-    // using the anchor char ensures this without other kinds of realignment
-    string reference_M;
-    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-        reference_M = padding + ref + padding;
-        reference_M[paddingLen] = anchorChar;
-    } else {
-        reference_M = flankingRefLeft + ref + flankingRefRight;
-        paddingLen = flankingRefLeft.size();
-    }
+    const string& reference_M = ref;
 
     std::vector<rkmh::hash_t> ref_sketch_fwd;
     std::vector<rkmh::hash_t> ref_sketch_rev;
@@ -2120,9 +2102,10 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     for (auto a: alt) { // iterate ALT strings
         // unsigned int referencePos;
         string& alternate = a;
+        variantAlleles[alternate]; // create the slot
     }
 
-// #pragma omp parallel for
+#pragma omp parallel for
     for (auto a: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
@@ -2154,13 +2137,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             */
         }
 
-        string alternateQuery_M;
-        if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-            alternateQuery_M = padding + alternate + padding;
-            alternateQuery_M[paddingLen] = anchorChar;
-        } else {
-            alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
-        }
+        const string& alternateQuery_M = alternate;
 
         string cigar;
         vector<pair<int, char> > cigarData;
@@ -2174,7 +2151,15 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         aligner.alignEnd2End(reference_M.c_str(), reference_M.size(), alternateQuery_M.c_str(), alternateQuery_M.size());
         cigar = aligner.getAlignmentCigar();
         */
-        auto wf_aligner = wavefront_aligner_new(wfaParams);
+        auto wfp = *wfaParams;
+        size_t max_len = max(reference_M.size(), alternateQuery_M.size());
+        if (max_len > 1000) {
+            wfp.memory_mode = wavefront_memory_ultralow;
+        } else {
+            wfp.memory_mode = wavefront_memory_high;
+        }
+        auto wf_aligner = wavefront_aligner_new(&wfp);
+
         wavefront_aligner_set_heuristic_none(wf_aligner);
         wavefront_aligner_set_alignment_end_to_end(wf_aligner);
         wavefront_align(wf_aligner,
@@ -2219,6 +2204,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
 
         // Check for matched padding (ZZZs)
+        /*
         if (cigarData.front().second != 'M'
             || cigarData.back().second != 'M'
             || cigarData.front().first < paddingLen
@@ -2235,16 +2221,17 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
             cigarData.front().first -= paddingLen;
             cigarData.back().first -= paddingLen;
         }
+        */
 
         // now left align!
         //
         // TODO: currently broken! it seems to mess up our indel alleles (they become length 0 on ref or alt)
         //stablyLeftAlign(alternateQuery_M, reference_M, cigarData, 5, true);
 
-        cigar = joinCigar(cigarData);
-
-        if (debug)
+        if (debug) {
+            cigar = joinCigar(cigarData);
             cerr << position << ":" << cigar << ":" << reference_M << "," << alternateQuery_M << endl;
+        }
 
         // Walk the CIGAR for one alternate and build up variantAlleles
         vector<VariantAllele> &variants = variantAlleles[alternate].first;
@@ -2257,78 +2244,40 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
 
             switch (mtype) {
             case 'I': // CIGAR INSERT
-                if (includePreviousBaseForIndels) {
-                    if (!variants.empty() &&
-                        variants.back().ref != variants.back().alt) {
-                        VariantAllele a =
-                            VariantAllele("",
-                                          alternate.substr(altpos, mlen),
-                                          refpos + position);
-                        variants.back() = variants.back() + a;
-                    } else {
-                        VariantAllele a =
-                            VariantAllele(ref.substr(refpos - 1, 1),
-                                          alternate.substr(altpos - 1, mlen + 1),
-                                          refpos + position - 1);
-                        variants.push_back(a);
-                    }
+            {
+                auto allele = VariantAllele("",
+                                            alternate.substr(altpos, mlen),
+                                            refpos + position);
+                // inject insertion from allele
+                if (variants.size() && variants.back().is_pure_indel()) {
+                    variants.back() = variants.back() + allele;
                 } else {
-                    // inject insertion from allele
-                    variants.push_back(VariantAllele("",
-                                                     alternate.substr(altpos, mlen),
-                                                     refpos + position));
+                    variants.push_back(allele);
                 }
                 altpos += mlen;
-                break;
+            }
+            break;
             case 'D': // CIGAR DELETE
-                if (includePreviousBaseForIndels) {
-                    if (!variants.empty() &&
-                        variants.back().ref != variants.back().alt) {
-                        VariantAllele a
-                            = VariantAllele(ref.substr(refpos, mlen)
-                                            , "", refpos + position);
-                        variants.back() = variants.back() + a;
-                    } else {
-                        VariantAllele a
-                            = VariantAllele(ref.substr(refpos - 1, mlen + 1),
-                                            alternate.substr(altpos - 1, 1),
-                                            refpos + position - 1);
-                        variants.push_back(a);
-                    }
+            {
+                auto allele = VariantAllele(ref.substr(refpos, mlen),
+                                            "", refpos + position);
+                // inject deletion from ref
+                if (variants.size() && variants.back().is_pure_indel()) {
+                    variants.back() = variants.back() + allele;
                 } else {
-                    // inject deletion from ref
-                    variants.push_back(VariantAllele(ref.substr(refpos, mlen),
-                                                     "", refpos + position));
+                    variants.push_back(allele);
                 }
                 refpos += mlen;
-                break;
+            }
+            break;
             case 'M': // CIGAR match and variant
             case 'X':
-            {
-                for (int i = 0; i < mlen; ++i) {
-                    VariantAllele a
-                        = VariantAllele(ref.substr(refpos + i, 1),
-                                        alternate.substr(altpos + i, 1),
-                                        (refpos + i + position));
-                    if (useMNPs) {
-                        bool is_first = variants.empty();
-                        auto &tail = variants.back(); // note that with is_first tail is undefined
-                        auto &ref = tail.ref;
-                        auto &alt = tail.alt;
-
-                        if (!is_first && ref.size() == alt.size() && ref != alt) {
-                            // elongate last variant as MNP
-                            tail = tail + a;
-                        } else {
-                            // Inject variants as a single nucleotides
-                            variants.push_back(a);
-                        }
-                    }
-                }
-            }
-            refpos += mlen;
-            altpos += mlen;
-            break;
+                variants.push_back(VariantAllele(ref.substr(refpos, mlen),
+                                                 alternate.substr(altpos, mlen),
+                                                 refpos + position));
+                refpos += mlen;
+                altpos += mlen;
+                break;
             case 'S': // S operations specify segments at the start
                       // and/or end of the query that do not appear in
                       // a local alignment
@@ -2346,6 +2295,124 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                 break;
             } // switch mtype
         }
+        if (includePreviousBaseForIndels) {
+            for (uint64_t i = 0; i < variants.size(); ++i) {
+                auto& v = variants[i];
+                if (v.is_pure_indel()) {
+                    if (i == 0) { // special case, we're at the beginning
+                        // do we have a next allele?
+                        if (i == variants.size()-1) {
+                            // if not-- panic
+                            cerr << "allele base fail: no subsequent alleles to indel" << endl;
+                            cerr << v << endl;
+                            cerr << "variant at " << position << endl;
+                            exit(1);
+                        }
+                        // else
+                        // while the next allele is an indel
+                        auto j = i+1;
+                        while (j < variants.size()
+                               // stop when we have sequence in both ref or alt
+                               && v.is_pure_indel()) {
+                            auto q = variants[j++];
+                            // merge with us
+                            shift_mid_left(v, q);
+                        }
+                        // panic if we reach the end of the variants
+                        if (j == variants.size() && v.is_pure_indel()) {
+                            cerr << "allele base fail: can't get an additional base next" << endl;
+                            cerr << v << endl;
+                            cerr << "variant at " << position << endl;
+                            exit(1);
+                        }
+                    } else {
+                        // while the next allele is an indel
+                        int j = i-1; // i is guaranteed >=1
+                        while (j >= 0
+                               // stop when we have sequence in both ref or alt
+                               && v.is_pure_indel()) {
+                            auto q = variants[j--];
+                            // move the middle base between the alleles
+                            // to be at the start of v
+                            // or merge if both are pure indels
+                            shift_mid_right(q, v);
+                        }
+                        // panic if we reach the end of the variants
+                        if (j <= 0 && v.is_pure_indel()) {
+                            cerr << "allele base fail: can't get an additional base prev" << endl;
+                            cerr << v << endl;
+                            cerr << "variant at " << position << endl;
+                            exit(1);
+                        }
+                        // while the previous allele is an indel
+                        // merge with us
+                        // stop when we have sequence in both ref or alt
+                        // if allele we reach is a positional match
+                        // panic if we reach the start of the variants
+
+                    }
+                    // try to get the previous reference or alternate base
+                    // continue until the
+                    // we first check if we have an indel just before us
+                    // if so, we need to merge this into the same allele and go further back
+                }
+            }
+        }
+        /*
+        if (false && includePreviousBaseForIndels) {
+            VariantAllele empty_allele("", "", 0);
+            // we're going to find indels and include the previous or next base in them
+            // by definition of our input (VCF standard) we should always have a base to add
+            // but it may be "behind" the indel and past insertions and deletions
+            for (uint64_t i = 0; i < variants.size()-1; ++i) {
+                auto& curr = variants[i];
+                auto& next = variants[i+1];
+                if (curr == empty_allele || next == empty_allele) continue;
+                bool curr_indel = (curr.ref.size() != curr.alt.size() && (curr.ref.empty() || curr.alt.empty()));
+                bool next_indel = (next.ref.size() != next.alt.size() && (next.ref.empty() || next.alt.empty()));
+                bool curr_match = (curr.ref.size() == curr.alt.size());
+                bool next_match = (next.ref.size() == next.alt.size());
+                if (!curr_indel && next_indel) {
+                    // curr is not an indel, but next is
+                    // split the last base out of curr
+                    // and add it to next
+                    if (curr.ref.size() > 1) {
+                        auto v = VariantAllele(curr.ref.substr(curr.ref.size()-1),
+                                               curr.alt.substr(curr.alt.size()-1),
+                                               curr.position + curr.ref.size());
+                        curr.ref = curr.ref.substr(0, curr.ref.size()-1);
+                        curr.alt = curr.alt.substr(0, curr.ref.size()-1);
+                        next = v + next;
+                    } else {
+                        // it's a single base
+                        assert(curr.ref.size() == curr.alt.size() && curr.ref.size() == 1);
+                        curr = curr + next;
+                        next = empty_allele;
+                    }
+                } else if (curr_indel && !next_indel) {
+                    // or curr is an indel and there is nothing before us and next is not an indel
+                    if (next.ref.size() > 1) {
+                        auto v = VariantAllele(next.ref.substr(0,1),
+                                               next.alt.substr(0,1),
+                                               next.position);
+                        next.position += 1;
+                        next.ref = next.ref.substr(1);
+                        next.alt = next.alt.substr(1);
+                        curr = curr + v;
+                    } else {
+                        // it's a single base
+                        assert(next.ref.size() == next.alt.size() && next.ref.size() == 1);
+                        curr = curr + next;
+                        next = empty_allele;
+                    }
+                } else if (curr_indel && next_indel) {
+                    cerr << "parsedAlternates: double indel" << endl;
+                    exit(1);
+                    // ok
+                }
+            }
+        }
+        */
     }
 
     return variantAlleles;

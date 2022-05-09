@@ -14,7 +14,57 @@ VariantAllele operator+(const VariantAllele& a, const VariantAllele& b) {
 }
 
 bool operator<(const VariantAllele& a, const VariantAllele& b) {
-    return a.repr < b.repr;
+    return std::tie(a.position, a.ref, a.alt) < std::tie(b.position, b.ref, b.alt);
+
+}
+
+bool operator==(const VariantAllele& a, const VariantAllele& b) {
+    return a.ref == b.ref && a.alt == b.alt && a.position == b.position;
+}
+
+bool VariantAllele::is_pure_indel(void) {
+    return ref.size() > 0 &&  alt == "" || alt.size() > 0 && ref == "";
+}
+
+// shift 1bp in between the two variants to be in the "left" (first) allele
+void shift_mid_left(VariantAllele& a, VariantAllele& b) {
+    if (!b.is_pure_indel()) {
+        a.alt.append(b.alt.substr(0,1));
+        a.ref.append(b.ref.substr(0,1));
+        b.alt = b.alt.substr(1);
+        b.ref = b.ref.substr(1);
+        ++b.position;
+    } else {
+        a.alt.append(b.alt);
+        a.ref.append(b.ref);
+        b.alt.clear();
+        b.ref.clear();
+        b.position = 0;
+    }
+}
+
+// shift 1bp in between the two variants to be in the "right" (second) allele
+void shift_mid_right(VariantAllele& a, VariantAllele& b) {
+    if (!a.is_pure_indel()) {
+        b.alt = a.alt.substr(a.alt.size()-1,1) + b.alt;
+        b.ref = a.ref.substr(a.ref.size()-1,1) + b.ref;
+        a.alt = a.alt.substr(0,a.alt.size()-1);
+        a.ref = a.ref.substr(0,a.alt.size()-1);
+        --b.position;
+    } else {
+        // a is pure indel
+        // if del, the position will shift when merging
+        if (a.ref.size() && !a.alt.size()) {
+            b.position = a.position;
+        }
+        // else if pure ins, no change in position
+        // but in any case we will combine
+        b.alt = a.alt + b.alt;
+        b.ref = a.ref + b.ref;
+        a.alt.clear();
+        a.ref.clear();
+        a.position = 0;
+    }
 }
 
 }
