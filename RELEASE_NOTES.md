@@ -4,23 +4,17 @@ see
 and
 [commits](https://github.com/vcflib/vcflib/commits/master).
 
-## ChangeLog v1.0.4-pre
-
-Checks before release:
-
-- [ ] Add some validation after realignment
-- [ ] Output of WF against WF after CIGAR fix
-- [ ] Inversion of very short sequences
+## ChangeLog v1.0.4 (20220510)
 
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 
-+ Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md)
-+ Support inversions in vcfwave
++ Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md) (thank you Erik Garrison https://github.com/ekg and Santiago Marco-Sola  https://github.com/smarco).
++ Support longer read inversions in vcfwave!
 + vcfallelicprimitives now considered legacy/obsolete
 + Improved CMake configuration
 + vcflib compiles with both gcc and clang++ and tests pass, see [guix-clang.scm](./guix-clang.scm) - mind that git submodules such as WFA2-lib still override to gcc
 + Fixed local build for tabixpp+htslib - note that htslib should be an upstream released version (currently 1.15.1). Unfortunately git submodule does not handle tags.
-+ Fix -L switch for vcfallelicprimitives
++ Fix for -L switch for vcfallelicprimitives
 + Added libasan and lto support
 + Removed useless googletest submodule
 + Added python bindings with pybind11
