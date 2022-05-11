@@ -2040,6 +2040,7 @@ int ploidy(const map<int, int>& genotype) {
 }
 
 
+
 // parsedAlternates returns a hash of 'ref' and a vector of alts. A
 // single record may be split into multiple records with new
 // 'refs'. In this function Smith-Waterman is used with padding on

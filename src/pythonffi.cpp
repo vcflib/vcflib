@@ -16,7 +16,15 @@ using namespace vcflib;
 
 PYBIND11_MODULE(pyvcflib, m)
 {
-  m.doc() = "This is a Python binding of C++ vcflib Library";
+  m.doc() = "This is a Python binding of C++ vcflib Library with WFA";
+
+  // Wavefront
+  py::class_<wavefront_aligner_attr_t>(m, "wavefront_aligner_attr_t", "WFA settings")
+      .def_readwrite("distance_metric", &wavefront_aligner_attr_t::distance_metric)
+      ;
+  m.attr("wavefront_aligner_attr_default") = wavefront_aligner_attr_default;
+
+  // VCFlib
   py::class_<VariantAllele>(m, "VariantAllele", "VCF alleles")
       .def_readonly("position", &VariantAllele::position)
       .def_readonly("ref", &VariantAllele::ref)
@@ -30,6 +38,7 @@ PYBIND11_MODULE(pyvcflib, m)
       .def_readwrite("alt", &Variant::alt)
       .def_readwrite("alleles", &Variant::alleles)
       .def("legacy_parsedAlternates", &Variant::legacy_parsedAlternates)
+      .def("parsedAlternates", &Variant::parsedAlternates)
       ;
   py::class_<VariantCallFile>(m, "VariantCallFile", "VCF file")
       .def(py::init())

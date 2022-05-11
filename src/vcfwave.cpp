@@ -7,9 +7,6 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
-#include "bindings/cpp/WFAligner.hpp"
-using namespace wfa;
-
 #include "Variant.h"
 #include "convert.h"
 #include "join.h"
@@ -178,7 +175,7 @@ int main(int argc, char** argv) {
     for (auto& s : p_str) { p.push_back(atoi(s.c_str())); }
 
     auto wfa_params = wavefront_aligner_attr_default;
-    wfa_params.memory_mode = wavefront_memory_ultralow;
+    wfa_params.memory_mode = wavefront_memory_ultralow; // note this is overridden in Variant.cpp
     wfa_params.distance_metric = gap_affine_2p;
     wfa_params.affine2p_penalties.match = p[0];
     wfa_params.affine2p_penalties.mismatch = p[1];
