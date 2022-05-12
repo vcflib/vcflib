@@ -23,6 +23,10 @@ PYBIND11_MODULE(pyvcflib, m)
       .def_readwrite("distance_metric", &wavefront_aligner_attr_t::distance_metric)
       ;
   m.attr("wavefront_aligner_attr_default") = wavefront_aligner_attr_default;
+  py::enum_<distance_metric_t>(m, "distance_meric_t")
+    .value("gap_affine_2p", gap_affine_2p)
+      ;
+
 
   // VCFlib
   py::class_<VariantAllele>(m, "VariantAllele", "VCF alleles")

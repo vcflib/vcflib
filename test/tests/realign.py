@@ -50,7 +50,7 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(rec.alt,['GTAGCATCCCAAGTGATGT', 'GTAGAATCCCAATTGATGT', 'GGAGCATCCCAATTGATGG', 'GG'])
         wfa_params = wavefront_aligner_attr_default
         # string paramString = "0,19,39,3,81,1";
-        # wfa_params.distance_metric = 4 # gap_affine_2p
+        wfa_params.distance_metric = distance_meric_t.gap_affine_2p
         wf = rec.parsedAlternates(False,True,False,"","",wfa_params,True,64,True)
         for key, value in wf.items():
             print(f'WF2 allele key: {key}: ')
