@@ -212,14 +212,6 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        // for each parsedAlternate allele, get the position
-        // and build a new vcf record for that position
-        // unless we are already at the position!
-        // take everything which is unique to that allele (records) and append it to the new record
-        // then handle genotypes; determine the mapping between allelic primitives and convert to phased haplotypes
-        // this means taking all the parsedAlternates and, for each one, generating a pattern of allele indexes corresponding to it
-
-        // this code does an O(n^2) alignment of the ALTs
         map<string, pair<vector<VariantAllele>, bool> > varAlleles =
            var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
                                 false, // bool useEntropy = false,

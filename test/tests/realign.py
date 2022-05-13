@@ -6,6 +6,7 @@
 
 import unittest
 from pyvcflib import *
+import json
 
 class RealignTest(unittest.TestCase):
 
@@ -18,7 +19,7 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(rec.name,"grch38#chr4")
         self.assertEqual(rec.ref,'ACCCCCACCCCCACC')
         self.assertEqual(rec.alt,['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA'])
-        sw = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,True)
+        sw = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,False)
 
     def test_sw_wf_compare(self):
         vcf = VariantCallFile()
@@ -29,16 +30,16 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(rec.ref,'GGAGAATCCCAATTGATGG')
         self.assertEqual(rec.alt,['GTAGCATCCCAAGTGATGT', 'GTAGAATCCCAATTGATGT', 'GGAGCATCCCAATTGATGG', 'GG'])
         sw = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,False)
-        for key, value in sw.items():
-            print(f'SW allele key: {key}: ')
-            for a in value:
-                print(f'               {a.position}/{a.ref}/{a.alt} ')
+        # for key, value in sw.items():
+        #     print(f'SW allele key: {key}: ')
+        #     for a in value:
+        #         print(f'               {a.position}/{a.ref}/{a.alt} ')
         # note wf ignores paramaters
         wf = rec.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",True,False)
-        for key, value in wf.items():
-            print(f'WF allele key: {key}: ')
-            for a in value:
-                print(f'               {a.position}/{a.ref}/{a.alt} ')
+        # for key, value in wf.items():
+        #     print(f'WF allele key: {key}: ')
+        #     for a in value:
+        #        print(f'               {a.position}/{a.ref}/{a.alt} ')
         self.assertEqual(len(wf),5)
         self.assertEqual(len(wf),len(sw))
         self.assertEqual(sw['GGAGAATCCCAATTGATGG'][0].alt,wf['GGAGAATCCCAATTGATGG'][0].alt)
@@ -66,6 +67,28 @@ class RealignTest(unittest.TestCase):
             print(f'WF2 allele key: {key}: ')
             for a in value[0]:
                 print(f'               {a.position}:{a.ref}/{a.alt} ')
+        self.assertEqual(len(wf),5)
+        gg0 = wf['GG'][0][0]
+        gg1 = wf['GG'][0][1]
+        self.assertEqual(gg0.alt,"GG")
+        self.assertEqual(gg1.alt,"")
+        self.assertEqual(wf['GGAGAATCCCAATTGATGG'][0][0].alt,"GGAGAATCCCAATTGATGG")
+        # collect unique alleles
+        unique = {}
+        alt_index = -1
+        for alt1, value in wf.items():
+            alt_index += 1
+            for a in value[0]:
+                ref = a.ref
+                alt = a.alt
+                if ref != alt and alt != "":
+                    tag = f'{alt1}:{a.position}:{ref}/{alt}'
+                    unique[tag] = { 'alt1': alt1,
+                                    'pos': a.position,
+                                    'ref': ref,
+                                    'aidx': alt_index,
+                                    'alt': alt}
+        print(json.dumps(unique,indent=4))
 
 
 if __name__ == '__main__':
