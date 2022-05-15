@@ -63,6 +63,7 @@ class RealignTest(unittest.TestCase):
         wfa_params.affine2p_penalties.gap_extension2 = 1
         wfa_params.alignment_scope = alignment_scope_t.compute_alignment;
         wf = rec.parsedAlternates(False,True,False,"","",wfa_params,True,64,True)
+        print(f'ref={rec.ref}')
         for key, value in wf.items():
             print(f'WF2 allele key: {key}: ')
             for a in value[0]:
@@ -83,13 +84,16 @@ class RealignTest(unittest.TestCase):
                 alt = a.alt
                 if ref != alt and alt != "":
                     tag = f'{alt1}:{a.position}:{ref}/{alt}'
-                    unique[tag] = { 'alt1': alt1,
+                    unique[tag] = { 'ref0': rec.ref,
+                                    'alt0': alt1,
+                                    'altidx': alt_index,
                                     'pos': a.position,
+                                    'relpos': a.position - rec.pos + 1,
                                     'ref': ref,
-                                    'aidx': alt_index,
                                     'alt': alt}
-        print(json.dumps(unique,indent=4))
-
+        uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos'])
+        print(json.dumps(uniqsorted,indent=4))
+        self.assertEqual(len(uniqsorted),7)
 
 if __name__ == '__main__':
     unittest.main()
