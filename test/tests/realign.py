@@ -62,8 +62,10 @@ class RealignTest(unittest.TestCase):
         wfa_params.affine2p_penalties.gap_opening2 = 81
         wfa_params.affine2p_penalties.gap_extension2 = 1
         wfa_params.alignment_scope = alignment_scope_t.compute_alignment;
+        # A dict is returned of alleles with variants and is_reversed
         wf = rec.parsedAlternates(False,True,False,"","",wfa_params,True,64,True)
         print(f'ref={rec.ref}')
+        print(rec.info)
         for key, value in wf.items():
             print(f'WF2 allele key: {key}: ')
             for a in value[0]:
@@ -75,25 +77,33 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(gg1.alt,"")
         self.assertEqual(wf['GGAGAATCCCAATTGATGG'][0][0].alt,"GGAGAATCCCAATTGATGG")
         # collect unique alleles
+        info = rec.info
         unique = {}
-        alt_index = -1
-        for alt1, value in wf.items():
-            alt_index += 1
+        for alt0, value in wf.items():
+            is_rev = value[1]
             for a in value[0]:
                 ref = a.ref
                 alt = a.alt
                 if ref != alt and alt != "":
-                    tag = f'{alt1}:{a.position}:{ref}/{alt}'
+                    alt_index = rec.alt.index(alt0)
+                    tag = f'{alt0}:{a.position}:{ref}/{alt}'
+                    AC = info['AC'][alt_index]
+                    AF = info['AF'][alt_index]
                     unique[tag] = { 'ref0': rec.ref,
-                                    'alt0': alt1,
+                                    'alt0': alt0,
                                     'altidx': alt_index,
                                     'pos': a.position,
                                     'relpos': a.position - rec.pos + 1,
                                     'ref': ref,
-                                    'alt': alt}
+                                    'alt': alt,
+                                    'AC': AC,
+                                    'AF': AF,
+                                    'is_rev': is_rev}
         uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos'])
         print(json.dumps(uniqsorted,indent=4))
         self.assertEqual(len(uniqsorted),7)
+        # We are now going to adjust the info fields
+        self.assertEqual(rec.info['AC'],['11', '7', '1', '3'])
 
 if __name__ == '__main__':
     unittest.main()

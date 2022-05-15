@@ -261,11 +261,11 @@ int main(int argc, char** argv) {
         };
         map<VariantAllele, var_info_t> alleleStuff;
 
-        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-            vector<VariantAllele>& vars = varAlleles[*a].first;
-            bool is_inv = varAlleles[*a].second;
-            for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
-                alleleStuff[*va].in_inv += is_inv;
+        for (auto a: var.alt) {
+            auto varalleles = varAlleles[a].first;
+            bool is_inv = varAlleles[a].second;
+            for (auto va: varalleles) {
+                alleleStuff[va].in_inv += is_inv;
             }
         }
 
@@ -290,13 +290,13 @@ int main(int argc, char** argv) {
         bool hasAc = false;
         if (var.info.find("AC") != var.info.end()) {
             hasAc = true;
-            for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                vector<VariantAllele>& vars = varAlleles[*a].first;
-                for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
-                    int freq;
+            for (auto a: var.alt) {
+                auto vars = varAlleles[a].first;
+                for (auto va: vars) {
+                    int count;
                     try {
-                        convert(var.info["AC"].at(var.altAlleleIndexes[*a]), freq);
-                        alleleStuff[*va].count += freq;
+                        convert(var.info["AC"].at(var.altAlleleIndexes[a]), count);
+                        alleleStuff[va].count += count;
                     } catch (...) {
                         cerr << "vcfallelicprimitives WARNING: AC does not have count == alts @ "
                              << var.sequenceName << ":" << var.position << endl;

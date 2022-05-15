@@ -55,6 +55,7 @@ PYBIND11_MODULE(pyvcflib, m)
       .def_readwrite("ref", &Variant::ref)
       .def_readwrite("alt", &Variant::alt)
       .def_readwrite("alleles", &Variant::alleles)
+      .def_readonly("info", &Variant::info)
       .def("legacy_parsedAlternates", &Variant::legacy_parsedAlternates)
       .def("parsedAlternates", &Variant::parsedAlternates)
       ;
