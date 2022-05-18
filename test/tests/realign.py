@@ -81,27 +81,38 @@ class RealignTest(unittest.TestCase):
         unique = {}
         for alt0, value in wf.items():
             is_rev = value[1]
-            for a in value[0]:
-                ref = a.ref
-                alt = a.alt
-                if ref != alt and alt != "":
-                    alt_index = rec.alt.index(alt0)
-                    tag = f'{alt0}:{a.position}:{ref}/{alt}'
+            for matches in value[0]:
+                ref = matches.ref
+                aligned = matches.alt
+                tag = f'{alt0}:{a.position}:{ref}/{aligned}'
+                if rec.ref == aligned:
+                    alt_index = -1
+                    AC = None
+                    AF = None
+                else:
+                    alt_index = rec.alt.index(alt0) # Raises a ValueError if there is no such item
                     AC = info['AC'][alt_index]
                     AF = info['AF'][alt_index]
-                    unique[tag] = { 'ref0': rec.ref,
-                                    'alt0': alt0,
-                                    'altidx': alt_index,
-                                    'pos': a.position,
-                                    'relpos': a.position - rec.pos + 1,
-                                    'ref': ref,
-                                    'alt': alt,
-                                    'AC': AC,
-                                    'AF': AF,
-                                    'is_rev': is_rev}
-        uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos'])
+                relpos = a.position - rec.pos
+                unique[tag] = {
+                    'pos0': rec.pos,
+                    'ref0': rec.ref,
+                    'alt0': alt0,
+                    'ref1': ref,
+                    'algn': aligned,
+                    'pos': a.position, # points where exactly? FIXME
+                    'altidx': alt_index,
+                    'relpos': relpos,
+                    'AC': AC,
+                    'AF': AF,
+                    'is_rev': is_rev}
+        # uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos'])
+        uniqsorted = unique
         print(json.dumps(uniqsorted,indent=4))
-        self.assertEqual(len(uniqsorted),7)
+        self.assertEqual(len(uniqsorted),16)
+        # Check if all alleles were used by counting 'altidx'
+        idxs = set(map(lambda k: unique[k]['altidx'],unique.keys()))
+        self.assertEqual(len(idxs),len(rec.alt)+1)
         # We are now going to adjust the info fields
         self.assertEqual(rec.info['AC'],['11', '7', '1', '3'])
 
