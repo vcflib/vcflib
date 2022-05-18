@@ -78,6 +78,7 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(wf['GGAGAATCCCAATTGATGG'][0][0].alt,"GGAGAATCCCAATTGATGG")
         # collect unique alleles
         info = rec.info
+        self.assertEqual(info['AC'],['11', '7', '1', '3'])
         unique = {}
         for alt0, value in wf.items():
             is_rev = value[1]
@@ -89,10 +90,12 @@ class RealignTest(unittest.TestCase):
                     alt_index = -1
                     AC = None
                     AF = None
+                    AN = None
                 else:
                     alt_index = rec.alt.index(alt0) # Raises a ValueError if there is no such item
-                    AC = info['AC'][alt_index]
-                    AF = info['AF'][alt_index]
+                    AC = int(info['AC'][alt_index])
+                    AF = float(info['AF'][alt_index])
+                    AN = int(info['AN'][0])
                 relpos = a.position - rec.pos
                 unique[tag] = {
                     'pos0': rec.pos,
@@ -100,21 +103,47 @@ class RealignTest(unittest.TestCase):
                     'alt0': alt0,
                     'ref1': ref,
                     'algn': aligned,
-                    'pos': a.position, # points where exactly? FIXME
+                    'pos1': a.position, # points where exactly? FIXME
                     'altidx': alt_index,
-                    'relpos': relpos,
+                    'relpos': relpos,  # see position comment
                     'AC': AC,
                     'AF': AF,
+                    'AN': AN,
                     'is_rev': is_rev}
-        # uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos'])
-        uniqsorted = unique
+        # Did we get all?
+        self.assertEqual(len(unique.items()),16)
+        # Display
+        uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos1'])
         print(json.dumps(uniqsorted,indent=4))
-        self.assertEqual(len(uniqsorted),16)
         # Check if all alleles were used by counting 'altidx'
         idxs = set(map(lambda k: unique[k]['altidx'],unique.keys()))
         self.assertEqual(len(idxs),len(rec.alt)+1)
-        # We are now going to adjust the info fields
-        self.assertEqual(rec.info['AC'],['11', '7', '1', '3'])
+        # We are now going to merge records using a dict. From
+        #
+        # 10134532:AGAATCCCAATTGATGG/
+        # 10134532:A/C
+        # 10134532:G/T
+        # 10134532:G/T
+        # 10134532:A/C
+        # 10134532:T/G
+        variants = {}
+        for k,v in uniqsorted:
+            ref = v['ref1']
+            aligned = v['algn']
+            if ref != aligned:
+                ntag = f"{v['pos1']}:{ref}/{aligned}"
+                print(f"{ntag} AC={v['AC']}")
+                if ntag in variants:
+                    variants[ntag]['AC'] += v['AC']
+                    # Check AN number is equal so we can compute AF by addition
+                    self.assertEqual(variants[ntag]['AN'],v['AN'])
+                    variants[ntag]['AF'] += v['AF']
+                else:
+                    variants[ntag] = v
+        print(variants)
+        print(json.dumps(variants,indent=4))
+        self.assertEqual(variants['10134532:G/T']['AC'],18)
+
 
 if __name__ == '__main__':
     unittest.main()
