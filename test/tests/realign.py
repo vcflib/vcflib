@@ -161,6 +161,9 @@ class RealignTest(unittest.TestCase):
             # Set origin
             variants[key]['origin'] = f"{rec.name}:{rec.pos}"
         print(json.dumps(variants,indent=4))
+        samples = rec.samples
+        for sample in rec.sampleNames:
+            print(sample,samples[sample])
 
 if __name__ == '__main__':
     unittest.main()
