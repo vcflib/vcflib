@@ -140,10 +140,27 @@ class RealignTest(unittest.TestCase):
                     variants[ntag]['AF'] += v['AF']
                 else:
                     variants[ntag] = v
-        print(variants)
-        print(json.dumps(variants,indent=4))
+        # print(variants)
+        # print(json.dumps(variants,indent=4))
         self.assertEqual(variants['10134532:G/T']['AC'],18)
-
+        for key in variants:
+            v = variants[key]
+            ref_len = len(v['ref1'])
+            aln_len = len(v['algn'])
+            type = None
+            if aln_len < ref_len:
+                type = 'del'
+            elif aln_len > ref_len:
+                type = 'del'
+            elif aln_len == ref_len:
+                if ref_len == 1:
+                    type = 'snp'
+                else:
+                    type = 'mnp'
+            variants[key]['type'] = type
+            # Set origin
+            variants[key]['origin'] = f"{rec.name}:{rec.pos}"
+        print(json.dumps(variants,indent=4))
 
 if __name__ == '__main__':
     unittest.main()
