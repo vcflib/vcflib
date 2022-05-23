@@ -119,14 +119,54 @@ class RealignTest(unittest.TestCase):
         # Check if all alleles were used by counting 'altidx'
         idxs = set(map(lambda k: unique[k]['altidx'],unique.keys()))
         self.assertEqual(len(idxs),len(rec.alt)+1)
+
+        # Collect sample genotypes
+        samples = rec.samples
+        gts = []
+        for name in rec.sampleNames:
+            # print(name,samples[name])
+            gt = (samples[name]['GT'])[0].split("|")
+            # print(gt)
+            gts.append(list(map(lambda item: int(item) if item.isdigit() else None,gt)))
+        print(gts)
+        # for each variant translate genotypes
+        for k,v in uniqsorted:
+            print(key)
+            idx1 = v['altidx']+1
+            print(idx1)
+            genotypes = []
+            for gt in gts:
+                # print(gt)
+                genotypes.append(list(map(lambda item: item,gt)))
+            # print(list(genotypes))
+            # Now we neet to plug in the new indices
+            for gt in genotypes:
+                for i,g in enumerate(gt):
+                    if g == idx1:
+                        gt[i] = 1 # only one genotype in play
+                    else:
+                        if g != None:
+                            gt[i] = 0
+            # print("---")
+            # print(list(genotypes))
+            v['samples'] = genotypes
+
         # We are now going to merge records using a dict. From
         #
-        # 10134532:AGAATCCCAATTGATGG/
-        # 10134532:A/C
-        # 10134532:G/T
-        # 10134532:G/T
-        # 10134532:A/C
-        # 10134532:T/G
+        # 10134515:G/T AC=7
+        # 10134515:G/T AC=11
+        # 10134516:AGAATCCCAATTGATGG/ AC=3
+        # 10134518:A/C AC=1
+        # 10134518:A/C AC=11
+        # 10134526:T/G AC=11
+        # 10134532:G/T AC=7
+        # 10134532:G/T AC=11
+        #   into
+        # 10134515:G/T AC=18
+        # 10134516:AGAATCCCAATTGATGG/ AC=3
+        # 10134518:A/C AC=12
+        # 10134526:T/G AC=11
+        # 10134532:G/T AC=18
         variants = {}
         for k,v in uniqsorted:
             ref = v['ref1']
@@ -139,8 +179,24 @@ class RealignTest(unittest.TestCase):
                     # Check AN number is equal so we can compute AF by addition
                     self.assertEqual(variants[ntag]['AN'],v['AN'])
                     variants[ntag]['AF'] += v['AF']
+                    # Merge genotypes if they come from different alleles
+                    if v['altidx'] != variants[ntag]['altidx']:
+                        for i,samplesi in enumerate(variants[ntag]['samples']):
+                            result = samplesi.copy()
+                            g2 = v['samples'][i]
+                            for j,samplej in enumerate(g2):
+                                if g2[j] and g2[j]>0:
+                                    result[j] = g2[j]
+                            # print(i,samplesi,v['samples'][i],result)
                 else:
                     variants[ntag] = v
+
+
+        print("into")
+        for key in variants:
+            v = variants[key]
+            print(f"{key} AC={v['AC']}")
+
         # print(variants)
         # print(json.dumps(variants,indent=4))
         self.assertEqual(variants['10134532:G/T']['AC'],18)
@@ -160,47 +216,9 @@ class RealignTest(unittest.TestCase):
                     type = 'mnp'
             variants[key]['type'] = type
             # Set origin
-            variants[key]['origin'] = f"{rec.name}:{rec.pos}"
-        print(json.dumps(variants,indent=4))
-        samples = rec.samples
-        gts = []
-        for name in rec.sampleNames:
-            # print(name,samples[name])
-            gt = (samples[name]['GT'])[0].split("|")
-            # print(gt)
-            gts.append(list(map(lambda item: int(item) if item.isdigit() else None,gt)))
-        print(gts)
-        # for each variant translate genotypes
-        for key in variants:
-            print(key)
-            rec = variants[key]
-            idx1 = rec['altidx']+1
-            print(idx1)
-            genotypes = []
-            for gt in gts:
-                # print(gt)
-                genotypes.append(list(map(lambda item: item,gt)))
-            print(list(genotypes))
-            # Now we neet to plug in the new indices
-            for gt in genotypes:
-                if gt[0] == idx1:
-                    gt[0] = 1
-                else:
-                    if gt[0] != None:
-                        gt[0] = 0
-                if len(gt)>1:
-                    if gt[1] == idx1:
-                        gt[1] = 1
-                    else:
-                        if gt[1] != None:
-                            gt[1] = 0
-            print("---")
-            print(list(genotypes))
-# [[0, 1], [1, 0], [0, 0], [0, 1], [0, 0], [1, 0], [1, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, None], [0, 0], [2, 2], [0, 0], [4, 0], [0, 0], [0, 1], [0, 1], [0, 1], [0, 2], [0, 0], [4, 0], [0, 2], [0, 0], [0, 0], [2, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [2, 0], [4, 1], [0, 0], [0, 0], [0, 0], [0, 0], [0, 3], [0, 0], [0, 2], [0, 0], [1]]
-
-# Note we are '2'
-
-#    0|1     1|0     0|0     0|1     0|0     1|0     1|0     1|0     0|0    0|0     0|0     0|0     0|0     0|.          0|0    1|1      0|0    .|0     0|0     0|1     0|1     0|1     0|1     0|0     .|0     0|1     0|0     0|0  1|0     0|0     0|0     0|0     0|0     0|0     1|0     .|1     0|0     0|0     0|0     0|0     0|0     0|0  0|1     0|0     1
+            print(v)
+            variants[key]['origin'] = f'{rec.name}:{rec.pos}'
+        # print(json.dumps(variants,indent=4))
 
 
 if __name__ == '__main__':
