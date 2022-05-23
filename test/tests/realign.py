@@ -80,12 +80,13 @@ class RealignTest(unittest.TestCase):
         info = rec.info
         self.assertEqual(info['AC'],['11', '7', '1', '3'])
         unique = {}
+        a = None
         for alt0, value in wf.items():
             is_rev = value[1]
             for matches in value[0]:
                 ref = matches.ref
                 aligned = matches.alt
-                tag = f'{alt0}:{a.position}:{ref}/{aligned}'
+                tag = f'{alt0}:{matches.position}:{ref}/{aligned}'
                 if rec.ref == aligned:
                     alt_index = -1
                     AC = None
@@ -96,22 +97,22 @@ class RealignTest(unittest.TestCase):
                     AC = int(info['AC'][alt_index])
                     AF = float(info['AF'][alt_index])
                     AN = int(info['AN'][0])
-                relpos = a.position - rec.pos
+                relpos = matches.position - rec.pos
                 unique[tag] = {
                     'pos0': rec.pos,
                     'ref0': rec.ref,
                     'alt0': alt0,
                     'ref1': ref,
                     'algn': aligned,
-                    'pos1': a.position, # points where exactly? FIXME
-                    'altidx': alt_index,
-                    'relpos': relpos,  # see position comment
+                    'pos1': matches.position,
+                    'altidx': alt_index, # zero based
+                    'relpos': relpos,
                     'AC': AC,
                     'AF': AF,
                     'AN': AN,
                     'is_rev': is_rev}
         # Did we get all?
-        self.assertEqual(len(unique.items()),16)
+        self.assertEqual(len(unique.items()),18)
         # Display
         uniqsorted = sorted(unique.items(),key = lambda r: r[1]['pos1'])
         print(json.dumps(uniqsorted,indent=4))
@@ -162,8 +163,45 @@ class RealignTest(unittest.TestCase):
             variants[key]['origin'] = f"{rec.name}:{rec.pos}"
         print(json.dumps(variants,indent=4))
         samples = rec.samples
-        for sample in rec.sampleNames:
-            print(sample,samples[sample])
+        gts = []
+        for name in rec.sampleNames:
+            # print(name,samples[name])
+            gt = (samples[name]['GT'])[0].split("|")
+            # print(gt)
+            gts.append(list(map(lambda item: int(item) if item.isdigit() else None,gt)))
+        print(gts)
+        # for each variant translate genotypes
+        for key in variants:
+            print(key)
+            rec = variants[key]
+            idx1 = rec['altidx']+1
+            print(idx1)
+            genotypes = []
+            for gt in gts:
+                # print(gt)
+                genotypes.append(list(map(lambda item: item,gt)))
+            print(list(genotypes))
+            # Now we neet to plug in the new indices
+            for gt in genotypes:
+                if gt[0] == idx1:
+                    gt[0] = 1
+                else:
+                    if gt[0] != None:
+                        gt[0] = 0
+                if len(gt)>1:
+                    if gt[1] == idx1:
+                        gt[1] = 1
+                    else:
+                        if gt[1] != None:
+                            gt[1] = 0
+            print("---")
+            print(list(genotypes))
+# [[0, 1], [1, 0], [0, 0], [0, 1], [0, 0], [1, 0], [1, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, None], [0, 0], [2, 2], [0, 0], [4, 0], [0, 0], [0, 1], [0, 1], [0, 1], [0, 2], [0, 0], [4, 0], [0, 2], [0, 0], [0, 0], [2, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [2, 0], [4, 1], [0, 0], [0, 0], [0, 0], [0, 0], [0, 3], [0, 0], [0, 2], [0, 0], [1]]
+
+# Note we are '2'
+
+#    0|1     1|0     0|0     0|1     0|0     1|0     1|0     1|0     0|0    0|0     0|0     0|0     0|0     0|.          0|0    1|1      0|0    .|0     0|0     0|1     0|1     0|1     0|1     0|0     .|0     0|1     0|0     0|0  1|0     0|0     0|0     0|0     0|0     0|0     1|0     .|1     0|0     0|0     0|0     0|0     0|0     0|0  0|1     0|0     1
+
 
 if __name__ == '__main__':
     unittest.main()
