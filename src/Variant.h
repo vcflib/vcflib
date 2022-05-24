@@ -232,6 +232,17 @@ public:
            bool useWaveFront=true,
            bool debug=false);
 
+    // Legacy version
+    void legacy_reduceAlleles(
+        map<string, pair<vector<VariantAllele>, bool> > varAlleles,
+        VariantCallFile &variantFile,
+        Variant var,
+        string parseFlag,
+        bool keepInfo=true,
+        bool keepGeno=true,
+        bool debug=false);
+
+
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
 

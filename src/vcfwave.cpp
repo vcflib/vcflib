@@ -223,11 +223,15 @@ int main(int argc, char** argv) {
                                 debug);  // bool debug=false
 
 
-        for (auto v: variants) {
-            cout << v.second << endl;
-        }
+        var.legacy_reduceAlleles(
+            varAlleles,
+            variantFile,
+            var,
+            parseFlag,
+            keepInfo,
+            keepGeno,
+            debug);
     }
 
     return 0;
-
 }

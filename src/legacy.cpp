@@ -332,11 +332,19 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
 }
 
 /*
-Post-process alleles to reduce the set and normalise counts. This is the legacy version.
+@@ Post-process alleles to reduce the set and normalise counts. This is the legacy version.
  */
 
-map<long unsigned int, Variant> Variant::legacy_reduceAlleles(
-    map<string, vector<VariantAllele> > varAlleles)
+#define ALLELE_NULL -1
+
+void Variant::legacy_reduceAlleles(
+    map<string, pair<vector<VariantAllele>, bool> > varAlleles,
+    VariantCallFile &variantFile,
+    Variant var,
+    string parseFlag,
+    bool keepInfo,
+    bool keepGeno,
+    bool debug)
 {
     set<VariantAllele> alleles;
     // collect unique alleles
@@ -357,7 +365,7 @@ map<long unsigned int, Variant> Variant::legacy_reduceAlleles(
 
     if (altcount == 1 && var.alt.size() == 1 && var.alt.front().size() == 1) { // if biallelic SNP
         cout << var << endl;
-        continue;
+        return;
     }
 
     // collect variant allele indexed membership
@@ -638,5 +646,9 @@ map<long unsigned int, Variant> Variant::legacy_reduceAlleles(
             variant.samples[sampleName]["GT"].push_back(genotype);
         }
     }
+    for (auto v: variants) {
+        cout << v.second << endl;
+    }
+}
 
 } // namespace vcflib
