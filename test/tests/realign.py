@@ -63,7 +63,7 @@ class RealignTest(unittest.TestCase):
         wfa_params.affine2p_penalties.gap_extension2 = 1
         wfa_params.alignment_scope = alignment_scope_t.compute_alignment;
         # A dict is returned of alleles with variants and is_reversed
-        wf = rec.parsedAlternates(False,True,False,"","",wfa_params,True,64,True)
+        wf = rec.parsedAlternates(True,True,False,"","",wfa_params,True,64,True)
         print(f'ref={rec.ref}')
         print(rec.info)
         for key1, value1 in wf.items():
@@ -75,7 +75,7 @@ class RealignTest(unittest.TestCase):
         gg0 = wf['GG'][0][0]
         gg1 = wf['GG'][0][1]
         self.assertEqual(gg0.alt,"GG")
-        self.assertEqual(gg1.alt,"")
+        self.assertEqual(gg1.alt,"G")
         self.assertEqual(wf['GGAGAATCCCAATTGATGG'][0][0].alt,"GGAGAATCCCAATTGATGG")
         # Collect unique alleles
         info = rec.info
@@ -224,7 +224,6 @@ class RealignTest(unittest.TestCase):
             print(v)
             variants[key]['origin'] = f'{rec.name}:{rec.pos}'
         # print(json.dumps(variants,indent=4))
-
 
 if __name__ == '__main__':
     unittest.main()
