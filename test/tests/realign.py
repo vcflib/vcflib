@@ -66,27 +66,29 @@ class RealignTest(unittest.TestCase):
         wf = rec.parsedAlternates(False,True,False,"","",wfa_params,True,64,True)
         print(f'ref={rec.ref}')
         print(rec.info)
-        for key, value in wf.items():
-            print(f'WF2 allele key: {key}: ')
-            for a in value[0]:
+        for key1, value1 in wf.items():
+            print(f'WF2 allele key: {key1}: ')
+            for a in value1[0]:
                 print(f'               {a.position}:{a.ref}/{a.alt} ')
+        # Run a few tests
         self.assertEqual(len(wf),5)
         gg0 = wf['GG'][0][0]
         gg1 = wf['GG'][0][1]
         self.assertEqual(gg0.alt,"GG")
         self.assertEqual(gg1.alt,"")
         self.assertEqual(wf['GGAGAATCCCAATTGATGG'][0][0].alt,"GGAGAATCCCAATTGATGG")
-        # collect unique alleles
+        # Collect unique alleles
         info = rec.info
         self.assertEqual(info['AC'],['11', '7', '1', '3'])
         unique = {}
         a = None
-        for alt0, value in wf.items():
-            is_rev = value[1]
-            for matches in value[0]:
-                ref = matches.ref
-                aligned = matches.alt
-                tag = f'{alt0}:{matches.position}:{ref}/{aligned}'
+        for alt0, wfvalue in wf.items(): # wfvalue is a compound of bool is_rev and alleles
+            is_rev = wfvalue[1]
+            for wfmatch in wfvalue[0]:
+                ref = wfmatch.ref
+                aligned = wfmatch.alt
+                wfpos = wfmatch.position
+                wftag = f'{alt0}:{wfpos}:{ref}/{aligned}'
                 if rec.ref == aligned:
                     alt_index = -1
                     AC = None
@@ -97,14 +99,14 @@ class RealignTest(unittest.TestCase):
                     AC = int(info['AC'][alt_index])
                     AF = float(info['AF'][alt_index])
                     AN = int(info['AN'][0])
-                relpos = matches.position - rec.pos
-                unique[tag] = {
+                relpos = wfpos - rec.pos
+                unique[wftag] = {
                     'pos0': rec.pos,
                     'ref0': rec.ref,
                     'alt0': alt0,
                     'ref1': ref,
                     'algn': aligned,
-                    'pos1': matches.position,
+                    'pos1': wfpos,
                     'altidx': alt_index, # zero based
                     'relpos': relpos,
                     'AC': AC,
@@ -123,17 +125,17 @@ class RealignTest(unittest.TestCase):
         # Collect sample genotypes
         samples = rec.samples
         gts = []
-        for name in rec.sampleNames:
+        for sname in rec.sampleNames:
             # print(name,samples[name])
-            gt = (samples[name]['GT'])[0].split("|")
+            gt = (samples[sname]['GT'])[0].split("|")
             # print(gt)
             gts.append(list(map(lambda item: int(item) if item.isdigit() else None,gt)))
         print(gts)
         # for each variant translate genotypes
-        for k,v in uniqsorted:
-            print(key)
-            idx1 = v['altidx']+1
-            print(idx1)
+        for tag,aln in uniqsorted:
+            # print(tag)
+            idx1 = aln['altidx']+1
+            # print(idx1)
             genotypes = []
             for gt in gts:
                 # print(gt)
@@ -147,9 +149,11 @@ class RealignTest(unittest.TestCase):
                     else:
                         if g != None:
                             gt[i] = 0
-            # print("---")
             # print(list(genotypes))
-            v['samples'] = genotypes
+            aln['samples'] = genotypes
+        gts = None
+        print(uniqsorted[10])
+        self.assertEqual(uniqsorted[10][1]['samples'],[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, None], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 1], [0, 0], [0, 0], [0, 0], [0]])
 
         # We are now going to merge records using a dict. From
         #
@@ -167,7 +171,9 @@ class RealignTest(unittest.TestCase):
         # 10134518:A/C AC=12
         # 10134526:T/G AC=11
         # 10134532:G/T AC=18
-        variants = {}
+        variants = {} # store new hash
+        k = None
+        v = None
         for k,v in uniqsorted:
             ref = v['ref1']
             aligned = v['algn']
@@ -193,15 +199,14 @@ class RealignTest(unittest.TestCase):
 
 
         print("into")
-        for key in variants:
-            v = variants[key]
+        for key,v in variants.items():
             print(f"{key} AC={v['AC']}")
 
-        # print(variants)
-        # print(json.dumps(variants,indent=4))
+        self.assertEqual(len(variants),5)
         self.assertEqual(variants['10134532:G/T']['AC'],18)
-        for key in variants:
-            v = variants[key]
+        key = None
+        v = None
+        for key,v in variants.items():
             ref_len = len(v['ref1'])
             aln_len = len(v['algn'])
             type = None
