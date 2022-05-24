@@ -46,7 +46,7 @@ See more below.
 
 ```
 
->>> head("vcfwave -h",24)
+>>> head("vcfwave -h",25)
 >
 usage: vcfwave [options] [file]
 >
@@ -68,6 +68,7 @@ options:
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
     -t, --threads N         use this many threads for variant decomposition
+    -n, --nextgen           next gen mode.
     -d, --debug             debug mode.
 >
 Type: transformation

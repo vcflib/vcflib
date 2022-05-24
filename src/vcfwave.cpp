@@ -49,6 +49,7 @@ options:
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
     -t, --threads N         use this many threads for variant decomposition
+    -n, --nextgen           next gen mode.
     -d, --debug             debug mode.
 
 Type: transformation
@@ -70,7 +71,9 @@ int main(int argc, char** argv) {
     bool keepInfo = false;
     bool keepGeno = false;
     bool useWaveFront = true;
+    bool nextGen  = false;
     bool debug    = false;
+
     int thread_count = 1;
     int inv_sketch_kmer = 17;
     int min_inv_len = 64;
@@ -92,13 +95,14 @@ int main(int argc, char** argv) {
                 {"keep-info", no_argument, 0, 'k'},
                 {"keep-geno", no_argument, 0, 'g'},
                 {"threads", required_argument, 0, 't'},
+                {"nextgen", no_argument, 0, 'n'},
                 {"debug", no_argument, 0, 'd'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "dhkt:L:p:t:K:I:f:",
+        c = getopt_long (argc, argv, "ndhkt:L:p:t:K:I:f:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -122,7 +126,11 @@ int main(int argc, char** argv) {
             thread_count = atoi(optarg);
             break;
 
-	    case 'd':
+        case 'n':
+            nextGen = true;
+            break;
+
+        case 'd':
             debug = true;
             break;
 
@@ -222,15 +230,19 @@ int main(int argc, char** argv) {
                                 min_inv_len,
                                 debug);  // bool debug=false
 
-
-        var.legacy_reduceAlleles(
-            varAlleles,
-            variantFile,
-            var,
-            parseFlag,
-            keepInfo,
-            keepGeno,
-            debug);
+        if (nextGen) {
+            cerr << "NYI" << endl;
+        }
+        else {
+            var.legacy_reduceAlleles(
+                varAlleles,
+                variantFile,
+                var,
+                parseFlag,
+                keepInfo,
+                keepGeno,
+                debug);
+        }
     }
 
     return 0;
