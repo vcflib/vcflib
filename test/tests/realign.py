@@ -213,7 +213,7 @@ class RealignTest(unittest.TestCase):
             if aln_len < ref_len:
                 type = 'del'
             elif aln_len > ref_len:
-                type = 'del'
+                type = 'ins'
             elif aln_len == ref_len:
                 if ref_len == 1:
                     type = 'snp'
