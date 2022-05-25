@@ -231,7 +231,26 @@ int main(int argc, char** argv) {
                                 debug);  // bool debug=false
 
         if (nextGen) {
-            cerr << "NYI" << endl;
+            for (auto k: varAlleles) {
+                auto alt0 = k.first;
+                auto wfvalue = k.second;
+                bool is_rev = wfvalue.second;
+                for (auto wfmatch: wfvalue.first) {
+                    auto ref = wfmatch.ref;
+                    auto aligned = wfmatch.alt;
+                    auto wfpos = wfmatch.position;
+                    int alt_index = -1;
+                    string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
+                    if (var.ref == aligned) {
+                        cout << "EQ: ";
+                    }
+                    else {
+                        alt_index = var.alt.index(alt0);
+                    }
+                    cout << wftag << endl;
+                }
+            }
+            cerr << "WIP" << endl;
         }
         else {
             var.legacy_reduceAlleles(
