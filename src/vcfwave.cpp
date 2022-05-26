@@ -231,9 +231,10 @@ int main(int argc, char** argv) {
                                 debug);  // bool debug=false
 
         if (nextGen) {
-            for (auto k: varAlleles) {
-                auto alt0 = k.first;
-                auto wfvalue = k.second;
+            // for (auto k: varAlleles) {
+            for (const auto [alt0, wfvalue] : varAlleles) {
+                // auto alt0 = k.first;
+                // auto wfvalue = k.second;
                 bool is_rev = wfvalue.second;
                 for (auto wfmatch: wfvalue.first) {
                     auto ref = wfmatch.ref;
@@ -245,8 +246,13 @@ int main(int argc, char** argv) {
                         cout << "EQ: ";
                     }
                     else {
-                        alt_index = var.alt.index(alt0);
+                        auto index = [](vector<string> v, string allele) {
+                            auto it = find(v.begin(), v.end(), allele);
+                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() + 1 );
+                        };
+                        alt_index = index(var.alt,alt0); // throws error if missing
                     }
+                    auto relpos = wfpos - var.position;
                     cout << wftag << endl;
                 }
             }
