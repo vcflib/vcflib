@@ -231,6 +231,19 @@ int main(int argc, char** argv) {
                                 debug);  // bool debug=false
 
         if (nextGen) {
+
+            struct trackinfo {
+                size_t pos0 = 0;
+                string ref0, alt0, ref1, algn;
+                size_t pos1 = 0;
+                size_t altidx;
+                int relpos;
+                int AC,AF,AN;
+                bool is_rev = false;
+            };
+            typedef map<string, trackinfo> TrackInfo;
+            TrackInfo unique;
+
             // for (auto k: varAlleles) {
             for (const auto [alt0, wfvalue] : varAlleles) {
                 // auto alt0 = k.first;
@@ -240,7 +253,8 @@ int main(int argc, char** argv) {
                     auto ref = wfmatch.ref;
                     auto aligned = wfmatch.alt;
                     auto wfpos = wfmatch.position;
-                    int alt_index = -1;
+                    int alt_index,AC,AN = -1;
+                    double AF = 0.0;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (var.ref == aligned) {
                         cout << "EQ: ";
@@ -248,15 +262,30 @@ int main(int argc, char** argv) {
                     else {
                         auto index = [](vector<string> v, string allele) {
                             auto it = find(v.begin(), v.end(), allele);
-                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() + 1 );
+                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
+                        AC = stoi(var.info["AC"].at(alt_index));
+                        AF = stod(var.info["AF"].at(alt_index));
+                        AN = stoi(var.info["AN"].at(0));
                     }
                     auto relpos = wfpos - var.position;
-                    cout << wftag << endl;
+                    auto u = &unique[wftag];
+                    u->pos0 = var.position;
+                    u->ref0 = var.ref;
+                    u->alt0 = alt0;
+                    u->algn = aligned;
+                    u->pos1 = wfpos;
+                    u->altidx = alt_index;
+                    u->relpos = relpos;
+                    u->AC = AC;
+                    u->AF = AF;
+                    u->AN = AN;
+                    u->is_rev = is_rev;
+                    cout << wftag << " " << unique.size() << endl;
                 }
             }
-            cerr << "WIP" << endl;
+            cerr << "WIP " << endl;
         }
         else {
             var.legacy_reduceAlleles(
