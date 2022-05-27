@@ -240,11 +240,12 @@ int main(int argc, char** argv) {
                 int relpos;
                 int AC,AF,AN;
                 bool is_rev = false;
+                string type;
+                string origin;
             };
             typedef map<string, trackinfo> TrackInfo;
             TrackInfo unique;
 
-            // for (auto k: varAlleles) {
             for (const auto [alt0, wfvalue] : varAlleles) {
                 // auto alt0 = k.first;
                 // auto wfvalue = k.second;
@@ -274,6 +275,7 @@ int main(int argc, char** argv) {
                     u->pos0 = var.position;
                     u->ref0 = var.ref;
                     u->alt0 = alt0;
+                    u->ref1 = ref;
                     u->algn = aligned;
                     u->pos1 = wfpos;
                     u->altidx = alt_index;
@@ -282,8 +284,29 @@ int main(int argc, char** argv) {
                     u->AF = AF;
                     u->AN = AN;
                     u->is_rev = is_rev;
-                    cout << wftag << " " << unique.size() << endl;
                 }
+            }
+            // Adjust TYPE field to set snp/mnp/ins/del
+            auto variants = unique;
+            unique.clear();
+            for (auto [key,v] : variants) {
+                auto ref_len = v.ref1.length();
+                auto aln_len = v.algn.length();
+                string type;
+                if (aln_len < ref_len)
+                    type = "del";
+                else if (aln_len > ref_len)
+                    type = "ins";
+                else if (aln_len == ref_len)
+                    if (ref_len == 1)
+                        type = "snp";
+                    else
+                        type = "mnp";
+                v.type = type;
+                v.origin = var.sequenceName+to_string(var.position);
+                variants[key] = v;
+                cout.precision(2);
+                cout << key << " HEY " << ref_len << "," << aln_len << " AC=" << v.AC << fixed << " AF=" << v.AF << " " << variants[key].type << " " << variants.size() << endl;
             }
             cerr << "WIP " << endl;
         }

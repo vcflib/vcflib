@@ -204,6 +204,7 @@ class RealignTest(unittest.TestCase):
 
         self.assertEqual(len(variants),5)
         self.assertEqual(variants['10134532:G/T']['AC'],18)
+        # Adjust TYPE field to set snp/mnp/ins/del
         key = None
         v = None
         for key,v in variants.items():
