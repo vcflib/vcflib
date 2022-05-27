@@ -232,6 +232,8 @@ int main(int argc, char** argv) {
 
         if (nextGen) {
 
+            typedef vector<int> Genotypes;
+            typedef map<string, Genotypes> SampleGenotypes;
             struct trackinfo {
                 size_t pos0 = 0;
                 string ref0, alt0, ref1, algn;
@@ -242,6 +244,7 @@ int main(int argc, char** argv) {
                 bool is_rev = false;
                 string type;
                 string origin;
+                SampleGenotypes genotypes;
             };
             typedef map<string, trackinfo> TrackInfo;
             TrackInfo unique;
@@ -286,9 +289,53 @@ int main(int argc, char** argv) {
                     u->is_rev = is_rev;
                 }
             }
-            // Adjust TYPE field to set snp/mnp/ins/del
-            auto variants = unique;
+            // Collect genotypes in gts
+            auto samples = var.samples;
+            for (auto sname: var.sampleNames) {
+                auto genotype1 = samples[sname]["GT"].front();
+                auto genotypeStrs = split(genotype1, "|/");
+                cout << "gts " << genotypeStrs[0] << "," << genotypeStrs[1] << endl;
+                // auto gts =
+            }
+            // Merge records in a new dict named variants and adjust AC, AF and AN
+            TrackInfo variants;
+            for (auto [key,v] : unique) {
+                auto ref = v.ref1;
+                auto aligned = v.algn;
+                if (ref != aligned) {
+                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned;
+                    if (variants.count(ntag)>0) {
+                        variants[ntag].AC += v.AC;
+                        // Check AN number is equal so we can compute AF by addition
+                        assert(variants[ntag].AN == v.AN);
+                        variants[ntag].AF += v.AF;
+                        // Merge genotypes if they come from different alleles
+                        if (v.altidx != variants[ntag].altidx) {
+                            // later
+                        }
+                    }
+                    else {
+                        variants[ntag] = v;
+                    }
+                    /*
+                    self.assertEqual(variants[ntag]['AN'],v['AN'])
+                    variants[ntag]['AF'] += v['AF']
+                    # Merge genotypes if they come from different alleles
+                    if v['altidx'] != variants[ntag]['altidx']:
+                        for i,samplesi in enumerate(variants[ntag]['samples']):
+                            result = samplesi.copy()
+                            g2 = v['samples'][i]
+                            for j,samplej in enumerate(g2):
+                                if g2[j] and g2[j]>0:
+                                    result[j] = g2[j]
+                            # print(i,samplesi,v['samples'][i],result)
+                else:
+                    variants[ntag] = v
+                    */
+                }
+            }
             unique.clear();
+            // Adjust TYPE field to set snp/mnp/ins/del
             for (auto [key,v] : variants) {
                 auto ref_len = v.ref1.length();
                 auto aln_len = v.algn.length();
