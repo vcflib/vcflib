@@ -306,23 +306,26 @@ int main(int argc, char** argv) {
                 Genotypes gts;
                 // cout << "str " << genotypeStrs[0] << "," << genotypeStrs[1] << endl;
                 std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? -200 : stoi(n)); });
-                // cout << "gts " << genotypes[0] << "," << genotypes[1] << endl;
+                // cout << "gts " << gts[0] << "," << gts[1] << endl;
                 genotypes.push_back(gts);
             }
+            auto aln_genotypes = genotypes; // make a copy
             // Now plug in the new indices
             for (auto [tag,aln]: unique) {
                 auto idx1 = aln.altidx+1;
-                for (auto gt: genotypes) {
-                    for (size_t i = 0; auto g: gt) {
-                        // for (auto const& [i,g] : gt | ranges::views::enumerate) {
+                for (auto &gt: aln_genotypes) {
+                    int i = 0;
+                    for (auto g: gt) {
+                        cout << g << endl;
                         if (g == idx1)
                             gt[i] = 1; // one genotype in play
                         else
                             if (g != -200)
                                 gt[i] = 0;
+                        i++;
                     }
                 }
-                unique[tag].genotypes = genotypes;
+                unique[tag].genotypes = aln_genotypes;
             }
 
             // Merge records in a new dict named variants and adjust AC, AF and AN
@@ -339,17 +342,7 @@ int main(int argc, char** argv) {
                         track_variants[ntag].AF += v.AF;
                         // Merge genotypes if they come from different alleles
                         if (v.altidx != track_variants[ntag].altidx) {
-                            // later
-                        }
-                    }
-                    else {
-                        track_variants[ntag] = v;
-                    }
-                    /*
-                    self.assertEqual(variants[ntag]['AN'],v['AN'])
-                    variants[ntag]['AF'] += v['AF']
-                    # Merge genotypes if they come from different alleles
-                    if v['altidx'] != variants[ntag]['altidx']:
+                        /*
                         for i,samplesi in enumerate(variants[ntag]['samples']):
                             result = samplesi.copy()
                             g2 = v['samples'][i]
@@ -357,9 +350,13 @@ int main(int argc, char** argv) {
                                 if g2[j] and g2[j]>0:
                                     result[j] = g2[j]
                             # print(i,samplesi,v['samples'][i],result)
-                else:
-                    variants[ntag] = v
-                    */
+                        */
+                            // later
+                        }
+                    }
+                    else {
+                        track_variants[ntag] = v;
+                    }
                 }
             }
             unique.clear();
@@ -385,7 +382,7 @@ int main(int argc, char** argv) {
             for (auto [key,v]: track_variants) {
                 ct++;
                 // cout.precision(2);
-                cout << "----->" << key << " AC=" << v.AC << fixed << " AF=" << v.AF << " " << v.type << " " << track_variants.size() << endl;
+                // cout << "----->" << key << " AC=" << v.AC << fixed << " AF=" << v.AF << " " << v.type << " " << track_variants.size() << endl;
                 Variant newvar(variantFile);
                 newvar.sequenceName = var.sequenceName;
                 newvar.position = v.pos1;
