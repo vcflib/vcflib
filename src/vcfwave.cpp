@@ -7,14 +7,21 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
+#include <algorithm>
+#include <string>
+#include <ranges>
+#include <set>
+#include <utility>
+#include <vector>
+
+#include <getopt.h>
+#include <omp.h>
+
 #include "Variant.h"
 #include "convert.h"
 #include "join.h"
 #include "split.h"
-#include <omp.h>
-#include <set>
-#include <algorithm>
-#include <getopt.h>
+
 
 using namespace std;
 using namespace vcflib;
@@ -233,7 +240,8 @@ int main(int argc, char** argv) {
         if (nextGen) {
 
             typedef vector<int> Genotypes;
-            typedef map<string, Genotypes> SampleGenotypes;
+            // typedef map<string, Genotypes> SampleGenotypes;
+            typedef vector<Genotypes> RecGenotypes;
             struct trackinfo {
                 size_t pos0 = 0;
                 string ref0, alt0, ref1, algn;
@@ -244,7 +252,7 @@ int main(int argc, char** argv) {
                 bool is_rev = false;
                 string type;
                 string origin;
-                SampleGenotypes genotypes;
+                RecGenotypes genotypes;
             };
             typedef map<string, trackinfo> TrackInfo;
             TrackInfo unique;
@@ -290,32 +298,52 @@ int main(int argc, char** argv) {
                 }
             }
             // Collect genotypes in gts
+            RecGenotypes genotypes;
             auto samples = var.samples;
             for (auto sname: var.sampleNames) {
                 auto genotype1 = samples[sname]["GT"].front();
-                auto genotypeStrs = split(genotype1, "|/");
-                cout << "gts " << genotypeStrs[0] << "," << genotypeStrs[1] << endl;
-                // auto gts =
+                vector<string> genotypeStrs = split(genotype1, "|/");
+                Genotypes gts;
+                // cout << "str " << genotypeStrs[0] << "," << genotypeStrs[1] << endl;
+                std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? -200 : stoi(n)); });
+                // cout << "gts " << genotypes[0] << "," << genotypes[1] << endl;
+                genotypes.push_back(gts);
             }
+            // Now plug in the new indices
+            for (auto [tag,aln]: unique) {
+                auto idx1 = aln.altidx+1;
+                for (auto gt: genotypes) {
+                    for (size_t i = 0; auto g: gt) {
+                        // for (auto const& [i,g] : gt | ranges::views::enumerate) {
+                        if (g == idx1)
+                            gt[i] = 1; // one genotype in play
+                        else
+                            if (g != -200)
+                                gt[i] = 0;
+                    }
+                }
+                unique[tag].genotypes = genotypes;
+            }
+
             // Merge records in a new dict named variants and adjust AC, AF and AN
-            TrackInfo variants;
+            TrackInfo track_variants;
             for (auto [key,v] : unique) {
                 auto ref = v.ref1;
                 auto aligned = v.algn;
                 if (ref != aligned) {
                     auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned;
-                    if (variants.count(ntag)>0) {
-                        variants[ntag].AC += v.AC;
+                    if (track_variants.count(ntag)>0) {
+                        track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
-                        assert(variants[ntag].AN == v.AN);
-                        variants[ntag].AF += v.AF;
+                        assert(track_variants[ntag].AN == v.AN);
+                        track_variants[ntag].AF += v.AF;
                         // Merge genotypes if they come from different alleles
-                        if (v.altidx != variants[ntag].altidx) {
+                        if (v.altidx != track_variants[ntag].altidx) {
                             // later
                         }
                     }
                     else {
-                        variants[ntag] = v;
+                        track_variants[ntag] = v;
                     }
                     /*
                     self.assertEqual(variants[ntag]['AN'],v['AN'])
@@ -336,7 +364,7 @@ int main(int argc, char** argv) {
             }
             unique.clear();
             // Adjust TYPE field to set snp/mnp/ins/del
-            for (auto [key,v] : variants) {
+            for (auto [key,v] : track_variants) {
                 auto ref_len = v.ref1.length();
                 auto aln_len = v.algn.length();
                 string type;
@@ -350,10 +378,60 @@ int main(int argc, char** argv) {
                     else
                         type = "mnp";
                 v.type = type;
-                v.origin = var.sequenceName+to_string(var.position);
-                variants[key] = v;
-                cout.precision(2);
-                cout << key << " HEY " << ref_len << "," << aln_len << " AC=" << v.AC << fixed << " AF=" << v.AF << " " << variants[key].type << " " << variants.size() << endl;
+                v.origin = var.sequenceName+":"+to_string(var.position);
+                track_variants[key] = v;
+            }
+            int ct = 0;
+            for (auto [key,v]: track_variants) {
+                ct++;
+                // cout.precision(2);
+                cout << "----->" << key << " AC=" << v.AC << fixed << " AF=" << v.AF << " " << v.type << " " << track_variants.size() << endl;
+                Variant newvar(variantFile);
+                newvar.sequenceName = var.sequenceName;
+                newvar.position = v.pos1;
+                newvar.id = var.id + "_" + to_string(ct);
+                newvar.ref = v.ref1;
+                newvar.alt.push_back(v.algn);
+                newvar.quality = var.quality;
+                newvar.info = var.info;
+                vector<string> AC{ to_string(v.AC) };
+                vector<string> AF{ to_string(v.AF) };
+                vector<string> AN{ to_string(v.AN) };
+                vector<string> ORIGIN{ v.origin };
+                vector<string> TYPE{ v.type };
+                newvar.info["AC"] = AC;
+                newvar.info["AF"] = AF;
+                newvar.info["AN"] = AN;
+                newvar.info[parseFlag] = ORIGIN;
+                newvar.info["TYPE"] = TYPE;
+
+                // newvar.format = var.format;
+                // newvar.sampleNames = var.sampleNames;
+                // newvar.outputSampleNames = var.outputSampleNames;
+                // newvar.samples = v.genotypeStrs;
+
+                // Instead of using above format output we now simply print genotypes
+                cout.precision(0);
+                cout << newvar;
+                cout << "\tGT";
+                for (auto gts: v.genotypes) {
+                    cout << "\t";
+                    int idx = 0;
+                    for (auto gt : gts) {
+                        cout << (gt == -200 ? "." : to_string(gt));
+                        if (idx < gts.size()-1) cout << "|";
+                        idx++;
+                    }
+                }
+                cout << endl;
+                // cout << var << endl;
+                /*
+                auto samples = var.samples;
+                for (auto sname: var.sampleNames) {
+                    auto genotype1 = samples[sname]["GT"].front();
+                    cout << genotype1 << " ";
+                }
+                */
             }
             cerr << "WIP " << endl;
         }
