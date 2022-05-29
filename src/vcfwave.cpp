@@ -238,9 +238,9 @@ int main(int argc, char** argv) {
                                 debug);  // bool debug=false
 
         if (nextGen) {
-
+            // The following section post-process the results of wavefront and
+            // updates AC, AF and genotype values
             typedef vector<int> Genotypes;
-            // typedef map<string, Genotypes> SampleGenotypes;
             typedef vector<Genotypes> RecGenotypes;
             struct trackinfo {
                 size_t pos0 = 0;
@@ -255,11 +255,10 @@ int main(int argc, char** argv) {
                 RecGenotypes genotypes;
             };
             typedef map<string, trackinfo> TrackInfo;
-            TrackInfo unique;
+            TrackInfo unique; // Track all alleles
 
+            // Unpack wavefront results and set values for each unique allele
             for (const auto [alt0, wfvalue] : varAlleles) {
-                // auto alt0 = k.first;
-                // auto wfvalue = k.second;
                 bool is_rev = wfvalue.second;
                 for (auto wfmatch: wfvalue.first) {
                     auto ref = wfmatch.ref;
@@ -274,7 +273,6 @@ int main(int argc, char** argv) {
                             return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
-                        // cout << "!" << alt_index << endl;
                         AC = stoi(var.info["AC"].at(alt_index));
                         AF = stod(var.info["AF"].at(alt_index));
                         AN = stoi(var.info["AN"].at(0));
@@ -295,38 +293,37 @@ int main(int argc, char** argv) {
                     u->is_rev = is_rev;
                 }
             }
-            // Collect genotypes in gts
+            // Collect genotypes for every allele from the main record. This code is
+            // effectively mirrored in Python in realign.py:
             RecGenotypes genotypes;
             auto samples = var.samples;
             for (auto sname: var.sampleNames) {
                 auto genotype1 = samples[sname]["GT"].front();
                 vector<string> genotypeStrs = split(genotype1, "|/");
                 Genotypes gts;
-                // cout << "str " << genotypeStrs[0] << "," << genotypeStrs[1] << endl;
                 std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? -200 : stoi(n)); });
-                // cout << "gts " << gts[0] << "," << gts[1] << endl;
                 genotypes.push_back(gts);
             }
-            // Now plug in the new indices
+            // Now plug in the new indices for listed genotypes
             for (auto [tag,aln]: unique) {
                 RecGenotypes aln_genotypes = genotypes; // make a copy
                 auto altidx1 = aln.altidx+1;
                 for (auto &gt: aln_genotypes) {
                     int i = 0;
                     for (auto g: gt) {
-                        // cout << g << "," << altidx1;
                         if (g == altidx1)
                             gt[i] = 1; // one genotype in play
                         else
                             if (g != -200) gt[i] = 0;
-                        // cout << "->" << gt[i] << endl;
                         i++;
                     }
                 }
                 unique[tag].genotypes = aln_genotypes;
             }
 
-            // Merge records in a new dict named variants and adjust AC, AF and AN
+            // Merge records that describe the exact same variant (in
+            // earlier jargon a 'primitive allele' in a new dict named
+            // variants and adjust AC, AF and genotypes:
             TrackInfo track_variants;
             for (auto [key,v] : unique) {
                 auto ref = v.ref1;
@@ -357,6 +354,7 @@ int main(int argc, char** argv) {
                 }
             }
             unique.clear();
+            // The following section updates the INFO TYPE field:
             // Adjust TYPE field to set snp/mnp/ins/del
             for (auto [key,v] : track_variants) {
                 auto ref_len = v.ref1.length();
@@ -375,6 +373,7 @@ int main(int argc, char** argv) {
                 v.origin = var.sequenceName+":"+to_string(var.position);
                 track_variants[key] = v;
             }
+            // The following section output all tracked alleles one by one:
             int ct = 0;
             for (auto [key,v]: track_variants) {
                 ct++;
