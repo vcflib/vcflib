@@ -268,15 +268,13 @@ int main(int argc, char** argv) {
                     int alt_index,AC,AN = -1;
                     double AF = 0.0;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
-                    if (var.ref == aligned) {
-                        cout << "EQ: ";
-                    }
-                    else {
+                    if (var.ref != aligned) {
                         auto index = [](vector<string> v, string allele) {
                             auto it = find(v.begin(), v.end(), allele);
                             return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
+                        // cout << "!" << alt_index << endl;
                         AC = stoi(var.info["AC"].at(alt_index));
                         AF = stod(var.info["AF"].at(alt_index));
                         AN = stoi(var.info["AN"].at(0));
@@ -309,19 +307,19 @@ int main(int argc, char** argv) {
                 // cout << "gts " << gts[0] << "," << gts[1] << endl;
                 genotypes.push_back(gts);
             }
-            auto aln_genotypes = genotypes; // make a copy
             // Now plug in the new indices
             for (auto [tag,aln]: unique) {
-                auto idx1 = aln.altidx+1;
+                RecGenotypes aln_genotypes = genotypes; // make a copy
+                auto altidx1 = aln.altidx+1;
                 for (auto &gt: aln_genotypes) {
                     int i = 0;
                     for (auto g: gt) {
-                        cout << g << endl;
-                        if (g == idx1)
+                        // cout << g << "," << altidx1;
+                        if (g == altidx1)
                             gt[i] = 1; // one genotype in play
                         else
-                            if (g != -200)
-                                gt[i] = 0;
+                            if (g != -200) gt[i] = 0;
+                        // cout << "->" << gt[i] << endl;
                         i++;
                     }
                 }
@@ -335,23 +333,22 @@ int main(int argc, char** argv) {
                 auto aligned = v.algn;
                 if (ref != aligned) {
                     auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned;
-                    if (track_variants.count(ntag)>0) {
+                    if (track_variants.count(ntag)>0) { // this variant already exists
                         track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
                         assert(track_variants[ntag].AN == v.AN);
                         track_variants[ntag].AF += v.AF;
                         // Merge genotypes if they come from different alleles
                         if (v.altidx != track_variants[ntag].altidx) {
-                        /*
-                        for i,samplesi in enumerate(variants[ntag]['samples']):
-                            result = samplesi.copy()
-                            g2 = v['samples'][i]
-                            for j,samplej in enumerate(g2):
-                                if g2[j] and g2[j]>0:
-                                    result[j] = g2[j]
-                            # print(i,samplesi,v['samples'][i],result)
-                        */
-                            // later
+                            auto track_genotypes = track_variants[ntag].genotypes;
+                            for (auto &sample: v.genotypes) { // all samples
+                                int i = 0;
+                                for (auto g: sample) { // all genotypes
+                                    if (g && sample[i]>0)
+                                        sample[i] = 1; // always one genotype in play
+                                    i++;
+                                }
+                            }
                         }
                     }
                     else {
@@ -381,8 +378,6 @@ int main(int argc, char** argv) {
             int ct = 0;
             for (auto [key,v]: track_variants) {
                 ct++;
-                // cout.precision(2);
-                // cout << "----->" << key << " AC=" << v.AC << fixed << " AF=" << v.AF << " " << v.type << " " << track_variants.size() << endl;
                 Variant newvar(variantFile);
                 newvar.sequenceName = var.sequenceName;
                 newvar.position = v.pos1;
@@ -408,7 +403,7 @@ int main(int argc, char** argv) {
                 // newvar.samples = v.genotypeStrs;
 
                 // Instead of using above format output we now simply print genotypes
-                cout.precision(0);
+                cout.precision(2);
                 cout << newvar;
                 cout << "\tGT";
                 for (auto gts: v.genotypes) {
@@ -421,16 +416,7 @@ int main(int argc, char** argv) {
                     }
                 }
                 cout << endl;
-                // cout << var << endl;
-                /*
-                auto samples = var.samples;
-                for (auto sname: var.sampleNames) {
-                    auto genotype1 = samples[sname]["GT"].front();
-                    cout << genotype1 << " ";
-                }
-                */
             }
-            cerr << "WIP " << endl;
         }
         else {
             var.legacy_reduceAlleles(
