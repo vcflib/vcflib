@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
                 size_t altidx;
                 int relpos;
                 int AC,AF,AN;
-                bool is_rev = false;
+                bool is_inv = false;
                 string type;
                 string origin;
                 RecGenotypes genotypes;
@@ -260,7 +260,7 @@ int main(int argc, char** argv) {
 
             // Unpack wavefront results and set values for each unique allele
             for (const auto [alt0, wfvalue] : varAlleles) {
-                bool is_rev = wfvalue.second;
+                bool is_inv = wfvalue.second;
                 for (auto wfmatch: wfvalue.first) {
                     auto ref = wfmatch.ref;
                     auto aligned = wfmatch.alt;
@@ -291,7 +291,7 @@ int main(int argc, char** argv) {
                     u->AC = AC;
                     u->AF = AF;
                     u->AN = AN;
-                    u->is_rev = is_rev;
+                    u->is_inv = is_inv;
                 }
             }
             // Collect genotypes for every allele from the main record. This code is
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
                 auto ref = v.ref1;
                 auto aligned = v.algn;
                 if (ref != aligned) {
-                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_rev);
+                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv);
                     if (track_variants.count(ntag)>0) { // this variant already exists
                         track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
@@ -396,7 +396,7 @@ int main(int argc, char** argv) {
                 newvar.info["AN"] = AN;
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;
-
+                newvar.info["INV"] = vector<string>{to_string(v.is_inv)};
                 // newvar.format = var.format;
                 // newvar.sampleNames = var.sampleNames;
                 // newvar.outputSampleNames = var.outputSampleNames;
