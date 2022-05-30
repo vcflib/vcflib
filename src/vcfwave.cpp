@@ -27,6 +27,7 @@ using namespace std;
 using namespace vcflib;
 
 #define ALLELE_NULL -1
+#define ALLELE_NULL2 -200 // large number brings out issues
 
 double convertStrDbl(const string& s) {
     double r;
@@ -301,7 +302,7 @@ int main(int argc, char** argv) {
                 auto genotype1 = samples[sname]["GT"].front();
                 vector<string> genotypeStrs = split(genotype1, "|/");
                 Genotypes gts;
-                std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? -200 : stoi(n)); });
+                std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? ALLELE_NULL2 : stoi(n)); });
                 genotypes.push_back(gts);
             }
             // Now plug in the new indices for listed genotypes
@@ -314,7 +315,7 @@ int main(int argc, char** argv) {
                         if (g == altidx1)
                             gt[i] = 1; // one genotype in play
                         else
-                            if (g != -200) gt[i] = 0;
+                            if (g != ALLELE_NULL2) gt[i] = 0;
                         i++;
                     }
                 }
@@ -329,7 +330,7 @@ int main(int argc, char** argv) {
                 auto ref = v.ref1;
                 auto aligned = v.algn;
                 if (ref != aligned) {
-                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned;
+                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_rev);
                     if (track_variants.count(ntag)>0) { // this variant already exists
                         track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
@@ -354,7 +355,7 @@ int main(int argc, char** argv) {
                 }
             }
             unique.clear();
-            // The following section updates the INFO TYPE field:
+            // The following section updates the INFO TYPE and INV field:
             // Adjust TYPE field to set snp/mnp/ins/del
             for (auto [key,v] : track_variants) {
                 auto ref_len = v.ref1.length();
@@ -409,7 +410,7 @@ int main(int argc, char** argv) {
                     cout << "\t";
                     int idx = 0;
                     for (auto gt : gts) {
-                        cout << (gt == -200 ? "." : to_string(gt));
+                        cout << (gt == ALLELE_NULL2 ? "." : to_string(gt));
                         if (idx < gts.size()-1) cout << "|";
                         idx++;
                     }
