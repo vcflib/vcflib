@@ -570,7 +570,13 @@ void Variant::legacy_reduceAlleles(
 
     }
 
-    // handle deletions
+    // handle deletions. If ref length is larger than the WF matched
+    // allele length make this a missing genotype for all individual
+    // SNP/MNP calls that match the allele index and fall inside the
+    // deletion.
+    //
+    // The idea is that when a deletion exists for a sample there is
+    // no way a SNP/MNP gets called in that sample.
     for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
         int len = 0;
         if (a->ref.size() && a->alt.size() && a->ref.at(0) == a->alt.at(0)

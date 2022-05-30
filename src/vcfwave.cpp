@@ -248,7 +248,8 @@ int main(int argc, char** argv) {
                 size_t pos1 = 0;
                 size_t altidx;
                 int relpos;
-                int AC,AF,AN;
+                int AC=0,AN=0;
+                double AF=0.0;
                 bool is_inv = false;
                 string type;
                 string origin;
