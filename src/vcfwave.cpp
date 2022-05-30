@@ -9,7 +9,6 @@
 
 #include <algorithm>
 #include <string>
-#include <ranges>
 #include <set>
 #include <utility>
 #include <vector>
