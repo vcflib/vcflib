@@ -609,7 +609,7 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     }
     else if (svtype == "DEL"){
-        if (this->position + info_span != info_end){
+        if (this->position + -info_len != info_end){
             cerr << "Warning: deletion END and SVLEN do not agree [canonicalize] " << *this << endl <<
             "END: " << info_end << "  " << "SVLEN: " << -info_len << endl;
             return false;
@@ -618,6 +618,12 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         if (this->position + info_span != info_end){
             cerr << "Warning: deletion END and SPAN do not agree [canonicalize] " << *this << endl <<
             "END: " << info_end << "  " << "SPAN: " << info_span << endl;
+            return false;
+        }
+    
+        if (info_end > fasta_reference.sequenceLength(this->sequenceName)) {
+            cerr << "Warning: deletion END is past end of sequence [canonicalize] " << *this << endl <<
+            "END: " << info_end << "  " << "length: " << fasta_reference.sequenceLength(this->sequenceName) << endl;
             return false;
         }
     
@@ -648,6 +654,12 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
             } else {
                 return false;
             }
+        }
+        
+        if (info_end > fasta_reference.sequenceLength(this->sequenceName)) {
+            cerr << "Warning: inversion END is past end of sequence [canonicalize] " << *this << endl <<
+            "END: " << info_end << "  " << "length: " << fasta_reference.sequenceLength(this->sequenceName) << endl;
+            return false;
         }
     
         if (place_seq){
