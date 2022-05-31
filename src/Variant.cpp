@@ -609,9 +609,10 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     }
     else if (svtype == "DEL"){
-        if (this->position + -info_len != info_end){
+        // Note that info_len has been abs'd and is always positive
+        if (this->position + info_len != info_end){
             cerr << "Warning: deletion END and SVLEN do not agree [canonicalize] " << *this << endl <<
-            "END: " << info_end << "  " << "SVLEN: " << -info_len << endl;
+            "END: " << info_end << "  " << "SVLEN: " << info_len << endl;
             return false;
         }
     
