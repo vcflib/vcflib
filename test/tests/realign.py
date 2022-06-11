@@ -253,8 +253,9 @@ class RealignTest(unittest.TestCase):
                 # del_len = del_ref_len - del_aln_len
                 del_pos1 = v['pos1']
                 del_size = v['size']
+                del_start_pos = del_pos1 + del_aln_len
                 # Make a range from the start of the deletion to the end
-                check_range = range(del_pos1 + del_aln_len, del_pos1 + del_size)
+                check_range = range(del_start_pos, del_start_pos + del_size)
                 check_samples = v['samples']
                 for key2,v2 in variants.items():
                     if v2['type'] == 'snp' or v2['type'] == 'mnp':
