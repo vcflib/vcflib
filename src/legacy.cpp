@@ -469,7 +469,6 @@ void Variant::legacy_reduceAlleles(
 
     map<long unsigned int, Variant> variants;
     int varidx = 0;
-    //vector<Variant> variants;
     for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
         if (a->ref == a->alt) {
             // ref allele
@@ -577,19 +576,23 @@ void Variant::legacy_reduceAlleles(
     //
     // The idea is that when a deletion exists for a sample there is
     // no way a SNP/MNP gets called in that sample.
-    for (set<VariantAllele>::iterator a = alleles.begin(); a != alleles.end(); ++a) {
+    for (auto a: alleles) {
         int len = 0;
-        if (a->ref.size() && a->alt.size() && a->ref.at(0) == a->alt.at(0)
-            && a->ref.size() > a->alt.size()) {
-            len = a->ref.size() - a->alt.size();
+        if (a.ref.size() && a.alt.size() && a.ref.at(0) == a.alt.at(0)
+            && a.ref.size() > a.alt.size()) {
+            len = a.ref.size() - a.alt.size();
         } else {
             continue;
         }
-        assert(len > 0);
-        // nullify all the variants inside of the deletion range
-        vector<int>& originalIndexes = variantAlleleIndexes[*a];
-        auto begin = variants.upper_bound(a->position);
-        auto end = variants.upper_bound(a->position + a->ref.size());
+        assert(len > 0); // make sure we have a deletion
+        // nullify all the variants inside of the deletion range by
+        // walking all variants and checking the allele index
+        // number. Note that this version relies on a sorted map of
+        // variants[pos]. By default, a Map in C++ is sorted in
+        // increasing order based on its key.
+        vector<int>& originalIndexes = variantAlleleIndexes[a];
+        auto begin = variants.upper_bound(a.position);
+        auto end = variants.upper_bound(a.position + a.ref.size());
         for (auto i : originalIndexes) {
             for (auto x = begin; x != end; ++x) {
                 unpackedAlleleIndexes[i][x->second.position] = ALLELE_NULL;
