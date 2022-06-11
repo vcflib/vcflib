@@ -3,6 +3,7 @@
 # or
 #
 #   cd ../test ; env PYTHONPATH=../build python3 tests/realign.py ; cd ../build
+#   cd ../test ; env PYTHONPATH=../build pytest tests/realign.py ; cd ../build
 
 import unittest
 from pyvcflib import *
@@ -211,20 +212,70 @@ class RealignTest(unittest.TestCase):
             ref_len = len(v['ref1'])
             aln_len = len(v['algn'])
             type = None
+            size = None
             if aln_len < ref_len:
                 type = 'del'
+                size = ref_len - aln_len
             elif aln_len > ref_len:
                 type = 'ins'
+                size = aln_len - ref_len
             elif aln_len == ref_len:
                 if ref_len == 1:
                     type = 'snp'
                 else:
                     type = 'mnp'
+                size = aln_len
+            assert(size > 0)
             variants[key]['type'] = type
+            variants[key]['size'] = size
             # Set origin
             print(v)
             variants[key]['origin'] = f'{var.name}:{var.pos}'
         # print(json.dumps(variants,indent=4))
+
+        # handle deletions. If ref length is larger than the WF matched
+        # allele length make this a missing genotype for all individual
+        # SNP/MNP calls that match the allele index and fall inside the
+        # deletion (region).
+        #
+        # The idea is that when a deletion exists for a sample there is
+        # no way a SNP/MNP gets called in that sample. So for this deletion:
+        # {'pos0': 10134514, 'ref0': 'GGAGAATCCCAATTGATGG', 'alt0': 'GG', 'ref1': 'GAGAATCCCAATTGATGG', 'algn': 'G', 'pos1': 10134515, 'altidx': 3, 'relpos': 1, 'AC': 3, 'AF': 0.0340909, 'AN': 88, 'is_rev': False, 'samples': [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, None], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0]], 'type': 'del'}
+        # run through all other alleles and see if the genotype calls overlap. If
+        # the SNP/MNP overlaps the deletion make it a NULL call. It means running
+        # through all variants for every deletion (does it?)
+        type = None
+        for key,v in variants.items():
+            if v['type'] == 'del':
+                # for every deletion
+                del_ref_len = len(v['ref1'])
+                del_aln_len = len(v['algn'])
+                # del_len = del_ref_len - del_aln_len
+                del_pos1 = v['pos1']
+                del_size = v['size']
+                # Make a range from the start of the deletion to the end
+                check_range = range(del_pos1 + del_aln_len, del_pos1 + del_size)
+                check_samples = v['samples']
+                for key2,v2 in variants.items():
+                    if v2['type'] == 'snp' or v2['type'] == 'mnp':
+                        # for alignment check all SNPs/MNPs
+                        pos1 = v2['pos1']
+                        pos2 = pos1 + v2['size']
+                        if pos1 in check_range or pos2 in check_range:
+                            # compare all genotypes
+                            for i,sample in enumerate(v2['samples']):
+                                del_sample = check_samples[i]
+                                nullify = False
+                                if 1 in del_sample and 1 in sample:
+                                    nullify = True
+
+                                    print(i,sample,del_sample,nullify)
+                                    if nullify:
+                                        v2['samples'][i] = [None if item == 1 else item for item in sample]
+
+        # Recompute AC and AF using the actual genotypes
+        print("WIP")
+        print(variants)
 
 if __name__ == '__main__':
     unittest.main()
