@@ -15,6 +15,7 @@
 ;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env")
 ;;
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
+;;   cmake  -DCMAKE_BUILD_TYPE=Debug ..
 ;;   cmake --build .
 ;;
 ;; debug example
@@ -34,6 +35,7 @@
   (gnu packages compression)
   (gnu packages bioinformatics)
   (gnu packages build-tools)
+  (gnu packages check)
   (gnu packages curl)
   (gnu packages gcc)
   (gnu packages gdb)
@@ -74,6 +76,7 @@
        ("pandoc" ,pandoc) ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
+       ("python-pytest" ,python-pytest)
        ("pybind11" ,pybind11)
        ("ruby" ,ruby) ;; for generating man pages
        ("smithwaterman" ,smithwaterman)
