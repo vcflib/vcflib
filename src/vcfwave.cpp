@@ -250,6 +250,7 @@ int main(int argc, char** argv) {
                 int relpos;
                 int AC=0,AN=0;
                 double AF=0.0;
+                int size = -99;
                 bool is_inv = false;
                 string type;
                 string origin;
@@ -361,20 +362,68 @@ int main(int argc, char** argv) {
                 auto ref_len = v.ref1.length();
                 auto aln_len = v.algn.length();
                 string type;
-                if (aln_len < ref_len)
+                auto size = -99;
+                if (aln_len < ref_len) {
                     type = "del";
-                else if (aln_len > ref_len)
+                    size = ref_len - aln_len;
+                }
+                else if (aln_len > ref_len) {
                     type = "ins";
-                else if (aln_len == ref_len)
+                    size = aln_len - ref_len;
+                }
+                else if (aln_len == ref_len) {
                     if (ref_len == 1)
                         type = "snp";
                     else
                         type = "mnp";
+                    size = aln_len;
+                }
+
                 v.type = type;
+                v.size = size;
                 v.origin = var.sequenceName+":"+to_string(var.position);
                 track_variants[key] = v;
             }
-            // The following section output all tracked alleles one by one:
+            // Here we correct for deletions - overlapping cals for SNP and MNP get nullified.
+            for (auto [key,v]: track_variants) {
+                auto del_ref_len = v.ref1.length();
+                auto del_aln_len = v.algn.length();
+                auto del_pos1 = v.pos1;
+                auto del_size = v.size;
+                auto del_start_pos = del_pos1 + del_aln_len;
+                // Make a range from the start of the deletion to the end
+                auto check_range = make_tuple(del_start_pos, del_start_pos + del_size);
+                auto check_samples = v.genotypes;
+                for (auto [key2,v2]: track_variants) {
+                    if (v2.type == "snp" || v2.type == "mnp") {
+                        // for alignment check all SNPs/MNPs
+                        auto pos1 = v2.pos1;
+                        auto pos2 = pos1 + v2.size;
+                        auto overlap = [] (unsigned int pos,tuple<unsigned int, unsigned int> range) {
+                            auto start = get<0>(range);
+                            auto end = get<1>(range);
+                            return (pos >= start || pos <= end);
+                        };
+                        if (overlap(pos1,check_range) || overlap(pos2,check_range)) {
+                            int i = 0;
+                            for (auto sample: v2.genotypes) {
+                                auto del_sample = check_samples[i];
+                                auto it = find(del_sample.begin(), del_sample.end(), 1);
+                                bool nullify = !(it == del_sample.end());
+                                if (nullify) {
+                                    for (auto &item: sample) {
+                                        if (item == 1)
+                                            item = -99;
+                                    }
+                                }
+                                i++;
+                            }
+
+                        }
+                    }
+                }
+            }
+            // The following section outputs all tracked alleles one by one:
             int ct = 0;
             for (auto [key,v]: track_variants) {
                 ct++;
