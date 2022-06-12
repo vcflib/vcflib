@@ -12,6 +12,10 @@ doi: https://doi.org/10.1101/2021.05.21.445151
 
 ## news
 
+May 2022: the [vcflib paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123) has been published on PLoS Computational Biology!
+
+See below for the citation.
+
 April 2022: vcflib has just gone pangenome!
 
 By introducing the wavefront algorithm we can now realign long sequences and reduce call complexity (and FPs!) introduced by pangenome variant callers using the new [vcfwave](./doc/vcfwave.md) tool.
@@ -398,6 +402,11 @@ python3 -m doctest -o NORMALIZE_WHITESPACE -o REPORT_UDIFF pytest/vcf2tsv.md
 
 We also added support for python bindings and unit tests. See [realign.py](./test/tests/realign.py) for an example.
 
+# Support
+
+The developers are on the vcflib
+[matrix channel](https://matrix.to/#/#vcflib:matrix.org). Please do not use the github issue tracker for support issues!
+
 # Contributing
 
 To contribute code to vcflib send a github pull request. We may ask
@@ -418,6 +427,26 @@ Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins
 doi: https://doi.org/10.1101/2021.05.21.445151
 
 ## Bibtex reference
+
+Please cite:
+[A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
+
+```bibtex
+@article{10.1371/journal.pcbi.1009123,
+    doi = {10.1371/journal.pcbi.1009123},
+    author = {Garrison, Erik AND Kronenberg, Zev N. AND Dawson, Eric T. AND Pedersen, Brent S. AND Prins, Pjotr},
+    journal = {PLOS Computational Biology},
+    publisher = {Public Library of Science},
+    title = {A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar},
+    year = {2022},
+    month = {05},
+    volume = {18},
+    url = {https://doi.org/10.1371/journal.pcbi.1009123},
+    pages = {1-15}
+}
+```
+
+Below the prepublished version of our paper
 
 ```bibtex
 @article {Garrison2021.05.21.445151,
