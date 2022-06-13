@@ -459,7 +459,7 @@ function(add_pydoctest TEST_FILE)
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
 endfunction()
 
 

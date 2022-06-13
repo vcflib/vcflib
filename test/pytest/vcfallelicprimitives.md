@@ -38,7 +38,7 @@ See more below.
 
 <!--
 
-    >>> from pytest.rtest import run_stdout, head, cat, sh
+    >>> from rtest import run_stdout, head, cat, sh
 
 -->
 

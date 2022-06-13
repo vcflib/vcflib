@@ -413,7 +413,7 @@ int main(int argc, char** argv) {
                                 if (nullify) {
                                     for (auto &item: sample) {
                                         if (item == 1)
-                                            item = -99;
+                                            item = ALLELE_NULL2;
                                     }
                                 }
                                 i++;

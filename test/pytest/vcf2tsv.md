@@ -43,7 +43,7 @@ index
 
 <!--
 
-    >>> from pytest.rtest import run_stdout, head, cat
+    >>> from rtest import run_stdout, head, cat
 
 -->
 

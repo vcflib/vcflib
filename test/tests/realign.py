@@ -243,7 +243,8 @@ class RealignTest(unittest.TestCase):
         # {'pos0': 10134514, 'ref0': 'GGAGAATCCCAATTGATGG', 'alt0': 'GG', 'ref1': 'GAGAATCCCAATTGATGG', 'algn': 'G', 'pos1': 10134515, 'altidx': 3, 'relpos': 1, 'AC': 3, 'AF': 0.0340909, 'AN': 88, 'is_rev': False, 'samples': [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, None], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0]], 'type': 'del'}
         # run through all other alleles and see if the genotype calls overlap. If
         # the SNP/MNP overlaps the deletion make it a NULL call. It means running
-        # through all variants for every deletion (does it?)
+        # through all variants for every deletion. After discussion with Erik we
+        # turn all haplotypes to NULL.
         type = None
         for key,v in variants.items():
             if v['type'] == 'del':
@@ -272,7 +273,8 @@ class RealignTest(unittest.TestCase):
 
                                     print(i,sample,del_sample,nullify)
                                     if nullify:
-                                        v2['samples'][i] = [None if item == 1 else item for item in sample]
+                                        # v2['samples'][i] = [None if item == 1 else item for item in sample]
+                                        v2['samples'][i] = [None for item in sample]
 
         # Recompute AC and AF using the actual genotypes
         print("WIP")
