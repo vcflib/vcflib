@@ -340,7 +340,7 @@ int main(int argc, char** argv) {
                         // Merge genotypes if they come from different alleles
                         if (v.altidx != track_variants[ntag].altidx) {
                             auto track_genotypes = track_variants[ntag].genotypes;
-                            for (auto &sample: v.genotypes) { // all samples
+                            for (auto sample: v.genotypes) { // all samples
                                 int i = 0;
                                 for (auto g: sample) { // all genotypes
                                     if (g && sample[i]>0)
@@ -386,39 +386,41 @@ int main(int argc, char** argv) {
             }
             // Here we correct for deletions - overlapping cals for SNP and MNP get nullified.
             for (auto [key,v]: track_variants) {
-                auto del_ref_len = v.ref1.length();
-                auto del_aln_len = v.algn.length();
-                auto del_pos1 = v.pos1;
-                auto del_size = v.size;
-                auto del_start_pos = del_pos1 + del_aln_len;
-                // Make a range from the start of the deletion to the end
-                auto check_range = make_tuple(del_start_pos, del_start_pos + del_size);
-                auto check_samples = v.genotypes;
-                for (auto [key2,v2]: track_variants) {
-                    if (v2.type == "snp" || v2.type == "mnp") {
-                        // for alignment check all SNPs/MNPs
-                        auto pos1 = v2.pos1;
-                        auto pos2 = pos1 + v2.size;
-                        auto overlap = [] (unsigned int pos,tuple<unsigned int, unsigned int> range) {
-                            auto start = get<0>(range);
-                            auto end = get<1>(range);
-                            return (pos >= start || pos <= end);
-                        };
-                        if (overlap(pos1,check_range) || overlap(pos2,check_range)) {
-                            int i = 0;
-                            for (auto sample: v2.genotypes) {
-                                auto del_sample = check_samples[i];
-                                auto it = find(del_sample.begin(), del_sample.end(), 1);
-                                bool nullify = !(it == del_sample.end());
-                                if (nullify) {
-                                    for (auto &item: sample) {
-                                        if (item == 1)
+                if (v.type == "del") {
+                    auto del_ref_len = v.ref1.length();
+                    auto del_aln_len = v.algn.length();
+                    auto del_pos1 = v.pos1;
+                    auto del_size = v.size;
+                    auto del_start_pos = del_pos1 + del_aln_len;
+                    // Make a range from the start of the deletion to the end
+                    auto check_range = make_tuple(del_start_pos, del_start_pos + del_size);
+                    auto check_samples = v.genotypes;
+                    for (auto [key2,v2]: track_variants) {
+                        if (v2.type == "snp" || v2.type == "mnp") {
+                            // for alignment check all SNPs/MNPs
+                            auto pos1 = v2.pos1;
+                            auto pos2 = pos1 + v2.size;
+                            auto overlap = [] (unsigned int pos,tuple<unsigned int, unsigned int> range) {
+                                auto start = get<0>(range);
+                                auto end = get<1>(range);
+                                return (pos >= start || pos <= end);
+                            };
+                            if (overlap(pos1,check_range) || overlap(pos2,check_range)) {
+                                int i = 0;
+                                for (auto &sample: v2.genotypes) {
+                                    auto del_sample = check_samples[i];
+                                    auto find_del = find(del_sample.begin(), del_sample.end(), 1);
+                                    bool nullify = !(find_del == del_sample.end());
+                                    if (nullify) {
+                                        for (auto &item: sample) {
                                             item = ALLELE_NULL2;
+                                        }
                                     }
+                                    i++;
                                 }
-                                i++;
-                            }
 
+                            }
+                            track_variants[key2] = v2;
                         }
                     }
                 }
@@ -445,6 +447,7 @@ int main(int argc, char** argv) {
                 newvar.info["AN"] = AN;
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;
+                newvar.info["SIZE"] = vector<string>{to_string(v.size)};
                 newvar.info["INV"] = vector<string>{to_string(v.is_inv)};
                 // newvar.format = var.format;
                 // newvar.sampleNames = var.sampleNames;
