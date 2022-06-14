@@ -250,6 +250,7 @@ int main(int argc, char** argv) {
                 int relpos;
                 int AC=0,AN=0;
                 double AF=0.0;
+                string AT;
                 int size = -99;
                 bool is_inv = false;
                 string type;
@@ -267,6 +268,7 @@ int main(int argc, char** argv) {
                     auto aligned = wfmatch.alt;
                     auto wfpos = wfmatch.position;
                     int alt_index,AC,AN = -1;
+                    string AT;
                     double AF = 0.0;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (var.ref != aligned) {
@@ -277,6 +279,7 @@ int main(int argc, char** argv) {
                         alt_index = index(var.alt,alt0); // throws error if missing
                         AC = stoi(var.info["AC"].at(alt_index));
                         AF = stod(var.info["AF"].at(alt_index));
+                        AT = var.info["AT"].at(alt_index);
                         AN = stoi(var.info["AN"].at(0));
                     }
                     auto relpos = wfpos - var.position;
@@ -292,6 +295,7 @@ int main(int argc, char** argv) {
                     u->AC = AC;
                     u->AF = AF;
                     u->AN = AN;
+                    u->AT = AT;
                     u->is_inv = is_inv;
                 }
             }
@@ -440,11 +444,13 @@ int main(int argc, char** argv) {
                 vector<string> AC{ to_string(v.AC) };
                 vector<string> AF{ to_string(v.AF) };
                 vector<string> AN{ to_string(v.AN) };
+                vector<string> AT{ v.AT };
                 vector<string> ORIGIN{ v.origin };
                 vector<string> TYPE{ v.type };
                 newvar.info["AC"] = AC;
                 newvar.info["AF"] = AF;
                 newvar.info["AN"] = AN;
+                newvar.info["AT"] = AT;
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["SIZE"] = vector<string>{to_string(v.size)};
