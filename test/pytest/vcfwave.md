@@ -147,7 +147,7 @@ a       281     >1>9    AGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAAT
 To
 
 ```python
->> sh("../build/vcfwave ../samples/inversion.vcf|grep -v ^\#|head -3")
+>>> sh("../build/vcfwave -n ../samples/inversion.vcf|grep -v ^\#|head -3")
 a       293     >1>9_1  A       T       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 a       310     >1>9_2  T       C       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 a       329     >1>9_3  T       A       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1

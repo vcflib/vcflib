@@ -277,6 +277,7 @@ int main(int argc, char** argv) {
                             return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
+                        @@ fix for inverse
                         AC = stoi(var.info["AC"].at(alt_index));
                         AF = stod(var.info["AF"].at(alt_index));
                         AT = var.info["AT"].at(alt_index);
