@@ -88,7 +88,21 @@ This aligns and adjusts the genotypes accordingly splitting into multiple record
 
 ```python
 
->>> sh("../build/vcfwave -L 1000 ../samples/10158243.vcf|grep -v ^\#")
+>>> sh("../build/vcfwave -L 1000 -n ../samples/10158243.vcf|grep -v ^\#")
+grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCAC   C       60      .       AC=1;AF=0.011236;AN=89;AT=>3655>3656>3657>3660>3662;INV=0;LV=0;NS=45;ORIGIN=grch38#chr4:10158243;SIZE=12;TYPE=del       GT      0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
+grch38#chr4     10158244        >3655>3662_2    CCCCCACCCCCACC  C       60      .       AC=3;AF=0.033708;AN=89;AT=>3655>3656>3660>3662;INV=0;LV=0;NS=45;ORIGIN=grch38#chr4:10158243;SIZE=13;TYPE=del    GT      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     1|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0
+grch38#chr4     10158245        >3655>3662_3    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;AN=89;AT=>3655>3656>3657>3658>3659>3660>3662;INV=0;LV=0;NS=45;ORIGIN=grch38#chr4:10158243;SIZE=12;TYPE=del    GT      0|0     1|1     1|1     1|0     0|1     0|0     0|1     0|1     1|1     1|1     1|1     1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1     1|0     1|1     1|1     0|0     1|0     1|1     0|1     1|1     1|1     0|1     1|0     1|1     1|1     0|1     1|1     1|1     1|0     1|0     1|1     0
+grch38#chr4     10158251        >3655>3662_4    CCCCACC C       60      .       AC=3;AF=0.033708;AN=89;AT=>3655>3656>3657>3658>3660>3662;INV=0;LV=0;NS=45;ORIGIN=grch38#chr4:10158243;SIZE=6;TYPE=del   GT      0|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
+grch38#chr4     10158256        >3655>3662_5    CC      C       60      .       AC=2;AF=0.022472;AN=89;AT=>3655>3660>3662;INV=0;LV=0;NS=45;ORIGIN=grch38#chr4:10158243;SIZE=1;TYPE=del  GT      0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|1     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
+grch38#chr4     10158257        >3655>3662_6    C       A       60      .       AC=1;AF=0.011236;AN=89;AT=>3655>3656>3657>3660>3662;INV=0;LV=0;NS=45;ORIGIN=grch38#chr4:10158243;SIZE=1;TYPE=snp        GT      0|0     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     0
+
+```
+
+This was the older version which did less work removing SNPs overlapping with deletions:
+
+```python
+
+>> sh("../build/vcfwave -L 1000 ../samples/10158243.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C    60      .       AC=1,3;AF=0.011236,0.0337079;INV=0,0;LEN=12,13;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del    GT      0|0   0|0      0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0   0|0      0|0     0|0     0|0     0|0     0|0     2|0     0|2     0|0     0|0     0|0     0|0     0|0     0|0     0|2     0|0     0
 grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;INV=0;LEN=12;ORIGIN=grch38#chr4:10158243;TYPE=del     GT      0|0     1|1     1|1     1|0     .|1     0|0   0|1      0|1     1|1     1|1     1|1     1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1     1|0     1|1     1|1     0|0     1|0     1|1     0|1     1|1   1|1      .|1     1|.     1|1     1|1     0|1     1|1     1|1     1|0     1|.     1|1     0
 grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;INV=0;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del      GT      0|0     .|.     .|.     .|0     .|.     0|1     0|.   0|.      .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.   .|.      .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
@@ -97,7 +111,7 @@ grch38#chr4     10158257        >3655>3662_5    C       A       60      .       
 
 ```
 
-These are currently not left aligned. Stay tuned...
+Note the new version is not yet perfect. I.e., these are currently not left aligned. Stay tuned...
 
 
 ## Source code
@@ -109,12 +123,12 @@ These are currently not left aligned. Stay tuned...
 The bidirectional wavefront (BiWFA) version has no problem with longer sequences (10_000bps is almost instant):
 
 ```python
-# ./vcfwave -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfwave_4.vcf
->>> run_stdout("vcfwave -L 10000 ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
+# ./vcfwave -L 10000 -n ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfwave_4.vcf
+>>> run_stdout("vcfwave -L 10000 -n ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfwave_4.vcf">vcfwave_4.vcf</a>
 
 # ./vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf > ../test/data/regression/vcfwave_5.vcf
->>> run_stdout("vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+>> run_stdout("vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfwave_5.vcf">vcfwave_5.vcf</a>
 
 ```
@@ -133,7 +147,7 @@ a       281     >1>9    AGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAAT
 To
 
 ```python
->>> sh("../build/vcfwave ../samples/inversion.vcf|grep -v ^\#|head -3")
+>> sh("../build/vcfwave ../samples/inversion.vcf|grep -v ^\#|head -3")
 a       293     >1>9_1  A       T       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 a       310     >1>9_2  T       C       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
 a       329     >1>9_3  T       A       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
