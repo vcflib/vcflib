@@ -128,7 +128,7 @@ The bidirectional wavefront (BiWFA) version has no problem with longer sequences
 output in <a href="../data/regression/vcfwave_4.vcf">vcfwave_4.vcf</a>
 
 # ./vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf > ../test/data/regression/vcfwave_5.vcf
->> run_stdout("vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
+>>> run_stdout("vcfwave -L 10000 -n ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfwave_5.vcf">vcfwave_5.vcf</a>
 
 ```
