@@ -2097,21 +2097,22 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
 
     }
 
+    /*
     for (auto a: alt) { // iterate ALT strings
         // unsigned int referencePos;
         string& alternate = a;
         variantAlleles[alternate]; // create the slot
     }
+    */
 
-#pragma omp parallel for
+// #pragma omp parallel for
     for (auto a: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
         // unsigned int referencePos;
         string alternate = a;
         pair<vector<VariantAllele>, bool>& _v = variantAlleles[alternate];
-        bool& is_inv = _v.second = false;
-        //bool& is_inv = (*alt_is_inv)[alternate];
+        bool is_inv = false;
         // get the alt/ref mapping in inversion space
         if (invKmerLen && alternate.size() >= invKmerLen
             && alternate.size() >= invMinLen
@@ -2126,8 +2127,11 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
                 is_inv = true;
                 // flip the alt
                 string alternate_rev = reverse_complement(alternate);
-                std::swap(alternate, alternate_rev);
+                // cout << "alt: " << alternate_rev << endl;
+                alternate = alternate_rev;
             }
+            variantAlleles[alternate]; // create slot
+            variantAlleles[alternate].second = is_inv;
             /*
             cerr << "comparing "
                  << " vs ref fwd " << rkmh::compare(alt_sketch, ref_sketch_fwd, invKmerLen)

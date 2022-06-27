@@ -148,9 +148,9 @@ To
 
 ```python
 >>> sh("../build/vcfwave -n ../samples/inversion.vcf|grep -v ^\#|head -3")
-a       293     >1>9_1  A       T       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
-a       310     >1>9_2  T       C       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
-a       329     >1>9_3  T       A       60      .       AC=0;AF=0;INV=0;LEN=1;ORIGIN=a:281;TYPE=snp     GT      1
+a       293     >1>9_1  A       T       60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;INV=1;LV=0;NS=1;ORIGIN=a:281;SIZE=1;TYPE=snp        GT      1
+a       310     >1>9_2  T       C       60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;INV=1;LV=0;NS=1;ORIGIN=a:281;SIZE=1;TYPE=snp        GT      1
+a       329     >1>9_3  T       A       60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;INV=1;LV=0;NS=1;ORIGIN=a:281;SIZE=1;TYPE=snp        GT      1
 
 ```
 

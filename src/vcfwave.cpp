@@ -272,12 +272,12 @@ int main(int argc, char** argv) {
                     double AF = 0.0;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (var.ref != aligned) {
-                        auto index = [](vector<string> v, string allele) {
-                            auto it = find(v.begin(), v.end(), allele);
-                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele "+allele) : it - v.begin() );
+                        auto index = [&](vector<string> v, string allele) {
+                            auto check = (is_inv ? reverse_complement(allele) : allele);
+                            auto it = find(v.begin(), v.end(), check);
+                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check) : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
-                        @@ fix for inverse
                         AC = stoi(var.info["AC"].at(alt_index));
                         AF = stod(var.info["AF"].at(alt_index));
                         AT = var.info["AT"].at(alt_index);
