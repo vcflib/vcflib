@@ -42,7 +42,7 @@ PYBIND11_MODULE(pyvcflib, m)
       ;
 
 
-  // VCFlib
+  // Main VCFlib
   py::class_<VariantAllele>(m, "VariantAllele", "VCF alleles")
       .def_readonly("position", &VariantAllele::position)
       .def_readonly("ref", &VariantAllele::ref)
