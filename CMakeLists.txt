@@ -481,6 +481,7 @@ endfunction()
 
 add_pytest(realign)
 add_pydoctest(pyvcflib)
+add_pydoctest(vcflib-api)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfwave)
