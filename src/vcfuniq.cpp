@@ -2,7 +2,7 @@
     vcflib C++ library for parsing and manipulating VCF files
 
     Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2020-2022 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -21,9 +21,11 @@ int main(int argc, char** argv) {
 
 Usage: vcfuniq <vcf file>
 
-List unique genotypes.  Like GNU uniq, but for VCF records.  Remove
-records which have the same position, ref, and alt as the previous
-record.
+List unique genotypes.  Similar to GNU uniq, but aimed at VCF records.
+vcfuniq removes records which have the same position, ref, and alt as
+the previous record on a sorted VCF file. Note that it does not
+adjust/combine genotypes in the output, but simply takes the first
+record. See also vcfcreatemulti for combining records.
 
 Type: filter
 
@@ -48,6 +50,7 @@ Type: filter
 
     cout << variantFile.header << endl;
 
+    // Track the previous variant
     string lastsn;
     long int lastpos;
     string lastref;
@@ -61,7 +64,7 @@ Type: filter
                 && lastpos == var.position
                 && lastref == var.ref
                 && lastalt == var.alt)) {
-            continue;
+            continue; // skip if previous variant equals name, pos, ref & alt!
         } else {
             lastsn = var.sequenceName;
             lastpos = var.position;

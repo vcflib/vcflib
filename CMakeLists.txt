@@ -512,6 +512,8 @@ if (PANDOC)
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfwave.md ./doc/vcfwave.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcflib-api.md ./doc/vcflib-api.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/pyvcflib.md ./doc/pyvcflib.md
         # generate man pages from markdown
         COMMAND ruby ./test/scripts/md2man
         # regenerate to allow for URLs in markdown docs
@@ -522,6 +524,7 @@ if (PANDOC)
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfwave.md ./doc/vcfwave.md
         # Documented test cases for Python bindings
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/pyvcflib.md ./doc/pyvcflib.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcflib-api.md ./doc/vcflib-api.md
     )
 else (PANDOC)
   message("Pandoc needs to be installed to generate the man pages")

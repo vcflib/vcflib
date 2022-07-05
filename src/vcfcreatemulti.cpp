@@ -2,7 +2,7 @@
     vcflib C++ library for parsing and manipulating VCF files
 
     Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2020-2022 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -24,12 +24,17 @@ double convertStrDbl(const string& s) {
 }
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] [file]" << endl
-         << endl
-         << "If overlapping alleles are represented across multiple records, merge" << endl
-         << "them into a single record.  Currently only for indels." << endl;
-    cerr << endl << "Type: transformation" << endl << endl;
-    exit(0);
+    cerr << R"(
+
+Usage: vcfcreatemulti [options] [file]
+
+Go through sorted VCF and if overlapping alleles are represented across multiple records, merge
+them into a single record.  Currently only for indels.
+
+Type: transformation
+
+)";
+    exit(1);
 }
 
 Variant createMultiallelic(vector<Variant>& vars) {
@@ -38,32 +43,31 @@ Variant createMultiallelic(vector<Variant>& vars) {
         return vars.front();
     }
 
-    int maxpos = vars.front().position + vars.front().ref.size();
-    for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
-        //cerr << *v << endl;
-        if (maxpos < v->position + v->ref.size()) {
-            maxpos = v->position + v->ref.size();
+    // set maxpos to the most outward allele position + its reference size
+    auto first = vars.front();
+    auto maxpos = first.position + first.ref.size();
+    for (auto v: vars) {
+        if (maxpos < v.position + v.ref.size()) {
+            maxpos = v.position + v.ref.size();
         }
     }
 
     int numalt = vars.size();
-    //cerr << "gots overlapping vars " << vars.front().position << "-" << vars.back().position << endl;
 
     // get REF
     // use start position to extend all other alleles
-    int start = vars.front().position;
-    string ref = vars.front().ref;
+    int start = first.position;
+    string ref = first.ref;
 
     for (vector<Variant>::iterator v = vars.begin() + 1; v != vars.end(); ++v) {
+        // for (auto v: vars) {
+        //   if (v == first) continue;
         int sdiff = (v->position + v->ref.size()) - (start + ref.size());
         int pdiff = (start + ref.size()) - v->position;
         if (sdiff > 0) {
             ref.append(v->ref.substr(pdiff, sdiff));
         }
     }
-
-    //cerr << "ref would be " << ref << " for vars from "
-    //     << vars.front().position << " to " << vars.back().position << endl;
 
     Variant var = vars.front();
     var.alt.clear();
@@ -156,19 +160,17 @@ int main(int argc, char** argv) {
 
     cout << variantFile.header << endl;
 
-    bool first = true;
-    bool already = false;
     Variant var(variantFile);
+    string lastSeqName;
     vector<Variant> vars;
-    string lastSeq;
 
     while (variantFile.getNextVariant(var)) {
 
-        if (lastSeq.empty()) {
-            lastSeq = var.sequenceName;
+        if (lastSeqName.empty()) { // track the previous sequence name
+            lastSeqName = var.sequenceName;
         }
 
-        if (vars.empty()) {
+        if (vars.empty()) { // track list of alt alleles
             vars.push_back(var);
             continue;
         } else {
@@ -178,11 +180,11 @@ int main(int argc, char** argv) {
                     maxpos = v->position + v->ref.size();
                 }
             }
-            if (var.sequenceName != lastSeq) {
+            if (var.sequenceName != lastSeqName) {
                 Variant result = createMultiallelic(vars);
                 cout << result << endl;
                 vars.clear();
-                lastSeq = var.sequenceName;
+                lastSeqName = var.sequenceName;
                 vars.push_back(var);
             } else if (var.position < maxpos) {
                 vars.push_back(var);

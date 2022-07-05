@@ -42,6 +42,18 @@ So the one input record shows it has a ref of 'ACCCCCACCCCCACC' and six alt alle
 
 This works fine!
 
+## Correcting for genotypes
+
+When two VCF records get combined we need to combine the genotypes. So, say we have as input two variants at the same position the genotypes need to be updated:
+
+```python
+>>> var1 = "1/0 0/0 0/1 1/1".split()
+>>> var2 = "0/0 1/1 1/0 0/0".split() # ['0/0', '1/1', '1/0', '0/0']
+>>> merge_genotypes(var1,var2)
+"1/0 2/2 2/1 1/1".split()
+
+```
+
 ## Another example
 
 See [realign.py](../tests/realign.py) for examples of using the FFI in the form of a python unit test. We used that to develop the vcfwave module.
