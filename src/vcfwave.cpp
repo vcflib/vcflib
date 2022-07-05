@@ -442,15 +442,15 @@ int main(int argc, char** argv) {
                 newvar.alt.push_back(v.algn);
                 newvar.quality = var.quality;
                 newvar.info = var.info;
-                vector<string> AC{ to_string(v.AC) };
-                vector<string> AF{ to_string(v.AF) };
-                vector<string> AN{ to_string(v.AN) };
+
+
+
                 vector<string> AT{ v.AT };
                 vector<string> ORIGIN{ v.origin };
                 vector<string> TYPE{ v.type };
-                newvar.info["AC"] = AC;
-                newvar.info["AF"] = AF;
-                newvar.info["AN"] = AN;
+                newvar.info["AC"] = vector<string>{ to_string(v.AC) };
+                newvar.info["AF"] = vector<string>{ to_string(v.AF) };
+                newvar.info["AN"] = vector<string>{ to_string(v.AN) };
                 newvar.info["AT"] = AT;
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;

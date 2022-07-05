@@ -62,3 +62,8 @@ while (variantFile.getNextVariant(var)) {
 ```
 
 will output VCF.
+
+## Mirroring in the Python FFI
+
+The Python FFI follows this API though some accessors may be renamed. See
+[pythonffi.cpp](pythonffi.cpp) and [pyvcflib.md](pyvcflib.md).
