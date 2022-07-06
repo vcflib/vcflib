@@ -28,8 +28,9 @@ void printSummary(char** argv) {
 
 Usage: vcfcreatemulti [options] [file]
 
-Go through sorted VCF and if overlapping alleles are represented across multiple records, merge
-them into a single record.  Currently only for indels.
+Go through sorted VCF and if overlapping alleles are represented
+across multiple records, merge them into a single record.  Currently
+only for indels.
 
 Type: transformation
 
