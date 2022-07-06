@@ -3,6 +3,7 @@
 # VCFLib API
 
 This document describes the VCFLIB API as it is used by the vcflib modules and the [python ffi](./pyvcflib.md).
+vcflib follows the [VCF standard](http://samtools.github.io/hts-specs/VCFv4.1.pdf).
 
 VCFLIB contains a lot of functionality, but the basis of going through a VCF file and fetching record (by record) information is straightforward and visible in all modules. A recent example can be found in [vcfwave](../../src/vcfwave.cpp).
 
@@ -48,7 +49,9 @@ In the file [Variant.h](https://github.com/vcflib/vcflib/blob/master/src/Variant
     vector<string> alleles;  // a list all alleles (ref + alt) at this locus
 ```
 
-See above read records example.
+See above read records example to parse a file. Some things to know are that info fields are split into
+fields with values in 'info' and flags that are true in 'infoFlags'.
+The order of info fields is not kept in the C++ map data structure so we have to keep track of order in an infoKeys vector.
 
 ## Output a VCF record
 

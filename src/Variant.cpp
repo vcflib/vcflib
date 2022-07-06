@@ -86,6 +86,9 @@ bool allATGCN(const string& s, bool allowLowerCase){
 }
 
 
+/*
+  Main VCF record parser
+*/
 
 void Variant::parse(string& line, bool parseSamples) {
     // clean up potentially variable data structures
@@ -127,17 +130,21 @@ void Variant::parse(string& line, bool parseSamples) {
 
     convert(fields.at(5), quality);
     filter = fields.at(6);
+    // Process the INFO fields
     if (fields.size() > 7) {
         vector<string> infofields = split(fields.at(7), ';');
-        for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
-            if (*f == ".") {
+        for (auto f: infofields) {
+            if (f == ".") {
                 continue;
             }
-            vector<string> kv = split(*f, '=');
+            vector<string> kv = split(f, '=');
+            auto key = kv.at(0);
             if (kv.size() == 2) {
-                split(kv.at(1), ',', info[kv.at(0)]);
+                split(kv.at(1), ',', info[key]);
+                infoKeys.push_back(key);
             } else if (kv.size() == 1) {
-                infoFlags[kv.at(0)] = true;
+                infoFlags[key] = true;
+                infoKeys.push_back(key);
             }
         }
     }
@@ -1062,6 +1069,9 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
+    /*
+      This is the main outputter of VCF records/lines
+     */
     ostream& operator<<(ostream& out, Variant& var) {
         // ensure there are no empty fields
         if (var.sequenceName.empty()) var.sequenceName = ".";
