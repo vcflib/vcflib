@@ -485,6 +485,7 @@ add_pydoctest(vcflib-api)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfwave)
+add_pydoctest(vcfcreatemulti)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
@@ -500,7 +501,7 @@ add_doctest(doc/vcffilter)
 
 find_program(PANDOC pandoc)
 
-set(pytest vcfnulldotslashdot vcfallelicprimitives vcfwave)
+set(pytest vcfnulldotslashdot vcfallelicprimitives vcfwave vcfcreatemulti)
 
 if (PANDOC)
     # note the option ALL which allows to build the docs together with the application
@@ -512,6 +513,7 @@ if (PANDOC)
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfwave.md ./doc/vcfwave.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfcreatemulti.md ./doc/vcfcreatemulti.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcflib-api.md ./doc/vcflib-api.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/pyvcflib.md ./doc/pyvcflib.md
         # generate man pages from markdown
@@ -522,6 +524,7 @@ if (PANDOC)
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfnulldotslashdot.md ./doc/vcfnulldotslashdot.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfallelicprimitives.md ./doc/vcfallelicprimitives.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfwave.md ./doc/vcfwave.md
+        COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcfcreatemulti.md ./doc/vcfcreatemulti.md
         # Documented test cases for Python bindings
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/pyvcflib.md ./doc/pyvcflib.md
         COMMAND ${CMAKE_COMMAND} -E copy ./test/pytest/vcflib-api.md ./doc/vcflib-api.md
