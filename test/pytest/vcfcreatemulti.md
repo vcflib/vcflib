@@ -66,8 +66,11 @@ Type: transformation
 
 ## Regression tests
 
+These tests mostly check for any major regressions between vcflib parser and outputter:
+
 ```python
 # ./vcfcreatemulti ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfcreatemulti_2.vcf
+# Note that grch38#chr8 36409983 gets combined
 >>> run_stdout("vcfcreatemulti ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfcreatemulti_2.vcf">vcfcreatemulti_2.vcf</a>
 

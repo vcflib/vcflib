@@ -91,7 +91,7 @@ bool allATGCN(const string& s, bool allowLowerCase){
 */
 
 void Variant::parse(string& line, bool parseSamples) {
-    // clean up potentially variable data structures
+    // clean up potentially variable data structures because the record may get reused(!)
     info.clear();
     infoFlags.clear();
     format.clear();
@@ -132,6 +132,7 @@ void Variant::parse(string& line, bool parseSamples) {
     filter = fields.at(6);
     // Process the INFO fields
     if (fields.size() > 7) {
+        infoOrderedKeys.clear();
         vector<string> infofields = split(fields.at(7), ';');
         for (auto field: infofields) {
             if (field == ".") {
@@ -1096,16 +1097,14 @@ VariantFieldType Variant::infoType(const string& key) {
         } else {
             // output the ordered info fields
             string s = "";
-            for (auto info: var.info) {
-                auto key = info.first;
-                auto value = info.second;
+            for (auto name: var.infoOrderedKeys) {
+                auto value = var.info[name];
                 if (!value.empty()) {
-                    s += key + "=" + join(value, ",") + ";" ;
+                    s += name + "=" + join(value, ",") + ";" ;
+                } else {
+                    auto infoflag = var.infoFlags[name];
+                    s += name + ";";
                 }
-            }
-            for (auto infoflag: var.infoFlags) {
-                auto key = infoflag.first;
-                s += key + ";";
             }
             auto len = s.length();
             if (len)
