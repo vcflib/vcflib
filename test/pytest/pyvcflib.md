@@ -49,8 +49,9 @@ When two VCF records get combined we need to combine the genotypes. So, say we h
 ```python
 >>> var1 = "1/0 0/0 0/1 1/1".split()
 >>> var2 = "0/0 1/1 1/0 0/0".split() # ['0/0', '1/1', '1/0', '0/0']
->>> merge_genotypes(var1,var2)
-"1/0 2/2 2/1 1/1".split()
+
+>> merge_genotypes(var1,var2)
+>> "1/0 2/2 2/1 1/1".split()
 
 ```
 

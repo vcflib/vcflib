@@ -1086,36 +1086,38 @@ VariantFieldType Variant::infoType(const string& key) {
             << var.ref << "\t";
         // report the list of alternate alleles.
         var.printAlt(out);
+
         out << "\t"
             << var.quality << "\t"
             << var.filter << "\t";
         if (var.info.empty() && var.infoFlags.empty()) {
             out << ".";
         } else {
-            for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
-                if (!i->second.empty()) {
-                    out << ((i == var.info.begin()) ? "" : ";") << i->first << "=" << join(i->second, ",");
+            string s = "";
+            for (auto i: var.info) {
+                if (!i.second.empty()) {
+                    s += i.first + "=" + join(i.second, ",") + ";" ;
                 }
             }
-            for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
-                if (i == var.infoFlags.end()) {
-                    out << "";
-                } else if (i == var.infoFlags.begin() && var.info.empty()) {
-                    out << "";
-                } else {
-                    out << ";";
-                }
-                out << i->first;
+            for (auto i: var.infoFlags) {
+                s += i.first + ";";
             }
+            auto len = s.length();
+            if (len)
+              out << s.substr(0, len-1); // chop s1.substr(0, i-1);
         }
         if (!var.format.empty()) {
             out << "\t";
-            for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                out << ((f == var.format.begin()) ? "" : ":") << *f;
+            string format = "";
+            for (auto f: var.format) {
+                format += f + ":";
             }
-            for (vector<string>::iterator s = var.outputSampleNames.begin(); s != var.outputSampleNames.end(); ++s) {
+            auto len = format.length();
+            if (len)
+              out << format.substr(0, len-1); // chop s1.substr(0, i-1);
+            for (auto s: var.outputSampleNames) {
                 out << "\t";
-                map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(*s);
+                map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(s);
                 if (sampleItr == var.samples.end()) {
                     out << ".";
                 } else {
