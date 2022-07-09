@@ -133,19 +133,20 @@ void Variant::parse(string& line, bool parseSamples) {
     // Process the INFO fields
     if (fields.size() > 7) {
         vector<string> infofields = split(fields.at(7), ';');
-        for (auto f: infofields) {
-            if (f == ".") {
+        for (auto field: infofields) {
+            if (field == ".") {
                 continue;
             }
-            vector<string> kv = split(f, '=');
+            vector<string> kv = split(field, '='); // note that field gets split in place
             auto key = kv.at(0);
             if (kv.size() == 2) {
-                split(kv.at(1), ',', info[key]);
-                infoKeys.push_back(key);
+                split(kv.at(1), ',', info[key]); // value gets split in place
+                infoOrderedKeys.push_back(key);
             } else if (kv.size() == 1) {
                 infoFlags[key] = true;
-                infoKeys.push_back(key);
+                infoOrderedKeys.push_back(key);
             }
+            // malformed fields with double '=' are silently skipped
         }
     }
     // check if we have samples specified

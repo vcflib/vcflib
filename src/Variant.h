@@ -319,7 +319,7 @@ public:
     VariantFieldType infoType(const string& key);
     map<string, vector<string> > info;  // vector<string> allows for lists by Genotypes or Alternates
     map<string, bool> infoFlags; // INFO flags are stored separately
-    vector<string> infoKeys; // track order of INFO fields
+    vector<string> infoOrderedKeys; // track order of INFO fields
     VariantFieldType formatType(const string& key);
     vector<string> format;
     map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternates
