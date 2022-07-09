@@ -205,6 +205,7 @@ int main(int argc, char** argv) {
                     variant.alt = var->alt;
                     variant.filter = var->filter;
                     variant.quality = var->quality;
+                    variant.infoOrderedKeys = var->infoOrderedKeys;
                     variant.info = var->info;
                     variant.format = var->format;
                 }

@@ -442,8 +442,7 @@ int main(int argc, char** argv) {
                 newvar.alt.push_back(v.algn);
                 newvar.quality = var.quality;
                 newvar.info = var.info;
-
-
+                newvar.infoOrderedKeys = var.infoOrderedKeys;
 
                 vector<string> AT{ v.AT };
                 vector<string> ORIGIN{ v.origin };
@@ -454,8 +453,12 @@ int main(int argc, char** argv) {
                 newvar.info["AT"] = AT;
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;
-                newvar.info["SIZE"] = vector<string>{to_string(v.size)};
+                newvar.info["LEN"] = vector<string>{to_string(v.size)};
                 newvar.info["INV"] = vector<string>{to_string(v.is_inv)};
+                newvar.infoOrderedKeys.push_back("ORIGIN");
+                newvar.infoOrderedKeys.push_back("LEN");
+                newvar.infoOrderedKeys.push_back("INV");
+                newvar.infoOrderedKeys.push_back("TYPE");
                 // newvar.format = var.format;
                 // newvar.sampleNames = var.sampleNames;
                 // newvar.outputSampleNames = var.outputSampleNames;

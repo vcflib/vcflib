@@ -92,12 +92,12 @@ bool allATGCN(const string& s, bool allowLowerCase){
 
 void Variant::parse(string& line, bool parseSamples) {
     // clean up potentially variable data structures because the record may get reused(!)
+    infoOrderedKeys.clear();
     info.clear();
     infoFlags.clear();
     format.clear();
     alt.clear();
     alleles.clear();
-    canonical = false;
 
     // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
     vector<string> fields = split(line, '\t');
@@ -132,7 +132,6 @@ void Variant::parse(string& line, bool parseSamples) {
     filter = fields.at(6);
     // Process the INFO fields
     if (fields.size() > 7) {
-        infoOrderedKeys.clear();
         vector<string> infofields = split(fields.at(7), ';');
         for (auto field: infofields) {
             if (field == ".") {
@@ -1095,6 +1094,14 @@ VariantFieldType Variant::infoType(const string& key) {
         if (var.info.empty() && var.infoFlags.empty()) {
             out << ".";
         } else {
+            // if infoOrderedKeys is empty we use the existing keys -
+            // this may appear in some corner cases
+            if (var.infoOrderedKeys.empty()) {
+                for (auto item: var.info)
+                    var.infoOrderedKeys.push_back(item.first);
+                for (auto item: var.infoFlags)
+                    var.infoOrderedKeys.push_back(item.first);
+            }
             // output the ordered info fields
             string s = "";
             for (auto name: var.infoOrderedKeys) {

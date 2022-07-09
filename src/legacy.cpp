@@ -521,6 +521,7 @@ void Variant::legacy_reduceAlleles(
         }
         v.quality = var.quality;
         v.filter = var.filter;
+        v.infoOrderedKeys = var.infoOrderedKeys;
         if (v.id.empty()) {
             v.id = var.id + "_" + std::to_string(++varidx);
         }
