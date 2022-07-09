@@ -1110,7 +1110,8 @@ VariantFieldType Variant::infoType(const string& key) {
                     s += name + "=" + join(value, ",") + ";" ;
                 } else {
                     auto infoflag = var.infoFlags[name];
-                    s += name + ";";
+                    if (infoflag == true)
+                        s += name + ";";
                 }
             }
             auto len = s.length();

@@ -391,6 +391,9 @@ int main(int argc, char** argv) {
             vector<string> gtonlyformat;
             gtonlyformat.push_back("GT");
             v.format = gtonlyformat;
+            v.infoOrderedKeys.push_back("LEN");
+            v.infoOrderedKeys.push_back("ORIGIN");
+            v.infoOrderedKeys.push_back("TYPE");
             v.info["TYPE"].push_back(type);
             v.info["LEN"].push_back(convert(len));
             if (hasAf) {
