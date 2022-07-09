@@ -71,6 +71,9 @@ Type: transformation
 >>> run_stdout("vcfcreatemulti ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf")
 output in <a href="../data/regression/vcfcreatemulti_2.vcf">vcfcreatemulti_2.vcf</a>
 
+>>> run_stdout("vcfcreatemulti ../samples/sample.vcf", ext="vcf")
+output in <a href="../data/regression/vcfcreatemulti_3.vcf">vcfcreatemulti_3.vcf</a>
+
 ```
 
 # LICENSE

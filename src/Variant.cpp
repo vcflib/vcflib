@@ -1072,7 +1072,7 @@ VariantFieldType Variant::infoType(const string& key) {
 
     /*
       This is the main outputter of VCF records/lines
-     */
+    */
     ostream& operator<<(ostream& out, Variant& var) {
         // ensure there are no empty fields
         if (var.sequenceName.empty()) var.sequenceName = ".";
@@ -1094,18 +1094,22 @@ VariantFieldType Variant::infoType(const string& key) {
         if (var.info.empty() && var.infoFlags.empty()) {
             out << ".";
         } else {
+            // output the ordered info fields
             string s = "";
-            for (auto i: var.info) {
-                if (!i.second.empty()) {
-                    s += i.first + "=" + join(i.second, ",") + ";" ;
+            for (auto info: var.info) {
+                auto key = info.first;
+                auto value = info.second;
+                if (!value.empty()) {
+                    s += key + "=" + join(value, ",") + ";" ;
                 }
             }
-            for (auto i: var.infoFlags) {
-                s += i.first + ";";
+            for (auto infoflag: var.infoFlags) {
+                auto key = infoflag.first;
+                s += key + ";";
             }
             auto len = s.length();
             if (len)
-              out << s.substr(0, len-1); // chop s1.substr(0, i-1);
+                out << s.substr(0, len-1); // chop s1.substr(0, i-1);
         }
         if (!var.format.empty()) {
             out << "\t";
@@ -1115,7 +1119,7 @@ VariantFieldType Variant::infoType(const string& key) {
             }
             auto len = format.length();
             if (len)
-              out << format.substr(0, len-1); // chop s1.substr(0, i-1);
+                out << format.substr(0, len-1); // chop s1.substr(0, i-1);
             for (auto s: var.outputSampleNames) {
                 out << "\t";
                 map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(s);
