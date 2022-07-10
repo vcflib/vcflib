@@ -1094,17 +1094,29 @@ VariantFieldType Variant::infoType(const string& key) {
         if (var.info.empty() && var.infoFlags.empty()) {
             out << ".";
         } else {
-            // if infoOrderedKeys is empty we use the existing keys -
-            // this may appear in some corner cases
-            if (var.infoOrderedKeys.empty()) {
-                for (auto item: var.info)
-                    var.infoOrderedKeys.push_back(item.first);
-                for (auto item: var.infoFlags)
-                    var.infoOrderedKeys.push_back(item.first);
-            }
+            // We want to display the info fields in the original
+            // order.  Because the actual info list may have been
+            // modified since the record was read, we need to recreate
+            // a valid ordered key list.
+            map<string,bool> lookup_keys; // for quick lookup in 2nd step
+            vector<string> ordered_keys;  // the output list
+            // first lookup the keys that appear both in infoOrdered keys
+            // and the info field:
+            for (auto name: var.infoOrderedKeys)
+            {
+                lookup_keys[name] = true;
+                if (!var.info[name].empty()) ordered_keys.push_back(name);
+                if (var.infoFlags[name]) ordered_keys.push_back(name);
+            };
+            // next add the keys that are not in the original list:
+            for (const auto& [name1, value]: var.info)
+                if (!lookup_keys[name1]) ordered_keys.push_back(name1);
+            for (const auto& [name2, value]: var.infoFlags)
+                if (lookup_keys[name2] == false) ordered_keys.push_back(name2);
+
             // output the ordered info fields
             string s = "";
-            for (auto name: var.infoOrderedKeys) {
+            for (auto name: ordered_keys) {
                 auto value = var.info[name];
                 if (!value.empty()) {
                     s += name + "=" + join(value, ",") + ";" ;
