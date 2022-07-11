@@ -455,6 +455,7 @@ int main(int argc, char** argv) {
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["LEN"] = vector<string>{to_string(v.size)};
                 newvar.info["INV"] = vector<string>{to_string(v.is_inv)};
+                // set the output order of the new INFO fields:
                 newvar.infoOrderedKeys.push_back("ORIGIN");
                 newvar.infoOrderedKeys.push_back("LEN");
                 newvar.infoOrderedKeys.push_back("INV");

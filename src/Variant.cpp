@@ -1099,7 +1099,7 @@ VariantFieldType Variant::infoType(const string& key) {
             // modified since the record was read, we need to recreate
             // a valid ordered key list.
             map<string,bool> lookup_keys; // for quick lookup in 2nd step
-            vector<string> ordered_keys;  // the output list
+            vector<string> ordered_keys, missing_keys;  // the output list
             // first lookup the keys that appear both in infoOrdered keys
             // and the info field:
             for (auto name: var.infoOrderedKeys)
@@ -1110,10 +1110,14 @@ VariantFieldType Variant::infoType(const string& key) {
             };
             // next add the keys that are not in the original list:
             for (const auto& [name1, value]: var.info)
-                if (!lookup_keys[name1]) ordered_keys.push_back(name1);
+                if (!lookup_keys[name1]) missing_keys.push_back(name1);
             for (const auto& [name2, value]: var.infoFlags)
-                if (lookup_keys[name2] == false) ordered_keys.push_back(name2);
+                if (lookup_keys[name2] == false) missing_keys.push_back(name2);
 
+            // append sorted missing keys
+            std::sort(missing_keys.begin(), missing_keys.end());
+
+            ordered_keys.insert(ordered_keys.end(), missing_keys.begin(), missing_keys.end());
             // output the ordered info fields
             string s = "";
             for (auto name: ordered_keys) {
