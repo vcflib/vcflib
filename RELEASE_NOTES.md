@@ -13,6 +13,17 @@ Important changes:
 + vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
 + INFO fields output order is now the same as on input parsing
 
+TODO
+
+- [ ] vcfwave check merging of genotypes - write tests
+- [ ] vcfwave recompute AC, AFs from merged record
+- [ ] RELEASE 1.0.4
+- [ ] vcfcreatemulti merge multiple rows
+      + [ ] rewrite vcfcreatemulti
+      + [ ] check for indels which are really the same
+      + [ ] combine vcfwave duplicated functionality
+- [ ] vcfuniq combine genotypes from non-unique records
+
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 
 + Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md) (thank you Erik Garrison https://github.com/ekg and Santiago Marco-Sola  https://github.com/smarco).

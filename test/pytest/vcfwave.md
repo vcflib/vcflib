@@ -99,15 +99,6 @@ grch38#chr4     10158257        >3655>3662_6    C       A       60      .       
 
 ```
 
-This was the older version which did less work removing SNPs overlapping with deletions:
-
-```python
-
->> sh("../build/vcfwave -L 1000 ../samples/10158243.vcf|grep -v ^\#")
-
-
-```
-
 Note the new version is not yet perfect. I.e., these are currently not left aligned. Stay tuned...
 
 
