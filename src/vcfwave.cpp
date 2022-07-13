@@ -400,11 +400,11 @@ int main(int argc, char** argv) {
                     // Make a range from the start of the deletion to the end
                     auto check_range = make_tuple(del_start_pos, del_start_pos + del_size);
                     auto check_samples = v.genotypes;
-                    for (auto [key2,v2]: track_variants) {
-                        if (v2.type == "snp" || v2.type == "mnp") {
+                    for (auto [key2,var2]: track_variants) {
+                        if (var2.type == "snp" || var2.type == "mnp") {
                             // for alignment check all SNPs/MNPs
-                            auto pos1 = v2.pos1;
-                            auto pos2 = pos1 + v2.size;
+                            auto pos1 = var2.pos1;
+                            auto pos2 = pos1 + var2.size;
                             auto overlap = [] (unsigned int pos,tuple<unsigned int, unsigned int> range) {
                                 auto start = get<0>(range);
                                 auto end = get<1>(range);
@@ -412,12 +412,12 @@ int main(int argc, char** argv) {
                             };
                             if (overlap(pos1,check_range) || overlap(pos2,check_range)) {
                                 int i = 0;
-                                for (auto &sample: v2.genotypes) {
+                                for (auto &sample2: var2.genotypes) {
                                     auto del_sample = check_samples[i];
                                     auto find_del = find(del_sample.begin(), del_sample.end(), 1);
                                     bool nullify = !(find_del == del_sample.end());
                                     if (nullify) {
-                                        for (auto &item: sample) {
+                                        for (auto &item: sample2) {
                                             item = ALLELE_NULL2;
                                         }
                                     }
@@ -425,7 +425,7 @@ int main(int argc, char** argv) {
                                 }
 
                             }
-                            track_variants[key2] = v2;
+                            track_variants[key2] = var2;
                         }
                     }
                 }

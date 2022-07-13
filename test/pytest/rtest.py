@@ -48,7 +48,7 @@ def sh(cmd):
     header = out.decode().expandtabs(tabsize=8).split("\n")
     print("\n".join(header))
 
-def run_stdout(cmd, ext = "vcf"):
+def run_stdout(cmd, ext = "vcf", uniq = None):
     os.makedirs(tmpdir,exist_ok=True)
     curframe = inspect.currentframe()
     # pp = pprint.PrettyPrinter(indent=4)
@@ -64,7 +64,10 @@ def run_stdout(cmd, ext = "vcf"):
     else:
         name = name[18:-1]
 
-    name += "_"+index
+    if uniq:
+        name += "_"+str(uniq)
+    else:
+        name += "_"+index
     if ext:
         name += "." + ext
 

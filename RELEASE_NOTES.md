@@ -22,7 +22,10 @@ TODO
       + [ ] rewrite vcfcreatemulti
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
+- [ ] RELEASE 1.0.5
 - [ ] vcfuniq combine genotypes from non-unique records
+- [ ] vcfwave check polyploids
+- [ ] RELEASE 1.0.6
 
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 

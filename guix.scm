@@ -22,7 +22,6 @@
 ;;
 ;;   env LD_LIBRARY_PATH=$GUIX_ENVIRONMENT/lib gdb --args vcfallelicprimitives -m ../samples/10158243.vcf
 
-
 (use-modules
   ((guix licenses) #:prefix license:)
   (guix gexp)
@@ -49,6 +48,7 @@
   (gnu packages python-xyz) ; for pybind11
   (gnu packages ruby)
   (gnu packages tls)
+  (gnu packages zig)
   (srfi srfi-1)
   (ice-9 popen)
   (ice-9 rdelim))
@@ -82,6 +82,7 @@
        ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
        ("xz" ,xz)
+       ("zig" ,zig)
        ("zlib" ,zlib)))
     (native-inputs
      `(("pkg-config" ,pkg-config)))

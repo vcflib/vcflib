@@ -125,22 +125,14 @@ file(GLOB INCLUDES
   filevercmp/*.h*)
 
 set(vcflib_SOURCE
+    src/vcf-c-api.cpp
     src/legacy.cpp
-    src/Variant.h
-    src/split.h
-    src/pdflib.hpp
-    src/var.hpp
-    src/cdflib.hpp
-    src/rnglib.hpp
-    src/join.h
     src/Variant.cpp
     src/rnglib.cpp
     src/var.cpp
     src/pdflib.cpp
     src/cdflib.cpp
     src/split.cpp
-    src/ssw.hpp
-    src/ssw_cpp.hpp
     src/legacy.cpp
     src/rkmh.cpp
     src/murmur3.cpp
@@ -372,6 +364,7 @@ ExternalProject_Add(wfa-EXT
     CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
+    BUILD_ALWAYS ON
     BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
@@ -390,7 +383,36 @@ add_custom_target(wfa
 
 include_directories(${WFA_INCLUDE_DIRS})
 
+# ZIG VCF imported library is part of VCFLIB source tree. We designate it an
+# external project so we can run 'zig build'
+
+ExternalProject_Add(ZIG-EXT
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/zig"
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_IN_SOURCE ON
+    BUILD_ALWAYS ON
+    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh
+)
+ExternalProject_Get_property(ZIG-EXT SOURCE_DIR)
+set(ZIG_INCLUDE_DIRS ${SOURCE_DIR})
+set(ZIG_LINK_LIBRARIES ${SOURCE_DIR}/zig-out/lib/libzig.a)
+# link_directories($SOURCE_DIR}/lib)
+# MESSAGE(STATUS ${ZIG_LINK_LIBRARIES})
+
+add_library(ZIGCPP_STATIC_LIB STATIC IMPORTED)
+set_target_properties(ZIGCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${ZIG_LINK_LIBRARIES})
+add_dependencies(ZIGCPP_STATIC_LIB ZIG-EXT vcf.zig)
+
+# add_custom_target(ZIGLIB
+#     DEPENDS ZIG-EXT
+#     VERBATIM)
+
+include_directories(${ZIG_INCLUDE_DIRS})
+
 set(vcflib_DEPS
+  ZIG-EXT
   CURL::libcurl
   wfa
 )
@@ -409,9 +431,10 @@ set(vcflib_LIBS
   ${CMAKE_THREAD_LIBS_INIT}
   ${WFA_LINK_LIBRARIES}
   ${HTSLIB_LINK_LIBRARIES}
+  ${ZIG_LINK_LIBRARIES}
 )
 
-target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
+# target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
 add_dependencies(vcflib ${vcflib_DEPS})
 
 # ---- Build all
@@ -420,7 +443,7 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     add_dependencies(${BIN} vcflib)
-    target_link_libraries(${BIN} PUBLIC vcflib ${vcflib_LIBS})
+    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib)
   endforeach(BIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
@@ -478,6 +501,16 @@ function(add_pydoctest_fullname TEST_FILE)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
 endfunction()
+
+function(add_zigtest)
+  add_test(
+    NAME zigvcf
+    COMMAND zig build test
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/zig
+    )
+endfunction()
+
+add_zigtest()
 
 add_pytest(realign)
 add_pydoctest(pyvcflib)
