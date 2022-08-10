@@ -27,6 +27,7 @@ option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
+option(ZIG "Disable using the zig compiler" ON)
 
 include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
@@ -227,7 +228,6 @@ set(BINS
     vcf2fasta
     vcfsitesummarize
     vcfbreakmulti
-    vcfcreatemulti
     vcfevenregions
     vcfcat
     vcfgenosummarize
@@ -243,7 +243,11 @@ set(BINS
     vcfinfo2qual
     vcfglbound
     vcfinfosummarize
-    )
+)
+
+if (ZIG)
+  list(APPEND BINS vcfcreatemulti)
+endif (ZIG)
 
 set(SCRIPTS
     bed2region
@@ -386,6 +390,7 @@ include_directories(${WFA_INCLUDE_DIRS})
 # ZIG VCF imported library is part of VCFLIB source tree. We designate it an
 # external project so we can run 'zig build'
 
+if (ZIG)
 ExternalProject_Add(ZIG-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/zig"
     UPDATE_COMMAND ""
@@ -411,11 +416,18 @@ add_dependencies(ZIGCPP_STATIC_LIB ZIG-EXT vcf.zig)
 
 include_directories(${ZIG_INCLUDE_DIRS})
 
+else (ZIG)
+  set (ZIG_LINK_LIBRARIES )
+endif (ZIG)
+
 set(vcflib_DEPS
-  ZIG-EXT
   CURL::libcurl
   wfa
-)
+  )
+
+if (ZIG)
+  list(APPEND vcflib_DEPS ZIG-EXT)
+endif ()
 
 if (HTSLIB_LOCAL)
   list(APPEND vcflib_DEPS htslib)
@@ -431,8 +443,11 @@ set(vcflib_LIBS
   ${CMAKE_THREAD_LIBS_INIT}
   ${WFA_LINK_LIBRARIES}
   ${HTSLIB_LINK_LIBRARIES}
-  ${ZIG_LINK_LIBRARIES}
 )
+
+if (ZIG)
+  list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
+endif()
 
 # target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
 add_dependencies(vcflib ${vcflib_DEPS})
@@ -502,6 +517,7 @@ function(add_pydoctest_fullname TEST_FILE)
   )
 endfunction()
 
+if (ZIG)
 function(add_zigtest)
   add_test(
     NAME zigvcf
@@ -511,6 +527,7 @@ function(add_zigtest)
 endfunction()
 
 add_zigtest()
+endif(ZIG)
 
 add_pytest(realign)
 add_pydoctest(pyvcflib)
@@ -518,7 +535,10 @@ add_pydoctest(vcflib-api)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfwave)
-add_pydoctest(vcfcreatemulti)
+if (ZIG)
+  add_pydoctest(vcfcreatemulti)
+endif (ZIG)
+
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
@@ -534,7 +554,9 @@ add_doctest(doc/vcffilter)
 
 find_program(PANDOC pandoc)
 
-set(pytest vcfnulldotslashdot vcfallelicprimitives vcfwave vcfcreatemulti)
+set(pytest vcfnulldotslashdot vcfallelicprimitives vcfwave)
+
+# vcfcreatemulti)
 
 if (PANDOC)
     # note the option ALL which allows to build the docs together with the application

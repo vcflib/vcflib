@@ -30,7 +30,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake ..
+        cmake -DZIG=OFF ..
     - name: Compile
       run: cmake --build build/ --verbose -- -j 2
     - name: Run tests

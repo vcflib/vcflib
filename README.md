@@ -320,7 +320,7 @@ of the sources make the files in the ./build directory with:
 git clone --recursive https://github.com/vcflib/vcflib.git
 cd vcflib
 mkdir -p build && cd build
-cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF ..
+cmake  -DCMAKE_BUILD_TYPE=Debug -DZIG=OFF -DOPENMP=OFF ..
 cmake --build .
 cmake --install .
 ```

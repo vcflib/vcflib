@@ -53,7 +53,10 @@ Usage: vcfcreatemulti [options] [file]
 >
 Go through sorted VCF and if overlapping alleles are represented
 across multiple records, merge them into a single record.  Currently
-only for indels.  See also vcfposmerge for a new implementation.
+only for indels.
+>
+options:
+     -n, --nextgen           next gen mode.
 >
 Type: transformation
 >
