@@ -17,7 +17,7 @@ vcfcreatemulti - reduces complex alleles by pairwise alignment with BiWFA
 Go through sorted VCF and if overlapping alleles are represented
 across multiple records, merge them into a single record.
 
-The current version merges records nicely, but does not update INFO fields and samples.
+The current version merges records nicely, but does not yet update INFO fields and samples/genotypes.
 See below EXAMPLES for more.
 
 ## Options
@@ -81,7 +81,7 @@ gets converted into the following:
 
 ```python
 
->>> sh("../build/vcfcreatemulti ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
+>>> sh("../build/vcfcreatemulti -n ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1;AF=0.011236;AN=89;AT=>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0;TYPE=del;combined=10158244-10158257     GT      0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
 
 ```

@@ -99,8 +99,15 @@ const Variant = struct {
         // Create ptrlist
         var_clear_alt(self.v);
         var i: usize = 0;
+        p("<{s}>", .{nalt.items});
         while (i < nalt.items.len) : (i += 1) {
-                var_set_alt(self.v,@ptrCast([*c] const u8,nalt.items[i]),i);
+                // p("<{s}>\n",.{nalt.items[i]});
+                // var x = to_cstr(nalt.items[i]);
+                var x: [:0] const u8 =
+                    std.mem.span(@ptrCast([*:0]const u8, nalt.items[i]));
+
+                var_set_alt(self.v,@ptrCast([*c] const u8,x),i);
+                // var_set_alt(self.v,x,i);
             }
     }
 };
@@ -260,6 +267,8 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
     // add alternates and splice them into the reference. It does not modify the ref.
     // const first = list.items[0];
     var nalt = ArrayList([] const u8).init(test_allocator);
+    p("1:{s}\n",.{nalt.items});
+
     for (list.items) |v| {
             const p5diff = v.pos() - pos; // always >= 0 - will raise error otherwise
             const before = ref[0..p5diff]; // leading ref
@@ -297,8 +306,8 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
             else
                 after = "";
             for (v.alt().items) | alt | {
-                    var n = try ArrayList(u8).initCapacity(test_allocator,2000);
-                    defer n.deinit();
+                    var n = try ArrayList(u8).initCapacity(test_allocator,20);
+                    // defer n.deinit();
                     if (p3diff != 0 or p5diff != 0) {
                         // p("{any}-{s},{s}\n",.{p3diff,before,after});
                         try n.appendSlice(before);
@@ -312,6 +321,7 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
                     }
             }
         }
+    // p("2:{s}\n",.{nalt.items});
     return nalt;
 }
 
