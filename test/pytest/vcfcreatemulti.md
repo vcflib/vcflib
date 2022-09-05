@@ -105,7 +105,7 @@ output in <a href="../data/regression/vcfcreatemulti_3.vcf">vcfcreatemulti_3.vcf
 
 ```
 
-Check if the legacy version is still the same. Note it only retains the first genotype.
+Check if the legacy version is still the same. Note it only retains the first genotype and has duplicate 'CC' alt alleles. INFO fields are not correct either.
 
 ```python
 >>> sh("../build/vcfcreatemulti ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")

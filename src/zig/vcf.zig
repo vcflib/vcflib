@@ -18,8 +18,6 @@ const VCFError = error{
 
 const hello = "Hello World from Zig";
 
-// const Variant = @OpaqueType();
-
 // C++ constructor
 extern fn var_parse(line: [*c] const u8, parse_samples: bool) *anyopaque;
 
@@ -27,11 +25,11 @@ extern fn var_parse(line: [*c] const u8, parse_samples: bool) *anyopaque;
 pub extern fn var_id(* anyopaque) [*c] const u8;
 extern fn var_pos(* anyopaque) u64;
 extern fn var_ref(* anyopaque) [*c] const u8;
-// const char **var_alt(const char ** ret, void *var);
 extern fn var_alt_num(variant: *anyopaque) usize;
-//extern fn var_alt(variant: * anyopaque, buf: [*c] const u8) [*c] const u8;
+extern fn var_info_num(variant: *anyopaque, name: [*c] const u8) usize;
 extern fn var_clear_alt(variant: *anyopaque) void;
 extern fn var_alt(variant: * anyopaque, buf: [*c]* anyopaque) [*c][*c] const u8;
+extern fn var_info(variant: * anyopaque, name: [*c] const u8, buf: [*c]* anyopaque) [*c][*c] const u8;
 extern fn var_set_id(?* anyopaque, [*c] const u8) void;
 extern fn var_set_ref(?* anyopaque, [*c] const u8) void;
 extern fn var_set_alt(?* anyopaque, [*c] const u8, usize) void;
@@ -47,12 +45,20 @@ const Variant = struct {
 
     const Self = @This();
 
-    fn to_slice0(c_str: [*c] const u8) [:0] const u8 {
+    inline fn to_slice0(c_str: [*c] const u8) [:0] const u8 {
         return std.mem.span(@ptrCast([*:0]const u8, c_str));
     }
 
-    fn to_slice(c_str: [*c] const u8) [] const u8 {
+    inline fn to_slice(c_str: [*c] const u8) [] const u8 {
         return std.mem.span(c_str);
+    }
+
+    inline fn to_cstr(str: [:0] const u8) [*c]const u8 {
+        return @ptrCast([*c]const u8,str);
+    }
+
+    inline fn to_cstr0(str: [] const u8) [*c]const u8 { // not sure this works
+        return @ptrCast([*c]const u8,str);
     }
 
     pub fn id(self: *const Self) [:0]const u8 {
@@ -91,6 +97,26 @@ const Variant = struct {
         return list;
     }
 
+    pub fn info(self: *const Self, name: [:0] const u8) ArrayList([] const u8) {
+        var c_name = to_cstr(name);
+        var list = ArrayList([] const u8).init(test_allocator);
+        const size = var_info_num(self.v,c_name);
+        var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
+        defer test_allocator.free(buffer);
+        const res = var_info(self.v,c_name,@ptrCast([*c]* anyopaque,buffer));
+        var i: usize = 0;
+        while (i < size) : (i += 1) {
+                // list.append(buffer[i]) catch unreachable;
+                const s = res[i];
+                // const s1 = to_slice(s);
+                // p("<{d}:{d}><{any}--{s}--{any}>\n",.{i,altsize,s,s1,buffer[i]});
+                const s2 = to_slice(s);
+                // p("{s}\n",.{s2});
+                list.append(s2) catch unreachable;
+        }
+        return list;
+    }
+
     pub fn set_ref(self: *const Self, nref: [:0] const u8) void {
         var_set_ref(self.v,@ptrCast([*c]const u8,nref));
     }
@@ -99,7 +125,7 @@ const Variant = struct {
         // Create ptrlist
         var_clear_alt(self.v);
         var i: usize = 0;
-        p("<{s}>", .{nalt.items});
+        // p("<{s}>", .{nalt.items});
         while (i < nalt.items.len) : (i += 1) {
                 // p("<{s}>\n",.{nalt.items[i]});
                 // var x = to_cstr(nalt.items[i]);
@@ -156,14 +182,13 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
     return variant;
 }
 
-
-// by @Cimport:
-// pub extern fn zig_create_multi_allelic(retvar: ?*anyopaque, varlist: [*c]?*anyopaque, size: c_long) ?*anyopaque;
-
 // @@
 export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) *anyopaque {
     _ = size;
-    var mvar = Variant{.v = variant.?};
+    var mvar = Variant{.v = variant.?}; // FIXME: we need to clean this small struct up from C++
+    p("---->{s}\n",.{mvar.info("AC").items});
+    p("---->{s}\n",.{mvar.info("AF").items});
+    p("---->{s}\n",.{mvar.info("AN").items});
     var vs = ArrayList(Variant).init(test_allocator);
     var i: usize = 0;
     while (i < size) : (i += 1) { // use index to access *anyopaque
