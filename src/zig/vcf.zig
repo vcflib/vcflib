@@ -57,7 +57,7 @@ const Variant = struct {
         return @ptrCast([*c]const u8,str);
     }
 
-    inline fn to_cstr0(str: [] const u8) [*c]const u8 { // not sure this works
+    inline fn to_cstr0(str: [] const u8) [*c]const u8 { // not sure this works because we need final zero
         return @ptrCast([*c]const u8,str);
     }
 
@@ -97,8 +97,8 @@ const Variant = struct {
         return list;
     }
 
-    pub fn info(self: *const Self, name: [:0] const u8) ArrayList([] const u8) {
-        var c_name = to_cstr(name);
+    pub fn info(self: *const Self, name: [] const u8) ArrayList([] const u8) {
+        var c_name = to_cstr0(name);
         var list = ArrayList([] const u8).init(test_allocator);
         const size = var_info_num(self.v,c_name);
         var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
@@ -186,9 +186,9 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
 export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) *anyopaque {
     _ = size;
     var mvar = Variant{.v = variant.?}; // FIXME: we need to clean this small struct up from C++
-    p("---->{s}\n",.{mvar.info("AC").items});
-    p("---->{s}\n",.{mvar.info("AF").items});
-    p("---->{s}\n",.{mvar.info("AN").items});
+    // p("---->{s}\n",.{mvar.info("AC").items});
+    // p("---->{s}\n",.{mvar.info("AF").items});
+    // p("---->{s}\n",.{mvar.info("AN").items});
     var vs = ArrayList(Variant).init(test_allocator);
     var i: usize = 0;
     while (i < size) : (i += 1) { // use index to access *anyopaque
@@ -205,6 +205,9 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
     const nalt = expand_alt(Variant,first.pos(),c_nref,vs) catch unreachable;
     defer nalt.deinit();
     mvar.set_alt(nalt);
+
+    const af = expand_info(Variant,"AF",vs) catch unreachable;
+    p("{s}\n",.{af.items});
 
     return mvar.v;
 }
@@ -289,11 +292,8 @@ fn expand_ref(comptime T: type, list: ArrayList(T)) !ArrayList(u8) {
 }
 
 fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)) !ArrayList([*:0] const u8) {
-    // const allocator = std.testing.allocator;
     // add alternates and splice them into the reference. It does not modify the ref.
-    // const first = list.items[0];
     var nalt = ArrayList([*:0] const u8).init(test_allocator);
-    p("1:{s}\n",.{nalt.items});
 
     for (list.items) |v| {
             const p5diff = v.pos() - pos; // always >= 0 - will raise error otherwise
@@ -350,8 +350,21 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
                     }
             }
         }
-    // p("2:{s}\n",.{nalt.items});
     return nalt; // caller needs to clean up
+}
+
+fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayList([] const u8) {
+    _ = name;
+    _ = list;
+    var ninfo = ArrayList([] const u8).init(test_allocator);
+    for (list.items) |v| {
+            for (v.info(name).items) | info | {
+                    // try ninfo.append(info);
+                    p("{s}",.{info});
+                    ninfo.append(info) catch unreachable;
+                }
+        }
+    return ninfo;
 }
 
 test "hello zig" {
