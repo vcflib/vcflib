@@ -44,6 +44,21 @@ const char *var_ref(void *var) {
     return (v->ref.data());
 }
 
+const unsigned long var_info_num(void *variant, const char *name) {
+    auto v = static_cast<Variant*>(variant);
+    return v->info[name].size();
+}
+
+const char **var_info(void *var, const char *name, const char **ret) {
+    auto v = static_cast<Variant*>(var);
+    int idx = 0;
+    for (auto &a: v->info[name]) {
+        ret[idx] = a.c_str();
+        idx++;
+    }
+    return ret;
+}
+
 const unsigned long var_alt_num(void *variant) {
     auto v = static_cast<Variant*>(variant);
     return v->alt.size();
@@ -83,4 +98,14 @@ void var_set_alt(void *var, const char *alt, long idx) {
     // v->ref = ref; // copies content
     // printf("[C] %s\n",alt);
     v->alt.push_back(alt);
+}
+
+void var_clear_info(void *var, const char *name) {
+    auto v = static_cast<Variant*>(var);
+    v->info[name].clear();
+}
+
+void var_set_info(void *var, const char *name, const char *value, long idx) {
+    auto v = static_cast<Variant*>(var);
+    v->info[name].push_back(value);
 }

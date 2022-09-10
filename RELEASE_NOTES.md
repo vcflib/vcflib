@@ -1,31 +1,31 @@
-For contributions
-see
+For contributions see
 [contributors](https://github.com/vcflib/vcflib/graphs/contributors)
 and
 [commits](https://github.com/vcflib/vcflib/commits/master).
 
-## ChangeLog v1.0.4 (20220510)
+## TODO
+
+- [ ] vcfcreatemulti merge multiple rows
+      + [X] rewrite vcfcreatemulti using zig
+      + [ ] merge genotypes correctly, with tests
+      + [ ] check for indels which are really the same
+      + [ ] combine vcfwave duplicated functionality
+- [ ] RELEASE 1.0.5
+- [ ] vcfuniq combine genotypes from non-unique records
+- [ ] vcfwave check polyploids?
+- [ ] RELEASE 1.0.6
+
+## ChangeLog v1.0.4 (20220829)
 
 This is a release with some major changes.
 
 Important changes:
 
-+ vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
-+ INFO fields output order is now the same as on input parsing
-
-TODO
-
-- [ ] vcfwave check merging of genotypes - write tests
-- [ ] vcfwave recompute AC, AFs from merged record
-- [ ] RELEASE 1.0.4
-- [ ] vcfcreatemulti merge multiple rows
-      + [ ] rewrite vcfcreatemulti
-      + [ ] check for indels which are really the same
-      + [ ] combine vcfwave duplicated functionality
-- [ ] RELEASE 1.0.5
-- [ ] vcfuniq combine genotypes from non-unique records
-- [ ] vcfwave check polyploids
-- [ ] RELEASE 1.0.6
+- vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
+- INFO fields output order is now the same as on input parsing
+- vcfwave check merging of genotypes - write tests
+- vcfwave recompute AC, AFs from merged record
+- introduced the zig compiler with vcfcreatemulti.cpp as a first target (use cmake ZIG=OFF to disable). At this point the zig version (-n switch) gives identical results.
 
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 

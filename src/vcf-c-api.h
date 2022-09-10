@@ -9,16 +9,22 @@
 void *var_parse(const char *line, bool parse_samples);
 
 // VCF variant accessors
-const char *var_id(void *variant);
-const long var_pos(void *variant);
-const char *var_ref(void *variant);
-const unsigned long var_alt_num(void *variant);
-const char **var_alt(void *variant, const char ** ret);
+const char *var_id(void *var);
+const long var_pos(void *var);
+const char *var_ref(void *var);
+const unsigned long var_alt_num(void *var);
+const char **var_alt(void *var, const char ** ret);
+const unsigned long var_info_num(void *variant, const char *name);
+const char **var_info(void *var, const char *name, const char **ret);
 
-void var_set_id(void *variant, const char *);
-void var_set_ref(void *variant, const char *);
+void var_set_id(void *var, const char *);
+void var_set_ref(void *var, const char *);
+
 void var_clear_alt(void *var);
 void var_set_alt(void *var, const char *alt, long idx);
+
+void var_clear_info(void *var, const char *name);
+void var_set_info(void *var, const char *name, const char *values, long idx);
 
 // Zig functionality
 

@@ -123,7 +123,8 @@ file(GLOB INCLUDES
   intervaltree/*.h*
   smithwaterman/*.h*
   fastahack/*.h*
-  filevercmp/*.h*)
+  filevercmp/*.h*
+  )
 
 set(vcflib_SOURCE
     src/vcf-c-api.cpp
@@ -526,7 +527,7 @@ function(add_zigtest)
     )
 endfunction()
 
-add_zigtest()
+  add_zigtest()
 endif(ZIG)
 
 add_pytest(realign)
