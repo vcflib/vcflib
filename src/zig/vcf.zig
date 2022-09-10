@@ -30,9 +30,11 @@ extern fn var_info_num(variant: *anyopaque, name: [*c] const u8) usize;
 extern fn var_clear_alt(variant: *anyopaque) void;
 extern fn var_alt(variant: * anyopaque, buf: [*c]* anyopaque) [*c][*c] const u8;
 extern fn var_info(variant: * anyopaque, name: [*c] const u8, buf: [*c]* anyopaque) [*c][*c] const u8;
+extern fn var_clear_info(variant: *anyopaque, name: [*c] const u8) void;
 extern fn var_set_id(?* anyopaque, [*c] const u8) void;
 extern fn var_set_ref(?* anyopaque, [*c] const u8) void;
 extern fn var_set_alt(?* anyopaque, [*c] const u8, usize) void;
+extern fn var_set_info(?* anyopaque, name: [*c] const u8, value: [*c] const u8, int: usize) void;
 extern fn call_c([*] const u8) void;
 
 export fn hello_zig2(msg: [*] const u8) [*]const u8 {
@@ -137,6 +139,16 @@ const Variant = struct {
                 var_set_alt(self.v,nalt.items[i],i);
             }
     }
+
+    pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {
+        var c_name = to_cstr0(name);
+        _ = data;
+        var_clear_info(self.v,c_name);
+        var i: usize = 0;
+        while (i < data.items.len) : (i += 1) {
+                var_set_info(self.v,c_name,to_cstr0(data.items[i]),i);
+            }
+    }
 };
 
 // by @Cimport:
@@ -186,9 +198,6 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
 export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) *anyopaque {
     _ = size;
     var mvar = Variant{.v = variant.?}; // FIXME: we need to clean this small struct up from C++
-    // p("---->{s}\n",.{mvar.info("AC").items});
-    // p("---->{s}\n",.{mvar.info("AF").items});
-    // p("---->{s}\n",.{mvar.info("AN").items});
     var vs = ArrayList(Variant).init(test_allocator);
     var i: usize = 0;
     while (i < size) : (i += 1) { // use index to access *anyopaque
@@ -206,8 +215,12 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
     defer nalt.deinit();
     mvar.set_alt(nalt);
 
-    const af = expand_info(Variant,"AF",vs) catch unreachable;
-    p("{s}\n",.{af.items});
+    const list = [_][] const u8{
+        "AN","AT","AC","AF","INV","TYPE" };
+    for (list) |item| {
+            const at = expand_info(Variant,item,vs) catch unreachable;
+            mvar.set_info(item,at);
+        }
 
     return mvar.v;
 }
@@ -360,7 +373,7 @@ fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayLi
     for (list.items) |v| {
             for (v.info(name).items) | info | {
                     // try ninfo.append(info);
-                    p("{s}",.{info});
+                    // p("{s}",.{info});
                     ninfo.append(info) catch unreachable;
                 }
         }

@@ -99,3 +99,13 @@ void var_set_alt(void *var, const char *alt, long idx) {
     // printf("[C] %s\n",alt);
     v->alt.push_back(alt);
 }
+
+void var_clear_info(void *var, const char *name) {
+    auto v = static_cast<Variant*>(var);
+    v->info[name].clear();
+}
+
+void var_set_info(void *var, const char *name, const char *value, long idx) {
+    auto v = static_cast<Variant*>(var);
+    v->info[name].push_back(value);
+}

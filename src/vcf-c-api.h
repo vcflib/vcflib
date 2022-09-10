@@ -19,8 +19,12 @@ const char **var_info(void *var, const char *name, const char **ret);
 
 void var_set_id(void *var, const char *);
 void var_set_ref(void *var, const char *);
+
 void var_clear_alt(void *var);
 void var_set_alt(void *var, const char *alt, long idx);
+
+void var_clear_info(void *var, const char *name);
+void var_set_info(void *var, const char *name, const char *values, long idx);
 
 // Zig functionality
 
