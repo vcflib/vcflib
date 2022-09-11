@@ -26,15 +26,18 @@ pub extern fn var_id(* anyopaque) [*c] const u8;
 extern fn var_pos(* anyopaque) u64;
 extern fn var_ref(* anyopaque) [*c] const u8;
 extern fn var_alt_num(variant: *anyopaque) usize;
+extern fn var_samples_num(variant: *anyopaque) usize;
 extern fn var_info_num(variant: *anyopaque, name: [*c] const u8) usize;
 extern fn var_clear_alt(variant: *anyopaque) void;
 extern fn var_alt(variant: * anyopaque, buf: [*c]* anyopaque) [*c][*c] const u8;
 extern fn var_info(variant: * anyopaque, name: [*c] const u8, buf: [*c]* anyopaque) [*c][*c] const u8;
+extern fn var_geno(variant: * anyopaque, buf: [*c]* anyopaque) [*c][*c] const u8;
 extern fn var_clear_info(variant: *anyopaque, name: [*c] const u8) void;
 extern fn var_set_id(?* anyopaque, [*c] const u8) void;
 extern fn var_set_ref(?* anyopaque, [*c] const u8) void;
 extern fn var_set_alt(?* anyopaque, [*c] const u8, usize) void;
 extern fn var_set_info(?* anyopaque, name: [*c] const u8, value: [*c] const u8, int: usize) void;
+extern fn var_set_geno(?* anyopaque, value: [*c] const u8, int: usize) void;
 extern fn call_c([*] const u8) void;
 
 export fn hello_zig2(msg: [*] const u8) [*]const u8 {
@@ -99,6 +102,7 @@ const Variant = struct {
         return list;
     }
 
+
     pub fn info(self: *const Self, name: [] const u8) ArrayList([] const u8) {
         var c_name = to_cstr0(name);
         var list = ArrayList([] const u8).init(test_allocator);
@@ -116,6 +120,7 @@ const Variant = struct {
                 // p("{s}\n",.{s2});
                 list.append(s2) catch unreachable;
         }
+
         return list;
     }
 
@@ -149,6 +154,23 @@ const Variant = struct {
                 var_set_info(self.v,c_name,to_cstr0(data.items[i]),i);
             }
     }
+
+    pub fn genotypes(self: *const Self) ArrayList([] const u8) {
+        var list = ArrayList([] const u8).init(test_allocator);
+        const size = var_samples_num(self.v);
+        var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
+        defer test_allocator.free(buffer);
+        const res = var_geno(self.v,@ptrCast([*c]* anyopaque,buffer));
+        var i: usize = 0;
+        while (i < size) : (i += 1) {
+                const s = res[i];
+                const s2 = to_slice(s);
+                p("{s}",.{s2});
+                // list.append(s2) catch unreachable;
+        }
+        return list;
+    }
+
 };
 
 // by @Cimport:
@@ -219,9 +241,12 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
         "AN","AT","AC","AF","INV","TYPE" };
     for (list) |item| {
             const at = expand_info(Variant,item,vs) catch unreachable;
+            defer at.deinit();
             mvar.set_info(item,at);
         }
 
+    var ngenos = update_genotypes(Variant,vs) catch unreachable;
+    p("{s}\n",.{ngenos.items});
     return mvar.v;
 }
 
@@ -367,8 +392,6 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
 }
 
 fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayList([] const u8) {
-    _ = name;
-    _ = list;
     var ninfo = ArrayList([] const u8).init(test_allocator);
     for (list.items) |v| {
             for (v.info(name).items) | info | {
@@ -378,6 +401,19 @@ fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayLi
                 }
         }
     return ninfo;
+}
+
+fn update_genotypes(comptime T: type, list: ArrayList(T)) !ArrayList([] const u8) {
+    var ngenos = ArrayList([] const u8).init(test_allocator);
+    for (list.items) |v| {
+            for (v.genotypes().items) | geno | {
+                    // try ninfo.append(info);
+                    // p("{s}",.{info});
+                    ngenos.append(geno) catch unreachable;
+                }
+        }
+
+    return ngenos;
 }
 
 test "hello zig" {

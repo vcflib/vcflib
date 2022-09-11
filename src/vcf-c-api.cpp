@@ -109,3 +109,23 @@ void var_set_info(void *var, const char *name, const char *value, long idx) {
     auto v = static_cast<Variant*>(var);
     v->info[name].push_back(value);
 }
+
+const unsigned long var_samples_num(void *var) {
+    auto v = static_cast<Variant*>(var);
+    return v->samples.size();
+}
+
+const char **var_geno(void *var, const char **ret) {
+    auto v = static_cast<Variant*>(var);
+    auto samples = v->samples;
+    int idx = 0;
+    for (auto sname: v->sampleNames) {
+        // cout << sname ;
+        cout << samples[sname]["GT"].front() << endl;
+
+        // printf("<%s>\n",samples[sname]["GT"].front());
+        ret[idx] = samples[sname]["GT"].front().data();
+        idx++;
+    }
+    return ret;
+}

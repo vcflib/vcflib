@@ -16,6 +16,7 @@ const unsigned long var_alt_num(void *var);
 const char **var_alt(void *var, const char ** ret);
 const unsigned long var_info_num(void *variant, const char *name);
 const char **var_info(void *var, const char *name, const char **ret);
+const char **var_geno(void *var, const char **ret);
 
 void var_set_id(void *var, const char *);
 void var_set_ref(void *var, const char *);
@@ -25,6 +26,8 @@ void var_set_alt(void *var, const char *alt, long idx);
 
 void var_clear_info(void *var, const char *name);
 void var_set_info(void *var, const char *name, const char *values, long idx);
+
+const unsigned long var_samples_num(void *var);
 
 // Zig functionality
 
