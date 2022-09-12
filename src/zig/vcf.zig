@@ -421,12 +421,8 @@ const Genotypes = struct {
         for (self.genos.items) |g| {
                 // parseInt to go to str
                 // charDigit to int
-                var buf: [4]u8 = undefined;
-                // var buf = ArrayList([] const u8).init(test_allocator);
-                const result = try fmt.bufPrint(&buf, "{}", .{g});
+                const result = try fmt.allocPrint(test_allocator, "{}", .{g});
                 p("Result is {s}!\n", .{result});
-                // var s2 = fmt.allocPrint(test_allocator, "{s}",.{ g }) catch unreachable;
-                // defer test_allocator.free(s2);
                 try s.append(result);
             }
         return s;
@@ -443,7 +439,6 @@ fn update_genotypes(comptime T: type, list: ArrayList(T)) !ArrayList([] const u8
                     ngenos.append(geno) catch unreachable;
                 }
         }
-
     return ngenos;
 }
 
@@ -455,8 +450,12 @@ test "genotypes" {
     try list.append(1);
     var gs = Genotypes{.genos = list, .phased = true};
     var genos = try gs.to_s();
-    defer genos.deinit();
-
+    defer {
+        for (genos.items) |item| {
+                test_allocator.free(item);
+            }
+        genos.deinit();
+    }
     p("YES {s}",.{genos.items});
 }
 
