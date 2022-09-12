@@ -403,6 +403,37 @@ fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayLi
     return ninfo;
 }
 
+// @@
+// Genotypes come as a list of integers separated by | (phased) or / (unphased).
+// You can't really mix phased/unphased so we can track that as a boolean.
+
+const GENOTYPE_MISSING = -256;
+
+const Genotypes = struct {
+    genos: ArrayList(i64),
+    phased: bool,
+
+    const Self = @This();
+
+    fn to_s(self: *const Self) !ArrayList([] const u8) {
+        _ = self;
+        var s = ArrayList([] const u8).init(test_allocator);
+        for (self.genos.items) |g| {
+                // parseInt to go to str
+                // charDigit to int
+                var buf: [4]u8 = undefined;
+                // var buf = ArrayList([] const u8).init(test_allocator);
+                const result = try fmt.bufPrint(&buf, "{}", .{g});
+                p("Result is {s}!\n", .{result});
+                // var s2 = fmt.allocPrint(test_allocator, "{s}",.{ g }) catch unreachable;
+                // defer test_allocator.free(s2);
+                try s.append(result);
+            }
+        return s;
+    }
+};
+
+
 fn update_genotypes(comptime T: type, list: ArrayList(T)) !ArrayList([] const u8) {
     var ngenos = ArrayList([] const u8).init(test_allocator);
     for (list.items) |v| {
@@ -414,6 +445,19 @@ fn update_genotypes(comptime T: type, list: ArrayList(T)) !ArrayList([] const u8
         }
 
     return ngenos;
+}
+
+
+test "genotypes" {
+    var list = ArrayList(i64).init(test_allocator);
+    defer list.deinit();
+    try list.append(0);
+    try list.append(1);
+    var gs = Genotypes{.genos = list, .phased = true};
+    var genos = try gs.to_s();
+    defer genos.deinit();
+
+    p("YES {s}",.{genos.items});
 }
 
 test "hello zig" {
