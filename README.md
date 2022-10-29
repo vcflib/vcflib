@@ -421,17 +421,12 @@ Citations are the bread and butter of Science.  If you are using this
 software in your research and want to support our future work, please
 cite the following publication:
 
-Vcflib and tools for processing the VCF variant call format;
-Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins;
-doi: https://doi.org/10.1101/2021.05.21.445151
-
-## Bibtex reference
-
 Please cite:
 
 [A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
 Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput Biol 18(5): e1009123. https://doi.org/10.1371/journal.pcbi.1009123
 
+## Bibtex reference
 
 ```bibtex
 @article{10.1371/journal.pcbi.1009123,
