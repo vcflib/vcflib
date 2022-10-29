@@ -6,15 +6,14 @@
 
 Vcflib and related tools are the workhorses in bioinformatics for processing the VCF variant calling format. See
 
-Vcflib and tools for processing the VCF variant call format;
-Erik Garrison, Zev N. Kronenberg, Eric T. Dawson, Brent S. Pedersen, Pjotr Prins;
-doi: https://doi.org/10.1101/2021.05.21.445151
+[A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
+Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput Biol 18(5): e1009123. https://doi.org/10.1371/journal.pcbi.1009123
+
+(bibtex reference at the end of this page)
 
 ## news
 
 May 2022: the [vcflib paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123) has been published on PLoS Computational Biology!
-
-See below for the citation.
 
 April 2022: vcflib has just gone pangenome!
 
@@ -429,7 +428,10 @@ doi: https://doi.org/10.1101/2021.05.21.445151
 ## Bibtex reference
 
 Please cite:
+
 [A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
+Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput Biol 18(5): e1009123. https://doi.org/10.1371/journal.pcbi.1009123
+
 
 ```bibtex
 @article{10.1371/journal.pcbi.1009123,
