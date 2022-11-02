@@ -1,3 +1,9 @@
+//! This zig module provides functionality for cleaning genotypes -
+//! mostly for combining multiple records into one. This code is partly
+//! in C++ in vcfwave and the older vcfallelicprimitives as well as C++
+//! version of vcfcreatemulti. None of these implementations did a great
+//! job and I felt a zig version would be faster and cleaner.
+
 const std = @import("std");
 // const variant = @import("variant");
 const mem = @import("std").mem;
@@ -45,6 +51,8 @@ export fn hello_zig2(msg: [*] const u8) [*]const u8 {
     return result;
 }
 
+/// Variant struct maps over the equivalent C++ version - copying data
+/// forth to zig and back to C++.
 const Variant = struct {
     v: *anyopaque,
 
@@ -73,10 +81,12 @@ const Variant = struct {
         return to_slice0(var_id(self.v));
     }
 
+    /// Get the C++ pos
     pub fn pos(self: *const Self) u64 {
         return var_pos(self.v);
     }
 
+    /// Get the C++ ref
     pub fn ref(self: *const Self) [] const u8 {
         // const buf: [*c]const u8 = var_ref(self.v);
         // const str = std.mem.span(@ptrCast([*:0]const u8, buf));
@@ -84,6 +94,7 @@ const Variant = struct {
         return to_slice(var_ref(self.v));
     }
 
+    /// Get the C++ alts
     pub fn alt(self: *const Self) ArrayList([] const u8) {
         var list = ArrayList([] const u8).init(test_allocator);
         const altsize = var_alt_num(self.v);
@@ -92,17 +103,14 @@ const Variant = struct {
         const res = var_alt(self.v,@ptrCast([*c]* anyopaque,buffer));
         var i: usize = 0;
         while (i < altsize) : (i += 1) {
-                // list.append(buffer[i]) catch unreachable;
-                const s = res[i];
-                // const s1 = to_slice(s);
-                // p("<{d}:{d}><{any}--{s}--{any}>\n",.{i,altsize,s,s1,buffer[i]});
-                const s2 = to_slice(s);
-                list.append(s2) catch unreachable;
+            const s = res[i];
+            const s2 = to_slice(s);
+            list.append(s2) catch unreachable;
         }
         return list;
     }
-
-
+    
+    /// Get the C++ infos
     pub fn info(self: *const Self, name: [] const u8) ArrayList([] const u8) {
         var c_name = to_cstr0(name);
         var list = ArrayList([] const u8).init(test_allocator);
@@ -112,50 +120,21 @@ const Variant = struct {
         const res = var_info(self.v,c_name,@ptrCast([*c]* anyopaque,buffer));
         var i: usize = 0;
         while (i < size) : (i += 1) {
-                // list.append(buffer[i]) catch unreachable;
-                const s = res[i];
-                // const s1 = to_slice(s);
-                // p("<{d}:{d}><{any}--{s}--{any}>\n",.{i,altsize,s,s1,buffer[i]});
-                const s2 = to_slice(s);
-                // p("{s}\n",.{s2});
-                list.append(s2) catch unreachable;
+            // list.append(buffer[i]) catch unreachable;
+            const s = res[i];
+            // const s1 = to_slice(s);
+            // p("<{d}:{d}><{any}--{s}--{any}>\n",.{i,altsize,s,s1,buffer[i]});
+            const s2 = to_slice(s);
+            // p("{s}\n",.{s2});
+            list.append(s2) catch unreachable;
         }
 
         return list;
     }
 
-    pub fn set_ref(self: *const Self, nref: [:0] const u8) void {
-        var_set_ref(self.v,@ptrCast([*c]const u8,nref));
-    }
-
-    pub fn set_alt(self: *const Self, nalt: ArrayList([*:0] const u8)) void {
-        // Create ptrlist
-        var_clear_alt(self.v);
-        var i: usize = 0;
-        // p("<{s}>", .{nalt.items});
-        while (i < nalt.items.len) : (i += 1) {
-                // p("<{s}>\n",.{nalt.items[i]});
-                // var x = to_cstr(nalt.items[i]);
-                // var x: [:0] const u8 =
-                //     nalt.items[i];
-
-                // var_set_alt(self.v,@ptrCast([*c] const u8,x),i);
-                // var_set_alt(self.v,x,i);
-                var_set_alt(self.v,nalt.items[i],i);
-            }
-    }
-
-    pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {
-        var c_name = to_cstr0(name);
-        _ = data;
-        var_clear_info(self.v,c_name);
-        var i: usize = 0;
-        while (i < data.items.len) : (i += 1) {
-                var_set_info(self.v,c_name,to_cstr0(data.items[i]),i);
-            }
-    }
-
+    /// Get the C++ genotypes as a list
     pub fn genotypes(self: *const Self) ArrayList([] const u8) {
+        p("Inside genotypes:\n",.{});
         var list = ArrayList([] const u8).init(test_allocator);
         const size = var_samples_num(self.v);
         var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
@@ -163,12 +142,46 @@ const Variant = struct {
         const res = var_geno(self.v,@ptrCast([*c]* anyopaque,buffer));
         var i: usize = 0;
         while (i < size) : (i += 1) {
-                const s = res[i];
-                const s2 = to_slice(s);
-                p("{s}",.{s2});
-                // list.append(s2) catch unreachable;
+            const s = res[i];
+            const s2 = to_slice(s);
+            // p("<{s}>",.{s2});
+            list.append(s2) catch unreachable;
         }
         return list;
+    }
+    
+    /// Set C++ ref
+    pub fn set_ref(self: *const Self, nref: [:0] const u8) void {
+        var_set_ref(self.v,@ptrCast([*c]const u8,nref));
+    }
+
+    /// Set C++ alts
+    pub fn set_alt(self: *const Self, nalt: ArrayList([*:0] const u8)) void {
+        // Create ptrlist
+        var_clear_alt(self.v);
+        var i: usize = 0;
+        // p("<{s}>", .{nalt.items});
+        while (i < nalt.items.len) : (i += 1) {
+            // p("<{s}>\n",.{nalt.items[i]});
+            // var x = to_cstr(nalt.items[i]);
+            // var x: [:0] const u8 =
+            //     nalt.items[i];
+            
+            // var_set_alt(self.v,@ptrCast([*c] const u8,x),i);
+            // var_set_alt(self.v,x,i);
+            var_set_alt(self.v,nalt.items[i],i);
+        }
+    }
+
+    /// Set C++ infos
+    pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {
+        var c_name = to_cstr0(name);
+        _ = data;
+        var_clear_info(self.v,c_name);
+        var i: usize = 0;
+        while (i < data.items.len) : (i += 1) {
+            var_set_info(self.v,c_name,to_cstr0(data.items[i]),i);
+        }
     }
 
 };
@@ -176,6 +189,7 @@ const Variant = struct {
 // by @Cimport:
 // pub extern fn zig_create_multi_allelic(retvar: ?*anyopaque, varlist: [*c]?*anyopaque, size: c_long) ?*anyopaque;
 
+// Obsolete test version of multi_allelic
 export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) ?*anyopaque {
     var v1 = var_parse("TEST\t1\t2\t3\t4\tt5\t6",false);
     _ = v1;
@@ -216,9 +230,10 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
     return variant;
 }
 
-// @@
+/// This function is called from C++ to reduce a set of variants to a
+/// single VCF record and adjusting genotypes accordingly.
 export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) *anyopaque {
-    _ = size;
+    // Create vs as a list of variants
     var mvar = Variant{.v = variant.?}; // FIXME: we need to clean this small struct up from C++
     var vs = ArrayList(Variant).init(test_allocator);
     var i: usize = 0;
@@ -227,16 +242,19 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
         vs.append(v) catch unreachable;
     }
 
+    // Get the reference and update mvar (multi VCF record containing multiple variants)
     var nref = expand_ref(Variant,vs) catch unreachable;
     defer nref.deinit();
     const c_nref = nref.toOwnedSliceSentinel(0) catch unreachable;
     mvar.set_ref(c_nref);
 
+    // Get the alts and update mvar
     const first = vs.items[0];
     const nalt = expand_alt(Variant,first.pos(),c_nref,vs) catch unreachable;
     defer nalt.deinit();
     mvar.set_alt(nalt);
 
+    // Get infos and update mvar
     const list = [_][] const u8{
         "AN","AT","AC","AF","INV","TYPE" };
     for (list) |item| {
@@ -245,8 +263,10 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
             mvar.set_info(item,at);
         }
 
-    var ngenos = update_genotypes(Variant,vs) catch unreachable;
-    p("{s}\n",.{ngenos.items});
+    // Get genotypes and update mvar
+    var ngenos = reduce_renumber_genotypes(Variant,vs) catch unreachable;
+    p("\nResulting in {s}\n",.{ngenos.items});
+    
     return mvar.v;
 }
 
@@ -367,7 +387,7 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
                 const last  = ref.len - @intCast(usize,p3diff);
                 after = ref[last..];
             }
-            else                after = "";
+            else after = "";
             for (v.alt().items) | alt | {
                     var n = ArrayList(u8).init(test_allocator);
                     defer n.deinit();
@@ -403,12 +423,12 @@ fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayLi
     return ninfo;
 }
 
-// @@
-// Genotypes come as a list of integers separated by | (phased) or / (unphased).
-// You can't really mix phased/unphased so we can track that as a boolean.
 
 const GENOTYPE_MISSING = -256;
 
+/// Genotypes come as a list of integers separated by | (phased) or /
+/// (unphased).  You can't really mix phased/unphased so we can track
+/// that as a boolean.
 const Genotypes = struct {
     genos: ArrayList(i64),
     phased: bool,
@@ -429,16 +449,20 @@ const Genotypes = struct {
     }
 };
 
-
-fn update_genotypes(comptime T: type, list: ArrayList(T)) !ArrayList([] const u8) {
+/// Walks all genotypes in the list of variants and reduces them to
+/// the genotypes of the combined variant. For examples 0|1 genotypes
+/// get translated to their list numbers 0|6. This works for
+/// heterozygous only (at this point).
+fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
     var ngenos = ArrayList([] const u8).init(test_allocator);
-    for (list.items) |v| {
-            for (v.genotypes().items) | geno | {
-                    // try ninfo.append(info);
-                    // p("{s}",.{info});
-                    ngenos.append(geno) catch unreachable;
-                }
+    for (vs.items) |v| {
+        // Fetch the genotypes from each variant
+        for (v.genotypes().items) | geno | {
+            // try ninfo.append(info);
+            p("({s})",.{geno});
+            ngenos.append(geno) catch unreachable;
         }
+    }
     return ngenos;
 }
 

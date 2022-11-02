@@ -12,8 +12,9 @@
 ;;
 ;; or in one go
 ;;
-;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env")
+;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env && cd build")
 ;;
+;;   cd build
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug ..
 ;;   cmake --build .
@@ -82,7 +83,7 @@
        ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
        ("xz" ,xz)
-       ("zig" ,zig)
+       ("zig" ,zig) ;; note we use zig-0.9.1
        ("zlib" ,zlib)))
     (native-inputs
      `(("pkg-config" ,pkg-config)))

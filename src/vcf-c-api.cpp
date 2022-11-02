@@ -121,7 +121,7 @@ const char **var_geno(void *var, const char **ret) {
     int idx = 0;
     for (auto sname: v->sampleNames) {
         // cout << sname ;
-        cout << samples[sname]["GT"].front() << endl;
+        // cout << samples[sname]["GT"].front() << endl;
 
         // printf("<%s>\n",samples[sname]["GT"].front());
         ret[idx] = samples[sname]["GT"].front().data();

@@ -360,9 +360,11 @@ For include files add
 
 And for some of the VCF executables
 
+- zig 0.9.1 (disable with cmake -DZIG=OFF)
 - python
 - perl
 
+The zig dependency is for
 ### Using a different htslib
 
 Check out htslib in tabixpp (recursively) and
