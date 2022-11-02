@@ -8,7 +8,7 @@ const std = @import("std");
 // const variant = @import("variant");
 const mem = @import("std").mem;
 const fmt = std.fmt;
-const samples = @import("samples");
+const samples = @import("./samples.zig");
 const expectEqual = @import("std").testing.expectEqual;
 const expect = @import("std").testing.expect;
 const ArrayList = std.ArrayList;
@@ -455,13 +455,12 @@ const Genotypes = struct {
 /// heterozygous only (at this point).
 fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
     var ngenos = ArrayList([] const u8).init(test_allocator);
-    for (vs.items) |v| {
+    for (vs.items) |v,i| {
         // Fetch the genotypes from each variant
         for (v.genotypes().items) | geno | {
-            // try ninfo.append(info);
-            var geno2 = "x|x";
+            const geno2 = samples.renumber_genotypes(i,geno);
             p("({s})",.{geno2});
-            ngenos.append(geno) catch unreachable;
+            ngenos.append(geno2) catch unreachable;
         }
     }
     return ngenos;

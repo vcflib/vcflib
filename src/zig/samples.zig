@@ -47,7 +47,11 @@ fn split_genotypes(str: []const u8) *ArrayList([] const u8) {
     return &list;
 }
 
-
+/// Take a 0-1 indexed genotype and convert it to an indexed number
+pub fn renumber_genotypes(idx: usize, str: [] const u8) [] const u8 {
+    _ = idx;
+    return str;
+}
 
 test "hello zig" {
     try expectEqual(hello_zig(hello),hello);
