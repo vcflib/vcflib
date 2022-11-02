@@ -329,23 +329,23 @@ fn expand_ref(comptime T: type, list: ArrayList(T)) !ArrayList(u8) {
 
     const left0 = first.pos();
     for (list.items) |v| {
-            const right0 = left0 + res.items.len;
-            const left1 = v.pos();
-            const right1 = left1 + v.ref().len;
-            //            ref    sdiff
-            // ref0     |AAAAA|------->|
-            // ref1      |AAAAAAAAAAAAA|
-            //           |--->| append |
-            //            pdiff
-
-            if (right1 > right0) {
-
-                const sdiff = right1 - right0; // diff between ref0 and ref1 right positions
-                const pdiff = right0 - left1; // diff between ref0 right and ref1 left
-                // newref = ref + append
-                try res.appendSlice(v.ref()[pdiff..pdiff+sdiff]);
-            }
+        const right0 = left0 + res.items.len;
+        const left1 = v.pos();
+        const right1 = left1 + v.ref().len;
+        //            ref    sdiff
+        // ref0     |AAAAA|------->|
+        // ref1      |AAAAAAAAAAAAA|
+        //           |--->| append |
+        //            pdiff
+        
+        if (right1 > right0) {
+            
+            const sdiff = right1 - right0; // diff between ref0 and ref1 right positions
+            const pdiff = right0 - left1; // diff between ref0 right and ref1 left
+            // newref = ref + append
+            try res.appendSlice(v.ref()[pdiff..pdiff+sdiff]);
         }
+    }
     return res;
 }
 
@@ -354,72 +354,72 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
     var nalt = ArrayList([*:0] const u8).init(test_allocator);
 
     for (list.items) |v| {
-            const p5diff = v.pos() - pos; // always >= 0 - will raise error otherwise
-            const before = ref[0..p5diff]; // leading ref
-
-            // ref0 has been expanded in a previous step to cover the full variant.
-            // the original code only deals with p3diff > 0.
-            //
-            // SNP
-            //            ref
-            // ref0     |AAAAAAAA|
-            //        p5diff    p3diff = +3
-            // SNP           C--->
-            //
-            // Insertion:
-            //            ref
-            // ref0     |AAAAA|------->|
-            //        p5diff    p3diff = -8 (start = 5--8 = 13
-            // ref1      |AAAAAAAAAAAAA|
-            //
-            // Deletion:
-            //            ref
-            // ref0     |AAAAA|
-            //        p5diff    p3diff = +2 (start = 5-2 = 3
-            // ref1      |AA|--
-
-            const right0 = pos + ref.len;
-            const right1 = v.pos() + v.ref().len;
-            const p3diff:i64 = @intCast(i64,right0) - @intCast(i64,right1);
-
-            var after: [] const u8 = undefined;
-            if (p3diff > 0 and p3diff < ref.len) {
-                const last  = ref.len - @intCast(usize,p3diff);
-                after = ref[last..];
-            }
-            else after = "";
-            for (v.alt().items) | alt | {
-                    var n = ArrayList(u8).init(test_allocator);
-                    defer n.deinit();
-                    if (p3diff != 0 or p5diff != 0) {
-                        // p("{any}-{s},{s}\n",.{p3diff,before,after});
-                        try n.appendSlice(before);
-                        try n.appendSlice(alt);
-                        try n.appendSlice(after);
-                        // try nalt.append(n.items);
-                        // n copied to nalt and emptied (no longer in care of n)
-                        try nalt.append(n.toOwnedSliceSentinel(0) catch unreachable);
-                        // p("new alt={s}\n",.{new.items});
-                    } else {
-                        try n.appendSlice(alt);
-                        // try n.toOwnedslice(alt);
-                        try nalt.append(n.toOwnedSliceSentinel(0) catch unreachable);
-                        // try nalt.append(n.items);
-                    }
+        const p5diff = v.pos() - pos; // always >= 0 - will raise error otherwise
+        const before = ref[0..p5diff]; // leading ref
+        
+        // ref0 has been expanded in a previous step to cover the full variant.
+        // the original code only deals with p3diff > 0.
+        //
+        // SNP
+        //            ref
+        // ref0     |AAAAAAAA|
+        //        p5diff    p3diff = +3
+        // SNP           C--->
+        //
+        // Insertion:
+        //            ref
+        // ref0     |AAAAA|------->|
+        //        p5diff    p3diff = -8 (start = 5--8 = 13
+        // ref1      |AAAAAAAAAAAAA|
+        //
+        // Deletion:
+        //            ref
+        // ref0     |AAAAA|
+        //        p5diff    p3diff = +2 (start = 5-2 = 3
+        // ref1      |AA|--
+        
+        const right0 = pos + ref.len;
+        const right1 = v.pos() + v.ref().len;
+        const p3diff:i64 = @intCast(i64,right0) - @intCast(i64,right1);
+        
+        var after: [] const u8 = undefined;
+        if (p3diff > 0 and p3diff < ref.len) {
+            const last  = ref.len - @intCast(usize,p3diff);
+            after = ref[last..];
+        }
+        else after = "";
+        for (v.alt().items) | alt | {
+            var n = ArrayList(u8).init(test_allocator);
+            defer n.deinit();
+            if (p3diff != 0 or p5diff != 0) {
+                // p("{any}-{s},{s}\n",.{p3diff,before,after});
+                try n.appendSlice(before);
+                try n.appendSlice(alt);
+                try n.appendSlice(after);
+                // try nalt.append(n.items);
+                // n copied to nalt and emptied (no longer in care of n)
+                try nalt.append(n.toOwnedSliceSentinel(0) catch unreachable);
+                // p("new alt={s}\n",.{new.items});
+            } else {
+                try n.appendSlice(alt);
+                // try n.toOwnedslice(alt);
+                try nalt.append(n.toOwnedSliceSentinel(0) catch unreachable);
+                // try nalt.append(n.items);
             }
         }
+    }
     return nalt; // caller needs to clean up
 }
 
 fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayList([] const u8) {
     var ninfo = ArrayList([] const u8).init(test_allocator);
     for (list.items) |v| {
-            for (v.info(name).items) | info | {
-                    // try ninfo.append(info);
-                    // p("{s}",.{info});
-                    ninfo.append(info) catch unreachable;
-                }
+        for (v.info(name).items) | info | {
+            // try ninfo.append(info);
+            // p("{s}",.{info});
+            ninfo.append(info) catch unreachable;
         }
+    }
     return ninfo;
 }
 
@@ -459,7 +459,8 @@ fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] c
         // Fetch the genotypes from each variant
         for (v.genotypes().items) | geno | {
             // try ninfo.append(info);
-            p("({s})",.{geno});
+            var geno2 = "x|x";
+            p("({s})",.{geno2});
             ngenos.append(geno) catch unreachable;
         }
     }

@@ -1,3 +1,5 @@
+/// This zig module handles VCF samples and genotypes
+
 const std = @import("std");
 const ArrayList = std.ArrayList;
 const expect = @import("std").testing.expect;
