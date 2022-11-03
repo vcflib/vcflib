@@ -1,41 +1,14 @@
 /// This zig module handles VCF samples and genotypes
 
 const std = @import("std");
-// const variant = @import("variant");
-const mem = @import("std").mem;
+const mem = std.mem;
 const fmt = std.fmt;
 const ArrayList = std.ArrayList;
-const expect = @import("std").testing.expect;
-const expectEqual = @import("std").testing.expectEqual;
-const p = @import("std").debug.print;
-const var_id = @import("vcf.zig").var_id;
-
-const hello = "Hello World from Zig";
+const expect = std.testing.expect;
+const expectEqual = std.testing.expectEqual;
+const expectEqualSlices = std.testing.expectEqualSlices;
+const p = std.debug.print;
 const test_allocator = std.testing.allocator;
-
-// extern fn call_c(*anyopaque) void;
-// extern fn get_name([*] const u8) [*] const u8;
-
-export fn hello_zig(msg: [*] const u8) [*]const u8 {
-    const result = msg;
-    return result;
-}
-
-export fn zig_process_vector(vsize: u64, v: [*][*] const u8) void {
-    // vector<string> genotypes{ "1/0", "2/.", "3/1" };
-    const s = v[1][0];
-    const s1 = v[1][1];
-    const s2 = v[1][2];
-    p("HELLO! {any} {any} {any} {c}:{c}:{c}\n",.{vsize, &v[0], &v[1], s,s1,s2}); // expect 1 and dot
-    // std.testing.expectEqual(&s, "1/0") catch unreachable;
-}
-
-export fn zig_process_opaque_ptr(variant: *anyopaque) void {
-    // call_c(variant);
-    const c_str = var_id(variant);
-    const s = @ptrCast([*c]const u8, c_str);
-    p("And yes, we are back in zig: {s}\n\n",.{s});
-}
 
 
 const GENOTYPE_MISSING = -256;
@@ -65,16 +38,16 @@ const Genotypes = struct {
         return list;
     }
 
-    /// Take a 0-1 indexed genotype and convert it to an indexed number
+    /// Take a 0-n indexed genotype and add offset idx. When the
+    /// genotype is 0 (ref) or missing it is not changed.
     fn renumber(idx: usize, list: ArrayList(i64)) ArrayList(i64) {
         _ = idx;
         for (list.items) | g,i | {
             list.items[i] = 
                 switch (g) {
                     0 => 0,
-                    1 => 1+@intCast(i64,idx),
                     GENOTYPE_MISSING => GENOTYPE_MISSING,
-                    else => error{Oops}
+                    else => g+@intCast(i64,idx)
             };
         }
         return list;
@@ -125,10 +98,6 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList(
     return ngenos;
 }
 
-test "hello zig" {
-    try expectEqual(hello_zig(hello),hello);
-}
-
 test "genotypes" {
     var list = ArrayList(i64).init(test_allocator);
     defer list.deinit();
@@ -157,8 +126,9 @@ test "genotypes" {
     try expectEqual(add3.items[1],GENOTYPE_MISSING);
     const gs4 = try Genotypes.to_num(".|2");
     defer gs4.deinit();
-    try expectEqual(gs4.items.len,2);
-    try expectEqual(gs4.items[1],2);
+    try expectEqualSlices(i64, gs4.items, &.{ GENOTYPE_MISSING, 2 });
+    const add4 = Genotypes.renumber(1,gs4);
+    try expectEqualSlices(i64, add4.items, &.{ GENOTYPE_MISSING, 3 });
 }
 
 test "split genotypes" {
