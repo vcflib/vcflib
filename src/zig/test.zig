@@ -25,6 +25,11 @@ export fn zig_process_opaque_ptr(variant: *anyopaque) void {
     p("And yes, we are back in zig: {s}\n\n",.{s});
 }
 
+export fn zig_variant_window() *void {
+    // p("And yes, we are back in zig: {s}\n\n",.{s});
+    p("And yes, we are back in zig: {s}\n\n",.{"YES"});
+}
+
 test "hello zig" {
     try expectEqual(hello_zig(hello),hello);
 }

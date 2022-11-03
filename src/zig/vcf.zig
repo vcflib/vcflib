@@ -230,8 +230,12 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
     return variant;
 }
 
-/// This function is called from C++ to reduce a set of variants to a
-/// single VCF record and adjusting genotypes accordingly.
+/// This function is the main entry point and called from C++ to
+/// reduce a set of variants to a single VCF record and adjusting
+/// genotypes accordingly. Essentially a list of variants is passed
+/// that overlap. This code simplifies ref and alts for each variant
+/// and adjusts the metrics for AF, AC, sample genotype index etc.
+///
 export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) *anyopaque {
     // Create vs as a list of variants
     var mvar = Variant{.v = variant.?}; // FIXME: we need to clean this small struct up from C++
@@ -255,8 +259,7 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
     mvar.set_alt(nalt);
 
     // Get infos and update mvar
-    const list = [_][] const u8{
-        "AN","AT","AC","AF","INV","TYPE" };
+    const list = [_][] const u8{ "AN","AT","AC","AF","INV","TYPE" };
     for (list) |item| {
             const at = expand_info(Variant,item,vs) catch unreachable;
             defer at.deinit();
