@@ -264,8 +264,9 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
         }
 
     // Get genotypes and update mvar
-    var ngenos = reduce_renumber_genotypes(Variant,vs) catch unreachable;
-    p("\nResulting in {s}\n",.{ngenos.items});
+    var ngenos = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
+    // p("\nResulting in {s}\n",.{ngenos.items});
+    _ = ngenos;
     
     return mvar.v;
 }
@@ -421,66 +422,6 @@ fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayLi
         }
     }
     return ninfo;
-}
-
-
-const GENOTYPE_MISSING = -256;
-
-/// Genotypes come as a list of integers separated by | (phased) or /
-/// (unphased).  You can't really mix phased/unphased so we can track
-/// that as a boolean.
-const Genotypes = struct {
-    genos: ArrayList(i64),
-    phased: bool,
-
-    const Self = @This();
-
-    fn to_s(self: *const Self) !ArrayList([] const u8) {
-        _ = self;
-        var s = ArrayList([] const u8).init(test_allocator);
-        for (self.genos.items) |g| {
-                // parseInt to go to str
-                // charDigit to int
-                const result = try fmt.allocPrint(test_allocator, "{}", .{g});
-                p("Result is {s}!\n", .{result});
-                try s.append(result);
-            }
-        return s;
-    }
-};
-
-/// Walks all genotypes in the list of variants and reduces them to
-/// the genotypes of the combined variant. For examples 0|1 genotypes
-/// get translated to their list numbers 0|6. This works for
-/// heterozygous only (at this point).
-fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
-    var ngenos = ArrayList([] const u8).init(test_allocator);
-    for (vs.items) |v,i| {
-        // Fetch the genotypes from each variant
-        for (v.genotypes().items) | geno | {
-            const geno2 = samples.renumber_genotypes(i,geno);
-            p("({s})",.{geno2});
-            ngenos.append(geno2) catch unreachable;
-        }
-    }
-    return ngenos;
-}
-
-
-test "genotypes" {
-    var list = ArrayList(i64).init(test_allocator);
-    defer list.deinit();
-    try list.append(0);
-    try list.append(1);
-    var gs = Genotypes{.genos = list, .phased = true};
-    var genos = try gs.to_s();
-    defer {
-        for (genos.items) |item| {
-                test_allocator.free(item);
-            }
-        genos.deinit();
-    }
-    p("YES {s}",.{genos.items});
 }
 
 test "hello zig" {
