@@ -10,6 +10,9 @@ const expectEqualSlices = std.testing.expectEqualSlices;
 const p = std.debug.print;
 const test_allocator = std.testing.allocator;
 
+const VcfSampleError = error{
+    CannotParseSample
+};
 
 const GENOTYPE_MISSING = -256;
 
@@ -37,16 +40,28 @@ const Genotypes = struct {
 
     // ---- helpers
 
+    fn is_phased(str: [] const u8) bool {
+        return std.mem.containsAtLeast(u8, str, 1, "|");
+    }
+    
     /// Convert a genotype (sample) string to a list of numbers
     fn to_num(str: []const u8) !ArrayList(i64) {
         var list = ArrayList(i64).init(test_allocator);
-        var splits = std.mem.split(u8, str, "|");
+
+        var splits = if (is_phased(str)) 
+            std.mem.split(u8, str, "|")
+        else
+            std.mem.split(u8, str, "/");
+
         while (splits.next()) |chunk| {
             const i: i64 = 
                 if (chunk[0] == '.') 
                 GENOTYPE_MISSING
                 else
-                try fmt.parseInt(i64,chunk,10);
+                fmt.parseInt(i64,chunk,10) catch |err| {
+                    try expect(err == error.InvalidCharacter);
+                    return error.CannotParseSample;
+                };
             list.append(i) catch unreachable;
         }
         return list;
@@ -56,6 +71,7 @@ const Genotypes = struct {
         const parsed = to_num(str) catch unreachable;
         return Genotypes {
             .genos = parsed,
+            .phased = is_phased(str)
         };
     }
 
