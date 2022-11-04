@@ -7,6 +7,7 @@ const ArrayList = std.ArrayList;
 const expect = std.testing.expect;
 const expectEqual = std.testing.expectEqual;
 const expectEqualSlices = std.testing.expectEqualSlices;
+const eql = std.mem.eql;
 const p = std.debug.print;
 const test_allocator = std.testing.allocator;
 
@@ -94,16 +95,30 @@ const Genotypes = struct {
         return list;
     }
     
-    fn to_s(self: *const Self) !ArrayList([] const u8) {
+    fn to_s(self: *const Self) !ArrayList(u8) {
+        var list = self.genos.items;
+        const phase_repr = if (self.phased) "|" else "/";
+        var s = ArrayList(u8).init(test_allocator);
+        for (list) | g | {
+            const result = try fmt.allocPrint(test_allocator, "{}{s}", .{g,phase_repr});
+            defer test_allocator.free(result);
+            try s.appendSlice(result);
+        }
+        s.items = s.items[0..s.items.len-1]; // drop trailing phase character
+        p("*{s}*",.{s.items});
+        return s;
+    }
+    
+    fn to_s2(self: *const Self) !ArrayList([] const u8) {
         _ = self;
         var s = ArrayList([] const u8).init(test_allocator);
         for (self.genos.items) |g| {
-                // parseInt to go to str
-                // charDigit to int
-                const result = try fmt.allocPrint(test_allocator, "{}", .{g});
-                p("Result is {s}!\n", .{result});
-                try s.append(result);
-            }
+            // parseInt to go to str
+            // charDigit to int
+            const result = try fmt.allocPrint(test_allocator, "{}", .{g});
+            p("Result is {s}!\n", .{result});
+            try s.append(result);
+        }
         return s;
     }
 };
@@ -141,7 +156,7 @@ test "genotypes" {
     try list.append(0);
     try list.append(1);
     var gs = Genotypes{.genos = list, .phased = true};
-    var genos = try gs.to_s();
+    var genos = try gs.to_s2();
     defer {
         for (genos.items) |item| {
                 test_allocator.free(item);
@@ -168,7 +183,11 @@ test "genotypes" {
     //try expectEqualSlices(i64, add4.items, &.{ GENOTYPE_MISSING, 3 });
 
     const genotypes = Genotypes.init("1|0");
-    p("{d}",.{genotypes.genos.items});
     defer genotypes.deinit();
+    p("{d}",.{genotypes.genos.items});
+    const str = try genotypes.to_s();
+    defer str.deinit();
+    p("{s}",.{str});
+    try expect(eql(u8, str.items, "1|0"));
 }
 
