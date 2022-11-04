@@ -13,14 +13,29 @@ const test_allocator = std.testing.allocator;
 
 const GENOTYPE_MISSING = -256;
 
+fn split_samples(str: []const u8) *ArrayList([] const u8) {
+    var list = ArrayList([] const u8).init(test_allocator);
+    defer list.deinit();
+    var splits = std.mem.split(u8, str, " ");
+    while (splits.next()) |chunk| {
+        list.append(chunk) catch |err| {
+            std.debug.print("out of memory {e}\n", .{err});
+        };
+    }
+    return &list;
+}
+
+
 /// Genotypes come as a list of integers separated by | (phased) or /
 /// (unphased).  You can't really mix phased/unphased so we can track
 /// that as a boolean.
 const Genotypes = struct {
     genos: ArrayList(i64),
-    phased: bool,
+    phased: bool = false,
 
     const Self = @This();
+
+    // ---- helpers
 
     /// Convert a genotype (sample) string to a list of numbers
     fn to_num(str: []const u8) !ArrayList(i64) {
@@ -38,6 +53,17 @@ const Genotypes = struct {
         return list;
     }
 
+    fn init(str: [] const u8) Genotypes {
+        const numbered = to_num(str) catch unreachable;
+        return Genotypes {
+            .genos = numbered,
+        };
+    }
+
+    fn deinit(self: *const Self) void {
+        self.genos.deinit();
+    }
+    
     /// Take a 0-n indexed genotype and add offset idx. When the
     /// genotype is 0 (ref) or missing it is not changed.
     fn renumber(idx: usize, list: ArrayList(i64)) ArrayList(i64) {
@@ -67,18 +93,6 @@ const Genotypes = struct {
     }
 };
 
-fn split_genotypes(str: []const u8) *ArrayList([] const u8) {
-    var list = ArrayList([] const u8).init(test_allocator);
-    defer list.deinit();
-    var splits = std.mem.split(u8, str, " ");
-    while (splits.next()) |chunk| {
-        list.append(chunk) catch |err| {
-            std.debug.print("out of memory {e}\n", .{err});
-        };
-    }
-    return &list;
-}
-
 
 /// Walks all genotypes in the list of variants and reduces them to
 /// the genotypes of the combined variant. For examples 0|1 genotypes
@@ -86,16 +100,24 @@ fn split_genotypes(str: []const u8) *ArrayList([] const u8) {
 /// heterozygous only (at this point).
 pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
     var ngenos = ArrayList([] const u8).init(test_allocator);
-    _ = vs;
-    // for (vs.items) |v,i| {
+    for (vs.items) |v,i| {
         // Fetch the genotypes from each variant
-    //     for (v.genotypes().items) | geno | {
-    //        // const geno2 = Genotypes.renumber_genotypes(i,geno);
-    //        p("({s})",.{geno2});
-    //        ngenos.append(geno2) catch unreachable;
-    //    }
-    //}
+        for (v.genotypes().items) | geno | {
+            
+            const geno2 = Genotypes.to_num(geno);
+            const geno3 = Genotypes.renumber(i,try geno2);
+            p("({s}{d})",.{geno,geno3.items});
+            
+            // ngenos.append(Genotypes.to_s(geno3)) catch unreachable;
+        }
+    }
+    p("{s}",.{ngenos.items});
     return ngenos;
+}
+
+test "split genotypes" {
+    const input_samples = "1|0 .|1 0|1 1|1";
+    try std.testing.expectEqual(split_samples(input_samples).items.len, 4);
 }
 
 test "genotypes" {
@@ -129,9 +151,9 @@ test "genotypes" {
     try expectEqualSlices(i64, gs4.items, &.{ GENOTYPE_MISSING, 2 });
     const add4 = Genotypes.renumber(1,gs4);
     try expectEqualSlices(i64, add4.items, &.{ GENOTYPE_MISSING, 3 });
+
+    const genotypes = Genotypes.init("1|0");
+    p("{d}",.{genotypes.genos.items});
+    defer genotypes.deinit();
 }
 
-test "split genotypes" {
-    const input_genotypes = "1|0 .|1 0|1 1|1";
-    try std.testing.expectEqual(split_genotypes(input_genotypes).items.len, 4);
-}

@@ -144,7 +144,7 @@ const Variant = struct {
         while (i < size) : (i += 1) {
             const s = res[i];
             const s2 = to_slice(s);
-            // p("<{s}>",.{s2});
+            p("<{s}>",.{s2});
             list.append(s2) catch unreachable;
         }
         return list;

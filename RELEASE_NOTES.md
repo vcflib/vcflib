@@ -9,6 +9,7 @@ and
       + [X] rewrite vcfcreatemulti using zig
       + [.] merge genotypes correctly, with tests
       + [ ] adjust info and genotypes for variants that have multiple alts already
+      + [ ] handle phase
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
 - [ ] RELEASE 1.0.5
