@@ -354,9 +354,9 @@ endif(HTSLIB_LOCAL)
 
 # FIXME: hard-coded compile switches need to be fixed upstream
 if (ASAN)
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC_FLAGS=-fPIC setup asan lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup asan lib_wfa)
 else()
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC_FLAGS=-fPIC setup lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup lib_wfa)
 endif()
 
 # if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
@@ -374,13 +374,14 @@ ExternalProject_Add(wfa-EXT
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
 set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
-set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfacpp.a)
+set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a )
+# set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a ${SOURCE_DIR}/lib/libwfacpp.a )
 link_directories($SOURCE_DIR}/lib)
 MESSAGE(STATUS ${WFA_LINK_LIBRARIES})
 
-add_library(WAFCPP_STATIC_LIB STATIC IMPORTED)
-set_target_properties(WAFCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${WFA_LINK_LIBRARIES})
-add_dependencies(WAFCPP_STATIC_LIB wfa-EXT)
+# add_library(WAFCPP_STATIC_LIB STATIC IMPORTED)
+# set_target_properties(WAFCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${WFA_LINK_LIBRARIES})
+# add_dependencies(WAFCPP_STATIC_LIB wfa-EXT)
 
 add_custom_target(wfa
     DEPENDS wfa-EXT

@@ -36,11 +36,14 @@
 #include <Fasta.h>
 extern "C" {
     #include "filevercmp.h"
+    #include "wavefront/wavefront_align.h"
 }
 
-#include "bindings/cpp/WFAligner.hpp"
+// #include "bindings/cpp/WFAligner.hpp"
+// #include "wavefront/wavefront_aligner.h"
 
-using namespace wfa;
+
+// using namespace wfa;
 
 using namespace std;
 

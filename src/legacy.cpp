@@ -153,8 +153,8 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
               &wf_aligner->cigar,wf_aligner->mm_allocator);
             */
             // Fetch CIGAR
-            char* buffer = wf_aligner->cigar.operations + wf_aligner->cigar.begin_offset;
-            int buf_len = wf_aligner->cigar.end_offset - wf_aligner->cigar.begin_offset;
+            char* buffer = wf_aligner->cigar->operations + wf_aligner->cigar->begin_offset;
+            int buf_len = wf_aligner->cigar->end_offset - wf_aligner->cigar->begin_offset;
             // Create string and return
             cigar = std::string(buffer,buf_len);
             if (debug) cerr << "Have a CIGAR " << cigar << endl;
