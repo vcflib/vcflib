@@ -40,6 +40,7 @@ Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW.
 + Fix for -L switch for vcfallelicprimitives
 + Added libasan and lto support
 + Removed useless googletest submodule
++ Moved git submodules into ./contrib
 + Added python bindings with pybind11
 + Added python testing framework
 + Added tabixpp back in as a submodule, fixes https://github.com/vcflib/vcflib/issues/305
