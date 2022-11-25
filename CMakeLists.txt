@@ -96,7 +96,7 @@ endif(GPROF)
 # ---- Include files
 
 include_directories(include)
-include_directories(fastahack)
+include_directories(contrib/fastahack)
 include_directories(intervaltree)
 include_directories(smithwaterman)
 include_directories(multichoose)
@@ -122,7 +122,7 @@ file(GLOB INCLUDES
   multichoose/*.h*
   intervaltree/*.h*
   smithwaterman/*.h*
-  fastahack/*.h*
+  contrib/fastahack/*.h*
   filevercmp/*.h*
   )
 
@@ -141,7 +141,7 @@ set(vcflib_SOURCE
     src/LeftAlign.cpp
     src/cigar.cpp
     src/allele.cpp
-    fastahack/Fasta.cpp
+    contrib/fastahack/Fasta.cpp
     smithwaterman/SmithWatermanGotoh.cpp
     smithwaterman/Repeats.cpp
     smithwaterman/IndelAllele.cpp
