@@ -97,10 +97,10 @@ endif(GPROF)
 
 include_directories(include)
 include_directories(contrib/fastahack)
-include_directories(intervaltree)
-include_directories(smithwaterman)
-include_directories(multichoose)
-include_directories(filevercmp)
+include_directories(contrib/intervaltree)
+include_directories(contrib/smithwaterman)
+include_directories(contrib/multichoose)
+include_directories(contrib/filevercmp)
 
 if(NOT HTSLIB_FOUND)
   set(HTSLIB_LOCAL contrib/tabixpp/htslib)
@@ -119,11 +119,11 @@ set(WFA_LOCAL contrib/WFA2-lib)
 
 file(GLOB INCLUDES
   src/*.h*
-  multichoose/*.h*
-  intervaltree/*.h*
-  smithwaterman/*.h*
+  contrib/multichoose/*.h*
+  contrib/intervaltree/*.h*
+  contrib/smithwaterman/*.h*
   contrib/fastahack/*.h*
-  filevercmp/*.h*
+  contrib/filevercmp/*.h*
   )
 
 set(vcflib_SOURCE
@@ -142,13 +142,13 @@ set(vcflib_SOURCE
     src/cigar.cpp
     src/allele.cpp
     contrib/fastahack/Fasta.cpp
-    smithwaterman/SmithWatermanGotoh.cpp
-    smithwaterman/Repeats.cpp
-    smithwaterman/IndelAllele.cpp
-    smithwaterman/disorder.cpp
-    smithwaterman/LeftAlign.cpp
-    fsom/fsom.c
-    filevercmp/filevercmp.c
+    contrib/smithwaterman/SmithWatermanGotoh.cpp
+    contrib/smithwaterman/Repeats.cpp
+    contrib/smithwaterman/IndelAllele.cpp
+    contrib/smithwaterman/disorder.cpp
+    contrib/smithwaterman/LeftAlign.cpp
+    contrib/fsom/fsom.c
+    contrib/filevercmp/filevercmp.c
 )
 
 if (TABIXPP_LOCAL) # add the tabixpp source file

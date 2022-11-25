@@ -1,26 +1,26 @@
 [submodule "smithwaterman"]
-	path = smithwaterman
+	path = contrib/smithwaterman
 	url = https://github.com/ekg/smithwaterman.git
 [submodule "multichoose"]
-	path = multichoose
+	path = contrib/multichoose
 	url = https://github.com/ekg/multichoose.git
 [submodule "fastahack"]
 	path = contrib/fastahack
 	url = https://github.com/ekg/fastahack.git
 [submodule "intervaltree"]
-	path = intervaltree
+	path = contrib/intervaltree
 	url = https://github.com/ekg/intervaltree.git
 [submodule "fsom"]
-	path = fsom
+	path = contrib/fsom
 	url = https://github.com/ekg/fsom.git
 [submodule "filevercmp"]
-	path = filevercmp
+	path = contrib/filevercmp
 	url = https://github.com/ekg/filevercmp.git
 [submodule "googletest"]
 	path = googletest
 	url = https://github.com/google/googletest.git
 [submodule "libVCFH"]
-	path = libVCFH
+	path = contrib/libVCFH
 	url = https://github.com/edawson/libVCFH.git
 [submodule "src/simde"]
 	path = src/simde
