@@ -19,7 +19,8 @@ const p = @import("std").debug.print;
 const test_allocator = std.testing.allocator;
 
 const VCFError = error{
-    UnexpectedOrder
+    UnexpectedOrder,
+    MultiAltNotSupported
 };
 
 const hello = "Hello World from Zig";
@@ -134,7 +135,7 @@ const Variant = struct {
 
     /// Get the C++ genotypes as a list
     pub fn genotypes(self: *const Self) ArrayList([] const u8) {
-        p("Inside genotypes:\n",.{});
+        // p("Inside genotypes:\n",.{});
         var list = ArrayList([] const u8).init(test_allocator);
         const size = var_samples_num(self.v);
         var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
@@ -144,7 +145,7 @@ const Variant = struct {
         while (i < size) : (i += 1) {
             const s = res[i];
             const s2 = to_slice(s);
-            p("<{s}>",.{s2});
+            // p("<{s}>",.{s2});
             list.append(s2) catch unreachable;
         }
         return list;
@@ -392,6 +393,11 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
             after = ref[last..];
         }
         else after = "";
+        if (v.alt().items.len > 1) {
+            p("Error: this code only supports one ALT allele per record (WIP/FIXME)\n",.{});
+            return error.MultiAltNotSupported;
+        }
+            
         for (v.alt().items) | alt | {
             var n = ArrayList(u8).init(test_allocator);
             defer n.deinit();

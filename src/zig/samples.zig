@@ -82,7 +82,7 @@ const Genotypes = struct {
     
     /// Take a 0-n indexed genotype and add offset idx. When the
     /// genotype is 0 (ref) or missing it is not changed.
-    fn renumber(self: *const Self, idx: usize) ArrayList(i64) {
+    fn renumber(self: *const Self, idx: usize) !void {
         var list = self.genos;
         for (list.items) | g,i | {
             list.items[i] = 
@@ -92,7 +92,6 @@ const Genotypes = struct {
                     else => g+@intCast(i64,idx)
             };
         }
-        return list;
     }
     
     fn to_s(self: *const Self) !ArrayList(u8) {
@@ -100,12 +99,15 @@ const Genotypes = struct {
         const phase_repr = if (self.phased) "|" else "/";
         var s = ArrayList(u8).init(test_allocator);
         for (list) | g | {
-            const result = try fmt.allocPrint(test_allocator, "{}{s}", .{g,phase_repr});
+            const result = if (g == GENOTYPE_MISSING) 
+                try fmt.allocPrint(test_allocator, ".{s}", .{phase_repr})
+            else
+                try fmt.allocPrint(test_allocator, "{}{s}", .{g,phase_repr});
             defer test_allocator.free(result);
             try s.appendSlice(result);
         }
         s.items = s.items[0..s.items.len-1]; // drop trailing phase character
-        p("*{s}*",.{s.items});
+        // p("*{s}*",.{s.items});
         return s;
     }
     
@@ -116,7 +118,7 @@ const Genotypes = struct {
             // parseInt to go to str
             // charDigit to int
             const result = try fmt.allocPrint(test_allocator, "{}", .{g});
-            p("Result is {s}!\n", .{result});
+            // p("Result is {s}!\n", .{result});
             try s.append(result);
         }
         return s;
@@ -135,13 +137,12 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList(
         for (v.genotypes().items) | geno | {
             
             var geno2 = Genotypes.init(geno);
-            const geno3 = geno2.renumber(i);
-            p("({s}{d})",.{geno,geno3.items});
-            
-            // ngenos.append(Genotypes.to_s(geno3)) catch unreachable;
+            try geno2.renumber(i);
+            const s = try geno2.to_s();
+            ngenos.append(s.items) catch unreachable;
         }
     }
-    p("{s}",.{ngenos.items});
+    p("ngenos: {s}",.{ngenos.items});
     return ngenos;
 }
 
@@ -169,13 +170,17 @@ test "genotypes" {
     defer gs2.deinit();
     try expect(gs2.items[0]==1);
     try expectEqual(gs2.items[1],0);
-    const gs3 = try Genotypes.to_num("1|.");
+    const gs3 = Genotypes.init("1|.");
     defer gs3.deinit();
-    try expectEqual(gs3.items.len,2);
-    try expectEqual(gs3.items[1],GENOTYPE_MISSING);
-    //const add3 = Genotypes.renumber(1,gs3);
-    //try expectEqual(add3.items[0],2);
-    //try expectEqual(add3.items[1],GENOTYPE_MISSING);
+    var list2 = gs3.genos.items;
+    try expectEqual(list2.len,2);
+    try expectEqual(list2[1],GENOTYPE_MISSING);
+    try gs3.renumber(1);
+    // try expectEqual(add3.items[0],2);
+    // try expectEqual(add3.items[1],GENOTYPE_MISSING);
+    const s3 = try gs3.to_s();
+    defer s3.deinit();
+    try expect(eql(u8, s3.items, "2|."));
     const gs4 = try Genotypes.to_num(".|2");
     defer gs4.deinit();
     try expectEqualSlices(i64, gs4.items, &.{ GENOTYPE_MISSING, 2 });
@@ -184,10 +189,10 @@ test "genotypes" {
 
     const genotypes = Genotypes.init("1|0");
     defer genotypes.deinit();
-    p("{d}",.{genotypes.genos.items});
+    // p("{d}",.{genotypes.genos.items});
     const str = try genotypes.to_s();
     defer str.deinit();
-    p("{s}",.{str});
+    // p("{s}",.{str});
     try expect(eql(u8, str.items, "1|0"));
 }
 
