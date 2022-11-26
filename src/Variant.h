@@ -7,8 +7,7 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
-#ifndef __VARIANT_H
-#define __VARIANT_H
+#pragma once
 
 #include <vector>
 #include <list>
@@ -34,16 +33,11 @@
 #include "rkmh.hpp"
 #include "LeftAlign.hpp"
 #include <Fasta.h>
+#include "wavefront/wfa.hpp"
+
 extern "C" {
-    #include "filevercmp.h"
-    #include "wavefront/wavefront_align.h"
+  #include "filevercmp.h"
 }
-
-// #include "bindings/cpp/WFAligner.hpp"
-// #include "wavefront/wavefront_aligner.h"
-
-
-// using namespace wfa;
 
 using namespace std;
 
@@ -668,5 +662,3 @@ private:
 };
 
 } // end namespace VCF
-
-#endif

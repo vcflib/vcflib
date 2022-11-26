@@ -7,9 +7,6 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
-#include "bindings/cpp/WFAligner.hpp"
-using namespace wfa;
-
 #include "Variant.h"
 #include "convert.h"
 #include "join.h"

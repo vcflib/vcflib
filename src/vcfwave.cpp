@@ -87,6 +87,8 @@ int main(int argc, char** argv) {
 
     VariantCallFile variantFile;
 
+    // int y = MIN(2,3);
+    // auto a = DNA_CHAR_A;
     int c;
     while (true) {
         static struct option long_options[] =
