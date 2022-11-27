@@ -44,7 +44,8 @@ extern fn var_set_id(?* anyopaque, [*c] const u8) void;
 extern fn var_set_ref(?* anyopaque, [*c] const u8) void;
 extern fn var_set_alt(?* anyopaque, [*c] const u8, usize) void;
 extern fn var_set_info(?* anyopaque, name: [*c] const u8, value: [*c] const u8, int: usize) void;
-extern fn var_set_geno(?* anyopaque, value: [*c] const u8, int: usize) void;
+extern fn var_set_sample(?* anyopaque, [*c] const u8, usize) void;
+// extern fn var_set_geno(?* anyopaque, value: [*c] const u8, int: usize) void;
 extern fn call_c([*] const u8) void;
 
 export fn hello_zig2(msg: [*] const u8) [*]const u8 {
@@ -177,7 +178,6 @@ const Variant = struct {
     /// Set C++ infos
     pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {
         var c_name = to_cstr0(name);
-        _ = data;
         var_clear_info(self.v,c_name);
         var i: usize = 0;
         while (i < data.items.len) : (i += 1) {
@@ -185,6 +185,14 @@ const Variant = struct {
         }
     }
 
+    pub fn set_samples(self: *const Self, nsamples: ArrayList([] const u8)) void {
+        // var_clear_samples(self.v);
+        var i: usize = 0;
+        while (i < nsamples.items.len) : (i += 1) {
+            _ = i;
+            var_set_sample(self.v,to_cstr0(nsamples.items[i]),i);
+        }
+    }
 };
 
 // by @Cimport:
@@ -268,9 +276,8 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
         }
 
     // Get genotypes and update mvar
-    var ngenos = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
-    // p("\nResulting in {s}\n",.{ngenos.items});
-    _ = ngenos;
+    var nsamples = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
+    mvar.set_samples(nsamples);
     
     return mvar.v;
 }

@@ -27,6 +27,8 @@ void var_set_alt(void *var, const char *alt, long idx);
 void var_clear_info(void *var, const char *name);
 void var_set_info(void *var, const char *name, const char *values, long idx);
 
+void var_set_sample(void *var, const char *alt, long idx);
+
 const unsigned long var_samples_num(void *var);
 
 // Zig functionality

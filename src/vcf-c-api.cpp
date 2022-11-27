@@ -95,8 +95,6 @@ void var_clear_alt(void *var) {
 
 void var_set_alt(void *var, const char *alt, long idx) {
     auto v = static_cast<Variant*>(var);
-    // v->ref = ref; // copies content
-    // printf("[C] %s\n",alt);
     v->alt.push_back(alt);
 }
 
@@ -128,4 +126,13 @@ const char **var_geno(void *var, const char **ret) {
         idx++;
     }
     return ret;
+}
+
+void var_set_sample(void *var, const char *genos, long idx) {
+    auto v = static_cast<Variant*>(var);
+    //    ret[idx] = samples[sname]["GT"].front().data();
+    auto sname = v->sampleNames[idx].data();
+    printf("%i: %s\n",idx,sname);
+    // map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternate
+    v->samples[sname]["GT"].push_back(genos);
 }
