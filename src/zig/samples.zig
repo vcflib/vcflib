@@ -76,13 +76,6 @@ const Genotypes = struct {
             .phased = is_phased(str)
         };
     }
-
-    fn init2(items: usize) Genotypes {
-        _ = items;
-        return Genotypes {
-            .genos = ArrayList(i64).init(test_allocator)
-        };
-    }
     
     fn deinit(self: *const Self) void {
         self.genos.deinit();
@@ -102,10 +95,15 @@ const Genotypes = struct {
         }
     }
 
+    /// Merge two samples. If there is a conflict we just select the
+    /// first genotype. FIXME: at this point we are not checking for
+    /// size mismatches
     fn merge(self: *const Self, genos2: Genotypes) !void {
         var list = self.genos;
         for (genos2.genos.items) | g,i | {
-            list.items[i] = g;
+            const current = list.items[i];
+            if (current != 0 and current != GENOTYPE_MISSING) continue;
+            if (g != GENOTYPE_MISSING) list.items[i] = g;
         }
     }
     
