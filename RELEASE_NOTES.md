@@ -32,6 +32,7 @@ Important changes:
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 
 + Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md) (thank you Erik Garrison https://github.com/ekg and Santiago Marco-Sola  https://github.com/smarco).
++ Switched to our WFA2-lib until patch is merged upstream. Fixes bleeding in of macros https://github.com/vcflib/vcflib/issues/359
 + Support longer read inversions in vcfwave!
 + vcfallelicprimitives now considered legacy/obsolete
 + Improved CMake configuration
