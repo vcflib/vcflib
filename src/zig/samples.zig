@@ -30,9 +30,10 @@ fn split_samples(str: []const u8) *ArrayList([] const u8) {
 }
 
 
-/// Genotypes come as a list of integers separated by | (phased) or /
-/// (unphased).  You can't really mix phased/unphased so we can track
-/// that as a boolean.
+/// Genotypes come as a per sample list of integers separated by |
+/// (phased) or / (unphased).  You can't really mix phased/unphased so
+/// we can track that as a boolean. To track samples create an
+/// ArrayList(genotypes).
 const Genotypes = struct {
     genos: ArrayList(i64),
     phased: bool = false,
@@ -76,6 +77,13 @@ const Genotypes = struct {
         };
     }
 
+    fn init2(items: usize) Genotypes {
+        _ = items;
+        return Genotypes {
+            .genos = ArrayList(i64).init(test_allocator)
+        };
+    }
+    
     fn deinit(self: *const Self) void {
         self.genos.deinit();
     }
@@ -91,6 +99,13 @@ const Genotypes = struct {
                     GENOTYPE_MISSING => GENOTYPE_MISSING,
                     else => g+@intCast(i64,idx)
             };
+        }
+    }
+
+    fn merge(self: *const Self, genos2: Genotypes) !void {
+        var list = self.genos;
+        for (genos2.genos.items) | g,i | {
+            list.items[i] = g;
         }
     }
     
@@ -131,19 +146,27 @@ const Genotypes = struct {
 /// get translated to their list numbers 0|6. This works for
 /// heterozygous only (at this point).
 pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
-    var ngenos = ArrayList([] const u8).init(test_allocator);
-    for (vs.items) |v,i| {
-        // Fetch the genotypes from each variant
-        for (v.genotypes().items) | geno | {
-            
-            var geno2 = Genotypes.init(geno);
+    var samples = ArrayList(Genotypes).init(test_allocator); // result set
+    for (vs.items) | v,i | { // Fetch the genotypes from each variant
+        for (v.genotypes().items) | geno,j | {
+            var geno2 = Genotypes.init(geno); // convert from string to number list
             try geno2.renumber(i);
-            const s = try geno2.to_s();
-            ngenos.append(s.items) catch unreachable;
+            if (i==0) {
+                try samples.append(geno2);
+            }
+            else {
+                try samples.items[j].merge(geno2);
+            }
         }
     }
-    p("ngenos: {s}",.{ngenos.items});
-    return ngenos;
+    // convert to strings for vcflib C++ core code
+    var s_samples = ArrayList([] const u8).init(test_allocator);
+    for (samples.items) |g| {
+        const s = try g.to_s();
+        s_samples.append(s.items) catch unreachable;
+    }
+    p("ngeno_s: size {d} {s}",.{s_samples.items.len,s_samples.items});
+    return s_samples;
 }
 
 test "split genotypes" {
