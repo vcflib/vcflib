@@ -193,6 +193,8 @@ const Variant = struct {
             var_clear_sample(self.v,i);
             var s = nsamples.items[i];
             var buffer = test_allocator.alloc(u8, s.len + 1) catch unreachable;
+            defer test_allocator.free(buffer);
+ 
             for (s)  | c,j | {
                 buffer[j] = c;
             }
