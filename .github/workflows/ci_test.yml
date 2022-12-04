@@ -23,13 +23,21 @@ jobs:
     - uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: install zig using wget
+      run: |
+        wget -q https://ziglang.org/download/0.9.1/zig-linux-x86_64-0.9.1.tar.xz
+        tar xf zig-linux-x86_64-0.9.1.tar.xz
+        ./zig-linux-x86_64-0.9.1/zig version
+        echo "$(pwd)/zig-linux-x86_64-0.9.1" >> $GITHUB_PATH
+        echo GITHUB_PATH=$GITHUB_PATH
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Configure
       run: |
+        echo "$(pwd)/zig-linux-x86_64-0.9.1" >> $GITHUB_PATH
         mkdir -p build
         cd build
-        cmake -DZIG=OFF ..
+        cmake ..
     - name: Compile
       run: cmake --build build/ --verbose -- -j 2
     - name: Run tests
