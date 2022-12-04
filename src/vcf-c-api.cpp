@@ -128,11 +128,17 @@ const char **var_geno(void *var, const char **ret) {
     return ret;
 }
 
+void var_clear_sample(void *var, long idx) {
+    auto v = static_cast<Variant*>(var);
+    auto sname = v->sampleNames[idx].data();
+    v->samples[sname]["GT"].clear();
+}
+
 void var_set_sample(void *var, const char *genos, long idx) {
     auto v = static_cast<Variant*>(var);
     //    ret[idx] = samples[sname]["GT"].front().data();
     auto sname = v->sampleNames[idx].data();
-    printf("%i: %s\n",idx,sname);
+    // printf("%i: %s\n",idx,sname);
     // map<string, map<string, vector<string> > > samples;  // vector<string> allows for lists by Genotypes or Alternate
     v->samples[sname]["GT"].push_back(genos);
 }

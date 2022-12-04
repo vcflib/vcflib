@@ -44,6 +44,7 @@ extern fn var_set_id(?* anyopaque, [*c] const u8) void;
 extern fn var_set_ref(?* anyopaque, [*c] const u8) void;
 extern fn var_set_alt(?* anyopaque, [*c] const u8, usize) void;
 extern fn var_set_info(?* anyopaque, name: [*c] const u8, value: [*c] const u8, int: usize) void;
+extern fn var_clear_sample(variant: *anyopaque, usize) void;
 extern fn var_set_sample(?* anyopaque, [*c] const u8, usize) void;
 // extern fn var_set_geno(?* anyopaque, value: [*c] const u8, int: usize) void;
 extern fn call_c([*] const u8) void;
@@ -73,6 +74,7 @@ const Variant = struct {
     }
 
     inline fn to_cstr0(str: [] const u8) [*c]const u8 { // not sure this works because we need final zero
+        //var s0 = str.toOwnedSliceSentinel(0);
         return @ptrCast([*c]const u8,str);
     }
 
@@ -186,11 +188,16 @@ const Variant = struct {
     }
 
     pub fn set_samples(self: *const Self, nsamples: ArrayList([] const u8)) void {
-        // var_clear_samples(self.v);
         var i: usize = 0;
         while (i < nsamples.items.len) : (i += 1) {
-            _ = i;
-            var_set_sample(self.v,to_cstr0(nsamples.items[i]),i);
+            var_clear_sample(self.v,i);
+            var s = nsamples.items[i];
+            var buffer = test_allocator.alloc(u8, s.len + 1) catch unreachable;
+            for (s)  | c,j | {
+                buffer[j] = c;
+            }
+            buffer[s.len] = 0;
+            var_set_sample(self.v,to_cstr0(buffer),i);
         }
     }
 };

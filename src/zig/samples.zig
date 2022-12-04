@@ -111,6 +111,7 @@ const Genotypes = struct {
         var list = self.genos.items;
         const phase_repr = if (self.phased) "|" else "/";
         var s = ArrayList(u8).init(test_allocator);
+        // concatenate genotypes with their phase separator
         for (list) | g | {
             const result = if (g == GENOTYPE_MISSING) 
                 try fmt.allocPrint(test_allocator, ".{s}", .{phase_repr})
@@ -157,13 +158,13 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList(
             }
         }
     }
-    // convert to strings for vcflib C++ core code
+    // convert to zero terminated strings for vcflib C++ core code
     var s_samples = ArrayList([] const u8).init(test_allocator);
     for (samples.items) |g| {
         const s = try g.to_s();
         s_samples.append(s.items) catch unreachable;
     }
-    p("ngeno_s: size {d} {s}",.{s_samples.items.len,s_samples.items});
+    // p("ngeno_s: size {d} {s}\n",.{s_samples.items.len,s_samples.items});
     return s_samples;
 }
 
@@ -185,7 +186,7 @@ test "genotypes" {
             }
         genos.deinit();
     }
-    p("YES {s}",.{genos.items});
+    // p("YES {s}",.{genos.items});
 
     const gs2 = try Genotypes.to_num("1|0");
     defer gs2.deinit();
