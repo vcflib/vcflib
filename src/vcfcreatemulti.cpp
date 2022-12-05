@@ -125,7 +125,7 @@ Variant createMultiallelic_zig(vector<Variant>& vars) {
     return *mvar;
 }
 
-
+// This function is called for every line/variant in the VCF file
 Variant createMultiallelic(vector<Variant>& vars) {
     if (nextGen)
         return createMultiallelic_zig(vars);
@@ -245,6 +245,9 @@ int main(int argc, char** argv) {
         Variant result = createMultiallelic(vars);
         cout << result << endl;
     }
+
+    if (nextGen)
+        zig_display_warnings();
 
     return 0;
 

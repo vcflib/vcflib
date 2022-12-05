@@ -47,3 +47,5 @@ long win_size(void *varwin);
 char *hello_zig2(char *s);
 
 void *zig_variant(void *var);
+
+void zig_display_warnings();

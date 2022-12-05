@@ -54,6 +54,16 @@ export fn hello_zig2(msg: [*] const u8) [*]const u8 {
     return result;
 }
 
+var warnings = ArrayList([] const u8).init(test_allocator);
+
+export fn zig_display_warnings() void {
+    defer warnings.deinit();
+    // warnings.append("NO WARNINGS+") catch unreachable;
+    for (warnings.items) | msg | {
+        p("{s}",.{msg});
+    }
+}
+
 /// Variant struct maps over the equivalent C++ version - copying data
 /// forth to zig and back to C++.
 const Variant = struct {
@@ -410,7 +420,8 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
         }
         else after = "";
         if (v.alt().items.len > 1) {
-            p("Error: this code only supports one ALT allele per record (WIP/FIXME)\n",.{});
+            warnings.append("This code only supports one ALT allele per record: skipping entry") catch unreachable;
+            // p("Error: this code only supports one ALT allele per record (WIP/FIXME)\n",.{});
             return error.MultiAltNotSupported;
         }
             
