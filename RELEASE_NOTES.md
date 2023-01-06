@@ -5,15 +5,19 @@ and
 
 ## TODO
 
-- [ ] vcfcreatemulti merge multiple rows
+- [X] vcfcreatemulti merge multiple rows
       + [X] rewrite vcfcreatemulti using zig
-      + [.] merge genotypes correctly, with tests
-      + [ ] adjust info and genotypes for variants that have multiple alts already (now errors)
+      + [X] merge genotypes correctly, with tests
+      + [X] adjust info and genotypes for variants that have multiple alts already (now errors)
       + [X] handle phase
+      + [ ] document using with `vcfwave` and `bcftools norm -m-`
+      + [ ] document building with zig
+      + [ ] add tests
+- [ ] RELEASE 1.0.5
+- [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
-- [ ] RELEASE 1.0.5
-- [ ] vcfuniq combine genotypes from non-unique records
+- [ ] vcfuniq combine genotypes from non-unique records: use vcfcreatemulti and bcftools norm as above
 - [ ] vcfwave check polyploids?
 - [ ] RELEASE 1.0.6
 
