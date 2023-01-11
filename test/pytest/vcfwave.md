@@ -14,10 +14,22 @@ vcfwave - reduces complex alleles by pairwise alignment with BiWFA
 **vcfwave** reduces complex alleles into simpler primitive representation using pairwise
 alignment with BiWFA.
 
-Realigns reference and alternate alleles with WFA, parsing out the primitive alleles
-into multiple VCF records. New records have IDs that reference the source record ID.
-Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes
-overlapping the deleted region.
+Ofter variant callers are not perfect. **vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, like Humpty Dumpty, can take them apart and put them together again in a more sane VCF output.
+Thereby getting rid of false positives and often greatly simplifying the output.
+We created these tools for the output from long-read pangenome genotypers - with 10K base pair realignments - and is used in the Human Pangenome Reference Consortium analyses (HPRC).
+
+**vcfwave** realigns reference and alternate alleles with the recently introduced super fast bi-wavefront aligner (WFA).
+**vcfwave** parses out the original `primitive' alleles into multiple VCF records and **vcfcreatemulti** puts them together again.
+These tools can handle insertions, deletions, inversions and nested sequences.
+In both tools information is tracked on original positions and genotypes are handled.
+New records have IDs that reference the source record ID.
+Deletion alleles will result in haploid (missing allele) genotypes overlapping the deleted region.
+
+A typical workflow will call **vcfwave** to realign all ALT alleles against the reference and spit out simplified VCF records.
+Next use a tool such as `bcftools norm -m-` to normalise the VCF records and split out multiple ALT alleles into separate VCF records.
+Finally use **vcfcreatemulti** to create multi-allele VCF records again.
+
+For more information see [vcfcreatemulti](./vcfcreatemulti.md).
 
 ## Options
 
@@ -98,9 +110,6 @@ grch38#chr4     10158257        >3655>3662_6    C       A       60      .       
 
 
 ```
-
-Note the new version is not yet perfect. I.e., these are currently not left aligned. Stay tuned...
-
 
 ## Source code
 

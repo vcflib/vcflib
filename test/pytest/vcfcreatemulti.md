@@ -3,7 +3,7 @@
 
 # NAME
 
-vcfcreatemulti - reduces complex alleles by pairwise alignment with BiWFA
+vcfcreatemulti - collates single ALT allele records into multi-allele records while tracking genotypes
 
 # SYNOPSIS
 
@@ -11,14 +11,11 @@ vcfcreatemulti - reduces complex alleles by pairwise alignment with BiWFA
 
 # DESCRIPTION
 
-**vcfcreatemulti** merges VCF records into one line by combining
-  alleles.
+**vcfcreatemulti** merges VCF records into one line by combining ALT alleles into a single VCF record. This tools is a great companion to [vcfwave](./vcfwave.md).
 
-Go through sorted VCF and if overlapping alleles are represented
-across multiple records, merge them into a single record.
+In 2022 **vcfcreatemulti** has been upgraded to track INFO records and genotypes (samples) so they are updated in the output.
 
-The current version merges records nicely, but does not yet update INFO fields and samples/genotypes.
-See below EXAMPLES for more.
+See below EXAMPLES and [vcfwave](./vcfwave.md) for more information.
 
 ## Options
 

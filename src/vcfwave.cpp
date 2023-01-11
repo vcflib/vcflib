@@ -1,8 +1,8 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2022 Erik Garrison
-    Copyright © 2020-2022 Pjotr Prins
+    Copyright © 2010-2023 Erik Garrison
+    Copyright © 2020-2023 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
