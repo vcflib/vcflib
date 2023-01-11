@@ -56,7 +56,6 @@ options:
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
     -t, --threads N         use this many threads for variant decomposition
-    -n, --nextgen           next gen mode.
     -d, --debug             debug mode.
 
 Type: transformation
@@ -78,7 +77,7 @@ int main(int argc, char** argv) {
     bool keepInfo = false;
     bool keepGeno = false;
     bool useWaveFront = true;
-    bool nextGen  = false;
+    bool nextGen  = true;
     bool debug    = false;
 
     int thread_count = 1;

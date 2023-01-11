@@ -53,14 +53,15 @@ across multiple records, merge them into a single record.  Currently
 only for indels.
 >
 options:
-     -n, --nextgen           next gen mode.
+>
+     --legacy           legacy mode (old C++ implementation does not do genotypes)
 >
 Type: transformation
 >
 
 ```
 
-vcfcreatemulti can combine overlapping alleles onto one record (VCF line), but it does not correct the INFO fields and sample (genotypes). For example:
+THe original 'legacy' vcfcreatemulti can combine overlapping alleles onto one record (VCF line), but it does not correct the INFO fields and sample (genotypes). For example:
 
 ```python
 
@@ -74,11 +75,11 @@ grch38#chr4     10158257        >3655>3662_6    C       A       60      .       
 
 ```
 
-gets converted into the following:
+now gets converted into the following:
 
 ```python
 
->>> sh("../build/vcfcreatemulti -n ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
+>>> sh("../build/vcfcreatemulti ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1,3,64,3,2,1;AF=0.011236,0.033708,0.719101,0.033708,0.022472,0.011236;AN=89,89,89,89,89,89;AT=>3655>3656>3657>3660>3662,>3655>3656>3660>3662,>3655>3656>3657>3658>3659>3660>3662,>3655>3656>3657>3658>3660>3662,>3655>3660>3662,>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0,0,0,0,0,0;TYPE=del,del,del,del,del,snp;combined=10158244-10158257      GT      0|0     3|3     3|3     3|0     1|3     0|4     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     4|5     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|4     3|3     3|3     5|0     3|0     3|3     0|3     3|3     3|3     2|3     3|2     3|3     3|3     0|3     3|3     3|3     3|0     3|2     3|3     0
 
 ```
@@ -93,11 +94,11 @@ These tests mostly check for any major regressions between vcflib parser and out
 In the first example grch38#chr8 36377478,36394713,36409983 get combined
 
 ```python
-# ./vcfcreatemulti -n ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfcreatemulti_2.vcf
->>> run_stdout("vcfcreatemulti ../samples/grch38#chr8_36353854-36453166.vcf", ext="vcf", uniq=2)
+# ./vcfcreatemulti ../samples/grch38#chr8_36353854-36453166.vcf > ../test/data/regression/vcfcreatemulti_2.vcf
+>>> run_stdout("vcfcreatemulti ../samples/grch38#chr8_36353854-36453166-bcftools-normalised.vcf", ext="vcf", uniq=2)
 output in <a href="../data/regression/vcfcreatemulti_2.vcf">vcfcreatemulti_2.vcf</a>
 
->>> run_stdout("vcfcreatemulti -n ../samples/sample.vcf", ext="vcf", uniq=3)
+>>> run_stdout("vcfcreatemulti ../samples/sample.vcf", ext="vcf", uniq=3)
 output in <a href="../data/regression/vcfcreatemulti_3.vcf">vcfcreatemulti_3.vcf</a>
 
 ```
@@ -105,10 +106,22 @@ output in <a href="../data/regression/vcfcreatemulti_3.vcf">vcfcreatemulti_3.vcf
 Check if the legacy version is still the same. Note it only retains the first genotype and has duplicate 'CC' alt alleles. INFO fields are not correct either.
 
 ```python
->>> sh("../build/vcfcreatemulti ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
+>>> sh("../build/vcfcreatemulti --legacy ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1;AF=0.011236;AN=89;AT=>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0;TYPE=del;combined=10158244-10158257     GT      0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
 
 ```
+
+## Trouble shooting
+
+If you get an error like
+
+```
+thread 502 panic: attempt to unwrap error: MultiAltNotSupported
+```
+
+It means the input file already contains multi-allele VCF records. To split these you can run a command such as `bcftools norm -m-` to normalise the VCF records and split out multiple ALT alleles into separate VCF records.
+Finally use **vcfcreatemulti** to create multi-allele VCF records again.
+
 
 # LICENSE
 

@@ -2,7 +2,7 @@
     vcflib C++ library for parsing and manipulating VCF files
 
     Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020-2022 Pjotr Prins
+    Copyright © 2020-2023 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -18,7 +18,7 @@ extern "C" {
 using namespace std;
 using namespace vcflib;
 
-bool nextGen  = false;
+bool nextGen  = true;
 
 // extern "C" void *zig_create_multi_allelic(Variant *retvar, Variant *varlist[], long size);
 
@@ -31,7 +31,8 @@ across multiple records, merge them into a single record.  Currently
 only for indels.
 
 options:
-     -n, --nextgen           next gen mode.
+
+     --legacy           legacy mode (old C++ implementation does not do genotypes)
 
 Type: transformation
 )";
@@ -143,7 +144,7 @@ int main(int argc, char** argv) {
         {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
-            {"nextgen", no_argument, 0, 'n'},
+            {"legacy", no_argument, 0, 'l'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
@@ -158,8 +159,8 @@ int main(int argc, char** argv) {
 
         switch (c) {
 
-            case 'n':
-                nextGen = true;
+            case 'l':
+                nextGen = false;
                 break;
 
             case 'h':
