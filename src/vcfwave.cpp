@@ -222,7 +222,7 @@ int main(int argc, char** argv) {
     uint64_t start = get_timestamp();
 
     if (!quiet)
-        cerr << "Parsing VCF file..." << endl;
+        cerr << "vcfwave processing VCF file..." << endl;
     while (variantFile.getNextVariant(var)) {
 
         amount = (double)variantFile.file_pos()/(double)file_size;
