@@ -12,8 +12,9 @@ and
       + [X] handle phase
       + [X] document using with `vcfwave` and `bcftools norm -m-`
       + [X] document building with zig
-      + [ ] add tests
-      + [ ] make CI pass with zig in path
+      + [X] default vcfwave and vcfcreatemulti to nextgen mode
+      + [ ] add tests (zig memory handler)
+      + [ ] make CI pass with recent zig in path
 - [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
