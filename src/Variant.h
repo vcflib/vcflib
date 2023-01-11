@@ -144,6 +144,13 @@ public:
         return parsedHeader;
     }
 
+    off_t file_pos() {
+        if (usingTabix) {
+            return tabixFile->file_pos();
+        }
+        return file->tellg();
+    }
+
     VariantCallFile(void) :
         usingTabix(false),
         parseSamples(true),

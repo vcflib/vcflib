@@ -108,6 +108,7 @@ include_directories(contrib/intervaltree)
 include_directories(contrib/smithwaterman)
 include_directories(contrib/multichoose)
 include_directories(contrib/filevercmp)
+include_directories(contrib/c-progress-bar)
 
 if(NOT HTSLIB_FOUND)
   set(HTSLIB_LOCAL contrib/tabixpp/htslib)
@@ -156,6 +157,7 @@ set(vcflib_SOURCE
     contrib/smithwaterman/LeftAlign.cpp
     contrib/fsom/fsom.c
     contrib/filevercmp/filevercmp.c
+    contrib/c-progress-bar/progress.c
 )
 
 if (TABIXPP_LOCAL) # add the tabixpp source file

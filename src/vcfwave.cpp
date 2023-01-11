@@ -20,7 +20,7 @@
 #include "convert.h"
 #include "join.h"
 #include "split.h"
-
+#include "progress.h"
 
 using namespace std;
 using namespace vcflib;
@@ -56,6 +56,7 @@ options:
                             be valid post-decomposition.  For biallelic loci in single-sample
                             VCFs, they should be usable with caution.
     -t, --threads N         use this many threads for variant decomposition
+    --quiet                 no progress bar
     -d, --debug             debug mode.
 
 Type: transformation
@@ -78,6 +79,7 @@ int main(int argc, char** argv) {
     bool keepGeno = false;
     bool useWaveFront = true;
     bool nextGen  = true;
+    bool quiet    = false;
     bool debug    = false;
 
     int thread_count = 1;
@@ -104,13 +106,14 @@ int main(int argc, char** argv) {
                 {"keep-geno", no_argument, 0, 'g'},
                 {"threads", required_argument, 0, 't'},
                 {"nextgen", no_argument, 0, 'n'},
+                {"quiet", no_argument, 0, 'q'},
                 {"debug", no_argument, 0, 'd'},
                 {0, 0, 0, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "ndhkt:L:p:t:K:I:f:",
+        c = getopt_long (argc, argv, "nqdhkt:L:p:t:K:I:f:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -136,6 +139,10 @@ int main(int argc, char** argv) {
 
         case 'n':
             nextGen = true;
+            break;
+
+        case 'q':
+            quiet = true;
             break;
 
         case 'd':
@@ -174,9 +181,12 @@ int main(int argc, char** argv) {
 
     omp_set_num_threads(thread_count);
 
+    off_t file_size = -1;
+
     if (optind < argc) {
         string filename = argv[optind];
         variantFile.open(filename);
+        file_size = get_file_size(filename.c_str());
     } else {
         variantFile.open(std::cin);
     }
@@ -208,7 +218,18 @@ int main(int argc, char** argv) {
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
+    double amount = 0.0;
+    uint64_t start = get_timestamp();
+
+    if (!quiet)
+        cerr << "Parsing VCF file..." << endl;
     while (variantFile.getNextVariant(var)) {
+
+        amount = (double)variantFile.file_pos()/(double)file_size;
+        // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
+        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0)
+            print_progress(amount*100, start);
+
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
         int max_allele_length = 0;
@@ -493,6 +514,8 @@ int main(int argc, char** argv) {
                 debug);
         }
     }
+
+    if (!quiet) cerr << endl;
 
     return 0;
 }
