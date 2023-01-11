@@ -367,7 +367,9 @@ And for some of the VCF executables
 - python
 - perl
 
-The zig dependency is for [vcfcreatemulti](./doc/vcfcreatemulti.md) that can be run after vcfwave to combine overlapping records. More on zig can be found in the [README](./src/zig/README.md).
+Make sure the `zig` tool is in the `PATH`.
+The `zig` dependency is for the recently upgraded [vcfcreatemulti](./doc/vcfcreatemulti.md) that can be run after vcfwave to combine overlapping records.
+More on `zig` can be found in the souce code [README](./src/zig/README.md).
 
 ### Using a different htslib
 

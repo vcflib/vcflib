@@ -93,6 +93,13 @@ if(GPROF)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif(GPROF)
 
+if (ZIG)
+  find_program(ZIG_EXE NAMES "zig")
+  if (NOT ZIG_EXE)
+    MESSAGE(FATAL_ERROR "zig binary not found in PATH: either use cmake -DNO_ZIG option or add zig to the PATH")
+  endif (NOT ZIG_EXE)
+endif(ZIG)
+
 # ---- Include files
 
 include_directories(include)

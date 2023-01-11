@@ -10,9 +10,10 @@ and
       + [X] merge genotypes correctly, with tests
       + [X] adjust info and genotypes for variants that have multiple alts already (now errors)
       + [X] handle phase
-      + [ ] document using with `vcfwave` and `bcftools norm -m-`
-      + [ ] document building with zig
+      + [X] document using with `vcfwave` and `bcftools norm -m-`
+      + [X] document building with zig
       + [ ] add tests
+      + [ ] make CI pass with zig in path
 - [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
