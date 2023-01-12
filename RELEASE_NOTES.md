@@ -12,6 +12,8 @@ and
       + [X] handle phase
       + [X] document using with `vcfwave` and `bcftools norm -m-`
       + [X] document building with zig
+      + [ ] update WFA-LIB
+      + [ ] added progress bar to vcfwave with update to tabixpp
       + [X] default vcfwave and vcfcreatemulti to nextgen mode
       + [ ] why is vcfwave on a single thread?
       + [ ] add tests (zig memory handler)
