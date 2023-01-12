@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
     string lastSeqName;
     vector<Variant> vars;
 
-    double amount = 0.0;
+    double amount = 0.0, prev_amount = 0.0;
     uint64_t start = get_timestamp();
 
     if (!quiet)
@@ -215,9 +215,10 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         amount = (double)variantFile.file_pos()/(double)file_size;
         // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
-
-        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0)
+        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.01) {
+            prev_amount = amount;
             print_progress(amount*100, start);
+        }
 
         if (lastSeqName.empty()) { // track the previous sequence name
             lastSeqName = var.sequenceName;

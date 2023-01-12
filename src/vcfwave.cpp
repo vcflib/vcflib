@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
     cout << variantFile.header << endl;
 
     Variant var(variantFile);
-    double amount = 0.0;
+    double amount = 0.0, prev_amount = 0.0;
     uint64_t start = get_timestamp();
 
     if (!quiet)
@@ -227,8 +227,10 @@ int main(int argc, char** argv) {
 
         amount = (double)variantFile.file_pos()/(double)file_size;
         // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
-        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0)
+        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.01) {
+            prev_amount = amount;
             print_progress(amount*100, start);
+        }
 
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
