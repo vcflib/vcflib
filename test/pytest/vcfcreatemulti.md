@@ -54,7 +54,8 @@ only for indels.
 >
 options:
 >
-     --legacy           legacy mode (old C++ implementation does not do genotypes)
+    --quiet           no progress bar
+    --legacy          legacy mode (old C++ implementation does not do genotypes)
 >
 Type: transformation
 >

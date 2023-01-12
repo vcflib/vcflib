@@ -109,6 +109,8 @@ void print_progress(double percentage, uint64_t start) {
     uint64_t estimated_total = elapsed / (percentage / 100.0);
     uint64_t remaining = estimated_total - elapsed;
 
+    if (percentage < 0.0 || percentage > 100.0) return;
+
     fprintf(stderr,"   Progress: %6.2f%% \t%s", percentage, BAR_START);
 
     for (i = 0; i < num_blocks; i++) {

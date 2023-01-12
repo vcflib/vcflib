@@ -14,11 +14,14 @@ extern "C" {
 #include <set>
 #include <sstream>
 #include <getopt.h>
+#include "progress.h"
 
 using namespace std;
 using namespace vcflib;
 
 bool nextGen  = true;
+bool quiet = false;
+off_t file_size = -1;
 
 // extern "C" void *zig_create_multi_allelic(Variant *retvar, Variant *varlist[], long size);
 
@@ -32,7 +35,8 @@ only for indels.
 
 options:
 
-     --legacy           legacy mode (old C++ implementation does not do genotypes)
+    --quiet           no progress bar
+    --legacy          legacy mode (old C++ implementation does not do genotypes)
 
 Type: transformation
 )";
@@ -144,6 +148,7 @@ int main(int argc, char** argv) {
         {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
+            {"quiet", no_argument, 0, 'q'},
             {"legacy", no_argument, 0, 'l'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
@@ -151,7 +156,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hn",
+        c = getopt_long (argc, argv, "hnq",
                          long_options, &option_index);
 
         if (c == -1)
@@ -161,6 +166,10 @@ int main(int argc, char** argv) {
 
             case 'l':
                 nextGen = false;
+                break;
+
+            case 'q':
+                quiet = true;
                 break;
 
             case 'h':
@@ -180,6 +189,7 @@ int main(int argc, char** argv) {
     if (optind < argc) {
         string filename = argv[optind];
         variantFile.open(filename);
+        file_size = get_file_size(filename.c_str());
     } else {
         variantFile.open(std::cin);
     }
@@ -196,10 +206,18 @@ int main(int argc, char** argv) {
     string lastSeqName;
     vector<Variant> vars;
 
-    // cout << "Calling into Zig" << endl;
-    //auto var_window = zig_variant_window();
+    double amount = 0.0;
+    uint64_t start = get_timestamp();
+
+    if (!quiet)
+        cerr << "vcfcreatemulti processing VCF file..." << endl;
 
     while (variantFile.getNextVariant(var)) {
+        amount = (double)variantFile.file_pos()/(double)file_size;
+        // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
+
+        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0)
+            print_progress(amount*100, start);
 
         if (lastSeqName.empty()) { // track the previous sequence name
             lastSeqName = var.sequenceName;
