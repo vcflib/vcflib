@@ -80,11 +80,6 @@ if (ASAN)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address  -fno-omit-frame-pointer -fno-common")
 endif(ASAN)
 
-if(OPENMP)
-  # find_package(OpenMP REQUIRED)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif(OPENMP)
-
 if(PROFILING)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif(PROFILING)
@@ -379,7 +374,7 @@ ExternalProject_Add(wfa-EXT
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
     BUILD_ALWAYS ON
-    BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
+    BUILD_COMMAND $(MAKE) clean ${wfa_MAKE_ARGS}
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
 set(WFA_INCLUDE_DIRS ${SOURCE_DIR})

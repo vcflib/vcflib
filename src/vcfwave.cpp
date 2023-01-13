@@ -259,6 +259,7 @@ int main(int argc, char** argv) {
                                 &wfa_params,
                                 inv_sketch_kmer,
                                 min_inv_len,
+                                thread_count,
                                 debug);  // bool debug=false
 
         if (nextGen) {

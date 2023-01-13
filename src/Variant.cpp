@@ -2100,6 +2100,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
     wavefront_aligner_attr_t* wfaParams,
     int invKmerLen,
     int invMinLen,
+    int threads,
     bool debug) {
 
     // return type is a hash of allele containing a list of variants and a
@@ -2202,6 +2203,7 @@ map<string, pair<vector<VariantAllele>,bool> > Variant::parsedAlternates(
         }
         auto wf_aligner = wavefront_aligner_new(&wfp);
 
+        wavefront_aligner_set_max_num_threads(wf_aligner,threads);
         wavefront_aligner_set_heuristic_none(wf_aligner);
         wavefront_aligner_set_alignment_end_to_end(wf_aligner);
         wavefront_align(wf_aligner,

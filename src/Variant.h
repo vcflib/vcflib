@@ -219,6 +219,7 @@ public:
            wavefront_aligner_attr_t* wfaParams = NULL,
            int invKmerLen = 17,
            int invMinLen = 1000,
+           int threads = 1,
            bool debug = false);
 
     // Legacy version of parsedAlterneates:
