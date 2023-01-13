@@ -19,6 +19,9 @@ primitive alleles into multiple VCF records.
 New records have IDs that reference the source record ID.
 Genotypes are handled.
 Deletion alleles will result in haploid (missing allele) genotypes.
+.PP
+Note that this tool is considered legacy and will emit a warning! Use
+vcfwave instead.
 .SS Options
 .TP
 -h, \[en]help
@@ -318,7 +321,8 @@ Now where does TAGAATCCCAATTGATGG come from?
 Output produced by test/tests/realign.py
 .SH LICENSE
 .PP
-Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors.
+Copyright 2011-2022 (C) Erik Garrison, Pjotr Prins and vcflib
+contributors.
 MIT licensed.
 .SH AUTHORS
 Erik Garrison, Pjotr Prins and other vcflib contributors.

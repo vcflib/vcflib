@@ -17,6 +17,9 @@ Realign reference and alternate alleles with WFA, parsing out the primitive alle
 into multiple VCF records. New records have IDs that reference the source record ID.
 Genotypes are handled. Deletion alleles will result in haploid (missing allele) genotypes.
 
+Note that this tool is considered legacy and will emit a warning!  Use
+[vcfwave](./vcfwave.md) instead.
+
 ## Options
 
 -h, --help
@@ -301,4 +304,4 @@ Output produced by test/tests/realign.py
 
 # LICENSE
 
-Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2011-2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.

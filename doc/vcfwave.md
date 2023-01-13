@@ -156,4 +156,4 @@ a       329     >1>9_3  T       A       60      .       AC=1;AF=1.000000;AN=1;AT
 
 # LICENSE
 
-Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2022-2023 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.

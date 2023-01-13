@@ -126,4 +126,4 @@ Finally use **vcfcreatemulti** to create multi-allele VCF records again.
 
 # LICENSE
 
-Copyright 2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2022-2023 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
