@@ -13,11 +13,12 @@ and
       + [X] document using with `vcfwave` and `bcftools norm -m-`
       + [X] document building with zig
       + [ ] update WFA-LIB
-      + [ ] added progress bar to vcfwave and vcfcreatemulti with update to tabixpp
+      + [X] added progress bar to vcfwave and vcfcreatemulti with update to tabixpp
       + [X] default vcfwave and vcfcreatemulti to nextgen mode
       + [ ] why is vcfwave on a single thread?
       + [ ] add tests (zig memory handler)
       + [ ] check for memory leaks
+      + [ ] check file is sorted for vcfcreatemulti and improve suggestions
       + [ ] make CI pass with recent zig in path
 - [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows

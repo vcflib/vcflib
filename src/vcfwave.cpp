@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     bool keepInfo = false;
     bool keepGeno = false;
     bool useWaveFront = true;
-    bool nextGen  = true;
+    bool nextGen  = true; // postprocessing is the default now
     bool quiet    = false;
     bool debug    = false;
 
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 
         amount = (double)variantFile.file_pos()/(double)file_size;
         // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
-        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.01) {
+        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.003) {
             prev_amount = amount;
             print_progress(amount*100, start);
         }

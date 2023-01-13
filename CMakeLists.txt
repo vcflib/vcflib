@@ -363,9 +363,9 @@ endif(HTSLIB_LOCAL)
 
 # FIXME: hard-coded compile switches need to be fixed upstream
 if (ASAN)
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup asan lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup asan lib_wfa)
 else()
-  set(wfa_MAKE_ARGS BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup lib_wfa)
+  set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup lib_wfa)
 endif()
 
 # if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
