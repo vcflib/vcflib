@@ -7,7 +7,7 @@
 #
 #    bin2md [--index] erbtemplate [binary]
 #
-# by Pjotr Prins (C) 2020-2022
+# by Pjotr Prins (C) 2020-2023
 #
 # The rules are:
 #
@@ -73,7 +73,7 @@ year = d.year
 
 # This code walks every binary that was generated, runs it and parses the
 # output to create a markdown file.
-Dir.glob(bindir+'/*').each do|bin|
+Dir.glob(bindir+'/*').sort.each do |bin|
   if !File.directory?(bin) and File.executable?(bin)
     if search and bin !~ /#{search}/
       next
@@ -201,6 +201,7 @@ Dir.glob(bindir+'/*').each do|bin|
     end
   end
 end
+
 if create_index
   require 'ostruct'
 
@@ -264,6 +265,18 @@ HEADER
 # SOURCE CODE
 
 See the source code repository at #{github}
+
+# CREDIT
+
+Citations are the bread and butter of Science.  If you are using this
+software in your research and want to support our future work, please
+cite the following publication:
+
+Please cite:
+
+[A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
+Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput Biol 18(5): e1009123. https://doi.org/10.1371/journal.pcbi.1009123
+
 
 # LICENSE
 

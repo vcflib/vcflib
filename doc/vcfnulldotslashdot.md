@@ -30,7 +30,7 @@ This is useful for some downstream analysis tools.
 
 <!--
 
-    >>> from pytest.rtest import run_stdout, head, cat
+    >>> from rtest import run_stdout, head, cat
 
 -->
 
