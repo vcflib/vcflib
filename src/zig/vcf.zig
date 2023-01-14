@@ -13,7 +13,6 @@ const expectEqual = @import("std").testing.expectEqual;
 const expect = @import("std").testing.expect;
 const ArrayList = std.ArrayList;
 const StringList = ArrayList([] const u8);
-// const Allocator = std.mem.Allocator;
 const p = @import("std").debug.print;
 
 const VCFError = error{
@@ -52,9 +51,11 @@ export fn hello_zig2(msg: [*] const u8) [*]const u8 {
     return result;
 }
 
-const test_allocator = std.testing.allocator;
+// const allocator = std.testing.allocator;
+var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+const allocator = gpa.allocator();
 
-var warnings = ArrayList([] const u8).init(test_allocator);
+var warnings = ArrayList([] const u8).init(allocator);
 
 export fn zig_display_warnings() void {
     defer warnings.deinit();
@@ -110,10 +111,10 @@ const Variant = struct {
 
     /// Get the C++ alts
     pub fn alt(self: *const Self) ArrayList([] const u8) {
-        var list = ArrayList([] const u8).init(test_allocator);
+        var list = ArrayList([] const u8).init(allocator);
         const altsize = var_alt_num(self.v);
-        var buffer = test_allocator.alloc(*anyopaque, altsize) catch unreachable;
-        defer test_allocator.free(buffer);
+        var buffer = allocator.alloc(*anyopaque, altsize) catch unreachable;
+        defer allocator.free(buffer);
         const res = var_alt(self.v,@ptrCast([*c]* anyopaque,buffer));
         var i: usize = 0;
         while (i < altsize) : (i += 1) {
@@ -127,10 +128,10 @@ const Variant = struct {
     /// Get the C++ infos
     pub fn info(self: *const Self, name: [] const u8) ArrayList([] const u8) {
         var c_name = to_cstr0(name);
-        var list = ArrayList([] const u8).init(test_allocator);
+        var list = ArrayList([] const u8).init(allocator);
         const size = var_info_num(self.v,c_name);
-        var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
-        defer test_allocator.free(buffer);
+        var buffer = allocator.alloc(*anyopaque, size) catch unreachable;
+        defer allocator.free(buffer);
         const res = var_info(self.v,c_name,@ptrCast([*c]* anyopaque,buffer));
         var i: usize = 0;
         while (i < size) : (i += 1) {
@@ -149,10 +150,10 @@ const Variant = struct {
     /// Get the C++ genotypes as a list
     pub fn genotypes(self: *const Self) ArrayList([] const u8) {
         // p("Inside genotypes:\n",.{});
-        var list = ArrayList([] const u8).init(test_allocator);
+        var list = ArrayList([] const u8).init(allocator);
         const size = var_samples_num(self.v);
-        var buffer = test_allocator.alloc(*anyopaque, size) catch unreachable;
-        defer test_allocator.free(buffer);
+        var buffer = allocator.alloc(*anyopaque, size) catch unreachable;
+        defer allocator.free(buffer);
         const res = var_geno(self.v,@ptrCast([*c]* anyopaque,buffer));
         var i: usize = 0;
         while (i < size) : (i += 1) {
@@ -188,7 +189,7 @@ const Variant = struct {
     }
 
     /// Set C++ infos
-    pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {
+    pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {        
         var c_name = to_cstr0(name);
         var_clear_info(self.v,c_name);
         var i: usize = 0;
@@ -202,8 +203,8 @@ const Variant = struct {
         while (i < nsamples.items.len) : (i += 1) {
             var_clear_sample(self.v,i);
             var s = nsamples.items[i];
-            var buffer = test_allocator.alloc(u8, s.len + 1) catch unreachable;
-            defer test_allocator.free(buffer);
+            var buffer = allocator.alloc(u8, s.len + 1) catch unreachable;
+            defer allocator.free(buffer);
  
             for (s)  | c,j | {
                 buffer[j] = c;
@@ -254,7 +255,6 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
              p("num = {}",.{i});
              p("id = {s}, pos = {d}\n",.{s2,var_pos(p2)});
          }
-    // var_set_id(variant,"HELLO");
     return variant;
 }
 
@@ -266,8 +266,13 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
 ///
 export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) *anyopaque {
     // Create vs as a list of variants
+    // var hanging_pointer = ArrayList([] const u8).init(allocator);
+    // hanging_pointer.append("C") catch unreachable;
+
     var mvar = Variant{.v = variant.?}; // FIXME: we need to clean this small struct up from C++
-    var vs = ArrayList(Variant).init(test_allocator);
+    var vs = ArrayList(Variant).init(allocator);
+    defer vs.deinit();
+    
     var i: usize = 0;
     while (i < size) : (i += 1) { // use index to access *anyopaque
         var v = Variant{.v = varlist[i].?};
@@ -297,18 +302,18 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
     // Get genotypes and update mvar
     var nsamples = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
     mvar.set_samples(nsamples);
-
-    var hanging_pointer = ArrayList([] const u8).init(std.testing.allocator);
-    hanging_pointer.append("C") catch unreachable;
     
     return mvar.v;
 }
 
 /// The C++ code should call this to cleanup
 
-export fn zig_cleanup() void {
-    // const leaked = allocator.deinit();
-    // if (leaked) expect(false) catch @panic("TEST FAIL"); //fail test; can't try in defer as defer is executed after we return
+export fn zig_cleanup() void {    
+    p("zig cleaning up!",.{});
+    // std.debug.assert(!gpa.deinit());
+    
+    const leaked = gpa.deinit();
+    if (leaked) p("MEM FAIL",.{});
 }
 
 
@@ -321,7 +326,6 @@ fn refs_maxpos(comptime T: type, list: ArrayList(T)) usize {
         }
     return mpos;
 }
-
 
 //    // set maxpos to the most outward allele position + its reference size
 //    auto maxpos = first.position + first.ref.size();
@@ -359,7 +363,6 @@ const MockVariant = struct {
 
 /// Expands reference to overlap all variants
 fn expand_ref(comptime T: type, list: ArrayList(T)) !ArrayList(u8) {
-    const allocator = std.testing.allocator;
     var res = ArrayList(u8).init(allocator);
     // defer res.deinit();
     // try res.append('T');
@@ -367,7 +370,7 @@ fn expand_ref(comptime T: type, list: ArrayList(T)) !ArrayList(u8) {
     // concat2(&res,first.ref);
     try res.appendSlice(first.ref());
     // p("!{s}!",.{res});
-    // defer test_allocator.free(result);
+    // defer allocator.free(result);
 
     const left0 = first.pos();
     for (list.items) |v| {
@@ -393,7 +396,7 @@ fn expand_ref(comptime T: type, list: ArrayList(T)) !ArrayList(u8) {
 
 fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)) !ArrayList([*:0] const u8) {
     // add alternates and splice them into the reference. It does not modify the ref.
-    var nalt = ArrayList([*:0] const u8).init(test_allocator);
+    var nalt = ArrayList([*:0] const u8).init(allocator);
 
     for (list.items) |v| {
         const p5diff = v.pos() - pos; // always >= 0 - will raise error otherwise
@@ -437,7 +440,7 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
         }
             
         for (v.alt().items) | alt | {
-            var n = ArrayList(u8).init(test_allocator);
+            var n = ArrayList(u8).init(allocator);
             defer n.deinit();
             if (p3diff != 0 or p5diff != 0) {
                 // p("{any}-{s},{s}\n",.{p3diff,before,after});
@@ -460,7 +463,7 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
 }
 
 fn expand_info(comptime T: type, name: [] const u8, list: ArrayList(T)) !ArrayList([] const u8) {
-    var ninfo = ArrayList([] const u8).init(test_allocator);
+    var ninfo = ArrayList([] const u8).init(allocator);
     for (list.items) |v| {
         for (v.info(name).items) | info | {
             // try ninfo.append(info);
@@ -488,8 +491,8 @@ test "variant ref expansion" {
 }
 
 test "mock variant" {
-    // var hanging_pointer = ArrayList(MockVariant).init(std.testing.allocator);
-    // _ = hanging_pointer;
+    var hanging_pointer = ArrayList(MockVariant).init(std.testing.allocator);
+    _ = hanging_pointer;
     
     var list = ArrayList(MockVariant).init(std.testing.allocator);
     defer list.deinit();
@@ -497,7 +500,7 @@ test "mock variant" {
     const v1 = MockVariant{ .pos_ = 10, .ref_ = "AAAA" };
     try expect(std.mem.eql(u8, v1.id(), "TEST"));
     try list.append(v1);
-    // try hanging_pointer.append(v1);
+    // try hanging_pointer.append(v1);  <<-- this will bail out on zig build test
     const v2 = MockVariant{ .pos_ = 10, .ref_ = "AAAAA" };
     try list.append(v2);
     const v3 = MockVariant{ .pos_ = 10, .ref_ = "AAAAACC" };
@@ -507,7 +510,7 @@ test "mock variant" {
     try expect(maxpos == 17);
 
     const nref = try expand_ref(MockVariant,list);
-    // defer test_allocator.free(nref);
+    // defer std.testing.allocator.free(nref);
     // p("<{s}>",.{nref});
     // p("!{s}!",.{nref});
     try expect(nref.items.len == 7);
@@ -516,6 +519,9 @@ test "mock variant" {
 }
 
 test "variant alt expansion" {
+    // var hanging_pointer = ArrayList([] const u8).init(std.testing.allocator);
+    // hanging_pointer.append("C") catch unreachable;
+
     var list = std.ArrayList(MockVariant).init(std.testing.allocator);
     defer {
         list.deinit();
@@ -545,9 +551,9 @@ test "variant alt expansion" {
     // const nalt = try expand_alt(MockVariant,10,"AAAAACC",list);
     // defer {
         // for (nalt.items) |item| {
-        //         test_allocator.free(item);
+        //         std.testing.allocator.free(item);
         //     }
-        // test_allocator.free(nalt);
+        // std.testing.allocator.free(nalt);
     //    nalt.deinit();
     // }
     // expect(nalt.items.len == 3) catch |e| {
