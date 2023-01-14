@@ -420,7 +420,7 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
         }
         else after = "";
         if (v.alt().items.len > 1) {
-            warnings.append("This code only supports one ALT allele per record: skipping entry") catch unreachable;
+            warnings.append("This code only supports one ALT allele per record: bailing out\nTry normalising the data with `bcftools norm -m-`") catch unreachable;
             // p("Error: this code only supports one ALT allele per record (WIP/FIXME)\n",.{});
             return error.MultiAltNotSupported;
         }

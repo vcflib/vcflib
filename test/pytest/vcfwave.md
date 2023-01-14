@@ -29,7 +29,15 @@ A typical workflow will call **vcfwave** to realign all ALT alleles against the 
 Next use a tool such as `bcftools norm -m-` to normalise the VCF records and split out multiple ALT alleles into separate VCF records.
 Finally use **vcfcreatemulti** to create multi-allele VCF records again.
 
-For more information see also [vcfcreatemulti](./vcfcreatemulti.md).
+PERFORMANCE:
+
+Unlike traditional aligners that run in quadratic time, the recently introduced wavefront aligner WFA runs in time O(ns+s^2), proportional to the sequence length n and the alignment score s, using O(s^2) memory (or O(s) using the ultralow/BiWFA mode). Therefore WFA does not choke on longer alignments.
+
+Speed-wise vcfwave can still be faster. See also the [performance docs](../test/doc/performance.md) for some metrics and discussion.
+
+READING:
+
+See also the *humpty dumpty* companion tool [vcfcreatemulti](./vcfcreatemulti.md).
 
 ## Options
 
