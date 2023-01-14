@@ -1,3 +1,4 @@
+const zig_version = @import("builtin").zig_version;
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
@@ -7,6 +8,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const lib = b.addStaticLibrary("zig", "vcf.zig");
     lib.setBuildMode(mode);
+    lib.addObjectFile("../../build/libvcflib.a");
     switch (mode) {
         .Debug, .ReleaseSafe => lib.bundle_compiler_rt = true,
         .ReleaseFast, .ReleaseSmall => lib.disable_stack_probing = true,
@@ -17,7 +19,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const main_tests = b.addTest("vcf.zig");
     main_tests.setBuildMode(mode);
-    main_tests.addLibPath("../../build");
+    main_tests.addLibraryPath("../../build");
     main_tests.addObjectFile("../../build/libvcflib.a");
 
     const test_step = b.step("test", "Run library tests");

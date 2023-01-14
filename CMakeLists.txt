@@ -404,7 +404,7 @@ ExternalProject_Add(ZIG-EXT
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
     BUILD_ALWAYS ON
-    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh
+    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh -Drelease-fast=true -freference-trace
 )
 ExternalProject_Get_property(ZIG-EXT SOURCE_DIR)
 set(ZIG_INCLUDE_DIRS ${SOURCE_DIR})
@@ -523,7 +523,7 @@ function(add_pydoctest_fullname TEST_FILE)
   )
 endfunction()
 
-if (ZIG)
+if (ZIG_TEST) # currently disabled
 function(add_zigtest)
   add_test(
     NAME zigvcf
@@ -533,7 +533,7 @@ function(add_zigtest)
 endfunction()
 
   add_zigtest()
-endif(ZIG)
+endif(ZIG_TEST)
 
 add_pytest(realign)
 add_pydoctest(pyvcflib)

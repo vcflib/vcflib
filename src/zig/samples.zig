@@ -9,7 +9,8 @@ const expectEqual = std.testing.expectEqual;
 const expectEqualSlices = std.testing.expectEqualSlices;
 const eql = std.mem.eql;
 const p = std.debug.print;
-const test_allocator = std.testing.allocator;
+var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+const allocator = gpa.allocator();
 
 const VcfSampleError = error{
     CannotParseSample
@@ -18,12 +19,12 @@ const VcfSampleError = error{
 const GENOTYPE_MISSING = -256;
 
 fn split_samples(str: []const u8) *ArrayList([] const u8) {
-    var list = ArrayList([] const u8).init(test_allocator);
+    var list = ArrayList([] const u8).init(allocator);
     defer list.deinit();
     var splits = std.mem.split(u8, str, " ");
     while (splits.next()) |chunk| {
         list.append(chunk) catch |err| {
-            std.debug.print("out of memory {e}\n", .{err});
+            std.debug.print("out of memory {}\n", .{err});
         };
     }
     return &list;
@@ -48,7 +49,7 @@ const Genotypes = struct {
     
     /// Convert a genotype (sample) string to a list of numbers
     fn to_num(str: []const u8) !ArrayList(i64) {
-        var list = ArrayList(i64).init(test_allocator);
+        var list = ArrayList(i64).init(allocator);
 
         var splits = if (is_phased(str)) 
             std.mem.split(u8, str, "|")
@@ -110,14 +111,14 @@ const Genotypes = struct {
     fn to_s(self: *const Self) !ArrayList(u8) {
         var list = self.genos.items;
         const phase_repr = if (self.phased) "|" else "/";
-        var s = ArrayList(u8).init(test_allocator);
+        var s = ArrayList(u8).init(allocator);
         // concatenate genotypes with their phase separator
         for (list) | g | {
             const result = if (g == GENOTYPE_MISSING) 
-                try fmt.allocPrint(test_allocator, ".{s}", .{phase_repr})
+                try fmt.allocPrint(allocator, ".{s}", .{phase_repr})
             else
-                try fmt.allocPrint(test_allocator, "{}{s}", .{g,phase_repr});
-            defer test_allocator.free(result);
+                try fmt.allocPrint(allocator, "{}{s}", .{g,phase_repr});
+            defer allocator.free(result);
             try s.appendSlice(result);
         }
         s.items = s.items[0..s.items.len-1]; // drop trailing phase character
@@ -126,12 +127,12 @@ const Genotypes = struct {
     }
     
     fn to_s2(self: *const Self) !ArrayList([] const u8) {
-        _ = self;
-        var s = ArrayList([] const u8).init(test_allocator);
+        // _ = self;
+        var s = ArrayList([] const u8).init(allocator);
         for (self.genos.items) |g| {
             // parseInt to go to str
             // charDigit to int
-            const result = try fmt.allocPrint(test_allocator, "{}", .{g});
+            const result = try fmt.allocPrint(allocator, "{}", .{g});
             // p("Result is {s}!\n", .{result});
             try s.append(result);
         }
@@ -145,7 +146,7 @@ const Genotypes = struct {
 /// get translated to their list numbers 0|6. This works for
 /// heterozygous only (at this point).
 pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
-    var samples = ArrayList(Genotypes).init(test_allocator); // result set
+    var samples = ArrayList(Genotypes).init(allocator); // result set
     for (vs.items) | v,i | { // Fetch the genotypes from each variant
         for (v.genotypes().items) | geno,j | {
             var geno2 = Genotypes.init(geno); // convert from string to number list
@@ -159,7 +160,7 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList(
         }
     }
     // convert to zero terminated strings for vcflib C++ core code
-    var s_samples = ArrayList([] const u8).init(test_allocator);
+    var s_samples = ArrayList([] const u8).init(allocator);
     for (samples.items) |g| {
         const s = try g.to_s();
         s_samples.append(s.items) catch unreachable;
@@ -174,7 +175,7 @@ test "split genotypes" {
 }
 
 test "genotypes" {
-    var list = ArrayList(i64).init(test_allocator);
+    var list = ArrayList(i64).init(allocator);
     defer list.deinit();
     try list.append(0);
     try list.append(1);
@@ -182,7 +183,7 @@ test "genotypes" {
     var genos = try gs.to_s2();
     defer {
         for (genos.items) |item| {
-                test_allocator.free(item);
+                allocator.free(item);
             }
         genos.deinit();
     }

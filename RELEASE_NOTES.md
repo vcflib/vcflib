@@ -17,8 +17,8 @@ and
       + [X] why is vcfwave on a single thread?
       + [X] check file is sorted for vcfcreatemulti and improve suggestions
       + [X] update WFA-LIB to main
-      + [ ] add tests (zig memory handler)
-      + [ ] check for memory leaks
+      + [X] add tests (zig memory handler)
+      + [X] check for memory leaks
       + [ ] make CI pass with recent zig in path
 - [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows

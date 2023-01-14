@@ -83,7 +83,7 @@
        ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
        ("xz" ,xz)
-       ("zig" ,zig) ;; note we use zig-0.9.1
+       ; ("zig" ,zig) ;; note we use zig-0.9.1
        ("zlib" ,zlib)))
     (native-inputs
      `(("pkg-config" ,pkg-config)))

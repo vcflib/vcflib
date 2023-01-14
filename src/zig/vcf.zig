@@ -227,7 +227,7 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
     p("---->{s}\n",.{v2.id().ptr});
     expect(mem.eql(u8, v2.id(), ">1>9")) catch unreachable;
     expectEqual(v2.id().len,">1>9".len) catch |err| {
-        std.debug.print("{e} <-> {s}\n", .{err,v2.id()});
+        std.debug.print("{} <-> {s}\n", .{err,v2.id()});
     };
     const c_str = var_id(variant.?);
     const s = @ptrCast([*c]const u8, c_str);
@@ -241,7 +241,7 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
 
     const as_slice: [:0]const u8 = std.mem.span(s3); // makes 0 terminated slice (sentinel value is zero byte)
     std.testing.expectEqualStrings(as_slice, ">3655>3662_4") catch |err| {
-        std.debug.print("{e} {s}\n", .{err,as_slice});
+        std.debug.print("{} {s}\n", .{err,as_slice});
     };
 
     // expectEqual(variant,@intToPtr(*anyopaque,varlist[0])) catch unreachable;
@@ -490,17 +490,13 @@ test "variant ref expansion" {
 
 }
 
-test "mock variant" {
-    var hanging_pointer = ArrayList(MockVariant).init(std.testing.allocator);
-    _ = hanging_pointer;
-    
+test "mock variant" {    
     var list = ArrayList(MockVariant).init(std.testing.allocator);
     defer list.deinit();
 
     const v1 = MockVariant{ .pos_ = 10, .ref_ = "AAAA" };
     try expect(std.mem.eql(u8, v1.id(), "TEST"));
     try list.append(v1);
-    // try hanging_pointer.append(v1);  <<-- this will bail out on zig build test
     const v2 = MockVariant{ .pos_ = 10, .ref_ = "AAAAA" };
     try list.append(v2);
     const v3 = MockVariant{ .pos_ = 10, .ref_ = "AAAAACC" };

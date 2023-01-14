@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # zig build test
-zig build # creates library in zig-out
+# creates library in zig-out
+zig build $*
 exit $?
 
 # C example:
