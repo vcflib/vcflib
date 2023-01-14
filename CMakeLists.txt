@@ -374,7 +374,7 @@ ExternalProject_Add(wfa-EXT
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
     BUILD_ALWAYS ON
-    BUILD_COMMAND $(MAKE) clean ${wfa_MAKE_ARGS}
+    BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
 )
 ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
 set(WFA_INCLUDE_DIRS ${SOURCE_DIR})

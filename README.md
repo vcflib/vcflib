@@ -15,10 +15,13 @@ Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput B
 
 ![Humpty Logo - CC0 license](./logos/humpty-dumpty.jpg)
 
-**January 2023**: vcflib's Humpty Dumpty release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
-Often variant callers are not perfect. **vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, unlike Humpty Dumpty, take them apart and put them together again, creating a more sane VCF output and getting rid of false positives.
+**January 2023**: this is vcflib's *Humpty Dumpty* release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
+Often variant callers are not perfect.
+**vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, unlike Humpty Dumpty, take them apart and put them together again.
+Thus creating a more sane VCF output and getting rid of false positives.
 
-We created these tools by including the state-of-the-art biWFA wavefront aligner. They are particularly useful for the output from pangenome genotypers, such as used in the Human Pangenome Reference Consortium analyses (HPRC).
+We created these tools by including the state-of-the-art [biWFA](https://github.com/smarco/WFA2-lib) wavefront aligner.
+The tools are particularly useful for the output from pangenome genotypers, such as used by the Human Pangenome Reference Consortium (HPRC).
 
 **May 2022**: the [vcflib paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123) has been published on PLoS Computational Biology!
 

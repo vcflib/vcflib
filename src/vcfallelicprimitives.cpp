@@ -30,8 +30,9 @@ void printSummary(char** argv) {
     std::string text = R"(
 usage: ./vcfallelicprimitives [options] [file]
 
-Note that this tool is considered legacy and will emit a warning!  Use
-[vcfwave](./vcfwave.md) instead.
+WARNING: this tool is considered legacy and is only retained for older
+workflows.  It will emit a warning!  Even though it can use the WFA
+you should use [vcfwave](./vcfwave.md) instead.
 
 Realign reference and alternate alleles with WFA or SW, parsing out
 the primitive alleles into multiple VCF records. New records have IDs

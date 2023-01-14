@@ -208,11 +208,24 @@ int main(int argc, char** argv) {
 
     double amount = 0.0, prev_amount = 0.0;
     uint64_t start = get_timestamp();
+    string prev_chr;
+    size_t prev_pos = 0;
 
     if (!quiet)
-        cerr << "vcfcreatemulti processing VCF file..." << endl;
+        cerr << "vcfcreatemulti processing..." << endl;
 
     while (variantFile.getNextVariant(var)) {
+
+        if (prev_pos &&
+            !(prev_chr == var.sequenceName &&
+              prev_pos <= var.position)) {
+            cerr << "ERROR: VCF data is not sorted!" << endl;
+            exit(8);
+        }
+
+        prev_chr = var.sequenceName;
+        prev_pos = var.position;
+
         amount = (double)variantFile.file_pos()/(double)file_size;
         // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
         if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.003) {
@@ -268,6 +281,8 @@ int main(int argc, char** argv) {
 
     if (nextGen)
         zig_display_warnings();
+
+    if (!quiet) cerr << endl;
 
     return 0;
 

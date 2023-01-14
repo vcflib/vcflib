@@ -56,6 +56,8 @@ See more below.
 
 -->
 
+Current command line options:
+
 ```
 
 >>> head("vcfwave -h",26)
