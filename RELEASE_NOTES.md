@@ -12,13 +12,13 @@ and
       + [X] handle phase
       + [X] document using with `vcfwave` and `bcftools norm -m-`
       + [X] document building with zig
-      + [ ] update WFA-LIB to main
       + [X] added progress bar to vcfwave and vcfcreatemulti with update to tabixpp
       + [X] default vcfwave and vcfcreatemulti to nextgen mode
       + [X] why is vcfwave on a single thread?
+      + [X] check file is sorted for vcfcreatemulti and improve suggestions
+      + [X] update WFA-LIB to main
       + [ ] add tests (zig memory handler)
       + [ ] check for memory leaks
-      + [ ] check file is sorted for vcfcreatemulti and improve suggestions
       + [ ] make CI pass with recent zig in path
 - [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows
@@ -35,7 +35,7 @@ This is a release with some major changes.
 Important changes:
 
 - vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
-- INFO fields output order is now the same as on input parsing
+- INFO fields output order is now the same with every tool as on input parsing
 - vcfwave check merging of genotypes - write tests
 - vcfwave recompute AC, AFs from merged record
 - introduced the zig compiler with vcfcreatemulti.cpp as a first target (use cmake ZIG=OFF to disable). At this point the zig version (-n switch) gives identical results.

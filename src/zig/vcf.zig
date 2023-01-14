@@ -13,10 +13,8 @@ const expectEqual = @import("std").testing.expectEqual;
 const expect = @import("std").testing.expect;
 const ArrayList = std.ArrayList;
 const StringList = ArrayList([] const u8);
-const Allocator = std.mem.Allocator;
+// const Allocator = std.mem.Allocator;
 const p = @import("std").debug.print;
-
-const test_allocator = std.testing.allocator;
 
 const VCFError = error{
     UnexpectedOrder,
@@ -53,6 +51,8 @@ export fn hello_zig2(msg: [*] const u8) [*]const u8 {
     const result = msg;
     return result;
 }
+
+const test_allocator = std.testing.allocator;
 
 var warnings = ArrayList([] const u8).init(test_allocator);
 
@@ -297,9 +297,20 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
     // Get genotypes and update mvar
     var nsamples = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
     mvar.set_samples(nsamples);
+
+    var hanging_pointer = ArrayList([] const u8).init(std.testing.allocator);
+    hanging_pointer.append("C") catch unreachable;
     
     return mvar.v;
 }
+
+/// The C++ code should call this to cleanup
+
+export fn zig_cleanup() void {
+    // const leaked = allocator.deinit();
+    // if (leaked) expect(false) catch @panic("TEST FAIL"); //fail test; can't try in defer as defer is executed after we return
+}
+
 
 fn refs_maxpos(comptime T: type, list: ArrayList(T)) usize {
     var mpos = list.items[0].pos();
@@ -477,12 +488,16 @@ test "variant ref expansion" {
 }
 
 test "mock variant" {
+    // var hanging_pointer = ArrayList(MockVariant).init(std.testing.allocator);
+    // _ = hanging_pointer;
+    
     var list = ArrayList(MockVariant).init(std.testing.allocator);
     defer list.deinit();
 
     const v1 = MockVariant{ .pos_ = 10, .ref_ = "AAAA" };
     try expect(std.mem.eql(u8, v1.id(), "TEST"));
     try list.append(v1);
+    // try hanging_pointer.append(v1);
     const v2 = MockVariant{ .pos_ = 10, .ref_ = "AAAAA" };
     try list.append(v2);
     const v3 = MockVariant{ .pos_ = 10, .ref_ = "AAAAACC" };

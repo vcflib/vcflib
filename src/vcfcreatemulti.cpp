@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
 
     double amount = 0.0, prev_amount = 0.0;
     uint64_t start = get_timestamp();
-    string prev_chr;
+    string prev_chr = "none";
     size_t prev_pos = 0;
 
     if (!quiet)
@@ -216,10 +216,8 @@ int main(int argc, char** argv) {
 
     while (variantFile.getNextVariant(var)) {
 
-        if (prev_pos &&
-            !(prev_chr == var.sequenceName &&
-              prev_pos <= var.position)) {
-            cerr << "ERROR: VCF data is not sorted!" << endl;
+        if (prev_pos && prev_chr == var.sequenceName && prev_pos > var.position) {
+            cerr << "ERROR: VCF data is not sorted! at " << prev_chr << ":" << prev_pos << " and " << var.sequenceName << ":" << var.position << endl;
             exit(8);
         }
 
@@ -279,8 +277,10 @@ int main(int argc, char** argv) {
         cout << result << endl;
     }
 
-    if (nextGen)
+    if (nextGen) {
         zig_display_warnings();
+        zig_cleanup();
+    }
 
     if (!quiet) cerr << endl;
 

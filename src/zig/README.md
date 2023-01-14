@@ -2,7 +2,13 @@
 
 Some new vcflib functionality is written in the Zig programming language.
 The first tool to use Zig code is `vcfcreatemulti`.
+
 Zig is very fast and performance often beats C and C++ code.
+
+So far, this code uses the test allocator only.
+I think it won't have much impact replacing it with another allocator because vcflib is IO bound.
+If anyone wants to try we could replace it.
+The good thing about the test allocator is that it complains if things do not get cleaned up.
 
 ## Build
 
@@ -16,6 +22,17 @@ ctest .
 ```
 
 The current [build workflow](../../.github/workflows/ci_test.yml) on github CI builds with zig. So you can check how it is done on Debian/Ubuntu.
+
+## Testing
+
+In src/zig you can run
+
+```
+zig build
+zig build test
+```
+
+To run the unit tests locally. Note that this is also part of vcflib's ctest.
 
 ## Coding against C++
 
