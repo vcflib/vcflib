@@ -12,8 +12,14 @@ const p = std.debug.print;
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
+const vcf = @import("vcf.zig");
+
+const warning = vcf.warning;
+
 const VcfSampleError = error{
-    CannotParseSample
+    None,
+    CannotParseSample,
+    MultiAltDoesNotFitSample
 };
 
 const GENOTYPE_MISSING = -256;
@@ -96,15 +102,18 @@ const Genotypes = struct {
         }
     }
 
-    /// Merge two samples. If there is a conflict we just select the
-    /// first genotype. FIXME: at this point we are not checking for
+    /// Merge two ALT samples. If there is a conflict we select the
+    /// last genotype. FIXME: at this point we are not checking for
     /// size mismatches
     fn merge(self: *const Self, genos2: Genotypes) !void {
-        var list = self.genos;
-        for (genos2.genos.items) | g,i | {
-            const current = list.items[i];
-            if (current != 0 and current != GENOTYPE_MISSING) continue;
-            if (g != GENOTYPE_MISSING) list.items[i] = g;
+        var base = self.genos;
+        
+        for (genos2.genos.items) | g2,i | {
+            const current = base.items[i];
+            if (g2 == 0 or g2 == GENOTYPE_MISSING) continue; // no update
+            if (current>0)
+                try warning("Too many ALT alleles to fit in sample(s)");
+            base.items[i] = g2;
         }
     }
     

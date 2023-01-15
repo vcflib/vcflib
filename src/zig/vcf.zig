@@ -55,13 +55,20 @@ export fn hello_zig2(msg: [*] const u8) [*]const u8 {
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
-var warnings = ArrayList([] const u8).init(allocator);
+var warnings = std.StringHashMap(bool).init(allocator); // Note: not thread safe
+// var warnings = ArrayList([] const u8).init(allocator); // NOTE: not thread safe
 
+pub fn warning(str: [] const u8) !void {
+    try warnings.put(str,true);
+}
+
+/// Called by C++
 export fn zig_display_warnings() void {
-    defer warnings.deinit();
     // warnings.append("NO WARNINGS+") catch unreachable;
-    for (warnings.items) | msg | {
-        p("{s}",.{msg});
+    var iterator = warnings.iterator();
+
+    while (iterator.next()) |msg| {
+        p("WARNING: {s}\n",.{msg.key_ptr.*});
     }
 }
 
@@ -311,7 +318,8 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
 export fn zig_cleanup() void {    
     // p("zig cleaning up!",.{});
     // std.debug.assert(!gpa.deinit());
-    
+    warnings.deinit();
+
     const leaked = gpa.deinit();
     if (leaked) p("MEM FAIL",.{});
 }
@@ -434,7 +442,7 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
         }
         else after = "";
         if (v.alt().items.len > 1) {
-            warnings.append("This code only supports one ALT allele per record: bailing out\nTry normalising the data with `bcftools norm -m-`") catch unreachable;
+            warning("This code only supports one ALT allele per record: bailing out\nTry normalising the data with `bcftools norm -m-`") catch unreachable;
             // p("Error: this code only supports one ALT allele per record (WIP/FIXME)\n",.{});
             return error.MultiAltNotSupported;
         }

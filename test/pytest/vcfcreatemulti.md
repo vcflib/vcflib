@@ -97,7 +97,9 @@ this is a simple artefact resulting from the fact that complex structures do not
 
 At this point there is little else to do but go to the original data (pangenome or VCF) and compare the results. What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation.
 
-One solution might be to have vcfcreatemulti ignore SNPs, but that somewhat would do away with pointing out complex arrangements. Contributions are welcome!
+At this point we show `WARNING: Too many ALT alleles to fit in sample(s)'.
+
+One solution might be to have vcfcreatemulti ignore SNPs, but that somewhat would do away with pointing out complex arrangements. Contributions and ideas are welcome!
 
 ## Source code
 
@@ -137,6 +139,13 @@ thread 502 panic: attempt to unwrap error: MultiAltNotSupported
 It means the input file already contains multi-allele VCF records. To split these you can run a command such as `bcftools norm -m-` to normalise the VCF records and split out multiple ALT alleles into separate VCF records.
 Finally use **vcfcreatemulti** to create multi-allele VCF records again.
 
+### Warning: Too many ALT alleles to fit in sample(s)
+
+See 'caveat' section above.
+
+### Warning: This code only supports one ALT allele per record: bailing out --- try normalising the data with `bcftools norm -m-`
+
+Your VCF already contains multi-allele entries - bring them back to one single ALT per record/line.
 
 # LICENSE
 
