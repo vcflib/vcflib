@@ -62,7 +62,7 @@ Type: transformation
 
 ```
 
-THe original 'legacy' vcfcreatemulti can combine overlapping alleles onto one record (VCF line), but it does not correct the INFO fields and sample (genotypes). For example:
+The original 'legacy' vcfcreatemulti can combine overlapping alleles onto one record (VCF line), but it does not correct the INFO fields and sample (genotypes). For example:
 
 ```python
 
@@ -85,7 +85,7 @@ grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC
 
 ```
 
-That looks proper. There is one caveat or blatant problem, however. If a variant sequence is long (a large 'bubble') and with the other allelles more (small) INDELs are scored than there are samples then the genotypes represent only the last match. Resulting in something ugly:
+That looks proper. There is one caveat or blatant problem, however. If a variant sequence is long (a large 'bubble') and with the other alleles more (small) INDELs are scored than there are samples then the genotypes represent only the last match. Resulting in something ugly:
 
 ```
 ...,del,del,snp,ins,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,s np,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,s np,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp;combined=36390210-36409660 GT
