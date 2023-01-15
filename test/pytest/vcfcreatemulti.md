@@ -15,7 +15,7 @@ vcfcreatemulti - collates single ALT allele records into multi-allele records wh
 
 In 2022 **vcfcreatemulti** has been upgraded to track INFO records and genotypes (samples) so they are updated in the output.
 
-See below EXAMPLES and [vcfwave](./vcfwave.md) for more information.
+See below EXAMPLES, one caveat, and [vcfwave](./vcfwave.md) for more information.
 
 ## Options
 
@@ -76,7 +76,7 @@ grch38#chr4     10158257        >3655>3662_6    C       A       60      .       
 
 ```
 
-now gets converted into the following:
+this now gets converted into the following:
 
 ```python
 
@@ -84,6 +84,20 @@ now gets converted into the following:
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1,3,64,3,2,1;AF=0.011236,0.033708,0.719101,0.033708,0.022472,0.011236;AN=89,89,89,89,89,89;AT=>3655>3656>3657>3660>3662,>3655>3656>3660>3662,>3655>3656>3657>3658>3659>3660>3662,>3655>3656>3657>3658>3660>3662,>3655>3660>3662,>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0,0,0,0,0,0;TYPE=del,del,del,del,del,snp;combined=10158244-10158257      GT      0|0     3|3     3|3     3|0     1|3     0|4     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     4|5     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|4     3|3     3|3     5|0     3|0     3|3     0|3     3|3     3|3     2|3     3|2     3|3     3|3     0|3     3|3     3|3     3|0     3|2     3|3     0
 
 ```
+
+That looks proper. There is one caveat or blatant problem, however. If a variant sequence is long (a large 'bubble') and with the other allelles more (small) INDELs are scored than there are samples then the genotypes represent only the last match. Resulting in something ugly:
+
+```
+...,del,del,snp,ins,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,s np,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,s np,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp;combined=36390210-36409660 GT
+
+509|49 8 500|500 20|251  500|238 238|498 653|387 102|1 500|498 9|509 498|69  500|297 498|725 498|660 500|472 204|500 50 0|846 654|653 500|500 500|500 18|18 430|498 214|500 499|299 67|500  18|386  47|154  508|47  500|385 42|47 579|47 47|18 47|47 219|500 18|47 53|213  500|18  500|18  500|500 47|846  47|47 500|47  500|47  839|500 498|47  500
+```
+
+this is a simple artefact resulting from the fact that complex structures do not map (easily) on the simple VCF layout.
+
+At this point there is little else to do but go to the original data (pangenome or VCF) and compare the results. What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation.
+
+One solution might be to have vcfcreatemulti ignore SNPs, but that somewhat would do away with pointing out complex arrangements. Contributions are welcome!
 
 ## Source code
 

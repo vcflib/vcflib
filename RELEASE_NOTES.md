@@ -28,24 +28,26 @@ and
 - [ ] vcfwave check polyploids?
 - [ ] RELEASE 1.0.6
 
-## ChangeLog v1.0.4 (20220829)
+## ChangeLog v1.0.5 (2023xxxx)
 
-This is a release with some major changes.
+Release with some major changes.
 
 Important changes:
 
-- vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
-- INFO fields output order is now the same with every tool as on input parsing
-- vcfwave check merging of genotypes - write tests
-- vcfwave recompute AC, AFs from merged record
-- introduced the zig compiler with vcfcreatemulti.cpp as a first target (use cmake ZIG=OFF to disable). At this point the zig version (-n switch) gives identical results.
++ vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
++ INFO fields output order is now the same with every tool as on input parsing
++ vcfwave check merging of genotypes - write tests
++ vcfwave recompute AC, AFs from merged record
++ Added python bindings with pybind11
++ introduced the zig compiler with vcfcreatemulti.cpp as a first target (use cmake ZIG=OFF to disable). At this point the zig version (-n switch) gives identical results.
 
 Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
 
 + Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md) (thank you Erik Garrison https://github.com/ekg and Santiago Marco-Sola  https://github.com/smarco).
-+ Switched to our WFA2-lib until patch is merged upstream. Fixes bleeding in of macros https://github.com/vcflib/vcflib/issues/359
++ WFA2-lib fix is merged upstream. Fixes bleeding in of macros https://github.com/vcflib/vcflib/issues/359
 + Support longer read inversions in vcfwave!
 + vcfallelicprimitives now considered legacy/obsolete
++ Fixed allowing for different field order - see https://github.com/vcflib/vcflib/issues/365
 + Improved CMake configuration
 + vcflib compiles with both gcc and clang++ and tests pass, see [guix-clang.scm](./guix-clang.scm) - mind that git submodules such as WFA2-lib still override to gcc
 + Fixed local build for tabixpp+htslib - note that htslib should be an upstream released version (currently 1.15.1). Unfortunately git submodule does not handle tags.
@@ -53,10 +55,13 @@ Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW.
 + Added libasan and lto support
 + Removed useless googletest submodule
 + Moved git submodules into ./contrib
-+ Added python bindings with pybind11
 + Added python testing framework
 + Added tabixpp back in as a submodule, fixes https://github.com/vcflib/vcflib/issues/305
 + Optimizations and bug fixes. (thanks @mphschmitt)
+
+## ChangeLog v1.0.4
+
+Never properly released. Merged with v1.0.5.
 
 ## ChangeLog v1.0.3 (20220122)
 
