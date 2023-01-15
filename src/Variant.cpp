@@ -1824,26 +1824,25 @@ bool VariantCallFile::parseHeader(string& hs) {
             size_t dataEnd = headerLine.find_first_of(">");
             if (dataStart != string::npos && dataEnd != string::npos) {
                 string entryData = headerLine.substr(dataStart + 1, dataEnd - dataStart - 1);
-                // XXX bad; this will break if anyone ever moves the order
-                // of the fields around to include a "long form" string
-                // including either a = or , in the first or second field
+                // this will break if it includes a "long form" string
+                // including either a = or , in the first or second
+                // field
                 if (entryType == "INFO" || entryType == "FORMAT") {
                     vector<string> fields = split(entryData, "=,");
-                    if (fields[0] != "ID") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[0] != \"ID\"" << endl
-                             << headerLine << endl;
-                        exit(1);
+                    map<string,string> mapper;
+                    string key = "";
+                    for (auto field: fields) {
+                        // split into key-value pairs and add to mapper
+                        if (key == "")
+                            key = field;
+                        else {
+                            mapper[key] = field;
+                            key = "";
+                        }
                     }
-                    string id = fields[1];
-                    if (fields[2] != "Number") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[2] != \"Number\"" << endl
-                             << headerLine << endl;
-                        exit(1);
-                    }
+                    string id = mapper["ID"];
                     int number;
-                    string numberstr = fields[3].c_str();
+                    string numberstr = mapper["NUMBER"].c_str();
                     // XXX TODO VCF has variable numbers of fields...
                     if (numberstr == "A") {
                         number = ALLELE_NUMBER;
@@ -1854,19 +1853,11 @@ bool VariantCallFile::parseHeader(string& hs) {
                     } else {
                         convert(numberstr, number);
                     }
-                    if (fields[4] != "Type") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[4] != \"Type\"" << endl
-                             << headerLine << endl;
-                        exit(1);
-                    }
-                    VariantFieldType type = typeStrToVariantFieldType(fields[5]);
+                    VariantFieldType type = typeStrToVariantFieldType(mapper["TYPE"]);
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
                         infoTypes[id] = type;
-                        //cerr << id << " == " << type << endl;
                     } else if (entryType == "FORMAT") {
-                        //cout << "found format field " << id << " with type " << type << endl;
                         formatCounts[id] = number;
                         formatTypes[id] = type;
                     }

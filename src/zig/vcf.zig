@@ -309,7 +309,7 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
 /// The C++ code should call this to cleanup
 
 export fn zig_cleanup() void {    
-    p("zig cleaning up!",.{});
+    // p("zig cleaning up!",.{});
     // std.debug.assert(!gpa.deinit());
     
     const leaked = gpa.deinit();
