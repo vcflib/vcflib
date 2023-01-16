@@ -5,21 +5,6 @@ and
 
 ## TODO
 
-- [X] vcfcreatemulti merge multiple rows
-      + [X] rewrite vcfcreatemulti using zig
-      + [X] merge genotypes correctly, with tests
-      + [X] adjust info and genotypes for variants that have multiple alts already (now errors)
-      + [X] handle phase
-      + [X] document using with `vcfwave` and `bcftools norm -m-`
-      + [X] document building with zig
-      + [X] added progress bar to vcfwave and vcfcreatemulti with update to tabixpp
-      + [X] default vcfwave and vcfcreatemulti to nextgen mode
-      + [X] why is vcfwave on a single thread?
-      + [X] check file is sorted for vcfcreatemulti and improve suggestions
-      + [X] update WFA-LIB to main
-      + [X] add tests (zig memory handler)
-      + [X] check for memory leaks
-      + [ ] make CI pass with recent zig in path
 - [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
@@ -30,7 +15,14 @@ and
 
 ## ChangeLog v1.0.5 (2023xxxx)
 
-Release with some major changes.
+Vcflib's first *Humpty Dumpty* release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
+
+Often variant callers are not perfect.
+**vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, unlike Humpty Dumpty, take them apart and put them together again.
+Thereby, hopefully, creating sane VCF output that is useful for analysis and getting rid of false positives.
+
+We created these tools by including the state-of-the-art [biWFA](https://github.com/smarco/WFA2-lib) wavefront aligner.
+The tools are particularly useful for the output from structural variation callers and pangenome genotypers, such as used by the Human Pangenome Reference Consortium (HPRC) because of overlapping ALT segments.
 
 Important changes:
 
@@ -58,6 +50,15 @@ Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW.
 + Added python testing framework
 + Added tabixpp back in as a submodule, fixes https://github.com/vcflib/vcflib/issues/305
 + Optimizations and bug fixes. (thanks @mphschmitt)
++ vcfcreatemulti merge multiple rows
++ rewrite of vcfcreatemulti using zig
++ vcfcreatemulti merge genotypes correctly, with tests
++ vcfcreatemulti adjust info and genotypes for variants that have multiple alts already (now errors)
++ vcfcreatemulti handle phase
++ vcfcreatemulti document building with zig
++ vcfcreatemulti added progress bar to vcfwave and vcfcreatemulti with update to tabixpp
++ vcfcreatemulti default vcfwave and vcfcreatemulti to nextgen mode
++ vcfcreatemulti check file is sorted for vcfcreatemulti and improve suggestions
 
 ## ChangeLog v1.0.4
 
