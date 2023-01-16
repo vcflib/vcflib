@@ -11,11 +11,12 @@ vcfcreatemulti - collates single ALT allele records into multi-allele records wh
 
 # DESCRIPTION
 
-**vcfcreatemulti** merges VCF records into one line by combining ALT alleles into a single VCF record. This tools is a great companion to [vcfwave](./vcfwave.md).
+**vcfcreatemulti** merges VCF records into one line by combining ALT alleles into a single VCF record. This tool is a great companion to [vcfwave](./vcfwave.md).
 
 In 2022 **vcfcreatemulti** has been upgraded to track INFO records and genotypes (samples) so they are updated in the output.
 
-See below EXAMPLES and [vcfwave](./vcfwave.md) for more information.
+Note that the tool is not perfect:
+See below EXAMPLES, the caveat on 'too many variants' `MULTI=ALTPROBLEM`, and [vcfwave](./vcfwave.md) for more information.
 
 ## Options
 
@@ -62,7 +63,7 @@ Type: transformation
 
 ```
 
-THe original 'legacy' vcfcreatemulti can combine overlapping alleles onto one record (VCF line), but it does not correct the INFO fields and sample (genotypes). For example:
+The original 'legacy' vcfcreatemulti can combine overlapping alleles onto one record (VCF line), but it does not correct the INFO fields and sample (genotypes). For example:
 
 ```python
 
@@ -76,7 +77,7 @@ grch38#chr4     10158257        >3655>3662_6    C       A       60      .       
 
 ```
 
-now gets converted into the following:
+this now gets converted into the following:
 
 ```python
 
@@ -84,6 +85,46 @@ now gets converted into the following:
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1,3,64,3,2,1;AF=0.011236,0.033708,0.719101,0.033708,0.022472,0.011236;AN=89,89,89,89,89,89;AT=>3655>3656>3657>3660>3662,>3655>3656>3660>3662,>3655>3656>3657>3658>3659>3660>3662,>3655>3656>3657>3658>3660>3662,>3655>3660>3662,>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0,0,0,0,0,0;TYPE=del,del,del,del,del,snp;combined=10158244-10158257      GT      0|0     3|3     3|3     3|0     1|3     0|4     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     4|5     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|4     3|3     3|3     5|0     3|0     3|3     0|3     3|3     3|3     2|3     3|2     3|3     3|3     0|3     3|3     3|3     3|0     3|2     3|3     0
 
 ```
+
+### Too many variants
+
+*Or the MULTI=ALTPROBLEM.*
+
+That looks proper. There is one caveat or blatant problem, however. If a variant sequence is long (a large 'bubble') and with the other alleles more (small) INDELs are scored than there are samples then the genotypes represent only the last match. Resulting in something ugly:
+
+```
+...,del,del,snp,ins,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,s np,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,s np,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp,snp;combined=36390210-36409660 GT
+
+509|49 8 500|500 20|251  500|238 238|498 653|387 102|1 500|498 9|509 498|69  500|297 498|725 498|660 500|472 204|500 50 0|846 654|653 500|500 500|500 18|18 430|498 214|500 499|299 67|500  18|386  47|154  508|47  500|385 42|47 579|47 47|18 47|47 219|500 18|47 53|213  500|18  500|18  500|500 47|846  47|47 500|47  500|47  839|500 498|47  500
+```
+
+this is a simple artefact resulting from the fact that complex structures do not map (easily) on the simple VCF layout. Another problem is that multiple SNPs don't get incorporated in the ALTs - the algorithm uses the reference to build up the longer ALTs for every single SNP from the start.
+
+In this example you see that the ALT for SNP2 does not contain SNP1 even though they may be in the same individual/sample:
+
+```
+                       sample
+REF      ACTGACTGACTG
+ALT-SNP1 ACTGC          1/0
+ALT-SNP2 ACTGACTA       1/0
+             ^
+```
+
+In words: the result is incorrect.
+At this point, for analysis, there is little else to do but go to the original data (pangenome or VCF) and compare the results.
+What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation and the resulting layout is a problem (too many ALTs as in 'too many cooks'!).
+
+To help vcflib show's a `WARNING: Too many ALT alleles to fit in sample(s)' and we add an INFO tag "MULTI=ALTPROBLEM". Searching for these will give an idea of this issue. E.g.
+
+```
+grep MULTI= ./test/tmp/vcfcreatemulti_2.vcf -c
+```
+
+Finds 3 marked records.
+
+One future solution might be to have vcfcreatemulti ignore SNPs, or only take the first one, but that somewhat would do away with pointing out complex arrangements. Another solution might be to edit the ALTs and merge ALT-SNP1 into ALT-SNP2 so we get `ACTGCCTA`.
+I have not made up my mind yet.
+Contributions and ideas are welcome!
 
 ## Source code
 
@@ -123,6 +164,13 @@ thread 502 panic: attempt to unwrap error: MultiAltNotSupported
 It means the input file already contains multi-allele VCF records. To split these you can run a command such as `bcftools norm -m-` to normalise the VCF records and split out multiple ALT alleles into separate VCF records.
 Finally use **vcfcreatemulti** to create multi-allele VCF records again.
 
+### Warning: Too many ALT alleles to fit in sample(s)
+
+See 'caveat' section [above](#Too-many-variants).
+
+### Warning: This code only supports one ALT allele per record: bailing out --- try normalising the data with `bcftools norm -m-`
+
+Your VCF already contains multi-allele entries - bring them back to one single ALT per record/line.
 
 # LICENSE
 

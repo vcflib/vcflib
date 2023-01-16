@@ -221,7 +221,9 @@ T}
 T{
 \f[B]vcfallelicprimitives\f[R]
 T}@T{
-Note that this tool is considered legacy and will emit a warning! Use
+WARNING: this tool is considered legacy and is only retained for older
+workflows.
+It will emit a warning! Even though it can use the WFA you should use
 vcfwave instead.
 T}
 T{
@@ -495,9 +497,9 @@ T{
 \f[B]vcfwave\f[R]
 T}@T{
 Realign reference and alternate alleles with WFA, parsing out the
-primitive alleles into multiple VCF records.
+`primitive' alleles into multiple VCF records.
 New records have IDs that reference the source record ID.
-Genotypes are handled.
+Genotypes/samples are handled correctly.
 Deletions generate haploid/missing genotypes at overlapping sites.
 T}
 .TE

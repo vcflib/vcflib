@@ -29,7 +29,15 @@ A typical workflow will call **vcfwave** to realign all ALT alleles against the 
 Next use a tool such as `bcftools norm -m-` to normalise the VCF records and split out multiple ALT alleles into separate VCF records.
 Finally use **vcfcreatemulti** to create multi-allele VCF records again.
 
-For more information see also [vcfcreatemulti](./vcfcreatemulti.md).
+PERFORMANCE:
+
+Unlike traditional aligners that run in quadratic time, the recently introduced wavefront aligner WFA runs in time O(ns+s^2), proportional to the sequence length n and the alignment score s, using O(s^2) memory (or O(s) using the ultralow/BiWFA mode). Therefore WFA does not choke on longer alignments.
+
+Speed-wise vcfwave can still be faster. See also the [performance docs](../test/doc/performance.md) for some metrics and discussion.
+
+READING:
+
+See also the *humpty dumpty* companion tool [vcfcreatemulti](./vcfcreatemulti.md).
 
 ## Options
 
@@ -56,15 +64,19 @@ See more below.
 
 -->
 
+Current command line options:
+
 ```
 
 >>> head("vcfwave -h",26)
 >
 usage: vcfwave [options] [file]
 >
-Realign reference and alternate alleles with WFA, parsing out the primitive alleles
-into multiple VCF records. New records have IDs that reference the source record ID.
-Genotypes are handled. Deletions generate haploid/missing genotypes at overlapping sites.
+Realign reference and alternate alleles with WFA, parsing out the
+'primitive' alleles into multiple VCF records. New records have IDs that
+reference the source record ID.  Genotypes/samples are handled
+correctly. Deletions generate haploid/missing genotypes at overlapping
+sites.
 >
 options:
     -p, --wf-params PARAMS  use the given BiWFA params (default: 0,19,39,3,81,1)
@@ -75,16 +87,15 @@ options:
                             REF is longer than LEN (default: unlimited).
     -K, --inv-kmer K        Length of k-mer to use for inversion detection sketching (default: 17).
     -I, --inv-min LEN       Minimum allele length to consider for inverted alignment (default: 64).
-    -k, --keep-info         Maintain site and allele-level annotations when decomposing.
-                            Note that in many cases, such as multisample VCFs, these won't
-                            be valid post-decomposition.  For biallelic loci in single-sample
-                            VCFs, they should be usable with caution.
-    -t, --threads N         use this many threads for variant decomposition
-    --quiet                 no progress bar
-    -d, --debug             debug mode.
+    -t, --threads N         Use this many threads for variant decomposition (default is 1).
+                            For most datasets threading may actually slow vcfwave down.
+    --quiet                 Do not display progress bar.
+    -d, --debug             Debug mode.
+>
+Note the -k,--keep-info switch is no longer in use and ignored.
 >
 Type: transformation
->
+
 
 ```
 

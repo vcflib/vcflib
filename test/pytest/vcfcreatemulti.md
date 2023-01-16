@@ -11,11 +11,12 @@ vcfcreatemulti - collates single ALT allele records into multi-allele records wh
 
 # DESCRIPTION
 
-**vcfcreatemulti** merges VCF records into one line by combining ALT alleles into a single VCF record. This tools is a great companion to [vcfwave](./vcfwave.md).
+**vcfcreatemulti** merges VCF records into one line by combining ALT alleles into a single VCF record. This tool is a great companion to [vcfwave](./vcfwave.md).
 
 In 2022 **vcfcreatemulti** has been upgraded to track INFO records and genotypes (samples) so they are updated in the output.
 
-See below EXAMPLES, one caveat, and [vcfwave](./vcfwave.md) for more information.
+Note that the tool is not perfect:
+See below EXAMPLES, the caveat on 'too many variants' `MULTI=ALTPROBLEM`, and [vcfwave](./vcfwave.md) for more information.
 
 ## Options
 
@@ -48,9 +49,7 @@ See more below.
 >
 Usage: vcfcreatemulti [options] [file]
 >
-Go through sorted VCF and if overlapping alleles are represented
-across multiple records, merge them into a single record.  Currently
-only for indels.
+Go through sorted VCF and when overlapping alleles are represented across multiple records, merge them into a single multi-ALT record. See the documentation for more information.
 >
 options:
 >

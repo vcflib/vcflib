@@ -76,7 +76,7 @@ the library's utility for most users.
  | [vcf2tsv](./vcf2tsv.md) | Converts VCF to per-allelle or per-genotype tab-delimited format, using null string to replace empty values in the table. Specifying -g will output one line per sample with genotype information. When there is more than one alt allele there will be multiple rows, one for each allele and, the info will match the 'A' index |
  | [vcfaddinfo](./vcfaddinfo.md) | Adds info fields from the second file which are not present in the first vcf file. |
  | [vcfafpath](./vcfafpath.md) | Display genotype paths |
- | [vcfallelicprimitives](./vcfallelicprimitives.md) | Note that this tool is considered legacy and will emit a warning! Use [vcfwave](./vcfwave.md) instead. |
+ | [vcfallelicprimitives](./vcfallelicprimitives.md) | WARNING: this tool is considered legacy and is only retained for older workflows. It will emit a warning! Even though it can use the WFA you should use [vcfwave](./vcfwave.md) instead. |
  | [vcfannotate](./vcfannotate.md) | Intersect the records in the VCF file with targets provided in a BED file. Intersections are done on the reference sequences in the VCF file. If no VCF filename is specified on the command line (last argument) the VCF read from stdin. |
  | [vcfannotategenotypes](./vcfannotategenotypes.md) | Examine genotype correspondence. Annotate genotypes in the first file with genotypes in the second adding the genotype as another flag to each sample filed in the first file. annotation-tag is the name of the sample flag which is added to store the annotation. also adds a 'has_variant' flag for sites where the second file has a variant. |
  | [vcfbreakmulti](./vcfbreakmulti.md) | If multiple alleles are specified in a single record, break the record into multiple lines, preserving allele-specific INFO fields. |
@@ -117,7 +117,7 @@ the library's utility for most users.
  | [vcfsamplediff](./vcfsamplediff.md) | Establish putative somatic variants using reported differences between germline and somatic samples. Tags each record where the listed sample genotypes differ with <tag>. The first sample is assumed to be germline, the second somatic. Each record is tagged with <tag>={germline,somatic,loh} to specify the type of variant given the genotype difference between the two samples. |
  | [vcfsamplenames](./vcfsamplenames.md) | List sample names |
  | [vcfstreamsort](./vcfstreamsort.md) | Sorts the input (either stdin or file) using a streaming sort algorithm. Guarantees that the positional order is correct provided out-of-order variants are no more than 100 positions in the VCF file apart. |
- | [vcfwave](./vcfwave.md) | Realign reference and alternate alleles with WFA, parsing out the primitive alleles into multiple VCF records. New records have IDs that reference the source record ID. Genotypes are handled. Deletions generate haploid/missing genotypes at overlapping sites. |
+ | [vcfwave](./vcfwave.md) | Realign reference and alternate alleles with WFA, parsing out the 'primitive' alleles into multiple VCF records. New records have IDs that reference the source record ID. Genotypes/samples are handled correctly. Deletions generate haploid/missing genotypes at overlapping sites. |
 
 ## statistics
 
