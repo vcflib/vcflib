@@ -13,7 +13,7 @@ and
 - [ ] vcfwave check polyploids?
 - [ ] RELEASE 1.0.6
 
-## ChangeLog v1.0.5 (2023xxxx)
+## ChangeLog v1.0.5 (20230116)
 
 Vcflib's first *Humpty Dumpty* release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
 

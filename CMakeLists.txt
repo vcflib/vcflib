@@ -91,7 +91,7 @@ endif(GPROF)
 if (ZIG)
   find_program(ZIG_EXE NAMES "zig")
   if (NOT ZIG_EXE)
-    MESSAGE(FATAL_ERROR "zig binary not found in PATH: either use cmake -DNO_ZIG option or add zig to the PATH")
+    MESSAGE(FATAL_ERROR "zig binary not found in PATH. zig is used for vcfcreatemulti. Either use cmake -DZIG=OFF option or add zig to the PATH")
   endif (NOT ZIG_EXE)
 endif(ZIG)
 
