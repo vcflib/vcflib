@@ -300,17 +300,24 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
 
     // Get infos and update mvar
     const list = [_][] const u8{ "AN","AT","AC","AF","INV","TYPE" };
-    for (list) |item| {
-            const at = expand_info(Variant,item,vs) catch unreachable;
+    for (list) |name| {
+            const at = expand_info(Variant,name,vs) catch unreachable;
             defer at.deinit();
-            mvar.set_info(item,at);
+            mvar.set_info(name,at);
         }
 
     // Get genotypes and update mvar
     var genotypes = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
     // mvar.set_samples(genotypes.c_samples());
-    mvar.set_samples(genotypes);
-    genotypes.deinit();
+    mvar.set_samples(genotypes.s_samples);
+    var ninfo = ArrayList([] const u8).init(allocator);
+    ninfo.deinit();
+    if (genotypes.g_err != samples.VcfSampleError.None) {
+        ninfo.append("ALTPROBLEM") catch unreachable;
+        mvar.set_info("MULTI",ninfo);
+    }
+        
+    genotypes.s_samples.deinit();
     
     return mvar.v;
 }

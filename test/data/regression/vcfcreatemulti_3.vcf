@@ -20,6 +20,7 @@
 ##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
 ##ALT=<ID=CNV,Description="Copy number variable region">
 ##INFO=<ID=combined,Number=1,Type=String,Description="Range of overlapping variants which were combined into this one using vcfcreatemulti.">
+##INFO=<ID=MULTI,Number=1,Type=String,Description="Identify problematic ALT reconstruction - see vcfcreatemulti.md doc.">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
 19	111	.	A	C	9.6	.	.	GT:HQ	0|0:10,10	0|0:10,10	0/1:3,3
 19	112	.	A	G	10	.	.	GT:HQ	0|0:10,10	0|0:10,10	0/1:3,3

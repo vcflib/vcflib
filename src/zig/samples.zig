@@ -16,7 +16,7 @@ const vcf = @import("vcf.zig");
 
 const warning = vcf.warning;
 
-const VcfSampleError = error{
+pub const VcfSampleError = error{
     None,
     CannotParseSample,
     MultiAltSNPProblem,
@@ -117,7 +117,7 @@ const Genotypes = struct {
             const current = base.items[i];
             if (g2 == 0 or g2 == GENOTYPE_MISSING) continue; // no update
             if (current>0) {
-                try warning("Too many ALT alleles to fit in sample(s)");
+                try warning("Too many ALT alleles to fit in sample(s) - record marked with MULTI=ALTPROBLEM");
                 g_err = error.MultiAltSNPProblem;
             }
             base.items[i] = g2;
@@ -158,15 +158,16 @@ const Genotypes = struct {
 };
 
 const ReturnGenotypes = struct {
-    g_err: VcfSampleError = error.None
+    g_err: VcfSampleError = error.None,
+    s_samples: ArrayList([] const u8)
 };
 
 /// Walks all genotypes in the list of variants and reduces them to
 /// the genotypes of the combined variant. For examples 0|1 genotypes
 /// get translated to their list numbers 0|6. This works for
 /// heterozygous only (at this point).
-// pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !Genotypes {
-pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
+pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ReturnGenotypes {
+//pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
     var samples = ArrayList(Genotypes).init(allocator); // result set
     var g_err: VcfSampleError = error.None;
     for (vs.items) | v,i | { // Fetch the genotypes from each variant
@@ -191,7 +192,8 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList(
         s_samples.append(s.items) catch unreachable;
     }
     // p("ngeno_s: size {d} {s}\n",.{s_samples.items.len,s_samples.items});
-    return s_samples;
+    // return s_samples;
+    return ReturnGenotypes { .g_err = g_err, .s_samples = s_samples };
 }
 
 test "split genotypes" {

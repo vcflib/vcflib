@@ -87,6 +87,8 @@ grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC
 
 ### Too many variants
 
+*Or the MULTI=ALTPROBLEM.*
+
 That looks proper. There is one caveat or blatant problem, however. If a variant sequence is long (a large 'bubble') and with the other alleles more (small) INDELs are scored than there are samples then the genotypes represent only the last match. Resulting in something ugly:
 
 ```
@@ -107,9 +109,17 @@ ALT-SNP2 ACTGACTA       1/0
              ^
 ```
 
-At this point, for analysis, there is little else to do but go to the original data (pangenome or VCF) and compare the results. What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation.
+In words: the result is incorrect.
+At this point, for analysis, there is little else to do but go to the original data (pangenome or VCF) and compare the results.
+What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation and the resulting layout is a problem (too many ALTs as in 'too many cooks'!).
 
-To help vcflib show's a `WARNING: Too many ALT alleles to fit in sample(s)' and we add an INFO tag "CREATEMULTI=OK|PROBLEM".
+To help vcflib show's a `WARNING: Too many ALT alleles to fit in sample(s)' and we add an INFO tag "MULTI=ALTPROBLEM". Searching for these will give an idea of this issue. E.g.
+
+```
+grep MULTI= ./test/tmp/vcfcreatemulti_2.vcf -c
+```
+
+Finds 3 marked records.
 
 One future solution might be to have vcfcreatemulti ignore SNPs, or only take the first one, but that somewhat would do away with pointing out complex arrangements. Another solution might be to edit the ALTs and merge ALT-SNP1 into ALT-SNP2 so we get `ACTGCCTA`.
 I have not made up my mind yet.
@@ -155,7 +165,7 @@ Finally use **vcfcreatemulti** to create multi-allele VCF records again.
 
 ### Warning: Too many ALT alleles to fit in sample(s)
 
-See 'caveat' section above.
+See 'caveat' section [above](#Too-many-variants).
 
 ### Warning: This code only supports one ALT allele per record: bailing out --- try normalising the data with `bcftools norm -m-`
 

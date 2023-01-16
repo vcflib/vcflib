@@ -199,6 +199,7 @@ int main(int argc, char** argv) {
     }
 
     variantFile.addHeaderLine("##INFO=<ID=combined,Number=1,Type=String,Description=\"Range of overlapping variants which were combined into this one using vcfcreatemulti.\">");
+    variantFile.addHeaderLine("##INFO=<ID=MULTI,Number=1,Type=String,Description=\"Identify problematic ALT reconstruction - see vcfcreatemulti.md doc.\">");
 
     cout << variantFile.header << endl;
 
