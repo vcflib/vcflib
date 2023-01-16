@@ -85,6 +85,8 @@ grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC
 
 ```
 
+### Too many variants
+
 That looks proper. There is one caveat or blatant problem, however. If a variant sequence is long (a large 'bubble') and with the other alleles more (small) INDELs are scored than there are samples then the genotypes represent only the last match. Resulting in something ugly:
 
 ```
@@ -93,13 +95,25 @@ That looks proper. There is one caveat or blatant problem, however. If a variant
 509|49 8 500|500 20|251  500|238 238|498 653|387 102|1 500|498 9|509 498|69  500|297 498|725 498|660 500|472 204|500 50 0|846 654|653 500|500 500|500 18|18 430|498 214|500 499|299 67|500  18|386  47|154  508|47  500|385 42|47 579|47 47|18 47|47 219|500 18|47 53|213  500|18  500|18  500|500 47|846  47|47 500|47  500|47  839|500 498|47  500
 ```
 
-this is a simple artefact resulting from the fact that complex structures do not map (easily) on the simple VCF layout.
+this is a simple artefact resulting from the fact that complex structures do not map (easily) on the simple VCF layout. Another problem is that multiple SNPs don't get incorporated in the ALTs - the algorithm uses the reference to build up the longer ALTs for every single SNP from the start.
 
-At this point there is little else to do but go to the original data (pangenome or VCF) and compare the results. What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation.
+In this example you see that the ALT for SNP2 does not contain SNP1 even though they may be in the same individual/sample:
 
-At this point we show `WARNING: Too many ALT alleles to fit in sample(s)'.
+```
+                       sample
+REF      ACTGACTGACTG
+ALT-SNP1 ACTGC          1/0
+ALT-SNP2 ACTGACTA       1/0
+             ^
+```
 
-One solution might be to have vcfcreatemulti ignore SNPs, but that somewhat would do away with pointing out complex arrangements. Contributions and ideas are welcome!
+At this point, for analysis, there is little else to do but go to the original data (pangenome or VCF) and compare the results. What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation.
+
+To help vcflib show's a `WARNING: Too many ALT alleles to fit in sample(s)' and we add an INFO tag "CREATEMULTI=OK|PROBLEM".
+
+One future solution might be to have vcfcreatemulti ignore SNPs, or only take the first one, but that somewhat would do away with pointing out complex arrangements. Another solution might be to edit the ALTs and merge ALT-SNP1 into ALT-SNP2 so we get `ACTGCCTA`.
+I have not made up my mind yet.
+Contributions and ideas are welcome!
 
 ## Source code
 

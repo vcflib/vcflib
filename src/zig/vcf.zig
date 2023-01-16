@@ -307,8 +307,10 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
         }
 
     // Get genotypes and update mvar
-    var nsamples = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
-    mvar.set_samples(nsamples);
+    var genotypes = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
+    // mvar.set_samples(genotypes.c_samples());
+    mvar.set_samples(genotypes);
+    genotypes.deinit();
     
     return mvar.v;
 }

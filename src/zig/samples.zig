@@ -19,7 +19,8 @@ const warning = vcf.warning;
 const VcfSampleError = error{
     None,
     CannotParseSample,
-    MultiAltDoesNotFitSample
+    MultiAltSNPProblem,
+    OutOfMemory
 };
 
 const GENOTYPE_MISSING = -256;
@@ -42,11 +43,14 @@ fn split_samples(str: []const u8) *ArrayList([] const u8) {
 /// we can track that as a boolean. To track samples create an
 /// ArrayList(genotypes).
 const Genotypes = struct {
-    genos: ArrayList(i64),
+    // default field values
+    genos: ArrayList(i64), 
     phased: bool = false,
 
     const Self = @This();
 
+    // state
+    // var g_err: VcfSampleError = error.None;
     // ---- helpers
 
     fn is_phased(str: [] const u8) bool {
@@ -107,14 +111,18 @@ const Genotypes = struct {
     /// size mismatches
     fn merge(self: *const Self, genos2: Genotypes) !void {
         var base = self.genos;
+        var g_err: VcfSampleError = error.None;
         
         for (genos2.genos.items) | g2,i | {
             const current = base.items[i];
             if (g2 == 0 or g2 == GENOTYPE_MISSING) continue; // no update
-            if (current>0)
+            if (current>0) {
                 try warning("Too many ALT alleles to fit in sample(s)");
+                g_err = error.MultiAltSNPProblem;
+            }
             base.items[i] = g2;
         }
+        return g_err;
     }
     
     fn to_s(self: *const Self) !ArrayList(u8) {
@@ -149,13 +157,18 @@ const Genotypes = struct {
     }
 };
 
+const ReturnGenotypes = struct {
+    g_err: VcfSampleError = error.None
+};
 
 /// Walks all genotypes in the list of variants and reduces them to
 /// the genotypes of the combined variant. For examples 0|1 genotypes
 /// get translated to their list numbers 0|6. This works for
 /// heterozygous only (at this point).
+// pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !Genotypes {
 pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
     var samples = ArrayList(Genotypes).init(allocator); // result set
+    var g_err: VcfSampleError = error.None;
     for (vs.items) | v,i | { // Fetch the genotypes from each variant
         for (v.genotypes().items) | geno,j | {
             var geno2 = Genotypes.init(geno); // convert from string to number list
@@ -164,7 +177,10 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList(
                 try samples.append(geno2);
             }
             else {
-                try samples.items[j].merge(geno2);
+                samples.items[j].merge(geno2) catch |err| {
+                    if (err != error.None)
+                        g_err = err;
+                };
             }
         }
     }
