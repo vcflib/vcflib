@@ -22,6 +22,14 @@
 ;; debug example
 ;;
 ;;   env LD_LIBRARY_PATH=$GUIX_ENVIRONMENT/lib gdb --args vcfallelicprimitives -m ../samples/10158243.vcf
+;;
+;; zig compiler
+;;
+;; To bring in a recent zig compiler I do something like
+;;
+;;   guix shell -C -D -f guix.scm --expose=/home/wrk/opt/zig-linux-x86_64-0.11.0-dev.987+a1d82352d/=/zig
+;;
+;; and add /zig to the PATH.
 
 (use-modules
   ((guix licenses) #:prefix license:)
