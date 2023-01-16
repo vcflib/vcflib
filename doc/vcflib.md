@@ -85,7 +85,7 @@ the library's utility for most users.
  | [vcfcleancomplex](./vcfcleancomplex.md) | Removes reference-matching sequence from complex alleles and adjusts records to reflect positional change. |
  | [vcfcombine](./vcfcombine.md) | Combine VCF files positionally, combining samples when sites and alleles are identical. Any number of VCF files may be combined. The INFO field and other columns are taken from one of the files which are combined when records in multiple files match. Alleles must have identical ordering to be combined into one record. If they do not, multiple records will be emitted. |
  | [vcfcommonsamples](./vcfcommonsamples.md) | Generates each record in the first file, removing samples not present in the second |
- | [vcfcreatemulti](./vcfcreatemulti.md) | Go through sorted VCF and if overlapping alleles are represented across multiple records, merge them into a single record. Currently only for indels. |
+ | [vcfcreatemulti](./vcfcreatemulti.md) | Go through sorted VCF and when overlapping alleles are represented across multiple records, merge them into a single multi-ALT record. See the documentation for more information. |
  | [vcfecho](./vcfecho.md) | Echo VCF to stdout (simple demo) |
  | [vcfevenregions](./vcfevenregions.md) | Generates a list of regions, e.g. chr20:10..30 using the variant density information provided in the VCF file to ensure that the regions have even numbers of variants. This can be use to reduce the variance in runtime when dividing variant detection or genotyping by genomic coordinates. |
  | [vcffixup](./vcffixup.md) | Generates a VCF stream where AC and NS have been generated for each record using sample genotypes |

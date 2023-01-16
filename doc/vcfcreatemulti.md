@@ -49,9 +49,7 @@ See more below.
 >
 Usage: vcfcreatemulti [options] [file]
 >
-Go through sorted VCF and if overlapping alleles are represented
-across multiple records, merge them into a single record.  Currently
-only for indels.
+Go through sorted VCF and when overlapping alleles are represented across multiple records, merge them into a single multi-ALT record. See the documentation for more information.
 >
 options:
 >
