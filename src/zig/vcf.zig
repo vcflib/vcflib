@@ -56,7 +56,6 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
 var warnings = std.StringHashMap(bool).init(allocator); // Note: not thread safe
-// var warnings = ArrayList([] const u8).init(allocator); // NOTE: not thread safe
 
 pub fn warning(str: [] const u8) !void {
     try warnings.put(str,true);
@@ -325,12 +324,10 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
 /// The C++ code should call this to cleanup
 
 export fn zig_cleanup() void {    
-    // p("zig cleaning up!",.{});
-    // std.debug.assert(!gpa.deinit());
     warnings.deinit();
 
-    const leaked = gpa.deinit();
-    if (leaked) p("MEM FAIL",.{});
+    // ---- Not cleaning up the GPA unless we are debugging
+    // std.debug.assert(!gpa.deinit());
 }
 
 
