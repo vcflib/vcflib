@@ -19,7 +19,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const main_tests = b.addTest("vcf.zig");
     main_tests.setBuildMode(mode);
-    main_tests.addLibraryPath("../../build");
+    // main_tests.addLibraryPath("../../build");
     // main_tests.addObjectFile("../../build/libvcflib.a");
 
     const test_step = b.step("test", "Run library tests");
