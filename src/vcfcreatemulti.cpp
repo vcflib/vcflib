@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
     size_t prev_pos = 0;
 
     if (!quiet)
-        cerr << "vcfcreatemulti processing..." << endl;
+        cerr << "vcfcreatemulti " << VCFLIB_VERSION << " processing..." << endl;
 
     while (variantFile.getNextVariant(var)) {
 
