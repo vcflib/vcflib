@@ -5,13 +5,15 @@ and
 
 ## TODO
 
-- [ ] RELEASE 1.0.5
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
-- [ ] vcfuniq combine genotypes from non-unique records: use vcfcreatemulti and bcftools norm as above
-- [ ] vcfwave check polyploids?
-- [ ] RELEASE 1.0.6
+
+## ChangeLog v1.0.6 (2023xxxx)
+
+Vcflib maintenance release
+
++ Fixed zig complaining about leaking memory
 
 ## ChangeLog v1.0.5 (20230116)
 
