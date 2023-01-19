@@ -8,6 +8,9 @@ and
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
+- bgzip
+- tabix -p vcf my_file.vcf.gz
+- pangenie, vg deconstruct, vcfbub
 
 ## ChangeLog v1.0.6 (2023xxxx)
 
