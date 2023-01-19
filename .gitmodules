@@ -28,7 +28,7 @@
 [submodule "contrib/tabixpp"]
 	path = contrib/tabixpp
 	url = https://github.com/vcflib/tabixpp.git
-  branch = pjotrp
+  branch = master
 [submodule "contrib/WFA2-lib"]
 	path = contrib/WFA2-lib
 	url = https://github.com/smarco/WFA2-lib
