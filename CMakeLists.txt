@@ -9,6 +9,7 @@ include(FeatureSummary)
 find_package(PkgConfig REQUIRED)
 find_package(pybind11 CONFIG)
 
+include(GNUInstallDirs)
 include(FindBZip2)
 include(FindLibLZMA)
 include(FindZLIB)
@@ -27,7 +28,8 @@ option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
-option(ZIG "Disable using the zig compiler" ON)
+option(ZIG "Set to OFF to disable the zig code" ON)
+option(WFA_GITMODULE "Use local git submodule for WFA2LIB" ON) # disable in distros, you may need to add path to WFA_INCLUDE_DIRS
 
 include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
@@ -118,7 +120,9 @@ if (NOT TABIX_FOUND)
   )
 endif()
 
-set(WFA_LOCAL contrib/WFA2-lib)
+if(WFA_GITMODULE)
+  set(WFA_LOCAL contrib/WFA2-lib)
+endif()
 
 file(GLOB INCLUDES
   src/*.h*
@@ -356,18 +360,19 @@ if (HTSLIB_LOCAL)
 
 endif(HTSLIB_LOCAL)
 
-# FIXME: hard-coded compile switches need to be fixed upstream
-if (ASAN)
-  set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup asan lib_wfa)
-else()
-  set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup lib_wfa)
-endif()
+if(WFA_GITMODULE)
+  # FIXME: hard-coded compile switches need to be fixed upstream
+  if (ASAN)
+    set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup asan lib_wfa)
+  else()
+    set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup lib_wfa)
+  endif()
 
-# if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
-#   set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS})
-# endif()
+  # if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
+  #   set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS})
+  # endif()
 
-ExternalProject_Add(wfa-EXT
+  ExternalProject_Add(wfa-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/${WFA_LOCAL}"
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -375,21 +380,22 @@ ExternalProject_Add(wfa-EXT
     BUILD_IN_SOURCE ON
     BUILD_ALWAYS ON
     BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
-)
-ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
-set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
-set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a )
-# set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a ${SOURCE_DIR}/lib/libwfacpp.a )
-link_directories($SOURCE_DIR}/lib)
-MESSAGE(STATUS ${WFA_LINK_LIBRARIES})
+    )
+  ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
+  set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
+  set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a )
+  # set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a ${SOURCE_DIR}/lib/libwfacpp.a )
+  link_directories($SOURCE_DIR}/lib)
+  MESSAGE(STATUS ${WFA_LINK_LIBRARIES})
 
-# add_library(WAFCPP_STATIC_LIB STATIC IMPORTED)
-# set_target_properties(WAFCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${WFA_LINK_LIBRARIES})
-# add_dependencies(WAFCPP_STATIC_LIB wfa-EXT)
+  # add_library(WAFCPP_STATIC_LIB STATIC IMPORTED)
+  # set_target_properties(WAFCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${WFA_LINK_LIBRARIES})
+  # add_dependencies(WAFCPP_STATIC_LIB wfa-EXT)
 
-add_custom_target(wfa
+  add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
+endif(WFA_GITMODULE)
 
 include_directories(${WFA_INCLUDE_DIRS})
 
