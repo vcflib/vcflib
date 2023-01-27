@@ -5,6 +5,8 @@ and
 
 ## TODO
 
+- [ ] allow Debian to use packaged wfa2 lib
+- [ ] vcfcreatemulti: fix problem with slow and wrong complex regions
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
