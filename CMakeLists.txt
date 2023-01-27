@@ -29,7 +29,7 @@ option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
 option(ZIG "Set to OFF to disable the zig code" ON)
-option(WFA_GITMODULE "Use local git submodule for WFA2LIB" ON) # disable in distros, you may need to add path to WFA_INCLUDE_DIRS
+option(WFA_GITMODULE "Force local git submodule for WFA2LIB" ON) # disable in distros, you may need to add path to WFA_INCLUDE_DIRS
 
 include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
@@ -44,8 +44,6 @@ endif(OPENMP)
 
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES TYPE REQUIRED)
-#find_package(LIBLZMA)
-#set_package_properties(LIBLZMA PROPERTIES TYPE REQUIRED)
 find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
@@ -261,14 +259,6 @@ endif (ZIG)
 set(SCRIPTS
     bed2region
     bgziptabix
-    # plotBfst.R
-    # plotHaplotypes.R
-    # plotHapLrt.R
-    # plotPfst.R
-    # plot_roc.r
-    # plotSmoothed.R
-    # plotWCfst.R
-    # plotXPEHH.R
     vcf2bed.py
     vcf2sqlite.py
     vcfbiallelic
@@ -388,10 +378,6 @@ if(WFA_GITMODULE)
   link_directories($SOURCE_DIR}/lib)
   MESSAGE(STATUS ${WFA_LINK_LIBRARIES})
 
-  # add_library(WAFCPP_STATIC_LIB STATIC IMPORTED)
-  # set_target_properties(WAFCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${WFA_LINK_LIBRARIES})
-  # add_dependencies(WAFCPP_STATIC_LIB wfa-EXT)
-
   add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
@@ -415,16 +401,10 @@ ExternalProject_Add(ZIG-EXT
 ExternalProject_Get_property(ZIG-EXT SOURCE_DIR)
 set(ZIG_INCLUDE_DIRS ${SOURCE_DIR})
 set(ZIG_LINK_LIBRARIES ${SOURCE_DIR}/zig-out/lib/libzig.a)
-# link_directories($SOURCE_DIR}/lib)
-# MESSAGE(STATUS ${ZIG_LINK_LIBRARIES})
 
 add_library(ZIGCPP_STATIC_LIB STATIC IMPORTED)
 set_target_properties(ZIGCPP_STATIC_LIB PROPERTIES IMPORTED_LOCATION ${ZIG_LINK_LIBRARIES})
 add_dependencies(ZIGCPP_STATIC_LIB ZIG-EXT vcf.zig)
-
-# add_custom_target(ZIGLIB
-#     DEPENDS ZIG-EXT
-#     VERBATIM)
 
 include_directories(${ZIG_INCLUDE_DIRS})
 
@@ -554,7 +534,6 @@ endif (ZIG)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 add_doctest(doc/vcffilter)
-# add_pydoctest_fullname(../README.md)
 
 # ---- Build docs
 #
