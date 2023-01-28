@@ -439,9 +439,9 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     add_dependencies(${BIN} vcflib)
-    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib)
+    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
   endforeach(BIN ${BINS})
-  target_link_libraries(vcfwave PUBLIC ${WFALIB})
+  # target_link_libraries(vcfwave PUBLIC ${WFALIB})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
