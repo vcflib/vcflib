@@ -307,17 +307,17 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
 
     // Get genotypes and update mvar
     var genotypes = samples.reduce_renumber_genotypes(Variant,vs) catch unreachable;
-    // mvar.set_samples(genotypes.c_samples());
+    defer genotypes.s_samples.deinit();
+
     mvar.set_samples(genotypes.s_samples);
     var ninfo = ArrayList([] const u8).init(allocator);
-    ninfo.deinit();
+    defer ninfo.deinit();
+    
     if (genotypes.g_err != samples.VcfSampleError.None) {
         ninfo.append("ALTPROBLEM") catch unreachable;
         mvar.set_info("MULTI",ninfo);
     }
         
-    genotypes.s_samples.deinit();
-    
     return mvar.v;
 }
 

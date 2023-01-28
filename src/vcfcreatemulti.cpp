@@ -23,8 +23,6 @@ bool nextGen  = true;
 bool quiet = false;
 off_t file_size = -1;
 
-// extern "C" void *zig_create_multi_allelic(Variant *retvar, Variant *varlist[], long size);
-
 void printSummary(char** argv) {
     cerr << R"(
 Usage: vcfcreatemulti [options] [file]

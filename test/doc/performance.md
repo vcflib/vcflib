@@ -54,3 +54,7 @@ tux02:~/tmp/vcflib/build$ /usr/bin/time -v ./vcfwave ../samples/chr18.grch38.vcf
 hmm. Not so exciting. Looks like we need to parallelize at a different level. Memory used was about 6Gb, and that is not bad.
 
 The good news is that the output is identical.
+
+## vcfcreatemulti
+
+This program is actually slower than vcfwave.
