@@ -1,3 +1,11 @@
+# For Debian currently with
+#
+#   cd build
+#   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF -DWFA_GITMODULE=OFF ..
+#   make
+#   make test
+#   make install
+#
 cmake_minimum_required(VERSION 3.16)
 project(vcflib)
 
@@ -5,6 +13,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(ExternalProject)
 include(FeatureSummary)
+include(GNUInstallDirs)
 
 find_package(PkgConfig REQUIRED)
 find_package(pybind11 CONFIG)
@@ -381,9 +390,13 @@ if(WFA_GITMODULE)
   add_custom_target(wfa
     DEPENDS wfa-EXT
     VERBATIM)
+else(WFA_GITMODULE)
+  set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
+  # set(WFA_LINK_LIBRARIES ${CMAKE_INSTALL_LIBDIR}/libwfa.so)
 endif(WFA_GITMODULE)
 
 include_directories(${WFA_INCLUDE_DIRS})
+MESSAGE(STATUS ${WFA_INCLUDE_DIRS})
 
 # ZIG VCF imported library is part of VCFLIB source tree. We designate it an
 # external project so we can run 'zig build'
@@ -414,7 +427,6 @@ endif (ZIG)
 
 set(vcflib_DEPS
   CURL::libcurl
-  wfa
   )
 
 if (ZIG)
@@ -423,6 +435,13 @@ endif ()
 
 if (HTSLIB_LOCAL)
   list(APPEND vcflib_DEPS htslib)
+endif()
+
+if (WFA_GITMODULE)
+  list(APPEND vcflib_DEPS wfa)
+else()
+  find_library(WFALIB wfa2 wfa) # PATHS /usr/local/lib64)
+  target_link_libraries(vcflib PUBLIC ${WFALIB})
 endif()
 
 set(vcflib_LIBS
@@ -441,7 +460,6 @@ if (ZIG)
   list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
 endif()
 
-# target_link_libraries(vcflib PUBLIC ${vcflib_LIBS})
 add_dependencies(vcflib ${vcflib_DEPS})
 
 # ---- Build all
