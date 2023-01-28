@@ -360,43 +360,15 @@ if (HTSLIB_LOCAL)
 endif(HTSLIB_LOCAL)
 
 if(WFA_GITMODULE)
-  # FIXME: hard-coded compile switches need to be fixed upstream
-  if (ASAN)
-    set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup asan lib_wfa)
-  else()
-    set(wfa_MAKE_ARGS BUILD_WFA_PARALLEL=1 BUILD_TOOLS=0 BUILD_EXAMPLES=0 CC=gcc CC_FLAGS=-fPIC setup lib_wfa)
-  endif()
-
-  # if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
-  #   set(wfa_MAKE_ARGS ${wfa_MAKE_ARGS})
-  # endif()
-
-  ExternalProject_Add(wfa-EXT
-    SOURCE_DIR "${CMAKE_SOURCE_DIR}/${WFA_LOCAL}"
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE ON
-    BUILD_ALWAYS ON
-    BUILD_COMMAND $(MAKE) ${wfa_MAKE_ARGS}
-    )
-  ExternalProject_Get_property(wfa-EXT SOURCE_DIR)
-  set(WFA_INCLUDE_DIRS ${SOURCE_DIR})
-  set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a )
-  # set(WFA_LINK_LIBRARIES ${SOURCE_DIR}/lib/libwfa.a ${SOURCE_DIR}/lib/libwfacpp.a )
-  link_directories($SOURCE_DIR}/lib)
-  MESSAGE(STATUS ${WFA_LINK_LIBRARIES})
-
-  add_custom_target(wfa
-    DEPENDS wfa-EXT
-    VERBATIM)
+  set(WFA_INCLUDE_DIRS ${WFA_LOCAL})
+  add_subdirectory(${WFA_LOCAL})
 else(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
-  # set(WFA_LINK_LIBRARIES ${CMAKE_INSTALL_LIBDIR}/libwfa.so)
 endif(WFA_GITMODULE)
 
 include_directories(${WFA_INCLUDE_DIRS})
 MESSAGE(STATUS ${WFA_INCLUDE_DIRS})
+
 
 # ZIG VCF imported library is part of VCFLIB source tree. We designate it an
 # external project so we can run 'zig build'
@@ -438,10 +410,9 @@ if (HTSLIB_LOCAL)
 endif()
 
 if (WFA_GITMODULE)
-  list(APPEND vcflib_DEPS wfa)
+  find_library(WFALIB wfa2 PATHS ${WFA_LOCAL})
 else()
-  find_library(WFALIB wfa2 wfa) # PATHS /usr/local/lib64)
-  target_link_libraries(vcflib PUBLIC ${WFALIB})
+  find_library(WFALIB wfa2 wfa) # distro search
 endif()
 
 set(vcflib_LIBS
@@ -470,6 +441,7 @@ if (NOT BUILD_ONLY_LIB)
     add_dependencies(${BIN} vcflib)
     target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib)
   endforeach(BIN ${BINS})
+  target_link_libraries(vcfwave PUBLIC ${WFALIB})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
 
   # ---- Copy scripts
