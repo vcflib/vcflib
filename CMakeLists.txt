@@ -310,7 +310,6 @@ file (STRINGS "VERSION" BUILD_NUMBER)
 add_definitions(-DVCFLIB_VERSION="${BUILD_NUMBER}")
 add_definitions(-DVERSION="${BUILD_NUMBER}")
 
-
 # ---- Build htslib
 #
 # Note by default we use the distributed htslib! These are
@@ -362,13 +361,14 @@ endif(HTSLIB_LOCAL)
 if(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${WFA_LOCAL})
   add_subdirectory(${WFA_LOCAL})
+  set(WFALIB wfa2) # pick up the wfa2 lib target from the included CMakeLists.txt
 else(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
-  find_library(WFALIB wfa2 wfa) # distro search
+  find_library(WFALIB wfa2 wfa) # distro search for shared lib
 endif(WFA_GITMODULE)
 
 include_directories(${WFA_INCLUDE_DIRS})
-MESSAGE(STATUS ${WFA_INCLUDE_DIRS})
+MESSAGE(STATUS "WFA using include ${WFA_INCLUDE_DIRS}")
 
 # ZIG VCF imported library is part of VCFLIB source tree. We designate it an
 # external project so we can run 'zig build'
@@ -433,11 +433,7 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     add_dependencies(${BIN} vcflib)
-    if (WFA_GITMODULE)
-      target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib wfa2)
-    else()
-      target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
-    endif()
+    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
   endforeach(BIN ${BINS})
   # target_link_libraries(vcfwave PUBLIC ${WFALIB})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
@@ -452,7 +448,7 @@ endif()
 # ---- Python bindings - mostly for testing at this stage
 pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
 add_dependencies(pyvcflib ${vcflib_DEPS})
-target_link_libraries(pyvcflib PUBLIC vcflib "${vcflib_LIBS}")
+target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
 install(TARGETS pyvcflib LIBRARY DESTINATION lib)
 
 # ---- Test
