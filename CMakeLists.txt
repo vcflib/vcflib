@@ -364,11 +364,11 @@ if(WFA_GITMODULE)
   add_subdirectory(${WFA_LOCAL})
 else(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
+  find_library(WFALIB wfa2 wfa) # distro search
 endif(WFA_GITMODULE)
 
 include_directories(${WFA_INCLUDE_DIRS})
 MESSAGE(STATUS ${WFA_INCLUDE_DIRS})
-
 
 # ZIG VCF imported library is part of VCFLIB source tree. We designate it an
 # external project so we can run 'zig build'
@@ -409,12 +409,6 @@ if (HTSLIB_LOCAL)
   list(APPEND vcflib_DEPS htslib)
 endif()
 
-if (WFA_GITMODULE)
-  find_library(WFALIB wfa2 PATHS ${WFA_LOCAL})
-else()
-  find_library(WFALIB wfa2 wfa) # distro search
-endif()
-
 set(vcflib_LIBS
   ${HTSLIB_LIBRARIES}
   ${CURL_LIBRARIES}
@@ -439,7 +433,11 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     add_dependencies(${BIN} vcflib)
-    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
+    if (WFA_GITMODULE)
+      target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib wfa2)
+    else()
+      target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
+    endif()
   endforeach(BIN ${BINS})
   # target_link_libraries(vcfwave PUBLIC ${WFALIB})
   install(TARGETS ${BINS} RUNTIME DESTINATION bin)
