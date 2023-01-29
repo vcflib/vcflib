@@ -5,7 +5,6 @@ and
 
 ## TODO
 
-- [ ] allow Debian to use packaged wfa2 lib
 - [ ] vcfcreatemulti: fix problem with slow and wrong complex regions
 - [ ] complete vcfcreatemulti merge multiple rows
       + [ ] check for indels which are really the same
@@ -14,11 +13,16 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
-## ChangeLog v1.0.6 (2023xxxx)
+## ChangeLog v1.0.6 (20230129)
 
-Vcflib maintenance release
+Vcflib maintenance release - mostly for including in Debian
 
 + Fixed zig complaining about leaking memory
++ Added CMake Debian support with -DWFA_GITMODULE=OFF
++ Introduced CMake include(GNUInstallDirs)
++ Successfully built wfa2 using embedded CMakeLists.txt
++ Cleaned up CMakeLists.txt removing comments etc.
++ Reintroduced vcfcreatemulti in legacy mode when ZIG=OFF (for Debian)
 
 ## ChangeLog v1.0.5 (20230116)
 
