@@ -19,7 +19,12 @@ extern "C" {
 using namespace std;
 using namespace vcflib;
 
+#ifdef NO_ZIG
+bool nextGen  = false;
+#else
 bool nextGen  = true;
+#endif
+
 bool quiet = false;
 off_t file_size = -1;
 
@@ -110,6 +115,7 @@ Variant createMultiallelic_legacy(vector<Variant>& vars) {
     return mvar;
 }
 
+#ifndef NO_ZIG
 Variant createMultiallelic_zig(vector<Variant>& vars) {
 
     if (vars.size() == 1) {
@@ -125,12 +131,15 @@ Variant createMultiallelic_zig(vector<Variant>& vars) {
 
     return *mvar;
 }
+#endif
 
 // This function is called for every line/variant in the VCF file
 Variant createMultiallelic(vector<Variant>& vars) {
+    #ifndef NO_ZIG
     if (nextGen)
         return createMultiallelic_zig(vars);
     else
+    #endif
         return createMultiallelic_legacy(vars);
 }
 
@@ -274,10 +283,12 @@ int main(int argc, char** argv) {
         cout << result << endl;
     }
 
+    #ifndef NO_ZIG
     if (nextGen) {
         zig_display_warnings();
         zig_cleanup();
     }
+    #endif
 
     if (!quiet) cerr << endl;
 

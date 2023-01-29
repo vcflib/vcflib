@@ -259,11 +259,8 @@ set(BINS
     vcfinfo2qual
     vcfglbound
     vcfinfosummarize
+    vcfcreatemulti
 )
-
-if (ZIG)
-  list(APPEND BINS vcfcreatemulti)
-endif (ZIG)
 
 set(SCRIPTS
     bed2region
@@ -395,6 +392,7 @@ include_directories(${ZIG_INCLUDE_DIRS})
 
 else (ZIG)
   set (ZIG_LINK_LIBRARIES )
+  add_definitions(-DNO_ZIG=1)
 endif (ZIG)
 
 set(vcflib_DEPS
