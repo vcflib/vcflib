@@ -100,7 +100,7 @@ endif(GPROF)
 if (ZIG)
   find_program(ZIG_EXE NAMES "zig")
   if (NOT ZIG_EXE)
-    MESSAGE(FATAL_ERROR "zig binary not found in PATH. zig is used for vcfcreatemulti. Either use cmake -DZIG=OFF option or add zig to the PATH")
+    MESSAGE(FATAL_ERROR "zig binary not found in PATH. zig is used for vcfcreatemulti's latest features. Either use cmake -DZIG=OFF option or add zig to the PATH")
   endif (NOT ZIG_EXE)
 endif(ZIG)
 
@@ -434,11 +434,11 @@ if (NOT BUILD_ONLY_LIB)
     target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
   endforeach(BIN ${BINS})
   # target_link_libraries(vcfwave PUBLIC ${WFALIB})
-  install(TARGETS ${BINS} RUNTIME DESTINATION bin)
+  install(TARGETS ${BINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # ---- Copy scripts
   foreach(SCRIPT ${SCRIPTS})
-    install(PROGRAMS ./scripts/${SCRIPT} DESTINATION bin RENAME ${SCRIPT})
+    install(PROGRAMS ./scripts/${SCRIPT} DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ${SCRIPT})
   endforeach(SCRIPT ${SCRIPTS})
 
 endif()
@@ -447,7 +447,7 @@ endif()
 pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
 add_dependencies(pyvcflib ${vcflib_DEPS})
 target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
-install(TARGETS pyvcflib LIBRARY DESTINATION lib)
+install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # ---- Test
 
@@ -563,7 +563,7 @@ endif (PANDOC)
 
 # ---- Install
 
-install(TARGETS vcflib ARCHIVE DESTINATION lib)
+install(TARGETS vcflib ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES ${INCLUDES} DESTINATION include)
 
