@@ -5,8 +5,7 @@ and
 
 ## TODO
 
-- [ ] vcfcreatemulti: fix problem with slow and wrong complex regions
-- [ ] complete vcfcreatemulti merge multiple rows
+- [ ] vcfcreatemulti: fix problem with slow and wrong complex regions (implement backtrack)
       + [ ] check for indels which are really the same
       + [ ] combine vcfwave duplicated functionality
 - bgzip
