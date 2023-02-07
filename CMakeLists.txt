@@ -362,6 +362,9 @@ if(WFA_GITMODULE)
 else(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
   find_library(WFALIB wfa2 wfa) # distro search for shared lib
+  if(NOT WFALIB)
+    message(STATUS "ERROR: Can not find libfwa! Make sure it is installed or use the git submodule instead")
+  endif()
 endif(WFA_GITMODULE)
 
 include_directories(${WFA_INCLUDE_DIRS})

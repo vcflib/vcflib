@@ -332,7 +332,7 @@ VCFLIB uses the cmake build system, after a recursive checkout of the sources ma
 git clone --recursive https://github.com/vcflib/vcflib.git
 cd vcflib
 mkdir -p build && cd build
-cmake  -DCMAKE_BUILD_TYPE=Debug -DZIG=OFF -DOPENMP=OFF ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DZIG=OFF -DOPENMP=OFF ..
 cmake --build .
 cmake --install .
 ```
@@ -340,7 +340,7 @@ cmake --install .
 and to run the tests
 
 ```sh
-ctest --verbose
+ctest . --verbose
 ```
 
 Executables are built into the `./build` directory in the repository.
@@ -392,6 +392,16 @@ Check out htslib in tabixpp (recursively) and
 
 The standard build creates `build/vcflib.a`. Take a hint from the
 [cmake](./CMakeLists.txt) file that builds all the vcflib tools.
+
+## distro builds
+
+Distros, such as Debian, should build with something like
+
+```
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF -DWFA_GITMODULE=OFF ..
+```
+
+See the CMakeLists.txt header for more.
 
 ## source code
 
