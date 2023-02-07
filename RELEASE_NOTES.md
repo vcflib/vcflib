@@ -12,6 +12,15 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog v1.0.7 (20230207)
+
+Vcflib maintenance release - mostly for including in Debian
+
++ Fixed regression discovered by garguantua_kerr and atille of Debian (thanks!)
++ Added note on bio-vcf in vcffilter doc
++ notes on vcfcreatemulti and backtracking
++ CMake: honour include(GNUInstallDirs) paths (I forgot)
+
 ## ChangeLog v1.0.6 (20230129)
 
 Vcflib maintenance release - mostly for including in Debian

@@ -357,7 +357,7 @@ endif(HTSLIB_LOCAL)
 
 if(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${WFA_LOCAL})
-  add_subdirectory(${WFA_LOCAL})
+  add_subdirectory(${WFA_LOCAL} EXCLUDE_FROM_ALL)
   set(WFALIB wfa2) # pick up the wfa2 lib target from the included CMakeLists.txt
 else(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)

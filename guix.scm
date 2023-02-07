@@ -8,7 +8,7 @@
 ;;
 ;; For the tests you need /usr/bin/env. In a container create it with
 ;;
-;;   mkdir -p /usr/bin ; ln -s $GUIX_ENVIRONMENT/bin/env /usr/bin/env
+;;   mkdir -p /usr/bin /bin ; ln -v -s $GUIX_ENVIRONMENT/bin/env /usr/bin/env ; ln -v -s $GUIX_ENVIRONMENT/bin/bash /bin/bash
 ;;
 ;; or in one go
 ;;

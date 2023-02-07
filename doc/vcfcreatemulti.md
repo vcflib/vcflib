@@ -109,6 +109,7 @@ ALT-SNP2 ACTGACTA       1/0
 ```
 
 In words: the result is incorrect.
+
 At this point, for analysis, there is little else to do but go to the original data (pangenome or VCF) and compare the results.
 What `vcfcreatemulti` helps to do is point out that there is a complex region here with ample variation and the resulting layout is a problem (too many ALTs as in 'too many cooks'!).
 
@@ -118,11 +119,46 @@ To help vcflib show's a `WARNING: Too many ALT alleles to fit in sample(s)' and 
 grep MULTI= ./test/tmp/vcfcreatemulti_2.vcf -c
 ```
 
-Finds 3 marked records.
+Finds 3 marked records. One of them is derived from the combination:
+
+```
+grch38#chr8 36377478  >601>606  GTTTCTTGAAAAACCAAATGT GTTTCTTGAAAAACCAAAGGT,G 60  . AC=20,1;AF=0.224719,0.011236
+;AN=89;AT=>601>602>603>605>606,>601>602>604>605>606,>601>606;NS=45;LV=0 GT  0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0
+0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 1|1 0|0 0|0 0|0 0|0 1|0 1|0 0|2 0|0 0|1 0|1 1|1 1|1 0|0 1|1 0|0 0|1 0|1
+0|0 1|0 1|1 0|1 0|1 0|0 0|1 0
+grch38#chr8 36377496  >602>605  T G 60  . AC=20;AF=0.227273;AN=88;AT=>602>603>605,>602>604>605;NS=45;LV=1;PS=>60
+1>606 GT  0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 1|1 0|0 0|0 0|0 0|0 1|0 1|
+0 0|. 0|0 0|1 0|1 1|1 1|1 0|0 1|1 0|0 0|1 0|1 0|0 1|0 1|1 0|1 0|1 0|0 0|1 0
+```
+
+resulting in
+
+```
+grch38#chr8 36377478  >601>606  GTTTCTTGAAAAACCAAATGT GTTTCTTGAAAAACCAAAGGT,G,GTTTCTTGAAAAACCAAAGGT 60  . AC=20,
+1,20;AF=0.224719,0.011236,0.227273;AN=89,89,88;AT=>601>602>603>605>606,>601>602>604>605>606,>601>602>603>605>606
+,>601>606,>602>603>605,>602>604>605;NS=45;LV=0;MULTI=ALTPROBLEM;combined=36377478-36377496  GT  0|0 0|0 0|0 0|0
+0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 3|3 0|0 0|0 0|0 0|0 3|0 3|0 0|2 0|0 0|3 0|3 3|3 3|3
+0|0 3|3 0|0 0|3 0|3 0|0 3|0 3|3 0|3 0|3 0|0 0|3 0
+```
+
+This is a combination of:
+
+```
+grch38#chr8 36377478  >601>606  GTTTCTTGAAAAACCAAATGT GTTTCTTGAAAAACCAAAGGT,G 60  . AC=20,1;AF=0.224719,0.011236
+;AN=89;AT=>601>602>603>605>606,>601>602>604>605>606,>601>606;NS=45;LV=0 GT  0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0
+0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 1|1 0|0 0|0 0|0 0|0 1|0 1|0 0|2 0|0 0|1 0|1 1|1 1|1 0|0 1|1 0|0 0|1 0|1
+0|0 1|0 1|1 0|1 0|1 0|0 0|1 0
+grch38#chr8 36377496  >602>605  T G 60  . AC=20;AF=0.227273;AN=88;AT=>602>603>605,>602>604>605;NS=45;LV=1;PS=>60
+1>606 GT  0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 0|0 1|1 0|0 0|0 0|0 0|0 1|0 1|
+0 0|. 0|0 0|1 0|1 1|1 1|1 0|0 1|1 0|0 0|1 0|1 0|0 1|0 1|1 0|1 0|1 0|0 0|1 0
+```
+
+Where the ALTs end up being a duplication and there is some overlap in the genotype calling.
 
 One future solution might be to have vcfcreatemulti ignore SNPs, or only take the first one, but that somewhat would do away with pointing out complex arrangements. Another solution might be to edit the ALTs and merge ALT-SNP1 into ALT-SNP2 so we get `ACTGCCTA`.
-I have not made up my mind yet.
 Contributions and ideas are welcome!
+
+Having a think about this: the safest approach is to backtrack on a conflict and leave it alone. So, when a variant comes up that conflicts with the combined record (so far) we should drop merging that variant and leave it alone. This will typically happen with a long ALT that overlaps many SNPs. We could come up with all types of solutions, but the point of this algorithm is to 'fix' the obvious cases. At this point we continue and show the MULTI=ALTPROBLEM info field. It is not satisfactory and it is slow too. We can have a stab at the backtrack in the future.
 
 ## Source code
 
