@@ -1,8 +1,8 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2022 Erik Garrison
-    Copyright © 2020-2022 Pjotr Prins
+    Copyright © 2010-2023 Erik Garrison
+    Copyright © 2020-2023 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -1829,20 +1829,22 @@ bool VariantCallFile::parseHeader(string& hs) {
                 // field
                 if (entryType == "INFO" || entryType == "FORMAT") {
                     vector<string> fields = split(entryData, "=,");
-                    map<string,string> mapper;
-                    string key = "";
-                    for (auto field: fields) {
-                        // split into key-value pairs and add to mapper
-                        if (key == "")
-                            key = field;
-                        else {
-                            mapper[key] = field;
-                            key = "";
-                        }
+                    if (fields[0] != "ID") {
+                        cerr << "header parse error at:" << endl
+                             << "fields[0] != \"ID\"" << endl
+                             << headerLine << endl;
+                        exit(1);
                     }
-                    string id = mapper["ID"];
+                    string id = fields[1];
+                    if (fields[2] != "Number") {
+                        cerr << "header parse error at:" << endl
+                             << "fields[2] != \"Number\"" << endl
+                             << headerLine << endl;
+                        exit(1);
+                    }
                     int number;
-                    string numberstr = mapper["NUMBER"].c_str();
+                    // string numberstr = mapper["Number"].c_str();
+                    string numberstr = fields[3].c_str();
                     // XXX TODO VCF has variable numbers of fields...
                     if (numberstr == "A") {
                         number = ALLELE_NUMBER;
@@ -1853,7 +1855,15 @@ bool VariantCallFile::parseHeader(string& hs) {
                     } else {
                         convert(numberstr, number);
                     }
-                    VariantFieldType type = typeStrToVariantFieldType(mapper["TYPE"]);
+                    if (fields[4] != "Type") {
+                        cerr << "header parse error at:" << endl
+                             << "fields[4] != \"Type\"" << endl
+                             << headerLine << endl;
+                        exit(1);
+                    }
+                    VariantFieldType type = typeStrToVariantFieldType(fields[5]);
+
+                    // VariantFieldType type = typeStrToVariantFieldType(mapper["TYPE"]);
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
                         infoTypes[id] = type;

@@ -512,13 +512,13 @@ add_pydoctest(vcflib-api)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
 add_pydoctest(vcfwave)
+add_pydoctest(vcffilter)
 if (ZIG)
   add_pydoctest(vcfcreatemulti)
 endif (ZIG)
 
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
-add_doctest(doc/vcffilter)
 
 # ---- Build docs
 #
