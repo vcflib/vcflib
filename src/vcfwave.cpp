@@ -17,6 +17,7 @@
 #include <omp.h>
 
 #include "Variant.h"
+#include "vcf-wfa.h"
 #include "convert.h"
 #include "join.h"
 #include "split.h"
@@ -218,7 +219,7 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=INV,Number=A,Type=String,Description=\"Count of haplotypes which are aligned in the inverted orientation using vcflib vcfwave.\">");
     cout << variantFile.header << endl;
 
-    Variant var(variantFile);
+    WfaVariant var(variantFile);
     double amount = 0.0, prev_amount = 0.0;
     uint64_t start = get_timestamp();
 

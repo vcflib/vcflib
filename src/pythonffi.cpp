@@ -1,8 +1,9 @@
 // Python ffi calls C++ functions
 //
-// Copyright © 2022 Pjotr Prins
+// Copyright © 2022-2023 Pjotr Prins
 
 #include "Variant.h"
+#include "vcf-wfa.h"
 
 // Pybind11
 #include <pybind11/pybind11.h>
@@ -59,7 +60,7 @@ PYBIND11_MODULE(pyvcflib, m)
       .def_readonly("sampleNames", &Variant::sampleNames)
       .def_readonly("samples", &Variant::samples)
       .def("legacy_parsedAlternates", &Variant::legacy_parsedAlternates)
-      .def("parsedAlternates", &Variant::parsedAlternates)
+      // .def("parsedAlternates", &WfaVariant::parsedAlternates)
       ;
   py::class_<VariantCallFile>(m, "VariantCallFile", "VCF file")
       .def(py::init())

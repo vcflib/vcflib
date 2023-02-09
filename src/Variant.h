@@ -1,8 +1,8 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2022 Erik Garrison
-    Copyright © 2020-2022 Pjotr Prins
+    Copyright © 2010-2023 Erik Garrison
+    Copyright © 2020-2023 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -33,7 +33,6 @@
 #include "rkmh.hpp"
 #include "LeftAlign.hpp"
 #include <Fasta.h>
-#include "wavefront/wfa.hpp"
 
 extern "C" {
   #include "filevercmp.h"
@@ -209,18 +208,6 @@ public:
     string vrepr(void);  // a comparable record of the variantion described by the record
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
-
-    map<string, pair<vector<VariantAllele>,bool> > parsedAlternates(
-           bool includePreviousBaseForIndels = false,
-           bool useMNPs = false,
-           bool useEntropy = false,
-           string flankingRefLeft = "",
-           string flankingRefRight = "",
-           wavefront_aligner_attr_t* wfaParams = NULL,
-           int invKmerLen = 17,
-           int invMinLen = 1000,
-           int threads = 1,
-           bool debug = false);
 
     // Legacy version of parsedAlterneates:
     map<string, vector<VariantAllele> > legacy_parsedAlternates(

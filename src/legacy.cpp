@@ -10,6 +10,7 @@
 
 #include <utility>
 #include "Variant.h"
+#include "vcf-wfa.h"
 #include "allele.hpp"
 #include "cigar.hpp"
 

@@ -143,6 +143,7 @@ file(GLOB INCLUDES
 set(vcflib_SOURCE
     src/vcf-c-api.cpp
     src/legacy.cpp
+    src/vcf-wfa.cpp
     src/Variant.cpp
     src/rnglib.cpp
     src/var.cpp
@@ -434,9 +435,15 @@ if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
     add_dependencies(${BIN} vcflib)
-    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib ${WFALIB})
+    target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib)
   endforeach(BIN ${BINS})
-  # target_link_libraries(vcfwave PUBLIC ${WFALIB})
+  # These binaries include WFALIB
+  target_link_libraries(vcfallelicprimitives PUBLIC ${WFALIB})
+  target_link_libraries(vcfcleancomplex PUBLIC ${WFALIB})
+  target_link_libraries(vcfparsealts PUBLIC ${WFALIB})
+  target_link_libraries(vcfroc PUBLIC ${WFALIB})
+  target_link_libraries(vcfstats PUBLIC ${WFALIB})
+  target_link_libraries(vcfwave PUBLIC ${WFALIB})
   install(TARGETS ${BINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # ---- Copy scripts
