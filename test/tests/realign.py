@@ -48,7 +48,7 @@ class RealignTest(unittest.TestCase):
     def test_wfbug2(self):
         vcf = VariantCallFile()
         vcf.openFile("../samples/10134514.vcf")
-        var = Variant(vcf)
+        var = WfaVariant(vcf)
         vcf.getNextVariant(var)
         self.assertEqual(var.name,"grch38#chr4_10083863-10181258.vcf:grch38#chr4")
         self.assertEqual(var.ref,'GGAGAATCCCAATTGATGG')

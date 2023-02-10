@@ -60,8 +60,12 @@ PYBIND11_MODULE(pyvcflib, m)
       .def_readonly("sampleNames", &Variant::sampleNames)
       .def_readonly("samples", &Variant::samples)
       .def("legacy_parsedAlternates", &Variant::legacy_parsedAlternates)
-      // .def("parsedAlternates", &WfaVariant::parsedAlternates)
       ;
+
+  py::class_<WfaVariant, Variant>(m, "WfaVariant", "WFA VCF record")
+      .def(py::init<VariantCallFile &>() )
+      .def("parsedAlternates", &WfaVariant::parsedAlternates);
+
   py::class_<VariantCallFile>(m, "VariantCallFile", "VCF file")
       .def(py::init())
       .def("openFile",&VariantCallFile::openFile,"Open the VCF")

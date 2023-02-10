@@ -43,6 +43,8 @@ option(WFA_GITMODULE "Force local git submodule for WFA2LIB" ON) # disable in di
 include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
 
+set(EXTRA_FLAGS " ") # otherwise it injects OFF
+
 # ---- Dependencies
 
 if(OPENMP)
@@ -462,6 +464,7 @@ install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 # ---- Test
 
 enable_testing()
+
 
 function(add_pytest TEST_FILE)
   add_test(
