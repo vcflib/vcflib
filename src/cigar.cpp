@@ -177,4 +177,52 @@ bool isEmptyCigarElement(const pair<int, char>& elem) {
     return elem.first == 0;
 }
 
+vector<pair<int, string> > old_splitCigar(const string& cigarStr) {
+    vector<pair<int, string> > cigar;
+    string number;
+    string type;
+    // strings go [Number][Type] ...
+    for (string::const_iterator s = cigarStr.begin(); s != cigarStr.end(); ++s) {
+        char c = *s;
+        if (isdigit(c)) {
+            if (type.empty()) {
+                number += c;
+            } else {
+                // signal for next token, push back the last pair, clean up
+                cigar.push_back(make_pair(atoi(number.c_str()), type));
+                number.clear();
+                type.clear();
+                number += c;
+            }
+        } else {
+            type += c;
+        }
+    }
+    if (!number.empty() && !type.empty()) {
+        cigar.push_back(make_pair(atoi(number.c_str()), type));
+    }
+    return cigar;
+}
+
+string old_joinCigar(const vector<pair<int, string> >& cigar) {
+    string cigarStr;
+    for (vector<pair<int, string> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+        if (c->first) {
+            cigarStr += convert(c->first) + c->second;
+        }
+    }
+    return cigarStr;
+}
+
+string old_joinCigar(const vector<pair<int, char> >& cigar) {
+    string cigarStr;
+    for (vector<pair<int, char> >::const_iterator c = cigar.begin(); c != cigar.end(); ++c) {
+        if (c->first) {
+            cigarStr += convert(c->first) + string(1, c->second);
+        }
+    }
+    return cigarStr;
+}
+
+
 }

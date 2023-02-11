@@ -8,6 +8,7 @@
 */
 
 #include "Variant.h"
+#include "cigar.hpp"
 #include <utility>
 
 namespace vcflib {
@@ -2689,5 +2690,210 @@ vector<Variant*> Variant::matchingHaplotypes() {
             this->header_columns.push_back(header_column);
         }
     }
+
+
+// Reintroduce old version for freebayes
+
+map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePreviousBaseForIndels,
+                                                              bool useMNPs,
+                                                              bool useEntropy,
+                                                              float matchScore,
+                                                              float mismatchScore,
+                                                              float gapOpenPenalty,
+                                                              float gapExtendPenalty,
+                                                              float repeatGapExtendPenalty,
+                                                              string flankingRefLeft,
+                                                              string flankingRefRight) {
+
+    map<string, vector<VariantAllele> > variantAlleles;
+
+    if (isSymbolicSV()){
+        // Don't ever align SVs. It just wrecks things.
+        return this->flatAlternates();
+    }
+    // add the reference allele
+    variantAlleles[ref].push_back(VariantAllele(ref, ref, position));
+
+    // single SNP case, no ambiguity possible, no need to spend a lot of
+    // compute aligning ref and alt fields
+    if (alt.size() == 1 && ref.size() == 1 && alt.front().size() == 1) {
+        variantAlleles[alt.front()].push_back(VariantAllele(ref, alt.front(), position));
+        return variantAlleles;
+    }
+
+    // padding is used to ensure a stable alignment of the alternates to the reference
+    // without having to go back and look at the full reference sequence
+    int paddingLen = max(10, (int) (ref.size()));  // dynamically determine optimum padding length
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+        string& alternate = *a;
+        paddingLen = max(paddingLen, (int) (alternate.size()));
+    }
+    char padChar = 'Z';
+    char anchorChar = 'Q';
+    string padding(paddingLen, padChar);
+
+    // this 'anchored' string is done for stability
+    // the assumption is that there should be a positional match in the first base
+    // this is true for VCF 4.1, and standard best practices
+    // using the anchor char ensures this without other kinds of realignment
+    string reference_M;
+    if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+        reference_M = padding + ref + padding;
+        reference_M[paddingLen] = anchorChar;
+    } else {
+        reference_M = flankingRefLeft + ref + flankingRefRight;
+        paddingLen = flankingRefLeft.size();
+    }
+
+    // passed to sw.Align
+    unsigned int referencePos;
+
+    string cigar;
+
+    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+
+      string& alternate = *a;
+      vector<VariantAllele>& variants = variantAlleles[alternate];
+      string alternateQuery_M;
+      if (flankingRefLeft.empty() && flankingRefRight.empty()) {
+	alternateQuery_M = padding + alternate + padding;
+	alternateQuery_M[paddingLen] = anchorChar;
+      } else {
+	alternateQuery_M = flankingRefLeft + alternate + flankingRefRight;
+      }
+      //const unsigned int alternateLen = alternate.size();
+
+      if (true) {
+	CSmithWatermanGotoh sw(matchScore,
+			       mismatchScore,
+			       gapOpenPenalty,
+			       gapExtendPenalty);
+	if (useEntropy) sw.EnableEntropyGapPenalty(1);
+	if (repeatGapExtendPenalty != 0){
+	  sw.EnableRepeatGapExtensionPenalty(repeatGapExtendPenalty);
+	}
+	sw.Align(referencePos, cigar, reference_M, alternateQuery_M);
+      } else {  // disabled for now
+	StripedSmithWaterman::Aligner aligner;
+	StripedSmithWaterman::Filter sswFilter;
+	StripedSmithWaterman::Alignment alignment;
+	aligner.Align(alternateQuery_M.c_str(),
+		      reference_M.c_str(),
+		      reference_M.size(), sswFilter, &alignment);
+	cigar = alignment.cigar_string;
+      }
+
+      // left-realign the alignment...
+
+      vector<pair<int, string> > cigarData = old_splitCigar(cigar);
+
+      if (cigarData.front().second != "M"
+	  || cigarData.back().second != "M"
+	  || cigarData.front().first < paddingLen
+	  || cigarData.back().first < paddingLen) {
+	cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
+	cerr << cigar << endl;
+	cerr << reference_M << endl;
+	cerr << alternateQuery_M << endl;
+	exit(1);
+      } else {
+	cigarData.front().first -= paddingLen;
+	cigarData.back().first -= paddingLen;;
+      }
+      //cigarData = cleanCigar(cigarData);
+      cigar = old_joinCigar(cigarData);
+
+      int altpos = 0;
+      int refpos = 0;
+
+      for (vector<pair<int, string> >::iterator e = cigarData.begin();
+	   e != cigarData.end(); ++e) {
+
+	int len = e->first;
+	string type = e->second;
+
+	switch (type.at(0)) {
+	case 'I':
+	  if (includePreviousBaseForIndels) {
+	    if (!variants.empty() &&
+		variants.back().ref != variants.back().alt) {
+	      VariantAllele a =
+		VariantAllele("",
+			      alternate.substr(altpos, len),
+			      refpos + position);
+	      variants.back() = variants.back() + a;
+	    } else {
+	      VariantAllele a =
+		VariantAllele(ref.substr(refpos - 1, 1),
+			      alternate.substr(altpos - 1, len + 1),
+			      refpos + position - 1);
+	      variants.push_back(a);
+	    }
+	  } else {
+	    variants.push_back(VariantAllele("",
+					     alternate.substr(altpos, len),
+					     refpos + position));
+	  }
+	  altpos += len;
+	  break;
+	case 'D':
+	  if (includePreviousBaseForIndels) {
+	    if (!variants.empty() &&
+		variants.back().ref != variants.back().alt) {
+	      VariantAllele a
+		= VariantAllele(ref.substr(refpos, len)
+				, "", refpos + position);
+	      variants.back() = variants.back() + a;
+	      } else {
+	      VariantAllele a
+		= VariantAllele(ref.substr(refpos - 1, len + 1),
+				alternate.substr(altpos - 1, 1),
+				refpos + position - 1);
+	      variants.push_back(a);
+	    }
+	  } else {
+	    variants.push_back(VariantAllele(ref.substr(refpos, len),
+					     "", refpos + position));
+	  }
+	  refpos += len;
+	  break;
+
+	  // zk has added (!variants.empty()) solves the seg fault in
+          // vcfstats, but need to test
+	case 'M':
+	  {
+	    for (int i = 0; i < len; ++i) {
+	      VariantAllele a
+		= VariantAllele(ref.substr(refpos + i, 1),
+				alternate.substr(altpos + i, 1),
+				(refpos + i + position));
+	      if (useMNPs && (!variants.empty()) &&
+		  variants.back().ref.size() == variants.back().alt.size()
+		  && variants.back().ref != variants.back().alt) {
+		  variants.back() = variants.back() + a;
+	      } else {
+		variants.push_back(a);
+	      }
+	    }
+	  }
+	  refpos += len;
+	  altpos += len;
+	  break;
+	case 'S':
+	  {
+	    refpos += len;
+	    altpos += len;
+	    break;
+	  }
+	default:
+	  {
+	    break;
+	  }
+	}
+      }
+    }
+    return variantAlleles;
+}
+
 
 } // end namespace vcf

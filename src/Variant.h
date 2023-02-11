@@ -234,6 +234,16 @@ public:
         bool keepGeno=true,
         bool debug=false);
 
+    map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
+                                                         bool useMNPs = false,
+                                                         bool useEntropy = false,
+                                                         float matchScore = 10.0f,
+                                                         float mismatchScore = -9.0f,
+                                                         float gapOpenPenalty = 15.0f,
+                                                         float gapExtendPenalty = 6.66f,
+                                                         float repeatGapExtendPenalty = 0.0f,
+                                                         string flankingRefLeft = "",
+                                                         string flankingRefRight = "");
 
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
