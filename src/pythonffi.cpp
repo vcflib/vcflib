@@ -64,7 +64,7 @@ PYBIND11_MODULE(pyvcflib, m)
 
   py::class_<WfaVariant, Variant>(m, "WfaVariant", "WFA VCF record")
       .def(py::init<VariantCallFile &>() )
-      .def("parsedAlternates", &WfaVariant::parsedAlternates);
+      .def("wfa_parsedAlternates", &WfaVariant::wfa_parsedAlternates);
 
   py::class_<VariantCallFile>(m, "VariantCallFile", "VCF file")
       .def(py::init())

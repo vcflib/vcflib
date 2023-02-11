@@ -22,7 +22,7 @@ namespace vcflib {
 // Returns map of [REF,ALTs] with attached VariantAllele records
 
 
-map<string, pair<vector<VariantAllele>,bool> > WfaVariant::parsedAlternates(
+map<string, pair<vector<VariantAllele>,bool> > WfaVariant::wfa_parsedAlternates(
     bool includePreviousBaseForIndels,
     bool useMNPs,
     bool useEntropy,

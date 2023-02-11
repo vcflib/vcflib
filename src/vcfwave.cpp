@@ -254,7 +254,7 @@ int main(int argc, char** argv) {
         }
 
         map<string, pair<vector<VariantAllele>, bool> > varAlleles =
-           var.parsedAlternates(includePreviousBaseForIndels, useMNPs,
+           var.wfa_parsedAlternates(includePreviousBaseForIndels, useMNPs,
                                 false, // bool useEntropy = false,
                                 "",    // string flankingRefLeft = "",
                                 "",    // string flankingRefRight = "",

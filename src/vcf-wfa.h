@@ -20,7 +20,7 @@ public:
     WfaVariant(VariantCallFile& v) : Variant(v)
       { };
 
-    map<string, pair<vector<VariantAllele>,bool> > parsedAlternates(
+    map<string, pair<vector<VariantAllele>,bool> > wfa_parsedAlternates(
            bool includePreviousBaseForIndels = false,
            bool useMNPs = false,
            bool useEntropy = false,

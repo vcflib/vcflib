@@ -2,8 +2,8 @@
     vcflib C++ library for parsing and manipulating VCF files. This file contains
     legacy material that will be phased out.
 
-    Copyright © 2010-2022 Erik Garrison
-    Copyright © 2020-2022 Pjotr Prins
+    Copyright © 2010-2023 Erik Garrison
+    Copyright © 2020-2023 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -21,7 +21,8 @@ namespace vcflib {
 // 'refs'. In this function Smith-Waterman is used with padding on
 // both sides of a ref and each alt. The SW method quadratic in nature
 // and painful with long sequences. Recently WFA is introduced with
-// runs in linear time.
+// runs in linear time: use WfaVariant::parsedAlternates.
+
 //
 // Returns map of [REF,ALTs] with attached VariantAllele records
 
@@ -39,6 +40,7 @@ map<string, vector<VariantAllele> > Variant::legacy_parsedAlternates(
     string flankingRefRight,
     bool useWaveFront,
     bool debug) {
+
 
     bool OLDPADDING = true; // we want to use the first bp for alignment
 
@@ -661,5 +663,7 @@ void Variant::legacy_reduceAlleles(
         cout << v.second << endl;
     }
 }
+
+
 
 } // namespace vcflib

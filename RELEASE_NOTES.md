@@ -12,6 +12,12 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog v1.0.8 (20230210)
+
+Vcflib maintenance release - mostly for including in Debian
+
++ Another fix so downstream packages, such as freebayes, no longer need WFAlib.
+
 ## ChangeLog v1.0.7 (20230207)
 
 Vcflib maintenance release - mostly for including in Debian

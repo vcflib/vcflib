@@ -64,7 +64,7 @@ class RealignTest(unittest.TestCase):
         wfa_params.affine2p_penalties.gap_extension2 = 1
         wfa_params.alignment_scope = alignment_scope_t.compute_alignment;
         # A dict is returned of alleles with variants and is_reversed
-        wf = var.parsedAlternates(True,True,False,"","",wfa_params,True,64,1,True)
+        wf = var.wfa_parsedAlternates(True,True,False,"","",wfa_params,True,64,1,True)
         print(f'ref={var.ref}')
         print(var.info)
         for key1, value1 in wf.items():
