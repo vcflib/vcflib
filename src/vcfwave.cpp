@@ -275,8 +275,8 @@ int main(int argc, char** argv) {
                 size_t pos1 = 0;
                 size_t altidx;
                 int relpos;
-                int AC=0,AN=0;
-                double AF=0.0;
+                int AC=-1,AN=-1;
+                double AF=-1;
                 string AT;
                 int size = -99;
                 bool is_inv = false;
@@ -294,9 +294,9 @@ int main(int argc, char** argv) {
                     auto ref = wfmatch.ref;
                     auto aligned = wfmatch.alt;
                     auto wfpos = wfmatch.position;
-                    int alt_index,AC,AN = -1;
+                    int alt_index,AC=-1,AN = -1;
                     string AT;
-                    double AF = 0.0;
+                    double AF = -1;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (var.ref != aligned) {
                         auto index = [&](vector<string> v, string allele) {
@@ -305,10 +305,18 @@ int main(int argc, char** argv) {
                             return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check) : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
-                        AC = stoi(var.info["AC"].at(alt_index));
-                        AF = stod(var.info["AF"].at(alt_index));
-                        AT = var.info["AT"].at(alt_index);
-                        AN = stoi(var.info["AN"].at(0));
+                        if (var.info["AC"].size() > alt_index) {
+                            AC = stoi(var.info["AC"].at(alt_index));
+                        }
+                        if (var.info["AF"].size() > alt_index) {
+                            AF = stod(var.info["AF"].at(alt_index));
+                        }
+                        if (var.info["AT"].size() > alt_index) {
+                            AT = var.info["AT"].at(alt_index);
+                        }
+                        if (var.info["AN"].size() > alt_index) {
+                            AN = stoi(var.info["AN"].at(alt_index));
+                        }
                     }
                     auto relpos = wfpos - var.position;
                     auto u = &unique[wftag];
@@ -474,10 +482,18 @@ int main(int argc, char** argv) {
                 vector<string> AT{ v.AT };
                 vector<string> ORIGIN{ v.origin };
                 vector<string> TYPE{ v.type };
-                newvar.info["AC"] = vector<string>{ to_string(v.AC) };
-                newvar.info["AF"] = vector<string>{ to_string(v.AF) };
-                newvar.info["AN"] = vector<string>{ to_string(v.AN) };
-                newvar.info["AT"] = AT;
+                if (v.AC > -1) {
+                    newvar.info["AC"] = vector<string>{ to_string(v.AC) };
+                }
+                if (v.AF > -1) {
+                    newvar.info["AF"] = vector<string>{ to_string(v.AF) };
+                }
+                if (v.AN > -1) {
+                    newvar.info["AN"] = vector<string>{ to_string(v.AN) };
+                }
+                if (v.AT.find_first_not_of(' ') != std::string::npos) {
+                    newvar.info["AT"] = AT; // there is a non-space character
+                }
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["LEN"] = vector<string>{to_string(v.size)};
