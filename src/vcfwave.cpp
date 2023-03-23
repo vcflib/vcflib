@@ -484,7 +484,6 @@ int main(int argc, char** argv) {
                 newvar.infoOrderedKeys = var.infoOrderedKeys;
 
                 vector<string> AT{ v.AT };
-                vector<string> ORIGIN{ v.origin };
                 vector<string> TYPE{ v.type };
                 if (v.AC > -1) {
                     newvar.info["AC"] = vector<string>{ to_string(v.AC) };
@@ -498,12 +497,21 @@ int main(int argc, char** argv) {
                 if (v.AT.find_first_not_of(' ') != std::string::npos) {
                     newvar.info["AT"] = AT; // there is a non-space character
                 }
-                newvar.info[parseFlag] = ORIGIN;
+
+                // Inversions are not decomposed anymore, so there is no need to specify the ORIGIN
+                if (!v.is_inv) {
+                    vector<string> ORIGIN{ v.origin };
+                    newvar.info[parseFlag] = ORIGIN;
+                }
+                
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["LEN"] = vector<string>{to_string(v.size)};
+
+                // Emit INV=YES if the variant is an inversion
                 if (v.is_inv) {
                     newvar.info["INV"] = vector<string>{"YES"};
                 }
+
                 // set the output order of the new INFO fields:
                 newvar.infoOrderedKeys.push_back("ORIGIN");
                 newvar.infoOrderedKeys.push_back("LEN");
