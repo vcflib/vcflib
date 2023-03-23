@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
     variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfwave and alignment with WFA2-lib.\">");
-    variantFile.addHeaderLine("##INFO=<ID=INV,Number=A,Type=String,Description=\"Count of haplotypes which are aligned in the inverted orientation using vcflib vcfwave.\">");
+    variantFile.addHeaderLine("##INFO=<ID=INV,Number=A,Type=String,Description=\"Haplotypes are aligned in the inverted orientation using vcflib vcfwave.\">");
     cout << variantFile.header << endl;
 
     WfaVariant var(variantFile);
