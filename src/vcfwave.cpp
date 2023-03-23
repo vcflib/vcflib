@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
     variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfwave and alignment with WFA2-lib.\">");
-    variantFile.addHeaderLine("##INFO=<ID=INV,Number=A,Type=String,Description=\"Haplotypes are aligned in the inverted orientation using vcflib vcfwave.\">");
+    variantFile.addHeaderLine("##INFO=<ID=INV,Number=0,Type=Flag,Description=\"Inversion detected\">");
     cout << variantFile.header << endl;
 
     WfaVariant var(variantFile);
@@ -288,7 +288,7 @@ int main(int argc, char** argv) {
             TrackInfo unique; // Track all alleles
 
             // Unpack wavefront results and set values for each unique allele
-            for (const auto [alt0, wfvalue] : varAlleles) {
+            for (const auto [alt0, wfvalue] : varAlleles) {               
                 bool is_inv = wfvalue.second;
                 for (auto wfmatch: wfvalue.first) {
                     auto ref = wfmatch.ref;
@@ -300,9 +300,10 @@ int main(int argc, char** argv) {
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (var.ref != aligned) {
                         auto index = [&](vector<string> v, string allele) {
-                            auto check = (is_inv ? reverse_complement(allele) : allele);
+                            //auto check = (is_inv ? reverse_complement(allele) : allele); DISABLED
+                            auto check = allele;
                             auto it = find(v.begin(), v.end(), check);
-                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check) : it - v.begin() );
+                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check + ")") : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
                         if (var.info["AC"].size() > alt_index) {
@@ -472,7 +473,10 @@ int main(int argc, char** argv) {
                 Variant newvar(variantFile);
                 newvar.sequenceName = var.sequenceName;
                 newvar.position = v.pos1;
-                newvar.id = var.id + "_" + to_string(ct);
+
+                // inversions are not realigned anymore, so they can't generate multiple entries
+                newvar.id = v.is_inv ? var.id : var.id + "_" + to_string(ct);
+                
                 newvar.ref = v.ref1;
                 newvar.alt.push_back(v.algn);
                 newvar.quality = var.quality;
@@ -497,7 +501,9 @@ int main(int argc, char** argv) {
                 newvar.info[parseFlag] = ORIGIN;
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["LEN"] = vector<string>{to_string(v.size)};
-                newvar.info["INV"] = vector<string>{to_string(v.is_inv)};
+                if (v.is_inv) {
+                    newvar.info["INV"] = vector<string>{"YES"};
+                }
                 // set the output order of the new INFO fields:
                 newvar.infoOrderedKeys.push_back("ORIGIN");
                 newvar.infoOrderedKeys.push_back("LEN");
