@@ -156,14 +156,11 @@ a       281     >1>9    AGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAAT
 To
 
 ```python
->>> sh("../build/vcfwave ../samples/inversion.vcf|grep -v ^\#|head -3")
-a       293     >1>9_1  A       T       60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;NS=1;LV=0;ORIGIN=a:281;LEN=1;INV=1;TYPE=snp GT      1
-a       310     >1>9_2  T       C       60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;NS=1;LV=0;ORIGIN=a:281;LEN=1;INV=1;TYPE=snp GT      1
-a       329     >1>9_3  T       A       60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;NS=1;LV=0;ORIGIN=a:281;LEN=1;INV=1;TYPE=snp GT      1
-
-
+>>> sh("../build/vcfwave ../samples/inversion.vcf|grep INV")
+a       281     >1>9    AGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAATCCTGCAAAAGACAG  CTGTCTTTTGCAGGATTCCTGTGCTGAAATGCAGATGACCGCATTCAAGGAAGAACTATCTGCCCCGGCT  60      .       AC=1;AF=1.000000;AN=1;AT=>1>2>3>4>5>6>7>8>9;NS=1;LV=0;LEN=70;INV=YES;TYPE=mnp  GT      1
 ```
 
+Note the `INV=YES' info.
 
 # LICENSE
 
