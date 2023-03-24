@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">");
     variantFile.addHeaderLine("##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">");
     variantFile.addHeaderLine("##INFO=<ID="+parseFlag+",Number=1,Type=String,Description=\"Decomposed from a complex record using vcflib vcfwave and alignment with WFA2-lib.\">");
-    variantFile.addHeaderLine("##INFO=<ID=INV,Number=A,Type=String,Description=\"Count of haplotypes which are aligned in the inverted orientation using vcflib vcfwave.\">");
+    variantFile.addHeaderLine("##INFO=<ID=INV,Number=0,Type=Flag,Description=\"Inversion detected\">");
     cout << variantFile.header << endl;
 
     WfaVariant var(variantFile);
@@ -275,8 +275,8 @@ int main(int argc, char** argv) {
                 size_t pos1 = 0;
                 size_t altidx;
                 int relpos;
-                int AC=0,AN=0;
-                double AF=0.0;
+                int AC=-1,AN=-1;
+                double AF=-1;
                 string AT;
                 int size = -99;
                 bool is_inv = false;
@@ -288,27 +288,36 @@ int main(int argc, char** argv) {
             TrackInfo unique; // Track all alleles
 
             // Unpack wavefront results and set values for each unique allele
-            for (const auto [alt0, wfvalue] : varAlleles) {
+            for (const auto [alt0, wfvalue] : varAlleles) {               
                 bool is_inv = wfvalue.second;
                 for (auto wfmatch: wfvalue.first) {
                     auto ref = wfmatch.ref;
                     auto aligned = wfmatch.alt;
                     auto wfpos = wfmatch.position;
-                    int alt_index,AC,AN = -1;
+                    int alt_index,AC=-1,AN = -1;
                     string AT;
-                    double AF = 0.0;
+                    double AF = -1;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (var.ref != aligned) {
                         auto index = [&](vector<string> v, string allele) {
-                            auto check = (is_inv ? reverse_complement(allele) : allele);
+                            //auto check = (is_inv ? reverse_complement(allele) : allele); DISABLED
+                            auto check = allele;
                             auto it = find(v.begin(), v.end(), check);
-                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check) : it - v.begin() );
+                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check + ")") : it - v.begin() );
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
-                        AC = stoi(var.info["AC"].at(alt_index));
-                        AF = stod(var.info["AF"].at(alt_index));
-                        AT = var.info["AT"].at(alt_index);
-                        AN = stoi(var.info["AN"].at(0));
+                        if (var.info["AC"].size() > alt_index) {
+                            AC = stoi(var.info["AC"].at(alt_index));
+                        }
+                        if (var.info["AF"].size() > alt_index) {
+                            AF = stod(var.info["AF"].at(alt_index));
+                        }
+                        if (var.info["AT"].size() > alt_index) {
+                            AT = var.info["AT"].at(alt_index);
+                        }
+                        if (var.info["AN"].size() > alt_index) {
+                            AN = stoi(var.info["AN"].at(alt_index));
+                        }
                     }
                     auto relpos = wfpos - var.position;
                     auto u = &unique[wftag];
@@ -364,10 +373,10 @@ int main(int argc, char** argv) {
                 auto aligned = v.algn;
                 if (ref != aligned) {
                     auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv);
-                    if (track_variants.count(ntag)>0) { // this variant already exists
+                    if (track_variants.count(ntag)>0 && track_variants[ntag].AN == v.AN) { // this variant already exists
                         track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
-                        assert(track_variants[ntag].AN == v.AN);
+                        //assert(track_variants[ntag].AN == v.AN);
                         track_variants[ntag].AF += v.AF;
                         // Merge genotypes if they come from different alleles
                         if (v.altidx != track_variants[ntag].altidx) {
@@ -464,7 +473,10 @@ int main(int argc, char** argv) {
                 Variant newvar(variantFile);
                 newvar.sequenceName = var.sequenceName;
                 newvar.position = v.pos1;
-                newvar.id = var.id + "_" + to_string(ct);
+
+                // inversions are not realigned anymore, so they can't generate multiple entries
+                newvar.id = v.is_inv ? var.id : var.id + "_" + to_string(ct);
+                
                 newvar.ref = v.ref1;
                 newvar.alt.push_back(v.algn);
                 newvar.quality = var.quality;
@@ -472,16 +484,34 @@ int main(int argc, char** argv) {
                 newvar.infoOrderedKeys = var.infoOrderedKeys;
 
                 vector<string> AT{ v.AT };
-                vector<string> ORIGIN{ v.origin };
                 vector<string> TYPE{ v.type };
-                newvar.info["AC"] = vector<string>{ to_string(v.AC) };
-                newvar.info["AF"] = vector<string>{ to_string(v.AF) };
-                newvar.info["AN"] = vector<string>{ to_string(v.AN) };
-                newvar.info["AT"] = AT;
-                newvar.info[parseFlag] = ORIGIN;
+                if (v.AC > -1) {
+                    newvar.info["AC"] = vector<string>{ to_string(v.AC) };
+                }
+                if (v.AF > -1) {
+                    newvar.info["AF"] = vector<string>{ to_string(v.AF) };
+                }
+                if (v.AN > -1) {
+                    newvar.info["AN"] = vector<string>{ to_string(v.AN) };
+                }
+                if (v.AT.find_first_not_of(' ') != std::string::npos) {
+                    newvar.info["AT"] = AT; // there is a non-space character
+                }
+
+                // Inversions are not decomposed anymore, so there is no need to specify the ORIGIN
+                if (!v.is_inv) {
+                    vector<string> ORIGIN{ v.origin };
+                    newvar.info[parseFlag] = ORIGIN;
+                }
+                
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["LEN"] = vector<string>{to_string(v.size)};
-                newvar.info["INV"] = vector<string>{to_string(v.is_inv)};
+
+                // Emit INV=YES if the variant is an inversion
+                if (v.is_inv) {
+                    newvar.info["INV"] = vector<string>{"YES"};
+                }
+
                 // set the output order of the new INFO fields:
                 newvar.infoOrderedKeys.push_back("ORIGIN");
                 newvar.infoOrderedKeys.push_back("LEN");
