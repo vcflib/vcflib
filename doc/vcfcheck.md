@@ -19,13 +19,15 @@ Validate integrity and identity of the VCF by verifying that the VCF record's RE
 
 ```
 
+
 options:
-    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences
+
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences.
     -x, --exclude-failures If a record fails, don't print it.  Otherwise do.
     -k, --keep-failures    Print if the record fails, otherwise not.
-    -h, --help       Print this message.
-    -v, --version    Print version.
-
+    -i, --ignore-case      Ignore case differences between FASTA reference and vcf.
+    -h, --help             Print this message.
+    -v, --version          Print version.
 
 Type: metrics
 
@@ -59,7 +61,7 @@ Type: metrics
 
 # LICENSE
 
-Copyright 2011-2022 (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-2023 (C) Erik Garrison and vcflib contributors. MIT licensed.
 
 <!--
   Created with ./scripts/bin2md.rb scripts/bin2md-template.erb

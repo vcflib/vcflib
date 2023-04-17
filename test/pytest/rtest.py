@@ -36,7 +36,19 @@ def head(cmd, lines=4):
     header = [l.replace("../build/", "") for l in header]
     print("\n".join(header))
 
-def run_stdout(cmd, ext = "vcf"):
+def sh(cmd):
+    cmds = ['bash','-c',cmd]
+    p = Popen(cmds, stdout=PIPE, stderr=PIPE, close_fds=True)
+    output = p.communicate()
+    out = output[0]
+    if len(out) == 0:
+        # if stdout is empty fetch stderr
+        out = output[1]
+    header = out.decode().split("\n")
+    header = out.decode().expandtabs(tabsize=8).split("\n")
+    print("\n".join(header))
+
+def run_stdout(cmd, ext = "vcf", uniq = None):
     os.makedirs(tmpdir,exist_ok=True)
     curframe = inspect.currentframe()
     # pp = pprint.PrettyPrinter(indent=4)
@@ -52,7 +64,10 @@ def run_stdout(cmd, ext = "vcf"):
     else:
         name = name[18:-1]
 
-    name += "_"+index
+    if uniq:
+        name += "_"+str(uniq)
+    else:
+        name += "_"+index
     if ext:
         name += "." + ext
 

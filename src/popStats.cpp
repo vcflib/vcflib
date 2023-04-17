@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
     populationTarget     = makeUnique<gt>();
 	}
 
-	populationTarget->loadPop(target, var.sequenceName, var.position);
+	populationTarget->loadPop(target, var.position);
 
 	 //cerr << "     3. target allele frequency      "    << endl;
 	 //cerr << "     4. expected heterozygosity      "    << endl;

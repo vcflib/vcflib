@@ -1,3 +1,4 @@
+notes.txt
 *~
 .Rhistory
 .*swp
@@ -126,5 +127,6 @@ build/
 *.log
 *.synctex.gz
 test/tests/main
-tabixpp/htslib
-contrib/htslib
+zig-cache
+zig-out
+hello

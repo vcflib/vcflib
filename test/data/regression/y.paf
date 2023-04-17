@@ -1,0 +1,3 @@
+a	630	350	630	+	b	630	350	630	280	280	60	NM:i:0	ms:i:560	AS:i:560	nn:i:0	tp:A:P	cm:i:266	s1:i:280	s2:i:0	de:f:0	zd:i:2	rl:i:0	cg:Z:280M
+a	630	0	280	+	b	630	0	280	280	280	0	NM:i:0	ms:i:560	AS:i:560	nn:i:0	tp:A:S	cm:i:266	s1:i:280	de:f:0	zd:i:1	rl:i:0	cg:Z:280M
+a	630	280	350	-	b	630	280	350	67	70	0	NM:i:3	ms:i:122	AS:i:122	nn:i:0	tp:A:S	cm:i:13	s1:i:55	de:f:0.0429	rl:i:0	cg:Z:70M

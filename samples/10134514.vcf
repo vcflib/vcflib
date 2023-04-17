@@ -1,0 +1,13 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##INFO=<ID=CONFLICT,Number=.,Type=String,Description="Sample names for which there are multiple paths in the graph with conflicting alleles">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Total number of alternate alleles in called genotypes">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1]">
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=LV,Number=1,Type=Integer,Description="Level in the snarl tree (0=top level)">
+##INFO=<ID=PS,Number=1,Type=String,Description="ID of variant corresponding to parent snarl">
+##INFO=<ID=AT,Number=R,Type=String,Description="Allele Traversal as path in graph">
+##contig=<ID=grch38#chr4,length=97395>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00438	HG00621	HG00673	HG00733	HG00735	HG00741	HG01071	HG01106	HG01109	HG01123	HG01175	HG01243	HG01258	HG01358	HG01361	HG01891	HG01928	HG01952	HG01978	HG02055	HG02080	HG02109	HG02145	HG02148	HG02257	HG02486	HG02559	HG02572	HG02622	HG02630	HG02717	HG02723	HG02818	HG02886	HG03098	HG03453	HG03486	HG03492	HG03516	HG03540	HG03579	NA18906	NA20129	NA21309	chm13
+grch38#chr4_10083863-10181258.vcf:grch38#chr4	10134514	>2136>2148	GGAGAATCCCAATTGATGG	GTAGCATCCCAAGTGATGT,GTAGAATCCCAATTGATGT,GGAGCATCCCAATTGATGG,GG	60	.	AC=11,7,1,3;AF=0.125,0.0795455,0.0113636,0.0340909;AN=88;AT=>2136>2138>2139>2141>2142>2144>2145>2147>2148,>2136>2137>2139>2140>2142>2143>2145>2146>2148,>2136>2137>2139>2141>2142>2144>2145>2146>2148,>2136>2138>2139>2140>2142>2144>2145>2147>2148,>2136>2138>2148;NS=45;LV=1;PS=>2125>2211	GT	0|1	1|0	0|0	0|1	0|0	1|0	1|0	1|0	0|0	0|0	0|0	0|0	0|0	0|.	0|0	2|2	0|0	4|0	0|0	0|1	0|1	0|1	0|2	0|0	4|0	0|2	0|0	0|0	2|0	0|0	0|0	0|0	0|0	0|0	2|0	4|1	0|0	0|0	0|0	0|0	0|3	0|0	0|2	0|0	1

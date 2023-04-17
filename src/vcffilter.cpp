@@ -15,7 +15,7 @@ using namespace std;
 using namespace vcflib;
 
 void printSummary(char** argv) {
-  cerr << "vcflib " << VCFLIB_VERSION << " filter the specified vcf file using the set of filters" << endl << endl
+  cerr << "vcflib filter the specified vcf file using the set of filters" << endl << endl
        << "usage: " << argv[0] << " [options] <vcf file>" << endl
          << endl
          << "options:" << endl

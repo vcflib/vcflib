@@ -2,58 +2,73 @@
     vcflib C++ library for parsing and manipulating VCF files
 
     Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2020-2023 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
 
 #include "Variant.h"
-#include "convert.h"
+extern "C" {
+#include "vcf-c-api.h"
+}
 #include <set>
 #include <sstream>
 #include <getopt.h>
+#include "progress.h"
 
 using namespace std;
 using namespace vcflib;
 
+#ifdef NO_ZIG
+bool nextGen  = false;
+#else
+bool nextGen  = true;
+#endif
 
-double convertStrDbl(const string& s) {
-    double r;
-    convert(s, r);
-    return r;
-}
+bool quiet = false;
+off_t file_size = -1;
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] [file]" << endl
-         << endl
-         << "If overlapping alleles are represented across multiple records, merge" << endl
-         << "them into a single record.  Currently only for indels." << endl;
-    cerr << endl << "Type: transformation" << endl << endl;
-    exit(0);
+    cerr << R"(
+Usage: vcfcreatemulti [options] [file]
+
+Go through sorted VCF and when overlapping alleles are represented across multiple records, merge them into a single multi-ALT record. See the documentation for more information.
+
+options:
+
+    --quiet           no progress bar
+    --legacy          legacy mode (old C++ implementation does not do genotypes)
+
+Type: transformation
+)";
+    exit(1);
 }
 
-Variant createMultiallelic(vector<Variant>& vars) {
+// Helper function to convert a vector of objects to a vector of
+// pointers (for zig).
+vector<void *> ptr_vec(vector<Variant> &vars) {
+    vector<void *> ptrs;
+    for (auto &v: vars) {
+        ptrs.push_back(&v);
+    }
+    return ptrs;
+}
+
+Variant createMultiallelic_legacy(vector<Variant>& vars) {
 
     if (vars.size() == 1) {
         return vars.front();
     }
 
-    int maxpos = vars.front().position + vars.front().ref.size();
-    for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
-        //cerr << *v << endl;
-        if (maxpos < v->position + v->ref.size()) {
-            maxpos = v->position + v->ref.size();
-        }
-    }
-
-    int numalt = vars.size();
-    //cerr << "gots overlapping vars " << vars.front().position << "-" << vars.back().position << endl;
+    Variant first = vars.front();
+    Variant nvar = first;
 
     // get REF
     // use start position to extend all other alleles
-    int start = vars.front().position;
-    string ref = vars.front().ref;
+    int start = first.position;
+    string ref = first.ref;
 
+    // expand reference using all references in list
     for (vector<Variant>::iterator v = vars.begin() + 1; v != vars.end(); ++v) {
         int sdiff = (v->position + v->ref.size()) - (start + ref.size());
         int pdiff = (start + ref.size()) - v->position;
@@ -62,45 +77,70 @@ Variant createMultiallelic(vector<Variant>& vars) {
         }
     }
 
-    //cerr << "ref would be " << ref << " for vars from "
-    //     << vars.front().position << " to " << vars.back().position << endl;
+    Variant mvar = first;
+    mvar.alt.clear();
+    mvar.ref = ref;
 
-    Variant var = vars.front();
-    var.alt.clear();
-    var.ref = ref;
-
+    // Correct alts using the new reference
     for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
         // add alternates and splice them into the reference
-        int p5diff = v->position - var.position;
-        int p3diff = (var.position + var.ref.size()) - (v->position + v->ref.size());
+        int p5diff = v->position - mvar.position;
+        int p3diff = (mvar.position + mvar.ref.size()) - (v->position + v->ref.size());
         string before;
         string after;
         if (p5diff > 0) {
-            before = var.ref.substr(0, p5diff);
+            before = mvar.ref.substr(0, p5diff);
         }
-        if (p3diff > 0 && p3diff < var.ref.size()) {
-            after = var.ref.substr(var.ref.size() - p3diff);
+        if (p3diff > 0 && p3diff < mvar.ref.size()) {
+            after = mvar.ref.substr(mvar.ref.size() - p3diff);
         }
         if (p5diff || p3diff) {
             for (vector<string>::iterator a = v->alt.begin(); a != v->alt.end(); ++a) {
-                var.alt.push_back(before);
-                string& alt = var.alt.back();
+                mvar.alt.push_back(before);
+                string& alt = mvar.alt.back();
                 alt.append(*a);
                 alt.append(after);
             }
         } else {
             for (vector<string>::iterator a = v->alt.begin(); a != v->alt.end(); ++a) {
-                var.alt.push_back(*a);
+                mvar.alt.push_back(*a);
             }
         }
     }
 
     stringstream s;
     s << vars.front().position << "-" << vars.back().position;
-    var.info["combined"].push_back(s.str());
+    mvar.info["combined"].push_back(s.str());
 
-    return var;
+    return mvar;
+}
 
+#ifndef NO_ZIG
+Variant createMultiallelic_zig(vector<Variant>& vars) {
+
+    if (vars.size() == 1) {
+        return vars.front();
+    }
+    Variant first = vars.front();
+    Variant nvar = first;
+
+    Variant *mvar = (Variant *)zig_create_multi_allelic(&nvar, ptr_vec(vars).data() , vars.size());
+    stringstream s;
+    s << vars.front().position << "-" << vars.back().position;
+    mvar->info["combined"].push_back(s.str());
+
+    return *mvar;
+}
+#endif
+
+// This function is called for every line/variant in the VCF file
+Variant createMultiallelic(vector<Variant>& vars) {
+    #ifndef NO_ZIG
+    if (nextGen)
+        return createMultiallelic_zig(vars);
+    else
+    #endif
+        return createMultiallelic_legacy(vars);
 }
 
 int main(int argc, char** argv) {
@@ -113,19 +153,29 @@ int main(int argc, char** argv) {
         {
             /* These options set a flag. */
             //{"verbose", no_argument,       &verbose_flag, 1},
+            {"quiet", no_argument, 0, 'q'},
+            {"legacy", no_argument, 0, 'l'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "h",
+        c = getopt_long (argc, argv, "hnq",
                          long_options, &option_index);
 
         if (c == -1)
             break;
 
         switch (c) {
+
+            case 'l':
+                nextGen = false;
+                break;
+
+            case 'q':
+                quiet = true;
+                break;
 
             case 'h':
                 printSummary(argv);
@@ -144,6 +194,7 @@ int main(int argc, char** argv) {
     if (optind < argc) {
         string filename = argv[optind];
         variantFile.open(filename);
+        file_size = get_file_size(filename.c_str());
     } else {
         variantFile.open(std::cin);
     }
@@ -153,53 +204,93 @@ int main(int argc, char** argv) {
     }
 
     variantFile.addHeaderLine("##INFO=<ID=combined,Number=1,Type=String,Description=\"Range of overlapping variants which were combined into this one using vcfcreatemulti.\">");
+    variantFile.addHeaderLine("##INFO=<ID=MULTI,Number=1,Type=String,Description=\"Identify problematic ALT reconstruction - see vcfcreatemulti.md doc.\">");
 
     cout << variantFile.header << endl;
 
-    bool first = true;
-    bool already = false;
     Variant var(variantFile);
+    string lastSeqName;
     vector<Variant> vars;
-    string lastSeq;
+
+    double amount = 0.0, prev_amount = 0.0;
+    uint64_t start = get_timestamp();
+    string prev_chr = "none";
+    size_t prev_pos = 0;
+
+    if (!quiet)
+        cerr << "vcfcreatemulti " << VCFLIB_VERSION << " processing..." << endl;
 
     while (variantFile.getNextVariant(var)) {
 
-        if (lastSeq.empty()) {
-            lastSeq = var.sequenceName;
+        if (prev_pos && prev_chr == var.sequenceName && prev_pos > var.position) {
+            cerr << "ERROR: VCF data is not sorted! at " << prev_chr << ":" << prev_pos << " and " << var.sequenceName << ":" << var.position << endl;
+            exit(8);
         }
 
-        if (vars.empty()) {
+        prev_chr = var.sequenceName;
+        prev_pos = var.position;
+
+        amount = (double)variantFile.file_pos()/(double)file_size;
+        // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
+        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.003) {
+            prev_amount = amount;
+            print_progress(amount*100, start);
+        }
+
+        if (lastSeqName.empty()) { // track the previous sequence name
+            lastSeqName = var.sequenceName;
+        }
+
+        if (vars.empty()) { // track list of variants in window (alt alleles)
             vars.push_back(var);
+            Variant *copy2 = &vars.back();
             continue;
         } else {
-            int maxpos = vars.front().position + vars.front().ref.size();
-            for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
-                if (maxpos < v->position + v->ref.size()) {
-                    maxpos = v->position + v->ref.size();
+            // compute maxpos as the most right position in the current reference window. Note
+            // that the window may get expanded at every step.
+            auto first = vars.front();
+            auto maxpos = first.position + first.ref.size();
+            for (auto v: vars) {
+                if (maxpos < v.position + v.ref.size()) {
+                    maxpos = v.position + v.ref.size();
                 }
             }
-            if (var.sequenceName != lastSeq) {
+            if (var.sequenceName != lastSeqName) {
+                // next chromosome, contig or whatever
                 Variant result = createMultiallelic(vars);
                 cout << result << endl;
                 vars.clear();
-                lastSeq = var.sequenceName;
+                lastSeqName = var.sequenceName;
                 vars.push_back(var);
+                Variant *copy2 = &vars.back();
             } else if (var.position < maxpos) {
+                // As long as it is in window add it to the list
                 vars.push_back(var);
+                Variant *copy2 = &vars.back();
             } else {
+                // Next variant is out of window, so create single line variant
                 Variant result = createMultiallelic(vars);
                 cout << result << endl;
                 vars.clear();
                 vars.push_back(var);
+                Variant *copy2 = &vars.back();
             }
         }
-
     }
 
     if (!vars.empty()) {
         Variant result = createMultiallelic(vars);
         cout << result << endl;
     }
+
+    #ifndef NO_ZIG
+    if (nextGen) {
+        zig_display_warnings();
+        zig_cleanup();
+    }
+    #endif
+
+    if (!quiet) cerr << endl;
 
     return 0;
 

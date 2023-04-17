@@ -1,8 +1,93 @@
-For contributions
-see
+For contributions see
 [contributors](https://github.com/vcflib/vcflib/graphs/contributors)
 and
 [commits](https://github.com/vcflib/vcflib/commits/master).
+
+## TODO
+
+- [ ] vcfcreatemulti: fix problem with slow and wrong complex regions (implement backtrack)
+      + [ ] check for indels which are really the same
+      + [ ] combine vcfwave duplicated functionality
+- bgzip
+- tabix -p vcf my_file.vcf.gz
+- pangenie, vg deconstruct, vcfbub
+
+## ChangeLog v1.0.8 (20230210)
+
+Vcflib maintenance release - mostly for including in Debian
+
++ Another fix so downstream packages, such as freebayes, no longer need WFAlib.
+
+## ChangeLog v1.0.7 (20230207)
+
+Vcflib maintenance release - mostly for including in Debian
+
++ Fixed regression discovered by garguantua_kerr and atille of Debian (thanks!)
++ Added note on bio-vcf in vcffilter doc
++ notes on vcfcreatemulti and backtracking
++ CMake: honour include(GNUInstallDirs) paths (I forgot)
+
+## ChangeLog v1.0.6 (20230129)
+
+Vcflib maintenance release - mostly for including in Debian
+
++ Fixed zig complaining about leaking memory
++ Added CMake Debian support with -DWFA_GITMODULE=OFF
++ Introduced CMake include(GNUInstallDirs)
++ Successfully built wfa2 using embedded CMakeLists.txt
++ Cleaned up CMakeLists.txt removing comments etc.
++ Reintroduced vcfcreatemulti in legacy mode when ZIG=OFF (for Debian)
+
+## ChangeLog v1.0.5 (20230116)
+
+Vcflib's first *Humpty Dumpty* release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
+
+Often variant callers are not perfect.
+**vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, unlike Humpty Dumpty, take them apart and put them together again.
+Thereby, hopefully, creating sane VCF output that is useful for analysis and getting rid of false positives.
+
+We created these tools by including the state-of-the-art [biWFA](https://github.com/smarco/WFA2-lib) wavefront aligner.
+The tools are particularly useful for the output from structural variation callers and pangenome genotypers, such as used by the Human Pangenome Reference Consortium (HPRC) because of overlapping ALT segments.
+
+Important changes:
+
++ vcfwave is introduced and vcfallelicprimitimes is now considered obsolete
++ INFO fields output order is now the same with every tool as on input parsing
++ vcfwave check merging of genotypes - write tests
++ vcfwave recompute AC, AFs from merged record
++ Added python bindings with pybind11
++ introduced the zig compiler with vcfcreatemulti.cpp as a first target (use cmake ZIG=OFF to disable). At this point the zig version (-n switch) gives identical results.
+
+Introduction of O(n) wavefront algorithm WF to replace O(n^2) Smith-Waterman SW. Note that the output is different from the original SW implementation. SW is still optionally available but considered obsolete. Use the bi-directional vcfwave instead of vcfallelicprimitives.
+
++ Added realignment using the wavefront algorithm (now the default). See [vcfwave](./doc/vcfwave.md) (thank you Erik Garrison https://github.com/ekg and Santiago Marco-Sola  https://github.com/smarco).
++ WFA2-lib fix is merged upstream. Fixes bleeding in of macros https://github.com/vcflib/vcflib/issues/359
++ Support longer read inversions in vcfwave!
++ vcfallelicprimitives now considered legacy/obsolete
++ Fixed allowing for different field order - see https://github.com/vcflib/vcflib/issues/365
++ Improved CMake configuration
++ vcflib compiles with both gcc and clang++ and tests pass, see [guix-clang.scm](./guix-clang.scm) - mind that git submodules such as WFA2-lib still override to gcc
++ Fixed local build for tabixpp+htslib - note that htslib should be an upstream released version (currently 1.15.1). Unfortunately git submodule does not handle tags.
++ Fix for -L switch for vcfallelicprimitives
++ Added libasan and lto support
++ Removed useless googletest submodule
++ Moved git submodules into ./contrib
++ Added python testing framework
++ Added tabixpp back in as a submodule, fixes https://github.com/vcflib/vcflib/issues/305
++ Optimizations and bug fixes. (thanks @mphschmitt)
++ vcfcreatemulti merge multiple rows
++ rewrite of vcfcreatemulti using zig
++ vcfcreatemulti merge genotypes correctly, with tests
++ vcfcreatemulti adjust info and genotypes for variants that have multiple alts already (now errors)
++ vcfcreatemulti handle phase
++ vcfcreatemulti document building with zig
++ vcfcreatemulti added progress bar to vcfwave and vcfcreatemulti with update to tabixpp
++ vcfcreatemulti default vcfwave and vcfcreatemulti to nextgen mode
++ vcfcreatemulti check file is sorted for vcfcreatemulti and improve suggestions
+
+## ChangeLog v1.0.4
+
+Never properly released. Merged with v1.0.5.
 
 ## ChangeLog v1.0.3 (20220122)
 

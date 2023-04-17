@@ -1,29 +1,57 @@
-name: CI
+name: Vcflib CI
 on: [push, pull_request]
 jobs:
   arch:
     name: vcflib-CI
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         os: [ubuntu-latest]
         python-version: [3.8]
     steps:
-    - name: Install dependencies
-      run: sudo apt-get install cmake libhts-dev libtabixpp-dev libtabixpp0
-    - uses: actions/checkout@v2
+    - name: apt update
+      run: sudo apt-get -o Acquire::Retries=3 update
+    - name: install dependencies
+      run: sudo apt-get -o Acquire::Retries=3 install -y -V
+        cmake
+        libhts-dev
+        libtabixpp-dev
+        libtabixpp0
+        pybind11-dev
+    - uses: actions/checkout@v3
     - uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: install zig using wget
+      run: |
+        wget -q https://ziglang.org/builds/zig-linux-x86_64-0.11.0-dev.1313+bb15e4057.tar.xz
+        tar xf zig-linux-x86_64-*.tar.xz
+        ./zig-linux-x86_64-*/zig version
+        pwd
+        ls -l zig-linux-*
+        echo "$(pwd)/zig-linux-x86_64-0.11.0-dev.1313+bb15e4057" >> $GITHUB_PATH
+        # echo "$(pwd)/zig-linux-x86_64-*" >> $GITHUB_PATH
+        # echo "::add-path::./zig-linux*"
+        echo GITHUB_PATH=$GITHUB_PATH
+        # zig version
+        # echo "{environment_variable_name}={value}" >> $GITHUB_ENV
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Configure
       run: |
+        echo $(pwd)/zig-linux-x86_64-* >> $GITHUB_PATH
+        echo "$(pwd)/zig-linux-x86_64-0.11.0-dev.1313+bb15e4057" >> $GITHUB_PATH
+        echo GITHUB_PATH=$GITHUB_PATH
+        echo PATH=$PATH
+        zig version
         mkdir -p build
         cd build
         cmake ..
     - name: Compile
-      run: cmake --build build/ --verbose
+      run: cmake --build build/ --verbose -- -j 2
     - name: Run tests
       run: |
         cd build

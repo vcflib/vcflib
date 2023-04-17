@@ -11,9 +11,12 @@
 .SH DESCRIPTION
 .PP
 List unique genotypes.
-Like GNU uniq, but for VCF records.
-Remove records which have the same position, ref, and alt as the
-previous record.
+Similar to GNU uniq, but aimed at VCF records.
+\f[B]vcfuniq\f[R] removes records which have the same position, ref, and
+alt as the previous record on a sorted VCF file.
+Note that it does not adjust/combine genotypes in the output, but simply
+takes the first record.
+See also vcfcreatemulti for combining records.
 .SH OPTIONS
 .IP
 .nf
@@ -33,11 +36,11 @@ Success
 Failure
 .SH SEE ALSO
 .PP
-vcflib(1)
+\f[B]vcflib\f[R](1)
 .SH OTHER
 .SH LICENSE
 .PP
-Copyright 2011-2022 (C) Erik Garrison and vcflib contributors.
+Copyright 2011-2023 (C) Erik Garrison and vcflib contributors.
 MIT licensed.
 .SH AUTHORS
 Erik Garrison and vcflib contributors.

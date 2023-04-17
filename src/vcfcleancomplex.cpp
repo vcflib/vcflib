@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         // if we just have one parsed alternate (non-complex case)
-        map<string, vector<VariantAllele> > parsedAlts = var.parsedAlternates(true, true); // use mnps, and previous for indels
+        map<string, vector<VariantAllele> > parsedAlts = var.legacy_parsedAlternates(true, true); // use mnps, and previous for indels
         // but the alt string is long
         //cerr << var.alt.size() << " " << parsedAlts.size() << endl;
         if (var.alt.size() == 1 && parsedAlts.size() > 1) {

@@ -36,80 +36,672 @@ for most users.
 .PP
 .TS
 tab(@);
-l l.
+lw(40.4n) lw(29.6n).
 T{
 filter command
 T}@T{
 description
 T}
 _
+T{
+\f[B]vcffilter\f[R]
+T}@T{
+VCF filter the specified vcf file using the set of filters
+T}
+T{
+\f[B]vcfuniq\f[R]
+T}@T{
+List unique genotypes.
+Similar to GNU uniq, but aimed at VCF records.
+\f[B]vcfuniq\f[R] removes records which have the same position, ref, and
+alt as the previous record on a sorted VCF file.
+Note that it does not adjust/combine genotypes in the output, but simply
+takes the first record.
+See also vcfcreatemulti for combining records.
+T}
+T{
+\f[B]vcfuniqalleles\f[R]
+T}@T{
+List unique alleles For each record, remove any duplicate alternate
+alleles that may have resulted from merging separate VCF files.
+T}
 .TE
 .SS metrics
 .PP
 .TS
 tab(@);
-l l.
+lw(40.4n) lw(29.6n).
 T{
 metrics command
 T}@T{
 description
 T}
 _
+T{
+\f[B]vcfcheck\f[R]
+T}@T{
+Validate integrity and identity of the VCF by verifying that the VCF
+record\[cq]s REF matches a given reference file.
+T}
+T{
+\f[B]vcfdistance\f[R]
+T}@T{
+Adds a tag to each variant record which indicates the distance to the
+nearest variant.
+(defaults to BasesToClosestVariant if no custom tag name is given.
+T}
+T{
+\f[B]vcfentropy\f[R]
+T}@T{
+Annotate VCF records with the Shannon entropy of flanking sequence.
+Anotates the output VCF file with, for each record, EntropyLeft,
+EntropyRight, EntropyCenter, which are the entropies of the sequence of
+the given window size to the left, right, and center of the record.
+Also adds EntropyRef and EntropyAlt for each alt.
+T}
+T{
+\f[B]vcfhetcount\f[R]
+T}@T{
+Calculate the heterozygosity rate: count the number of alternate alleles
+in heterozygous genotypes in all records in the vcf file
+T}
+T{
+\f[B]vcfhethomratio\f[R]
+T}@T{
+Generates the het/hom ratio for each individual in the file
+T}
 .TE
 .SS phenotype
 .PP
 .TS
 tab(@);
-l l.
+lw(40.4n) lw(29.6n).
 T{
 phenotype command
 T}@T{
 description
 T}
 _
+T{
+\f[B]permuteGPAT++\f[R]
+T}@T{
+\f[B]permuteGPAT++\f[R] is a method for adding empirical p-values to a
+GPAT++ score.
+T}
 .TE
 .SS genotype
 .PP
 .TS
 tab(@);
-l l.
+lw(40.4n) lw(29.6n).
 T{
 genotype command
 T}@T{
 description
 T}
 _
+T{
+\f[B]abba-baba\f[R]
+T}@T{
+\f[B]abba-baba\f[R] calculates the tree pattern for four indviduals.
+This tool assumes reference is ancestral and ignores non
+\f[B]abba-baba\f[R] sites.
+The output is a boolian value: 1 = true , 0 = false for abba and baba.
+the tree argument should be specified from the most basal taxa to the
+most derived.
+T}
+T{
+\f[B]hapLrt\f[R]
+T}@T{
+HapLRT is a likelihood ratio test for haplotype lengths.
+The lengths are modeled with an exponential distribution.
+The sign denotes if the target has longer haplotypes (1) or the
+background (-1).
+T}
+T{
+\f[B]normalize-iHS\f[R]
+T}@T{
+normalizes iHS or XP-EHH scores.
+T}
 .TE
 .SS transformation
 .PP
 .TS
 tab(@);
-l l.
+lw(40.4n) lw(29.6n).
 T{
 transformation command
 T}@T{
 description
 T}
 _
+T{
+\f[B]dumpContigsFromHeader\f[R]
+T}@T{
+Dump contigs from header
+T}
+T{
+\f[B]smoother\f[R]
+T}@T{
+smoothes is a method for window smoothing many of the GPAT++ formats.
+T}
+T{
+\f[B]vcf2dag\f[R]
+T}@T{
+Modify VCF to be able to build a directed acyclic graph (DAG)
+T}
+T{
+\f[B]vcf2fasta\f[R]
+T}@T{
+Generates sample_seq:N.fa for each sample, reference sequence, and
+chromosomal copy N in [0,1\&... ploidy].
+Each sequence in the fasta file is named using the same pattern used for
+the file name, allowing them to be combined.
+T}
+T{
+\f[B]vcf2tsv\f[R]
+T}@T{
+Converts VCF to per-allelle or per-genotype tab-delimited format, using
+null string to replace empty values in the table.
+Specifying -g will output one line per sample with genotype information.
+When there is more than one alt allele there will be multiple rows, one
+for each allele and, the info will match the `A' index
+T}
+T{
+\f[B]vcfaddinfo\f[R]
+T}@T{
+Adds info fields from the second file which are not present in the first
+vcf file.
+T}
+T{
+\f[B]vcfafpath\f[R]
+T}@T{
+Display genotype paths
+T}
+T{
+\f[B]vcfallelicprimitives\f[R]
+T}@T{
+WARNING: this tool is considered legacy and is only retained for older
+workflows.
+It will emit a warning! Even though it can use the WFA you should use
+vcfwave instead.
+T}
+T{
+\f[B]vcfannotate\f[R]
+T}@T{
+Intersect the records in the VCF file with targets provided in a BED
+file.
+Intersections are done on the reference sequences in the VCF file.
+If no VCF filename is specified on the command line (last argument) the
+VCF read from stdin.
+T}
+T{
+\f[B]vcfannotategenotypes\f[R]
+T}@T{
+Examine genotype correspondence.
+Annotate genotypes in the first file with genotypes in the second adding
+the genotype as another flag to each sample filed in the first file.
+annotation-tag is the name of the sample flag which is added to store
+the annotation.
+also adds a `has_variant' flag for sites where the second file has a
+variant.
+T}
+T{
+\f[B]vcfbreakmulti\f[R]
+T}@T{
+If multiple alleles are specified in a single record, break the record
+into multiple lines, preserving allele-specific INFO fields.
+T}
+T{
+\f[B]vcfcat\f[R]
+T}@T{
+Concatenates VCF files
+T}
+T{
+\f[B]vcfclassify\f[R]
+T}@T{
+Creates a new VCF where each variant is tagged by allele class: snp,
+ts/tv, indel, mnp
+T}
+T{
+\f[B]vcfcleancomplex\f[R]
+T}@T{
+Removes reference-matching sequence from complex alleles and adjusts
+records to reflect positional change.
+T}
+T{
+\f[B]vcfcombine\f[R]
+T}@T{
+Combine VCF files positionally, combining samples when sites and alleles
+are identical.
+Any number of VCF files may be combined.
+The INFO field and other columns are taken from one of the files which
+are combined when records in multiple files match.
+Alleles must have identical ordering to be combined into one record.
+If they do not, multiple records will be emitted.
+T}
+T{
+\f[B]vcfcommonsamples\f[R]
+T}@T{
+Generates each record in the first file, removing samples not present in
+the second
+T}
+T{
+\f[B]vcfcreatemulti\f[R]
+T}@T{
+Go through sorted VCF and when overlapping alleles are represented
+across multiple records, merge them into a single multi-ALT record.
+See the documentation for more information.
+T}
+T{
+\f[B]vcfecho\f[R]
+T}@T{
+Echo VCF to stdout (simple demo)
+T}
+T{
+\f[B]vcfevenregions\f[R]
+T}@T{
+Generates a list of regions, e.g.\ chr20:10..30 using the variant
+density information provided in the VCF file to ensure that the regions
+have even numbers of variants.
+This can be use to reduce the variance in runtime when dividing variant
+detection or genotyping by genomic coordinates.
+T}
+T{
+\f[B]vcffixup\f[R]
+T}@T{
+Generates a VCF stream where AC and NS have been generated for each
+record using sample genotypes
+T}
+T{
+\f[B]vcfflatten\f[R]
+T}@T{
+Removes multi-allelic sites by picking the most common alternate.
+Requires allele frequency specification `AF' and use of `G' and `A' to
+specify the fields which vary according to the Allele or Genotype.
+VCF file may be specified on the command line or piped as stdin.
+T}
+T{
+\f[B]vcfgeno2alleles\f[R]
+T}@T{
+modifies the genotypes field to provide the literal alleles rather than
+indexes
+T}
+T{
+\f[B]vcfgeno2haplo\f[R]
+T}@T{
+Convert genotype-based phased alleles within \[en]window-size into
+haplotype alleles.
+Will break haplotype construction when encountering non-phased genotypes
+on input.
+T}
+T{
+\f[B]vcfgenosamplenames\f[R]
+T}@T{
+Get samplenames
+T}
+T{
+\f[B]vcfglbound\f[R]
+T}@T{
+Adjust GLs so that the maximum GL is 0 by dividing all GLs for each
+sample by the max.
+T}
+T{
+\f[B]vcfglxgt\f[R]
+T}@T{
+Set genotypes using the maximum genotype likelihood for each sample.
+T}
+T{
+\f[B]vcfindex\f[R]
+T}@T{
+Adds an index number to the INFO field (id=position)
+T}
+T{
+\f[B]vcfinfo2qual\f[R]
+T}@T{
+Sets QUAL from info field tag keyed by [key].
+The VCF file may be omitted and read from stdin.
+The average of the field is used if it contains multiple values.
+T}
+T{
+\f[B]vcfinfosummarize\f[R]
+T}@T{
+Take annotations given in the per-sample fields and add the mean,
+median, min, or max to the site-level INFO.
+T}
+T{
+\f[B]vcfintersect\f[R]
+T}@T{
+VCF set analysis
+T}
+T{
+\f[B]vcfkeepgeno\f[R]
+T}@T{
+Reduce file size by removing FORMAT fields not listed on the command
+line from sample specifications in the output
+T}
+T{
+\f[B]vcfkeepinfo\f[R]
+T}@T{
+To decrease file size remove INFO fields not listed on the command line
+T}
+T{
+\f[B]vcfkeepsamples\f[R]
+T}@T{
+outputs each record in the vcf file, removing samples not listed on the
+command line
+T}
+T{
+\f[B]vcfld\f[R]
+T}@T{
+Compute LD
+T}
+T{
+\f[B]vcfleftalign\f[R]
+T}@T{
+Left-align indels and complex variants in the input using a pairwise
+ref/alt alignment followed by a heuristic, iterative left realignment
+process that shifts indel representations to their absolute leftmost
+(5\[cq]) extent.
+T}
+T{
+\f[B]vcflength\f[R]
+T}@T{
+Add length info field
+T}
+T{
+\f[B]vcfnullgenofields\f[R]
+T}@T{
+Makes the FORMAT for each variant line the same (uses all the FORMAT
+fields described in the header).
+Fills out per-sample fields to match FORMAT.
+Expands GT values of `.' with number of alleles based on ploidy (eg:
+`./.' for dipolid).
+T}
+T{
+\f[B]vcfnumalt\f[R]
+T}@T{
+outputs a VCF stream where NUMALT has been generated for each record
+using sample genotypes
+T}
+T{
+\f[B]vcfoverlay\f[R]
+T}@T{
+Overlay records in the input vcf files with order as precedence.
+T}
+T{
+\f[B]vcfprimers\f[R]
+T}@T{
+For each VCF record, extract the flanking sequences, and write them to
+stdout as FASTA records suitable for alignment.
+T}
+T{
+\f[B]vcfqual2info\f[R]
+T}@T{
+Puts QUAL into an info field tag keyed by [key].
+T}
+T{
+\f[B]vcfremap\f[R]
+T}@T{
+For each alternate allele, attempt to realign against the reference with
+lowered gap open penalty.
+If realignment is possible, adjust the cigar and reference/alternate
+alleles.
+Observe how different alignment parameters, including context and
+entropy-dependent ones, influence variant classification and
+interpretation.
+T}
+T{
+\f[B]vcfremoveaberrantgenotypes\f[R]
+T}@T{
+strips samples which are homozygous but have observations implying
+heterozygosity.
+Remove samples for which the reported genotype (GT) and observation
+counts disagree (AO, RO).
+T}
+T{
+\f[B]vcfremovesamples\f[R]
+T}@T{
+outputs each record in the vcf file, removing samples listed on the
+command line
+T}
+T{
+\f[B]vcfsample2info\f[R]
+T}@T{
+Take annotations given in the per-sample fields and add the mean,
+median, min, or max to the site-level INFO.
+T}
+T{
+\f[B]vcfsamplediff\f[R]
+T}@T{
+Establish putative somatic variants using reported differences between
+germline and somatic samples.
+Tags each record where the listed sample genotypes differ with .
+The first sample is assumed to be germline, the second somatic.
+Each record is tagged with ={germline,somatic,loh} to specify the type
+of variant given the genotype difference between the two samples.
+T}
+T{
+\f[B]vcfsamplenames\f[R]
+T}@T{
+List sample names
+T}
+T{
+\f[B]vcfstreamsort\f[R]
+T}@T{
+Sorts the input (either stdin or file) using a streaming sort algorithm.
+Guarantees that the positional order is correct provided out-of-order
+variants are no more than 100 positions in the VCF file apart.
+T}
+T{
+\f[B]vcfwave\f[R]
+T}@T{
+Realign reference and alternate alleles with WFA, parsing out the
+`primitive' alleles into multiple VCF records.
+New records have IDs that reference the source record ID.
+Genotypes/samples are handled correctly.
+Deletions generate haploid/missing genotypes at overlapping sites.
+T}
 .TE
 .SS statistics
 .PP
 .TS
 tab(@);
-l l.
+lw(40.4n) lw(29.6n).
 T{
 statistics command
 T}@T{
 description
 T}
 _
+T{
+\f[B]bFst\f[R]
+T}@T{
+\f[B]bFst\f[R] is a Bayesian approach to Fst.
+Importantly \f[B]bFst\f[R] accounts for genotype uncertainty in the
+model using genotype likelihoods.
+For a more detailed description see: \[ga]A Bayesian approach to
+inferring population structure from dominant markers\[cq] by Holsinger
+et al.\ Molecular Ecology Vol 11, issue 7 2002.
+The likelihood function has been modified to use genotype likelihoods
+provided by variant callers.
+There are five free parameters estimated in the model: each
+subpopulation\[cq]s allele frequency and Fis (fixation index, within
+each subpopulation), a free parameter for the total population\[cq]s
+allele frequency, and Fst.
+T}
+T{
+\f[B]genotypeSummary\f[R]
+T}@T{
+Generates a table of genotype counts.
+Summarizes genotype counts for bi-allelic SNVs and indel
+T}
+T{
+\f[B]iHS\f[R]
+T}@T{
+\f[B]iHS\f[R] calculates the integrated haplotype score which measures
+the relative decay of extended haplotype homozygosity (EHH) for the
+reference and alternative alleles at a site (see: voight et al.\ 2006,
+Spiech & Hernandez 2014).
+T}
+T{
+\f[B]meltEHH\f[R]
+T}@T{
+T}
+T{
+\f[B]pFst\f[R]
+T}@T{
+\f[B]pFst\f[R] is a probabilistic approach for detecting differences in
+allele frequencies between two populations.
+T}
+T{
+\f[B]pVst\f[R]
+T}@T{
+\f[B]pVst\f[R] calculates vst, a measure of CNV stratification.
+T}
+T{
+\f[B]permuteSmooth\f[R]
+T}@T{
+\f[B]permuteSmooth\f[R] is a method for adding empirical p-values
+smoothed wcFst scores.
+T}
+T{
+\f[B]plotHaps\f[R]
+T}@T{
+\f[B]plotHaps\f[R] provides the formatted output that can be used with
+`bin/plotHaplotypes.R'.
+T}
+T{
+\f[B]popStats\f[R]
+T}@T{
+General population genetic statistics for each SNP
+T}
+T{
+\f[B]segmentFst\f[R]
+T}@T{
+\f[B]segmentFst\f[R] creates genomic segments (bed file) for regions
+with high wcFst
+T}
+T{
+\f[B]segmentIhs\f[R]
+T}@T{
+Creates genomic segments (bed file) for regions with high wcFst
+T}
+T{
+\f[B]sequenceDiversity\f[R]
+T}@T{
+The \f[B]sequenceDiversity\f[R] program calculates two popular metrics
+of haplotype diversity: pi and extended haplotype homozygoisty (eHH).
+Pi is calculated using the Nei and Li 1979 formulation.
+eHH a convenient way to think about haplotype diversity.
+When eHH = 0 all haplotypes in the window are unique and when eHH = 1
+all haplotypes in the window are identical.
+T}
+T{
+\f[B]vcfaltcount\f[R]
+T}@T{
+count the number of alternate alleles in all records in the vcf file
+T}
+T{
+\f[B]vcfcountalleles\f[R]
+T}@T{
+Count alleles
+T}
+T{
+\f[B]vcfgenosummarize\f[R]
+T}@T{
+Adds summary statistics to each record summarizing qualities reported in
+called genotypes.
+Uses: RO (reference observation count), QR (quality sum reference
+observations) AO (alternate observation count), QA (quality sum
+alternate observations)
+T}
+T{
+\f[B]vcfgenotypecompare\f[R]
+T}@T{
+adds statistics to the INFO field of the vcf file describing the amount
+of discrepancy between the genotypes (GT) in the vcf file and the
+genotypes reported in the .
+use this after vcfannotategenotypes to get correspondence statistics for
+two vcfs.
+T}
+T{
+\f[B]vcfgenotypes\f[R]
+T}@T{
+Report the genotypes for each sample, for each variant in the VCF.
+Convert the numerical represenation of genotypes provided by the GT
+field to a human-readable genotype format.
+T}
+T{
+\f[B]vcfparsealts\f[R]
+T}@T{
+Alternate allele parsing method.
+This method uses pairwise alignment of REF and ALTs to determine
+component allelic primitives for each alternate allele.
+T}
+T{
+\f[B]vcfrandom\f[R]
+T}@T{
+Generate a random VCF file
+T}
+T{
+\f[B]vcfrandomsample\f[R]
+T}@T{
+Randomly sample sites from an input VCF file, which may be provided as
+stdin.
+Scale the sampling probability by the field specified in KEY.
+This may be used to provide uniform sampling across allele frequencies,
+for instance.
+T}
+T{
+\f[B]vcfroc\f[R]
+T}@T{
+Generates a pseudo-ROC curve using sensitivity and specificity estimated
+against a putative truth set.
+Thresholding is provided by successive QUAL cutoffs.
+T}
+T{
+\f[B]vcfsitesummarize\f[R]
+T}@T{
+Summarize by site
+T}
+T{
+\f[B]vcfstats\f[R]
+T}@T{
+Prints statistics about variants in the input VCF file.
+T}
+T{
+\f[B]wcFst\f[R]
+T}@T{
+\f[B]wcFst\f[R] is Weir & Cockerham\[cq]s Fst for two populations.
+Negative values are VALID, they are sites which can be treated as zero
+Fst.
+For more information see Evolution, Vol.
+38 N.
+6 Nov 1984.
+Specifically \f[B]wcFst\f[R] uses equations 1,2,3,4.
+T}
 .TE
 .SH SOURCE CODE
 .PP
 See the source code repository at https://github.com/vcflib/vcflib
+.SH CREDIT
+.PP
+Citations are the bread and butter of Science.
+If you are using this software in your research and want to support our
+future work, please cite the following publication:
+.PP
+Please cite:
+.PP
+A spectrum of free software tools for processing the VCF variant call
+format: vcflib, bio-vcf, cyvcf2, hts-nim and
+slivar (https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
+Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS
+Comput Biol 18(5): e1009123.
+https://doi.org/10.1371/journal.pcbi.1009123
 .SH LICENSE
 .PP
-Copyright 2011-2022 (C) Erik Garrison and vcflib contributors.
+Copyright 2011-2023 (C) Erik Garrison and vcflib contributors.
 MIT licensed.
 .SH AUTHORS
 Erik Garrison and vcflib contributors.

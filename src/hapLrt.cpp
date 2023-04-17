@@ -22,6 +22,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <limits.h>
 
 using namespace std;
 using namespace vcflib;
@@ -51,7 +52,7 @@ void printHelp(void){
   cerr << "INFO: required: t,target     -- argument: a zero base comma separated list of target individuals corresponding to VCF columns        " << endl;
   cerr << "INFO: required: b,background -- argument: a zero base comma separated list of background individuals corresponding to VCF columns    " << endl;
   cerr << "INFO: required: f,file       -- argument: a properly formatted phased VCF file                                                       " << endl;
-  cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL or GP                                                  " << endl;
+  cerr << "INFO: required: y,type       -- argument: type of genotype likelihood: PL, GL, GT or GP                                                  " << endl;
   cerr << "INFO: optional: r,region     -- argument: a genomic range to calculate hapLrt on in the format : \"seqid:start-end\" or \"seqid\" " << endl;
   cerr << endl;
   cerr << endl << "Type: genotype" << endl << endl;
@@ -166,7 +167,10 @@ void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]
 
 double mean(int data[], int n){
 
-  int sum;
+  if(!n)
+    return -std::numeric_limits<double>::quiet_NaN();
+
+  int sum = 0;
 
   for(int i = 0; i < n; i++){
     sum += data[i];
@@ -335,7 +339,7 @@ int main(int argc, char** argv) {
 
   VariantCallFile variantFile;
 
-  // zero based index for the target and background indivudals
+  // zero based index for the target and background individuals
 
   map<int, int> targetIndex, backgroundIndex;
 
@@ -408,12 +412,12 @@ int main(int argc, char** argv) {
     okayGenotypeLikelihoods["GT"] = 1;
 
     if(type == "NA"){
-      cerr << "FATAL: failed to specify genotype likelihood format : PL, GL or GP" << endl;
+      cerr << "FATAL: failed to specify genotype likelihood format : PL, GL, GT or GP" << endl;
       printHelp();
       return 1;
     }
     if(okayGenotypeLikelihoods.find(type) == okayGenotypeLikelihoods.end()){
-      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL, GL or GP" << endl;
+      cerr << "FATAL: genotype likelihood is incorrectly formatted, only use: PL, GL GT or GP" << endl;
       printHelp();
       return 1;
     }
@@ -478,7 +482,7 @@ int main(int argc, char** argv) {
 
     vector<int> ibi, iti, itot;
 
-    int index, indexi = 0;
+    int index = 0, indexi = 0;
 
     for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
 
@@ -544,18 +548,17 @@ int main(int argc, char** argv) {
       for(int nsamp = 0; nsamp < nsamples; nsamp++){
         map<string, vector<string> > sample = var.samples[samples[nsamp]];
 
-        /* Accessing to a key not defined in a map creates a default constructed
-         * value for this key.
-         * Thus, checking for key: 'type' in samples creates a default value for
-         * it if it does not exist, which changes the output of the program from
-         * -nan to very small decimal values when reading it in
-         * genotype::loadPop().
-         * We have to check from var.samples instead to make sure not to change
-         * the behavior of the program.
-         */
-        if(!var.samples[samples[nsamp]][type].size())
+        if(!sample[type].size())
         {
           cerr << "Bad file format: genotype field " << type << " is not present for: " << var.sequenceName << " " << var.position << endl;
+          exit(1);
+        }
+
+        if((type == "GL" || type == "GP" || type == "PL") && sample[type].size() != 3)
+        {
+          cerr << "Bad file format: genotype field " << type << " should have 3 values but has only ";
+          cerr << sample[type].size() << " for: " << var.sequenceName << " " << var.position;
+          cerr << " in sample " << nsamp << endl;
           exit(1);
         }
 
@@ -595,11 +598,11 @@ int main(int argc, char** argv) {
         populationTotal      = makeUnique<gt>();
       }
 
-      populationTarget->loadPop(target,         var.sequenceName, var.position);
+      populationTarget->loadPop(target,         var.position);
 
-      populationBackground->loadPop(background, var.sequenceName, var.position);
+      populationBackground->loadPop(background, var.position);
 
-      populationTotal->loadPop(total,           var.sequenceName, var.position);
+      populationTotal->loadPop(total,           var.position);
 
 
       if(populationTotal->af > 0.95 || populationTotal->af < 0.05){

@@ -1,14 +1,15 @@
 #!/usr/bin/env ruby
 #
-# Internal helper script to create a markdown file from binaries
+# Internal helper script to create markdown docs and man files from
+# the --help command of those binaries
 #
 # The --index option creates the index page
 #
 #    bin2md [--index] erbtemplate [binary]
 #
-# by Pjotr Prins (C) 2020
+# by Pjotr Prins (C) 2020-2023
 #
-# The rules are simple USAGE:
+# The rules are:
 #
 #    usage: can be multiline block anywhere in the output
 #
@@ -20,11 +21,11 @@ require 'erb'
 require 'date'
 require 'open3'
 
-# cerr << endl << "Type: statistics" << endl << endl;
-# cerr << endl << "Type: transformation" << endl << endl;
+# Section headers for the main index page
 TYPES = ["filter","metrics","phenotype","genotype","transformation","statistics"]
 
 =begin
+Example of such a section in C++:
 
 if (argc == 2) {
   string h_flag = argv[1];
@@ -70,11 +71,14 @@ $stderr.print("--- Parsing the bin files in #{bindir} for #{VERSION}\n")
 d = DateTime.now
 year = d.year
 
-Dir.glob(bindir+'/*').each do|bin|
+# This code walks every binary that was generated, runs it and parses the
+# output to create a markdown file.
+Dir.glob(bindir+'/*').sort.each do |bin|
   if !File.directory?(bin) and File.executable?(bin)
     if search and bin !~ /#{search}/
       next
     end
+    next if not File.executable?(bin) or bin =~ /\.(so|a)$/
     cmd = File.basename(bin)
     help_cmd = cmd + " -h"
     $stderr.print("    "+bin+"\n")
@@ -197,6 +201,7 @@ Dir.glob(bindir+'/*').each do|bin|
     end
   end
 end
+
 if create_index
   require 'ostruct'
 
@@ -260,6 +265,18 @@ HEADER
 # SOURCE CODE
 
 See the source code repository at #{github}
+
+# CREDIT
+
+Citations are the bread and butter of Science.  If you are using this
+software in your research and want to support our future work, please
+cite the following publication:
+
+Please cite:
+
+[A spectrum of free software tools for processing the VCF variant call format: vcflib, bio-vcf, cyvcf2, hts-nim and slivar](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123).
+Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput Biol 18(5): e1009123. https://doi.org/10.1371/journal.pcbi.1009123
+
 
 # LICENSE
 

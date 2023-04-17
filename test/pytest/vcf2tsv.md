@@ -43,7 +43,7 @@ index
 
 <!--
 
-    >>> from pytest.rtest import run_stdout, head, cat
+    >>> from rtest import run_stdout, head, cat
 
 -->
 
@@ -55,7 +55,7 @@ usage: vcf2tsv [-n null_string] [-g] [vcf file]
 
 ```
 
-vcf2tsv converts a CSV to a tabulated test file, e.g.
+vcf2tsv converts a VCF to a tabulated test file, e.g.
 
 ```python
 

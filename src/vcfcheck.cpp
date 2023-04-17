@@ -1,8 +1,9 @@
 /*
     vcflib C++ library for parsing and manipulating VCF files
 
-    Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2010-2022 Erik Garrison
+    Copyright © 2015      Chris Saunders
+    Copyright © 2020-2022 Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -12,22 +13,32 @@
 #include "Fasta.h"
 #include "gpatInfo.hpp"
 #include <getopt.h>
+#include <string.h>
 
 using namespace std;
 using namespace vcflib;
 
 void printSummary(char** argv) {
-    cerr << "usage: " << argv[0] << " [options] <vcf file>" << endl
-         << endl
-         << "Validate integrity and identity of the VCF by verifying that the VCF record's REF matches a given reference file." << endl
-         << "options:" << endl
-         << "    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences" << endl
-         << "    -x, --exclude-failures If a record fails, don't print it.  Otherwise do." << endl
-         << "    -k, --keep-failures    Print if the record fails, otherwise not." << endl
-	 << "    -h, --help       Print this message." << endl
-	 << "    -v, --version    Print version." << endl
-         << endl;
-      cerr << endl << "Type: metrics" << endl << endl;
+    cout << "usage: " << argv[0] << " [options] <vcf file>";
+    std::string text = R"(
+
+Validate integrity and identity of the VCF by verifying that the VCF
+record's REF matches a given reference file.
+
+options:
+
+    -f, --fasta-reference  FASTA reference file to use to obtain primer sequences.
+    -x, --exclude-failures If a record fails, don't print it.  Otherwise do.
+    -k, --keep-failures    Print if the record fails, otherwise not.
+    -i, --ignore-case      Ignore case differences between FASTA reference and vcf.
+    -h, --help             Print this message.
+    -v, --version          Print version.
+
+Type: metrics
+)";
+
+    cout << text;
+
     exit(0);
 }
 
@@ -36,6 +47,7 @@ int main(int argc, char** argv) {
 
     int c;
     string fastaRef;
+    bool ignoreCase = false;
     bool keepFailures = false;
     bool excludeFailures = false;
 
@@ -50,6 +62,7 @@ int main(int argc, char** argv) {
                 {"help", no_argument, 0, 'h'},
                 {"fasta-reference",  required_argument, 0, 'f'},
                 {"exclude-failures",  no_argument, 0, 'x'},
+                {"ignore-case",  no_argument, 0, 'i'},
                 {"keep-failures",  no_argument, 0, 'k'},
                 {"version",  no_argument, 0, 'v'},
                 //{"length",  no_argument, &printLength, true},
@@ -58,7 +71,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "hvxkf:",
+        c = getopt_long (argc, argv, "hvxkif:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -77,11 +90,15 @@ int main(int argc, char** argv) {
             printf ("\n");
             break;
 
+        case 'i':
+            ignoreCase = true;
+            break;
+
         case 'f':
-	  {
+          {
             fastaRef = optarg;
             break;
-	  }
+          }
 	case 'v':
 	  {
 	    printBasicVersion();
@@ -144,7 +161,19 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         int refstart = var.position - 1; // convert to 0-based
         string matchedRef = ref.getSubSequence(var.sequenceName, refstart, var.ref.size());
-        if (var.ref != matchedRef) {
+
+        bool isRefMatch = false;
+        if (ignoreCase)
+        {
+            isRefMatch = (0 == strcasecmp(var.ref.c_str(),matchedRef.c_str()));
+        }
+        else
+        {
+            isRefMatch = (0 == strcmp(var.ref.c_str(),matchedRef.c_str()));
+        }
+
+        if (! isRefMatch) {
+
             if (keepFailures) {
                 cout << var << endl;
             } else if (!excludeFailures) {

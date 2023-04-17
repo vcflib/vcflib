@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
         double randN = genrand_real1();
         if (!scaleByKey.empty()) {
             if (var.info.find(scaleByKey) != var.info.end()) {
-                double val;
+                double val = 0;
 
                 // hack, sum the values of interest if we have multiple values
                 // really, this is only suitable for AF stuff
