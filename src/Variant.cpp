@@ -1797,21 +1797,33 @@ bool VariantCallFile::parseHeader(string& hs) {
                 // including either a = or , in the first or second field
                 if (entryType == "INFO" || entryType == "FORMAT") {
                     vector<string> fields = split(entryData, "=,");
-                    if (fields[0] != "ID") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[0] != \"ID\"" << endl
-                             << headerLine << endl;
+                    if (fields.size() < 8) {
+                        cerr << "header line does not have all of the required fields: ID, Number, Type, and Description" << endl
+                             << headerLine << endl;;
                         exit(1);
                     }
-                    string id = fields[1];
-                    if (fields[2] != "Number") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[2] != \"Number\"" << endl
-                             << headerLine << endl;
-                        exit(1);
+                    // get the required fields from the header line
+                    auto id_field = find(fields.begin(), fields.begin() + 8, "ID");
+                    auto num_field = find(fields.begin(), fields.begin() + 8, "Number");
+                    auto type_field = find(fields.begin(), fields.begin() + 8, "Type");
+                    auto desc_field = find(fields.begin(), fields.begin() + 8, "Description");
+                    for (auto it : {id_field, num_field, type_field, desc_field}) {
+                        // make sure we found the field and that all of the keys have a value associated
+                        if (it == fields.begin() + 8 || ((it - fields.begin()) % 2 == 1)) {
+                            if (it == desc_field) {
+                                // we don't actually record / use the description, so we'll just give a warning
+                                cerr << "warning: ";
+                            }
+                            cerr << "header line does not have all of the required fields (ID, Number, Type, and Description) in the first 4 fields" << endl
+                                 << headerLine << endl;
+                            if (it != desc_field) {
+                                exit(1);
+                            }
+                        }
                     }
+                    string id = *(id_field + 1);
                     int number;
-                    string numberstr = fields[3].c_str();
+                    string numberstr = *(num_field + 1);
                     // XXX TODO VCF has variable numbers of fields...
                     if (numberstr == "A") {
                         number = ALLELE_NUMBER;
@@ -1822,13 +1834,7 @@ bool VariantCallFile::parseHeader(string& hs) {
                     } else {
                         convert(numberstr, number);
                     }
-                    if (fields[4] != "Type") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[4] != \"Type\"" << endl
-                             << headerLine << endl;
-                        exit(1);
-                    }
-                    VariantFieldType type = typeStrToVariantFieldType(fields[5]);
+                    VariantFieldType type = typeStrToVariantFieldType(*(type_field + 1));
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
                         infoTypes[id] = type;
