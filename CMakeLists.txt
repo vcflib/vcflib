@@ -76,8 +76,8 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
 endif()
 
 if ((${CMAKE_BUILD_TYPE} MATCHES Release) OR (${CMAKE_BUILD_TYPE} MATCHES RelWithDebInfo))
-  set (CMAKE_C_FLAGS "${OpenMP_C_FLAGS} ${EXTRA_FLAGS}")
-  set (CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS} ${EXTRA_FLAGS}")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
 endif ()
 
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -117,11 +117,13 @@ include_directories(contrib/filevercmp)
 include_directories(contrib/c-progress-bar)
 
 if(NOT HTSLIB_FOUND)
+  message(STATUS "Using included htslib")
   set(HTSLIB_LOCAL contrib/tabixpp/htslib)
-  set(TABIX_FOUND OFF) # also build tabixpp if htslib is missing
+  set(TABIXPP_FOUND OFF) # also build tabixpp if htslib is missing
 endif()
 
-if (NOT TABIX_FOUND)
+if (NOT TABIXPP_FOUND)
+  message(STATUS "Using included tabixpp")
   set(TABIXPP_LOCAL contrib/tabixpp)
   include_directories(contrib/tabixpp)
   set(tabixpp_SOURCE
@@ -359,6 +361,7 @@ if (HTSLIB_LOCAL)
 endif(HTSLIB_LOCAL)
 
 if(WFA_GITMODULE)
+  message(STATUS "Using included libwfa")
   set(WFA_INCLUDE_DIRS ${WFA_LOCAL})
   add_subdirectory(${WFA_LOCAL} EXCLUDE_FROM_ALL)
   set(WFALIB wfa2) # pick up the wfa2 lib target from the included CMakeLists.txt
