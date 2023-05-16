@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <math.h>
 #include <algorithm>
+#include <limits>
 #include "murmur3.hpp"
 
 // From Eric's https://github.com/edawson/rkmh
