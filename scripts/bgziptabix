@@ -11,4 +11,4 @@ fi
 
 file=$1
 
-bgzip >$file && tabix -fp vcf $file
+bgzip ${file} && tabix -fp vcf ${file}.gz
