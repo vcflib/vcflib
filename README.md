@@ -377,9 +377,13 @@ And for some of the VCF executables
 - python
 - perl
 
-Make sure the `zig` tool is in the `PATH`.
-The `zig` dependency is for the recently upgraded [vcfcreatemulti](./doc/vcfcreatemulti.md) that can be run after vcfwave to combine overlapping records.
+To use Zig compiled tools, such as vcfcreatemulti, make sure the `zig` compiler is in the `PATH`.
+The `zig` dependency is for the recently upgraded [vcfcreatemulti](./doc/vcfcreatemulti.md) that can be run after vcfwave to combine overlapping records. It is unfortunate that zig is not part of some large Linux distributions.
 More on `zig` can be found in the souce code [README](./src/zig/README.md).
+
+### Using a recent C++ compiler
+
+You may encounter something like libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by ...vcflib/build/pyvcflib.cpython-310-x86_64-linux-gnu.so). This is caused by the python pyvcflib not running against a python interpreter compiled with the same libstdc++ dependency. That is a bit nasty to solve. For now make sure to match C++ compilers for the python module.
 
 ### Using a different htslib
 
