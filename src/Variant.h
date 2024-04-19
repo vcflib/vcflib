@@ -647,8 +647,8 @@ private:
      * the maps we're going to be using will be case-insensitive
      * so that "fileFormat" and "fileformat" hash to the same item.
      */
-    struct stringcasecmp : binary_function<string, string, bool> {
-        struct charcasecmp : public std::binary_function<unsigned char, unsigned char, bool> {
+    struct stringcasecmp {
+        struct charcasecmp {
             bool operator() (const unsigned char& c1, const unsigned char& c2) const {
                 return tolower (c1) < tolower (c2);
             }
