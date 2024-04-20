@@ -360,7 +360,8 @@ endif(HTSLIB_LOCAL)
 
 if(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${WFA_LOCAL})
-  add_subdirectory(${WFA_LOCAL} EXCLUDE_FROM_ALL)
+  # add_subdirectory(${WFA_LOCAL} EXCLUDE_FROM_ALL)
+  add_subdirectory(${WFA_LOCAL})
   set(WFALIB wfa2) # pick up the wfa2 lib target from the included CMakeLists.txt
 else(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
@@ -465,7 +466,6 @@ install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 enable_testing()
 
-
 function(add_pytest TEST_FILE)
   add_test(
       NAME ${TEST_FILE}
@@ -473,7 +473,7 @@ function(add_pytest TEST_FILE)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
 endfunction()
 
 function(add_pydoctest TEST_FILE)
@@ -484,7 +484,7 @@ function(add_pydoctest TEST_FILE)
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest")
 endfunction()
 
 
