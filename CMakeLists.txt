@@ -2,9 +2,9 @@
 #
 #   cd build
 #   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF -DWFA_GITMODULE=OFF ..
-#   make
-#   make test
-#   make install
+#   cmake --build .
+#   ctest .
+#   cmake --install .
 #
 cmake_minimum_required(VERSION 3.16)
 project(vcflib)
