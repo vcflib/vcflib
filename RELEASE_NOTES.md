@@ -12,6 +12,15 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog v1.0.10 (20240420)
+
+Vcflib maintenance release
+
++ Improved for vcfwave the wfa2lib build, fixed running tests with upstream build update
++ Removed deprecated binary_function
++ Removed unused files from repo
++ Updated README
+
 ## ChangeLog v1.0.9 (20230211)
 
 Vcflib maintenance release - mostly for including in Debian
