@@ -7,7 +7,7 @@
 #
 #    bin2md [--index] erbtemplate [binary]
 #
-# by Pjotr Prins (C) 2020-2023
+# by Pjotr Prins (C) 2020-2024
 #
 # The rules are:
 #
@@ -280,7 +280,9 @@ Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput B
 
 # LICENSE
 
-Copyright 2011-#{year} (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-#{year} (C) Erik Garrison and vcflib contributors.
+Copyright 2020-#{year} (C) Pjotr Prins
+MIT licensed.
 
 FOOTER
   }
