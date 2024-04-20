@@ -56,6 +56,7 @@
   (gnu packages python)
   (gnu packages python-xyz) ; for pybind11
   (gnu packages ruby)
+  (gnu packages time)
   (gnu packages tls)
   (gnu packages zig)
   (srfi srfi-1)
@@ -90,6 +91,7 @@
        ("ruby" ,ruby) ;; for generating man pages
        ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
+       ("time" ,time) ;; for tests
        ("xz" ,xz)
        ("zig" ,zig) ;; note we use zig-0.9.1
        ("zlib" ,zlib)))
