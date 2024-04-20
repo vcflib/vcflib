@@ -92,6 +92,7 @@
        ("smithwaterman" ,smithwaterman)
        ("tabixpp" ,tabixpp)
        ("time" ,time) ;; for tests
+       ("wfa2-lib" ,wfa2-lib)
        ("xz" ,xz)
        ("zig" ,zig) ;; note we use zig-0.9.1
        ("zlib" ,zlib)))
