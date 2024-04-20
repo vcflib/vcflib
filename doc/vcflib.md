@@ -166,5 +166,7 @@ Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput B
 
 # LICENSE
 
-Copyright 2011-2023 (C) Erik Garrison and vcflib contributors. MIT licensed.
+Copyright 2011-2024 (C) Erik Garrison and vcflib contributors.
+Copyright 2020-2024 (C) Pjotr Prins
+MIT licensed.
 

@@ -208,4 +208,4 @@ Your VCF already contains multi-allele entries - bring them back to one single A
 
 # LICENSE
 
-Copyright 2022-2023 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2022-2024 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
