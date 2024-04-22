@@ -623,15 +623,22 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
         }
     }
     else if (svtype == "DEL"){
-        if (this->position + info_span != info_end){
+        // Note that info_len has been abs'd and is always positive
+        if (this->position + info_len != info_end){
             cerr << "Warning: deletion END and SVLEN do not agree [canonicalize] " << *this << endl <<
-            "END: " << info_end << "  " << "SVLEN: " << -info_len << endl;
+            "END: " << info_end << "  " << "SVLEN: " << info_len << endl;
             return false;
         }
 
         if (this->position + info_span != info_end){
             cerr << "Warning: deletion END and SPAN do not agree [canonicalize] " << *this << endl <<
             "END: " << info_end << "  " << "SPAN: " << info_span << endl;
+            return false;
+        }
+    
+        if (info_end > fasta_reference.sequenceLength(this->sequenceName)) {
+            cerr << "Warning: deletion END is past end of sequence [canonicalize] " << *this << endl <<
+            "END: " << info_end << "  " << "length: " << fasta_reference.sequenceLength(this->sequenceName) << endl;
             return false;
         }
 
@@ -663,7 +670,13 @@ bool Variant::canonicalize(FastaReference& fasta_reference, vector<FastaReferenc
                 return false;
             }
         }
-
+        
+        if (info_end > fasta_reference.sequenceLength(this->sequenceName)) {
+            cerr << "Warning: inversion END is past end of sequence [canonicalize] " << *this << endl <<
+            "END: " << info_end << "  " << "length: " << fasta_reference.sequenceLength(this->sequenceName) << endl;
+            return false;
+        }
+    
         if (place_seq){
             string ref_seq = toUpper(fasta_reference.getSubSequence(this->sequenceName, this->zeroBasedPosition(), info_span + 1));
             // Note that inversions still need an anchoring left base at POS
@@ -1830,22 +1843,35 @@ bool VariantCallFile::parseHeader(string& hs) {
                 // field
                 if (entryType == "INFO" || entryType == "FORMAT") {
                     vector<string> fields = split(entryData, "=,");
-                    if (fields[0] != "ID") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[0] != \"ID\"" << endl
-                             << headerLine << endl;
+                    if (fields.size() < 8) {
+                        cerr << "header line does not have all of the required fields: ID, Number, Type, and Description" << endl
+                             << headerLine << endl;;
                         exit(1);
                     }
-                    string id = fields[1];
-                    if (fields[2] != "Number") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[2] != \"Number\"" << endl
-                             << headerLine << endl;
-                        exit(1);
+                    // get the required fields from the header line
+                    auto id_field = find(fields.begin(), fields.begin() + 8, "ID");
+                    auto num_field = find(fields.begin(), fields.begin() + 8, "Number");
+                    auto type_field = find(fields.begin(), fields.begin() + 8, "Type");
+                    auto desc_field = find(fields.begin(), fields.begin() + 8, "Description");
+                    for (auto it : {id_field, num_field, type_field, desc_field}) {
+                        // make sure we found the field and that all of the keys have a value associated
+                        if (it == fields.begin() + 8 || ((it - fields.begin()) % 2 == 1)) {
+                            if (it == desc_field) {
+                                // we don't actually record / use the description, so we'll just give a warning
+                                cerr << "warning: ";
+                            }
+                            cerr << "header line does not have all of the required fields (ID, Number, Type, and Description) in the first 4 fields" << endl
+                                 << headerLine << endl;
+                            if (it != desc_field) {
+                                exit(1);
+                            }
+                        }
                     }
+                    string id = *(id_field + 1);
                     int number;
+                    string numberstr = *(num_field + 1);
                     // string numberstr = mapper["Number"].c_str();
-                    string numberstr = fields[3].c_str();
+
                     // XXX TODO VCF has variable numbers of fields...
                     if (numberstr == "A") {
                         number = ALLELE_NUMBER;
@@ -1856,14 +1882,7 @@ bool VariantCallFile::parseHeader(string& hs) {
                     } else {
                         convert(numberstr, number);
                     }
-                    if (fields[4] != "Type") {
-                        cerr << "header parse error at:" << endl
-                             << "fields[4] != \"Type\"" << endl
-                             << headerLine << endl;
-                        exit(1);
-                    }
-                    VariantFieldType type = typeStrToVariantFieldType(fields[5]);
-
+                    VariantFieldType type = typeStrToVariantFieldType(*(type_field + 1));
                     // VariantFieldType type = typeStrToVariantFieldType(mapper["TYPE"]);
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
