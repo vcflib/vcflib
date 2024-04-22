@@ -8,6 +8,7 @@
 */
 
 #include "Variant.h"
+#include "legacy.h"
 
 using namespace std;
 using namespace vcflib;
@@ -72,7 +73,7 @@ Type: statistics
 
     cout << variantFile.header << endl;
 
-    Variant var(variantFile);
+    VariantLegacy var(variantFile);
     while (variantFile.getNextVariant(var)) {
         map<string, vector<VariantAllele> > variants = var.legacy_parsedAlternates();
 	cout << var << endl;

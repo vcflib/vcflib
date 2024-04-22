@@ -2,12 +2,12 @@
     vcflib C++ library for parsing and manipulating VCF files
 
     Copyright © 2010-2020 Erik Garrison
-    Copyright © 2020      Pjotr Prins
+    Copyright © 2020-2024      Pjotr Prins
 
     This software is published under the MIT License. See the LICENSE file.
 */
 
-#include "Variant.h"
+#include "legacy.h"
 #include "split.h"
 #include <string>
 #include <sstream>
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    Variant var(variantFile);
+    VariantLegacy var(variantFile);
 
     // write the new header
     cout << variantFile.header << endl;

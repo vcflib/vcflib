@@ -8,6 +8,7 @@
 */
 
 #include "Variant.h"
+#include "legacy.h"
 #include "BedReader.h"
 #include "IntervalTree.h"
 #include <getopt.h>
@@ -36,38 +37,38 @@ void printSummary(char** argv) {
 }
 
 void buildVariantIntervalTree(VariantCallFile& variantFile,
-                              map<string, IntervalTree<size_t, Variant*> >& variantIntervals,
-                              list<Variant>& variants) {
+                              map<string, IntervalTree<size_t, VariantLegacy*> >& variantIntervals,
+                              list<VariantLegacy>& variants) {
 
-    map<string, vector<Interval<size_t, Variant*> > > rawVariantIntervals;
-    Variant var(variantFile);
+    map<string, vector<Interval<size_t, VariantLegacy*> > > rawVariantIntervals;
+    VariantLegacy var(variantFile);
     while (variantFile.getNextVariant(var)) {
         long int left = var.position;
         long int right = left + var.ref.size(); // this should be 1-past the end
         variants.push_back(var);
-        Variant* v = &variants.back();
-        rawVariantIntervals[var.sequenceName].push_back(Interval<size_t, Variant*>(left, right, v));
+        VariantLegacy* v = &variants.back();
+        rawVariantIntervals[var.sequenceName].push_back(Interval<size_t, VariantLegacy*>(left, right, v));
     }
 
-    for (map<string, vector<Interval<size_t, Variant*> > >::iterator j = rawVariantIntervals.begin(); j != rawVariantIntervals.end(); ++j) {
-        variantIntervals[j->first] = IntervalTree<size_t, Variant*>((vector<Interval<size_t, Variant*> >&&)j->second);
+    for (map<string, vector<Interval<size_t, VariantLegacy*> > >::iterator j = rawVariantIntervals.begin(); j != rawVariantIntervals.end(); ++j) {
+        variantIntervals[j->first] = IntervalTree<size_t, VariantLegacy*>((vector<Interval<size_t, VariantLegacy*> >&&)j->second);
     }
 }
 
 
-void intersectVariant(Variant& var,
-                      map<string, IntervalTree<size_t, Variant*> >& variantIntervals,
+void intersectVariant(VariantLegacy& var,
+                      map<string, IntervalTree<size_t, VariantLegacy*> >& variantIntervals,
                       vector<string*>& commonAlleles,
                       vector<string*>& uniqueAlleles,
                       FastaReference& reference,
                       int windowsize = 50) {
 
-    vector<Interval<size_t, Variant*> > results
+    vector<Interval<size_t, VariantLegacy*> > results
         = variantIntervals[var.sequenceName].findContained(var.position - windowsize, var.position + var.ref.size() + windowsize);
 
-    vector<Variant*> overlapping;
+    vector<VariantLegacy*> overlapping;
 
-    for (vector<Interval<size_t, Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
+    for (vector<Interval<size_t, VariantLegacy*> >::iterator r = results.begin(); r != results.end(); ++r) {
         overlapping.push_back(r->value);
     }
 
@@ -83,7 +84,7 @@ void intersectVariant(Variant& var,
         int haplotypeStart = var.position;
         int haplotypeEnd = var.position + var.ref.size();
 
-        for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+        for (vector<VariantLegacy*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
             haplotypeStart = min((*v)->position, (long int) haplotypeStart);
             haplotypeEnd = max((*v)->position + (*v)->ref.size(), (long unsigned int) haplotypeEnd);
         }
@@ -92,10 +93,10 @@ void intersectVariant(Variant& var,
         // if there is an exact match, the allele in the current VCF does intersect
 
         string referenceHaplotype = reference.getSubSequence(var.sequenceName, haplotypeStart - 1, haplotypeEnd - haplotypeStart);
-        map<string, vector<pair<Variant*, int> > > haplotypes; // map to variant and alt index
+        map<string, vector<pair<VariantLegacy*, int> > > haplotypes; // map to variant and alt index
 
-        for (vector<Variant*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
-            Variant& variant = **v;
+        for (vector<VariantLegacy*>::iterator v = overlapping.begin(); v != overlapping.end(); ++v) {
+            VariantLegacy& variant = **v;
             int altindex = 0;
             for (vector<string>::iterator a = variant.alt.begin(); a != variant.alt.end(); ++a, ++altindex) {
                 string haplotype = referenceHaplotype;
@@ -112,7 +113,7 @@ void intersectVariant(Variant& var,
             string haplotype = referenceHaplotype;
             int relativeStart = var.position - haplotypeStart;
             haplotype.replace(relativeStart, var.ref.size(), *a);
-            map<string, vector<pair<Variant*, int> > >::iterator h = haplotypes.find(haplotype);
+            map<string, vector<pair<VariantLegacy*, int> > >::iterator h = haplotypes.find(haplotype);
             if (h == haplotypes.end()) {
                 uniqueAlleles.push_back(&*a);
             } else {
@@ -232,12 +233,12 @@ int main(int argc, char** argv) {
     // read the VCF file for union or intersection into an interval tree
     // indexed using some proximity window
 
-    map<string, IntervalTree<size_t, Variant*> > truthVariantIntervals;
-    list<Variant> truthVariants;
+    map<string, IntervalTree<size_t, VariantLegacy*> > truthVariantIntervals;
+    list<VariantLegacy> truthVariants;
     buildVariantIntervalTree(truthVariantFile, truthVariantIntervals, truthVariants);
 
-    map<string, IntervalTree<size_t, Variant*> > testVariantIntervals;
-    list<Variant> testVariants;
+    map<string, IntervalTree<size_t, VariantLegacy*> > testVariantIntervals;
+    list<VariantLegacy> testVariants;
     buildVariantIntervalTree(variantFile, testVariantIntervals, testVariants);
 
     map<long double, vector<VariantAllele*> > falseNegativeAllelesAtCutoff;  // false negative after this cutoff
@@ -246,20 +247,20 @@ int main(int argc, char** argv) {
     map<long double, vector<VariantAllele*> > allelesAtCutoff;
     //map<long double, vector<VariantAllele*> > totalAllelesAtCutoff;
     map<Variant*, map<string, vector<VariantAllele> > > parsedAlleles;
-    map<long double, vector<Variant*> > callsByCutoff;
+    map<long double, vector<VariantLegacy*> > callsByCutoff;
 
     // replicate this method, where Q is for each unique Q in the set
     //vcfintersect -r $reference -v -i $results.$Q.vcf $answers_primitives | vcfstats >false_negatives.$Q.stats
     //vcfintersect -r $reference -v -i $answers_primitives $results.$Q.vcf | vcfstats >false_positives.$Q.stats
 
-    for (list<Variant>::iterator v = testVariants.begin(); v != testVariants.end(); ++v) {
+    for (list<VariantLegacy>::iterator v = testVariants.begin(); v != testVariants.end(); ++v) {
         // TODO allow different cutoff sources
         callsByCutoff[v->quality].push_back(&*v);
     }
 
     // add false negatives at any cutoff
-    for (list<Variant>::iterator v = truthVariants.begin(); v != truthVariants.end(); ++v) {
-        Variant& variant = *v;
+    for (list<VariantLegacy>::iterator v = truthVariants.begin(); v != truthVariants.end(); ++v) {
+        VariantLegacy& variant = *v;
         vector<string*> commonAlleles;
         vector<string*> uniqueAlleles;
         intersectVariant(variant, testVariantIntervals,
@@ -281,11 +282,11 @@ int main(int argc, char** argv) {
         }
     }
 
-    for (map<long double, vector<Variant*> >::iterator q = callsByCutoff.begin(); q != callsByCutoff.end(); ++q) {
+    for (map<long double, vector<VariantLegacy*> >::iterator q = callsByCutoff.begin(); q != callsByCutoff.end(); ++q) {
         long double threshold = q->first;
-        vector<Variant*>& variants = q->second;
-        for (vector<Variant*>::iterator v = variants.begin(); v != variants.end(); ++v) {
-            Variant& variant = **v;
+        vector<VariantLegacy*>& variants = q->second;
+        for (vector<VariantLegacy*>::iterator v = variants.begin(); v != variants.end(); ++v) {
+            VariantLegacy& variant = **v;
             vector<string*> commonAlleles;
             vector<string*> uniqueAlleles;
             intersectVariant(variant, truthVariantIntervals,

@@ -16,6 +16,9 @@ and
 
 Vcflib maintenance release
 
++ Fixed vcfwave bugs - thanks Andrea Guarracino!
++ Fixed c++17 compatability - thanks Alex Petty!
++ Fixed tabixpp script - thanks Blaise Li!
 + Improved for vcfwave the wfa2lib build, fixed running tests with upstream build update
 + Removed deprecated binary_function
 + Removed unused files from repo

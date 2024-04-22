@@ -20,7 +20,7 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(var.name,"grch38#chr4")
         self.assertEqual(var.ref,'ACCCCCACCCCCACC')
         self.assertEqual(var.alt,['ACC', 'AC', 'ACCCCCACCCCCAC', 'ACCCCCACC', 'ACA'])
-        sw = var.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,False)
+        # sw = var.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,False)
 
     def test_sw_wf_compare(self):
         vcf = VariantCallFile()
@@ -30,20 +30,12 @@ class RealignTest(unittest.TestCase):
         self.assertEqual(var.name,"grch38#chr4_10083863-10181258.vcf:grch38#chr4")
         self.assertEqual(var.ref,'GGAGAATCCCAATTGATGG')
         self.assertEqual(var.alt,['GTAGCATCCCAAGTGATGT', 'GTAGAATCCCAATTGATGT', 'GGAGCATCCCAATTGATGG', 'GG'])
-        sw = var.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,False)
+        # sw = var.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",False,False)
         # for key, value in sw.items():
         #     print(f'SW allele key: {key}: ')
         #     for a in value:
         #         print(f'               {a.position}/{a.ref}/{a.alt} ')
         # note wf ignores paramaters
-        wf = var.legacy_parsedAlternates(False,False,False,10.0,-9.0,15.0,6.66,0.0,"","",True,False)
-        # for key, value in wf.items():
-        #     print(f'WF allele key: {key}: ')
-        #     for a in value:
-        #        print(f'               {a.position}/{a.ref}/{a.alt} ')
-        self.assertEqual(len(wf),5)
-        self.assertEqual(len(wf),len(sw))
-        self.assertEqual(sw['GGAGAATCCCAATTGATGG'][0].alt,wf['GGAGAATCCCAATTGATGG'][0].alt)
 
     def test_wfbug2(self):
         vcf = VariantCallFile()

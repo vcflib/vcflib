@@ -83,7 +83,7 @@ endif ()
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
-  add_definitions(-Wfatal-errors)
+  add_definitions(-Wfatal-errors) # stop after first error
 endif ()
 
 if (ASAN)
@@ -142,17 +142,20 @@ file(GLOB INCLUDES
   contrib/filevercmp/*.h*
   )
 
-set(vcflib_SOURCE
-    src/vcf-c-api.cpp
-    src/legacy.cpp
+set(vcfwfa_SOURCE
+    src/legacy.cpp # introduces a WFA dependency
     src/vcf-wfa.cpp
+)
+
+set(vcflib_SOURCE
+    ${vcfwfa_SOURCE}
+    src/vcf-c-api.cpp
     src/Variant.cpp
     src/rnglib.cpp
     src/var.cpp
     src/pdflib.cpp
     src/cdflib.cpp
     src/split.cpp
-    src/legacy.cpp
     src/rkmh.cpp
     src/murmur3.cpp
     src/LeftAlign.cpp
@@ -217,16 +220,11 @@ set(BINS
     vcfsamplediff
     vcfremoveaberrantgenotypes
     vcfrandom
-    vcfparsealts
-    vcfstats
     vcfflatten
     vcfprimers
     vcfnumalt
-    vcfcleancomplex
     vcfintersect
     vcfannotate
-    vcfallelicprimitives
-    vcfwave
     vcfoverlay
     vcfaddinfo
     vcfkeepinfo
@@ -238,7 +236,6 @@ set(BINS
     vcfrandomsample
     vcfentropy
     vcfglxgt
-    vcfroc
     vcfcheck
     vcfstreamsort
     vcfuniq
@@ -264,6 +261,16 @@ set(BINS
     vcfinfosummarize
     vcfcreatemulti
 )
+
+
+set(WFBINS # Introduce wavefront dependency
+    vcfallelicprimitives
+    vcfcleancomplex
+    vcfparsealts
+    vcfroc
+    vcfstats
+    vcfwave
+  )
 
 set(SCRIPTS
     bed2region
@@ -441,13 +448,12 @@ if (NOT BUILD_ONLY_LIB)
     add_dependencies(${BIN} vcflib)
     target_link_libraries(${BIN} PUBLIC ${vcflib_LIBS} vcflib)
   endforeach(BIN ${BINS})
-  # These binaries include WFALIB
-  target_link_libraries(vcfallelicprimitives PUBLIC ${WFALIB})
-  target_link_libraries(vcfcleancomplex PUBLIC ${WFALIB})
-  target_link_libraries(vcfparsealts PUBLIC ${WFALIB})
-  target_link_libraries(vcfroc PUBLIC ${WFALIB})
-  target_link_libraries(vcfstats PUBLIC ${WFALIB})
-  target_link_libraries(vcfwave PUBLIC ${WFALIB})
+  foreach(WFBIN ${WFBINS})
+    add_executable(${WFBIN} src/${WFBIN}.cpp ${vcfwfa_SOURCE})
+    add_dependencies(${WFBIN} vcflib)
+    target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} vcflib)
+    target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} ${WFALIB})
+  endforeach(WFBIN ${BINS})
   install(TARGETS ${BINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # ---- Copy scripts

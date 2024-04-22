@@ -209,30 +209,6 @@ public:
     set<string> altSet(void);  // set of alleles, rather than vector of them
     map<string, int> altAlleleIndexes;  // reverse lookup for alleles
 
-    // Legacy version of parsedAlterneates:
-    map<string, vector<VariantAllele> > legacy_parsedAlternates(
-           bool includePreviousBaseForIndels = false,
-           bool useMNPs = false,
-           bool useEntropy = false,
-           float matchScore = 10.0f,
-           float mismatchScore = -9.0f,
-           float gapOpenPenalty = 15.0f,
-           float gapExtendPenalty = 6.66f,
-           float repeatGapExtendPenalty = 0.0f,
-           string flankingRefLeft = "",
-           string flankingRefRight = "",
-           bool useWaveFront=true,
-           bool debug=false);
-
-    // Legacy version
-    void legacy_reduceAlleles(
-        map<string, pair<vector<VariantAllele>, bool> > varAlleles,
-        VariantCallFile &variantFile,
-        Variant var,
-        string parseFlag,
-        bool keepInfo=true,
-        bool keepGeno=true,
-        bool debug=false);
 
     map<string, vector<VariantAllele> > parsedAlternates(bool includePreviousBaseForIndels = false,
                                                          bool useMNPs = false,
@@ -372,6 +348,14 @@ public:
     bool isPhased(void);
     // TODO
     //void setInfoField(const string& key, string& val);
+    void reduceAlleles(
+	map<string, pair<vector<VariantAllele>, bool> > varAlleles,
+	VariantCallFile &variantFile,
+	Variant var,
+	string parseFlag,
+	bool keepInfo=true,
+	bool keepGeno=true,
+	bool debug=false);
 
 private:
 
