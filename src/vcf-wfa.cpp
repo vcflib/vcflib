@@ -97,7 +97,6 @@ map<string, pair<vector<VariantAllele>,bool> > WfaVariant::wfa_parsedAlternates(
             if (rkmh::compare(alt_sketch, ref_sketch_fwd, invKmerLen)
                 > rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen)) {
                 is_inv = true;
-
                 /* DISABLED
                 // flip the alt
                 string alternate_rev = reverse_complement(alternate);

@@ -292,7 +292,7 @@ int main(int argc, char** argv) {
             TrackInfo unique; // Track all alleles
 
             // Unpack wavefront results and set values for each unique allele
-            for (const auto [alt0, wfvalue] : varAlleles) {
+            for (const auto [alt0, wfvalue] : varAlleles) {               
                 bool is_inv = wfvalue.second;
                 for (auto wfmatch: wfvalue.first) {
                     auto ref = wfmatch.ref;
@@ -480,7 +480,7 @@ int main(int argc, char** argv) {
 
                 // inversions are not realigned anymore, so they can't generate multiple entries
                 newvar.id = v.is_inv ? var.id : var.id + "_" + to_string(ct);
-
+                
                 newvar.ref = v.ref1;
                 newvar.alt.push_back(v.algn);
                 newvar.quality = var.quality;
@@ -507,7 +507,6 @@ int main(int argc, char** argv) {
                     vector<string> ORIGIN{ v.origin };
                     newvar.info[parseFlag] = ORIGIN;
                 }
-
                 newvar.info["TYPE"] = TYPE;
                 newvar.info["LEN"] = vector<string>{to_string(v.size)};
 

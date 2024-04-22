@@ -91,8 +91,8 @@
        ("ruby" ,ruby)           ;; for generating man pages
        ("smithwaterman" ,smithwaterman) ;; dev version not in Debian
        ("tabixpp" ,tabixpp)
-       ("time" ,time)           ;; for tests
-       ;; ("wfa2-lib" ,wfa2-lib)   ;; optional
+       ("time" ,time) ;; for tests
+       ("wfa2-lib" ,wfa2-lib) ; optional
        ("xz" ,xz)
        ("zig" ,zig)
        ("zlib" ,zlib)))
