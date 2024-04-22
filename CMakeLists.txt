@@ -1,7 +1,7 @@
 # For Debian currently with
 #
 #   cd build
-#   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF -DWFA_GITMODULE=OFF ..
+#   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF ..
 #   cmake --build .
 #   ctest .
 #   cmake --install .
@@ -38,8 +38,7 @@ option(PROFILING "Enable profiling" OFF)
 option(GPROF "Enable gprof profiling" OFF)
 option(ASAN "Use address sanitiser" OFF)
 option(ZIG "Set to OFF to disable the zig code" ON)
-option(WFA_GITMODULE "Force local git submodule for WFA2LIB" ON) # disable in distros, you may need to add path to WFA_INCLUDE_DIRS
-
+option(WFA_GITMODULE "Force local git submodule for WFA2LIB" OFF) # disabled by default now
 include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
 
@@ -367,17 +366,17 @@ endif(HTSLIB_LOCAL)
 
 if(WFA_GITMODULE)
   set(WFA_INCLUDE_DIRS ${WFA_LOCAL})
-  # add_subdirectory(${WFA_LOCAL} EXCLUDE_FROM_ALL)
   add_subdirectory(${WFA_LOCAL})
   set(WFALIB wfa2) # pick up the wfa2 lib target from the included CMakeLists.txt
 else(WFA_GITMODULE)
   include_directories($ENV{CMAKE_PREFIX_PATH}/include/wfa2lib)
   set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
-  find_library(WFALIB wfa2 wfa) # distro search for shared lib
-  if(NOT WFALIB)
-    message(STATUS "ERROR: Can not find libfwa! Make sure it is installed or use the git submodule instead")
-  endif()
+  find_library(WFALIB wfa2 wfa REQUIRED) # distro search for shared lib
 endif(WFA_GITMODULE)
+
+# if(NOT WFALIB)
+#   message(STATUS "ERROR: Can not find wfa2lib! Make sure it is installed or use the git submodule instead")
+# endif()
 
 include_directories(${WFA_INCLUDE_DIRS})
 MESSAGE(STATUS "WFA using include ${WFA_INCLUDE_DIRS}")
@@ -584,6 +583,7 @@ endif (PANDOC)
 # ---- Install
 
 install(TARGETS vcflib ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ${WFALIB} ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES ${INCLUDES} DESTINATION include)
 

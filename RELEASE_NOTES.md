@@ -12,6 +12,11 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog v1.0.11-pre ()
+
++ Stopped vendoring wfa2lib by default - so now the Debian build command is
+  `cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF ..`
+
 ## ChangeLog v1.0.10 (20240420)
 
 Vcflib maintenance release

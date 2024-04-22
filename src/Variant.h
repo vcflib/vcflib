@@ -26,7 +26,7 @@
 #include "split.h"
 #include "join.h"
 #include <tabix.hpp>
-#include "SmithWatermanGotoh.h"
+#include <SmithWatermanGotoh.h>
 #include "ssw_cpp.hpp"
 #include "convert.h"
 #include "multichoose.h"

@@ -75,26 +75,26 @@
     (source (local-file %source-dir #:recursive? #t))
     (build-system cmake-build-system)
     (inputs
-     `(("autoconf" ,autoconf) ;; htslib build requirement
-       ("automake" ,automake) ;; htslib build requirement
-       ("openssl" ,openssl) ;; htslib build requirement
-       ("curl" ,curl) ;; htslib build requirement
-       ("fastahack" ,fastahack)
-       ;; ("gcc" ,gcc-11)    ;; test against latest
+     `(("autoconf" ,autoconf)   ;; htslib build requirement
+       ("automake" ,automake)   ;; htslib build requirement
+       ("openssl" ,openssl)     ;; htslib build requirement
+       ("curl" ,curl)           ;; htslib build requirement
+       ("fastahack" ,fastahack) ;; dev version not in Debian
+       ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
        ("gdb" ,gdb)
        ("htslib" ,htslib)
-       ("pandoc" ,pandoc) ;; for generation man pages
+       ("pandoc" ,pandoc)       ;; for generation man pages
        ("perl" ,perl)
        ("python" ,python)
        ("python-pytest" ,python-pytest)
        ("pybind11" ,pybind11)
-       ("ruby" ,ruby) ;; for generating man pages
-       ("smithwaterman" ,smithwaterman)
+       ("ruby" ,ruby)           ;; for generating man pages
+       ("smithwaterman" ,smithwaterman) ;; dev version not in Debian
        ("tabixpp" ,tabixpp)
-       ("time" ,time) ;; for tests
-       ("wfa2-lib" ,wfa2-lib)
+       ("time" ,time)           ;; for tests
+       ;; ("wfa2-lib" ,wfa2-lib)   ;; optional
        ("xz" ,xz)
-       ("zig" ,zig) ;; note we use zig-0.9.1
+       ("zig" ,zig)
        ("zlib" ,zlib)))
     (native-inputs
      `(("pkg-config" ,pkg-config)))

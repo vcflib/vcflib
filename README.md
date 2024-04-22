@@ -353,16 +353,22 @@ cd build
 cmake --build . --target clean
 ```
 
-Build dependencies can be viewed in the github-CI
-scripts (see badges above), as well as [guix.scm](./guix.scm) used by
-us to create the build environment (for instructions see the header of
-guix.scm). Essentially:
+The most interesting one, perhaps, is wfa2lib. Bundling is no longer the default, but it is a submodule that will install an optimized libwfa2.so. Set up compilation with
+
+```sh
+cmake -DCMAKE_BUILD_TYPE=Release -DWFA_GITMODULE=ON  ..
+cmake --build .
+ctest .
+cmake --install .
+```
+
+Build dependencies can be viewed in the github-CI scripts (see badges above), as well as [guix.scm](./guix.scm) used by us to create the build environment (for instructions see the header of guix.scm). Essentially:
 
 - cmake
 - C++ compiler
 - htslib
 - tabixpp
-- WFA2
+- WFA2 (wfa2lib)
 - pybind11 (for testing)
 
 For include files add
@@ -373,7 +379,7 @@ For include files add
 
 And for some of the VCF executables
 
-- zig 0.9.1 (disable with cmake -DZIG=OFF)
+- zig 0.10 (disable with cmake -DZIG=OFF)
 - python
 - perl
 
@@ -402,7 +408,7 @@ The standard build creates `build/vcflib.a`. Take a hint from the
 Distros, such as Debian, should build with something like
 
 ```
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF -DWFA_GITMODULE=OFF ..
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF ..
 ```
 
 See the CMakeLists.txt header for more.

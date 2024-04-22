@@ -55,14 +55,14 @@ WARNING: this tool is considered legacy and is only retained for older
 workflows.  It will emit a warning!  Even though it can use the WFA
 you should use [vcfwave](./vcfwave.md) instead.
 >
-Realign reference and alternate alleles with WFA or SW, parsing out
+Realign reference and alternate alleles with SW or WF, parsing out
 the primitive alleles into multiple VCF records. New records have IDs
 that reference the source record ID.  Genotypes are handled. Deletion
 alleles will result in haploid (missing allele) genotypes.
 >
 options:
-    -a, --algorithm TYPE    Choose algorithm (default) Wave front or (obsolete)
-                            Smith-Waterman [WF|SW] algorithm
+    -a, --algorithm TYPE    Choose algorithm SW (Smith-Waterman) or WF wavefront
+                            (default: WF)
     -m, --use-mnps          Retain MNPs as separate events (default: false).
     -t, --tag-parsed FLAG   Annotate decomposed records with the source record
                             position (default: ORIGIN).
@@ -305,4 +305,4 @@ Output produced by test/tests/realign.py
 
 # LICENSE
 
-Copyright 2011-2022 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2011-2024 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
