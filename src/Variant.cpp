@@ -10,7 +10,7 @@
 #include "Variant.h"
 #include "cigar.hpp"
 #include <utility>
-#include <multichoose.h>
+#include "multichoose.h"
 #include <SmithWatermanGotoh.h>
 #include "ssw_cpp.hpp"
 

@@ -111,7 +111,7 @@ include_directories(include)
 include_directories(contrib/fastahack)
 include_directories(contrib/intervaltree)
 include_directories(contrib/smithwaterman)
-include_directories(contrib/multichoose)
+# include_directories(contrib/multichoose) merged with vcflib
 include_directories(contrib/filevercmp)
 include_directories(contrib/c-progress-bar)
 
@@ -144,7 +144,7 @@ endif()
 
 file(GLOB INCLUDES
   src/*.h*
-  contrib/multichoose/*.h*
+  # contrib/multichoose/*.h*
   contrib/intervaltree/*.h*
   contrib/smithwaterman/*.h*
   contrib/fastahack/*.h*
