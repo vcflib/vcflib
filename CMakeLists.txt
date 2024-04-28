@@ -160,6 +160,7 @@ set(vcflib_SOURCE
     ${vcfwfa_SOURCE}
     src/vcf-c-api.cpp
     src/Variant.cpp
+    src/canonicalize.cpp
     src/rnglib.cpp
     src/var.cpp
     src/pdflib.cpp
@@ -596,6 +597,6 @@ endif (PANDOC)
 install(TARGETS vcflib ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(TARGETS ${WFALIB} ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(FILES ${INCLUDES} DESTINATION include)
+install(FILES ${INCLUDES} DESTINATION include/vcflib)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/man/ DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
