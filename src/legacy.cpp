@@ -10,6 +10,7 @@
 */
 
 #include "legacy.h"
+#include <SmithWatermanGotoh.h>
 
 namespace vcflib {
 

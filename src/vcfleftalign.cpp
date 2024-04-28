@@ -16,6 +16,7 @@
 #include <vector>
 #include <getopt.h>
 #include <cmath>
+#include <SmithWatermanGotoh.h>
 
 using namespace std;
 using namespace vcflib;

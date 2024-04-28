@@ -15,6 +15,9 @@
 #include <algorithm>
 #include <list>
 #include <set>
+#include <SmithWatermanGotoh.h>
+// #include "ssw_cpp.hpp"
+
 
 using namespace std;
 using namespace vcflib;

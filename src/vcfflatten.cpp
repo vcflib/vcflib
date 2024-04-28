@@ -9,6 +9,7 @@
 
 #include "Variant.h"
 #include "convert.h"
+#include "multichoose.h"
 
 using namespace std;
 using namespace vcflib;
