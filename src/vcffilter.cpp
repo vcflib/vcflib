@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
                 {"info-filter",  required_argument, 0, 'f'},
                 {"genotype-filter",  required_argument, 0, 'g'},
                 {"tag-pass", required_argument, 0, 't'},
-                {"tag-pass", required_argument, 0, 'F'},
+                {"tag-fail", required_argument, 0, 'F'},
                 {"append-filter", no_argument, 0, 'A'},
                 {"allele-tag", required_argument, 0, 'a'},
                 {"invert", no_argument, 0, 'v'},
