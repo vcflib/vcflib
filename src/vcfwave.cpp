@@ -3,6 +3,7 @@
 
     Copyright © 2010-2024 Erik Garrison
     Copyright © 2020-2024 Pjotr Prins
+    Copyright © 2024 Andrea Guarracino
 
     This software is published under the MIT License. See the LICENSE file.
 */
@@ -302,7 +303,7 @@ int main(int argc, char** argv) {
                     string AT;
                     double AF = -1;
                     string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
-                    if (var.ref != aligned) {
+                    if (ref != aligned) {
                         auto index = [&](vector<string> v, string allele) {
                             //auto check = (is_inv ? reverse_complement(allele) : allele); DISABLED
                             auto check = allele;
