@@ -96,12 +96,12 @@ const Genotypes = struct {
     /// genotype is 0 (ref) or missing it is not changed.
     fn renumber(self: *const Self, idx: usize) !void {
         var list = self.genos;
-        for (list.items) | g,i | {
+        for (list.items,0..) | g,i | {
             list.items[i] = 
                 switch (g) {
                     0 => 0,
                     GENOTYPE_MISSING => GENOTYPE_MISSING,
-                    else => g+@intCast(i64,idx)
+                    else => g+@as(i64,@intCast(idx))
             };
         }
     }
@@ -113,7 +113,7 @@ const Genotypes = struct {
         var base = self.genos;
         var g_err: VcfSampleError = error.None;
         
-        for (genos2.genos.items) | g2,i | {
+        for (genos2.genos.items,0..) | g2,i | {
             const current = base.items[i];
             if (g2 == 0 or g2 == GENOTYPE_MISSING) continue; // no update
             if (current>0) {
@@ -126,7 +126,7 @@ const Genotypes = struct {
     }
     
     fn to_s(self: *const Self) !ArrayList(u8) {
-        var list = self.genos.items;
+        const list = self.genos.items;
         const phase_repr = if (self.phased) "|" else "/";
         var s = ArrayList(u8).init(allocator);
         // concatenate genotypes with their phase separator
@@ -170,8 +170,8 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ReturnGeno
 //pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
     var samples = ArrayList(Genotypes).init(allocator); // result set
     var g_err: VcfSampleError = error.None;
-    for (vs.items) | v,i | { // Fetch the genotypes from each variant
-        for (v.genotypes().items) | geno,j | {
+    for (vs.items, 0..) | v,i | { // Fetch the genotypes from each variant
+        for (v.genotypes().items, 0..) | geno,j | {
             var geno2 = Genotypes.init(geno); // convert from string to number list
             try geno2.renumber(i);
             if (i==0) {
@@ -222,7 +222,7 @@ test "genotypes" {
     try expectEqual(gs2.items[1],0);
     const gs3 = Genotypes.init("1|.");
     defer gs3.deinit();
-    var list2 = gs3.genos.items;
+    const list2 = gs3.genos.items;
     try expectEqual(list2.len,2);
     try expectEqual(list2[1],GENOTYPE_MISSING);
     try gs3.renumber(1);

@@ -58,7 +58,7 @@
   (gnu packages ruby)
   (gnu packages time)
   (gnu packages tls)
-  (gnu packages zig)
+  ;; (gnu packages zig)
   (srfi srfi-1)
   (ice-9 popen)
   (ice-9 rdelim))
@@ -94,7 +94,7 @@
        ("time" ,time) ;; for tests
        ("wfa2-lib" ,wfa2-lib) ; optional
        ("xz" ,xz)
-       ("zig" ,zig)
+       ;; ("zig" ,zig)
        ("zlib" ,zlib)))
     (native-inputs
      `(("pkg-config" ,pkg-config)))

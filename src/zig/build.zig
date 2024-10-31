@@ -1,27 +1,45 @@
 const zig_version = @import("builtin").zig_version;
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) void {
+const test_targets = [_]std.Target.Query{
+    .{}, // native
+};
+
+pub fn build(b: *std.Build) void {
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const mode = b.standardReleaseOptions();
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+    // const mode = b.standardReleaseOptions();
 
-    const lib = b.addStaticLibrary("zig", "vcf.zig");
-    lib.setBuildMode(mode);
+    const lib = b.addStaticLibrary(.{
+        .optimize = optimize,
+        .name = "zig",
+        .target = target,
+        .root_source_file = b.path("vcf.zig"),
+        .pic = true,
+    });
+    // lib.setBuildMode(optimize);
     // lib.addObjectFile("../../build/libvcflib.a"); circular dependency
-    switch (mode) {
+    switch (optimize) {
         .Debug, .ReleaseSafe => lib.bundle_compiler_rt = true,
-        .ReleaseFast, .ReleaseSmall => lib.disable_stack_probing = true,
+        .ReleaseFast, .ReleaseSmall => {},
     }
-    lib.force_pic = true;
+    // lib.force_pic = true;
     // lib.emit_h = true; future version of zig?
-    lib.install();
+    b.installArtifact(lib);
+    // lib.install();
 
-    const main_tests = b.addTest("vcf.zig");
-    main_tests.setBuildMode(mode);
-    // main_tests.addLibraryPath("../../build");
-    // main_tests.addObjectFile("../../build/libvcflib.a");
+    const test_step = b.step("test", "Run unit tests");
 
-    const test_step = b.step("test", "Run library tests");
-    test_step.dependOn(&main_tests.step);
+    for (test_targets) |ttarget| {
+        const unit_tests = b.addTest(.{
+            .root_source_file = b.path("vcf.zig"),
+            .target = b.resolveTargetQuery(ttarget),
+        });
+
+        const run_unit_tests = b.addRunArtifact(unit_tests);
+        test_step.dependOn(&run_unit_tests.step);
+    }
+    
 }

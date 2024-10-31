@@ -27,12 +27,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: install zig using wget
       run: |
-        wget -q https://ziglang.org/builds/zig-linux-x86_64-0.11.0-dev.1313+bb15e4057.tar.xz
+        wget -q https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz
         tar xf zig-linux-x86_64-*.tar.xz
         ./zig-linux-x86_64-*/zig version
         pwd
         ls -l zig-linux-*
-        echo "$(pwd)/zig-linux-x86_64-0.11.0-dev.1313+bb15e4057" >> $GITHUB_PATH
+        echo "$(pwd)/zig-linux-x86_64-0.13.0" >> $GITHUB_PATH
         # echo "$(pwd)/zig-linux-x86_64-*" >> $GITHUB_PATH
         # echo "::add-path::./zig-linux*"
         echo GITHUB_PATH=$GITHUB_PATH
@@ -43,7 +43,7 @@ jobs:
     - name: Configure
       run: |
         echo $(pwd)/zig-linux-x86_64-* >> $GITHUB_PATH
-        echo "$(pwd)/zig-linux-x86_64-0.11.0-dev.1313+bb15e4057" >> $GITHUB_PATH
+        echo "$(pwd)/zig-linux-x86_64-0.13.0" >> $GITHUB_PATH
         echo GITHUB_PATH=$GITHUB_PATH
         echo PATH=$PATH
         zig version

@@ -2,6 +2,8 @@
 
 # zig build test
 # creates library in zig-out
+echo "ZIG PATH $PATH"
+zig version
 zig build $*
 exit $?
 

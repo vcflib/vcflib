@@ -2,7 +2,8 @@
 
 ### A C++ library for parsing and manipulating VCF files.
 
-[![Github-CI](https://github.com/vcflib/vcflib/workflows/CI/badge.svg)](https://github.com/vcflib/vcflib/actions?query=workflow%3ACI) [![AnacondaBadge](https://anaconda.org/bioconda/vcflib/badges/version.svg)](https://anaconda.org/bioconda/vcflib) [![DL](https://anaconda.org/bioconda/vcflib/badges/downloads.svg)](https://anaconda.org/bioconda/vcflib) [![BrewBadge](https://img.shields.io/badge/%F0%9F%8D%BAbrew-vcflib-brightgreen.svg)](https://github.com/brewsci/homebrew-bio) [![GuixBadge](https://img.shields.io/badge/gnuguix-vcflib-brightgreen.svg)](https://www.gnu.org/software/guix/packages/V/) [![DebianBadge](https://badges.debian.net/badges/debian/testing/libvcflib-dev/version.svg)](https://packages.debian.org/testing/libvcflib-dev) [![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html) [![Chat on Matrix](https://matrix.to/img/matrix-badge.svg)](https://matrix.to/#/#vcflib:matrix.org)
+[![Github-CI](https://github.com/vcflib/vcflib/workflows/CI/badge.svg)](https://github.com/vcflib/vcflib/actions)
+[![AnacondaBadge](https://anaconda.org/bioconda/vcflib/badges/version.svg)](https://anaconda.org/bioconda/vcflib) [![DL](https://anaconda.org/bioconda/vcflib/badges/downloads.svg)](https://anaconda.org/bioconda/vcflib) [![BrewBadge](https://img.shields.io/badge/%F0%9F%8D%BAbrew-vcflib-brightgreen.svg)](https://github.com/brewsci/homebrew-bio) [![GuixBadge](https://img.shields.io/badge/gnuguix-vcflib-brightgreen.svg)](https://www.gnu.org/software/guix/packages/V/) [![DebianBadge](https://badges.debian.net/badges/debian/testing/libvcflib-dev/version.svg)](https://packages.debian.org/testing/libvcflib-dev) [![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html) [![Chat on Matrix](https://matrix.to/img/matrix-badge.svg)](https://matrix.to/#/#vcflib:matrix.org)
 
 Vcflib and related tools are the workhorses in bioinformatics for processing the VCF variant calling format. See
 
@@ -379,12 +380,23 @@ For include files add
 
 And for some of the VCF executables
 
-- zig 0.10 (disable with cmake -DZIG=OFF)
+- zig 0.13 (disable with cmake -DZIG=OFF)
 - python
 - perl
 
-To use Zig compiled tools, such as vcfcreatemulti, make sure the `zig` compiler is in the `PATH`.
+To use Zig compiled tools, such as vcfcreatemulti, make sure a recent `zig` compiler is in the `PATH`.
 The `zig` dependency is for the recently upgraded [vcfcreatemulti](./doc/vcfcreatemulti.md) that can be run after vcfwave to combine overlapping records. It is unfortunate that zig is not part of some large Linux distributions.
+
+Note you need to add the full path before running cmake and make. From the build dir this should work:
+
+```sh
+cd build
+export PATH=$(pwd)/../zig-linux-x86_64-0.13.0:$PATH
+zig version
+cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=1 ..
+make VERBOSE=1
+```
+
 More on `zig` can be found in the souce code [README](./src/zig/README.md).
 
 ### Using a recent C++ compiler

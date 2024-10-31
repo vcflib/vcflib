@@ -79,7 +79,7 @@ const Variant = struct {
     const Self = @This();
 
     inline fn to_slice0(c_str: [*c] const u8) [:0] const u8 {
-        return std.mem.span(@ptrCast([*:0]const u8, c_str));
+        return std.mem.span(@as([*:0]const u8, @ptrCast(c_str)));
     }
 
     inline fn to_slice(c_str: [*c] const u8) [] const u8 {
@@ -87,12 +87,12 @@ const Variant = struct {
     }
 
     inline fn to_cstr(str: [:0] const u8) [*c]const u8 {
-        return @ptrCast([*c]const u8,str);
+        return @as([*c]const u8,@ptrCast(str));
     }
 
     inline fn to_cstr0(str: [] const u8) [*c]const u8 { // not sure this works because we need final zero
         //var s0 = str.toOwnedSliceSentinel(0);
-        return @ptrCast([*c]const u8,str);
+        return @as([*c]const u8,@ptrCast(str));
     }
 
     pub fn id(self: *const Self) [:0]const u8 {
@@ -119,9 +119,9 @@ const Variant = struct {
     pub fn alt(self: *const Self) ArrayList([] const u8) {
         var list = ArrayList([] const u8).init(allocator);
         const altsize = var_alt_num(self.v);
-        var buffer = allocator.alloc(*anyopaque, altsize) catch unreachable;
+        const buffer = allocator.alloc(*anyopaque, altsize) catch unreachable;
         defer allocator.free(buffer);
-        const res = var_alt(self.v,@ptrCast([*c]* anyopaque,buffer));
+        const res = var_alt(self.v,@as([*c]* anyopaque,@ptrCast(buffer)));
         var i: usize = 0;
         while (i < altsize) : (i += 1) {
             const s = res[i];
@@ -133,12 +133,12 @@ const Variant = struct {
     
     /// Get the C++ infos
     pub fn info(self: *const Self, name: [] const u8) ArrayList([] const u8) {
-        var c_name = to_cstr0(name);
+        const c_name = to_cstr0(name);
         var list = ArrayList([] const u8).init(allocator);
         const size = var_info_num(self.v,c_name);
-        var buffer = allocator.alloc(*anyopaque, size) catch unreachable;
+        const buffer = allocator.alloc(*anyopaque, size) catch unreachable;
         defer allocator.free(buffer);
-        const res = var_info(self.v,c_name,@ptrCast([*c]* anyopaque,buffer));
+        const res = var_info(self.v,c_name,@as([*c]* anyopaque,@ptrCast(buffer)));
         var i: usize = 0;
         while (i < size) : (i += 1) {
             // list.append(buffer[i]) catch unreachable;
@@ -158,9 +158,9 @@ const Variant = struct {
         // p("Inside genotypes:\n",.{});
         var list = ArrayList([] const u8).init(allocator);
         const size = var_samples_num(self.v);
-        var buffer = allocator.alloc(*anyopaque, size) catch unreachable;
+        const buffer = allocator.alloc(*anyopaque, size) catch unreachable;
         defer allocator.free(buffer);
-        const res = var_geno(self.v,@ptrCast([*c]* anyopaque,buffer));
+        const res = var_geno(self.v,@as([*c]* anyopaque,@ptrCast(buffer)));
         var i: usize = 0;
         while (i < size) : (i += 1) {
             const s = res[i];
@@ -173,7 +173,7 @@ const Variant = struct {
     
     /// Set C++ ref
     pub fn set_ref(self: *const Self, nref: [:0] const u8) void {
-        var_set_ref(self.v,@ptrCast([*c]const u8,nref));
+        var_set_ref(self.v,@as([*c]const u8,@ptrCast(nref)));
     }
 
     /// Set C++ alts
@@ -196,7 +196,7 @@ const Variant = struct {
 
     /// Set C++ infos
     pub fn set_info(self: *const Self, name: [] const u8, data: ArrayList([] const u8)) void {        
-        var c_name = to_cstr0(name);
+        const c_name = to_cstr0(name);
         var_clear_info(self.v,c_name);
         var i: usize = 0;
         while (i < data.items.len) : (i += 1) {
@@ -208,11 +208,11 @@ const Variant = struct {
         var i: usize = 0;
         while (i < nsamples.items.len) : (i += 1) {
             var_clear_sample(self.v,i);
-            var s = nsamples.items[i];
+            const s = nsamples.items[i];
             var buffer = allocator.alloc(u8, s.len + 1) catch unreachable;
             defer allocator.free(buffer);
  
-            for (s)  | c,j | {
+            for (s, 0..)  | c,j | {
                 buffer[j] = c;
             }
             buffer[s.len] = 0;
@@ -226,9 +226,9 @@ const Variant = struct {
 
 // Obsolete test version of multi_allelic
 export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopaque, size: usize) ?*anyopaque {
-    var v1 = var_parse("TEST\t1\t2\t3\t4\tt5\t6",false);
+    const v1 = var_parse("TEST\t1\t2\t3\t4\tt5\t6",false);
     _ = v1;
-    var c_var = var_parse("a\t281\t>1>9\tAGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAATCCTGCAAAAGACAG\tCTGTCTTTTGCAGGATTCCTGTGCTGAAATGCAGATGACCGCATTCAAGGAAGAACTATCTGCCCCGGCT\t60.0\t.\tAC=1;AF=1;AN=1;AT=>1>2>3>4>5>6>7>8>9,>1<8>10<6>11<4>12<2>9;NS=1;LV=0\tGT\t1",false);
+    const c_var = var_parse("a\t281\t>1>9\tAGCCGGGGCAGAAAGTTCTTCCTTGAATGTGGTCATCTGCATTTCAGCTCAGGAATCCTGCAAAAGACAG\tCTGTCTTTTGCAGGATTCCTGTGCTGAAATGCAGATGACCGCATTCAAGGAAGAACTATCTGCCCCGGCT\t60.0\t.\tAC=1;AF=1;AN=1;AT=>1>2>3>4>5>6>7>8>9,>1<8>10<6>11<4>12<2>9;NS=1;LV=0\tGT\t1",false);
     var v2 = Variant{.v = c_var};
     p("---->{s}\n",.{v2.id().ptr});
     expect(mem.eql(u8, v2.id(), ">1>9")) catch unreachable;
@@ -236,10 +236,11 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
         std.debug.print("{} <-> {s}\n", .{err,v2.id()});
     };
     const c_str = var_id(variant.?);
-    const s = @ptrCast([*c]const u8, c_str);
+    // const s = @ptrCast([*c]const u8, c_str);
+    const s = @as([*c]const u8,@ptrCast(c_str));
     p("And yes, we are back in zig: {s} -- {}\n\n",.{s,size});
 
-    const p3 = @ptrCast(* anyopaque, varlist[3]);
+    const p3 = @as(* anyopaque, @ptrCast(varlist[3]));
     const s3 = var_id(p3);
     var v = Variant{.v = varlist[3].?};
     p("id={s} !{s}! pos={d} ref={s}\n",.{s3,v.id(),v.pos(),v.ref()});
@@ -256,7 +257,7 @@ export fn zig_create_multi_allelic2(variant: ?*anyopaque, varlist: [*c]?* anyopa
     var i:u64 = 0;
     for (varlist[0..size]) |ptr| {
              i = i + 1;
-             const p2 = @ptrCast(* anyopaque, ptr);
+             const p2 = @as(* anyopaque, @ptrCast(ptr));
              const s2 = var_id(p2);
              p("num = {}",.{i});
              p("id = {s}, pos = {d}\n",.{s2,var_pos(p2)});
@@ -281,7 +282,7 @@ export fn zig_create_multi_allelic(variant: ?*anyopaque, varlist: [*c]?* anyopaq
     
     var i: usize = 0;
     while (i < size) : (i += 1) { // use index to access *anyopaque
-        var v = Variant{.v = varlist[i].?};
+        const v = Variant{.v = varlist[i].?};
         vs.append(v) catch unreachable;
     }
 
@@ -334,7 +335,7 @@ export fn zig_cleanup() void {
 fn refs_maxpos(comptime T: type, list: ArrayList(T)) usize {
     var mpos = list.items[0].pos();
     for (list.items) |v| {
-            var npos = v.pos() + v.ref().len;
+            const npos = v.pos() + v.ref().len;
             if (npos > mpos)
                 mpos = npos;
         }
@@ -439,11 +440,11 @@ fn expand_alt(comptime T: type, pos: usize, ref: [] const u8, list: ArrayList(T)
         
         const right0 = pos + ref.len;
         const right1 = v.pos() + v.ref().len;
-        const p3diff:i64 = @intCast(i64,right0) - @intCast(i64,right1);
+        const p3diff:i64 = @as(i64, @intCast(right0)) - @as(i64, @intCast(right1));
         
         var after: [] const u8 = undefined;
         if (p3diff > 0 and p3diff < ref.len) {
-            const last  = ref.len - @intCast(usize,p3diff);
+            const last  = ref.len - @as(usize, @intCast(p3diff));
             after = ref[last..];
         }
         else after = "";
