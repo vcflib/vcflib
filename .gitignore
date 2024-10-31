@@ -130,3 +130,7 @@ test/tests/main
 zig-cache
 zig-out
 hello
+paper/plos_latex_template.bbl
+paper/plos_latex_template.blg
+paper/plos_latex_template.out
+
