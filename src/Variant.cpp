@@ -13,6 +13,7 @@
 #include "multichoose.h"
 #include <SmithWatermanGotoh.h>
 #include "ssw_cpp.hpp"
+#include <regex>
 
 namespace vcflib {
 
@@ -1509,12 +1510,11 @@ bool VariantCallFile::setRegion(string region) {
         cerr << "cannot setRegion on a non-tabix indexed file" << endl;
         exit(1);
     }
-    size_t dots = region.find("..");
     // convert between bamtools/freebayes style region string and tabix/samtools style
-    if (dots != string::npos) {
-        region.replace(dots, 2, "-");
-    }
-    if (tabixFile->setRegion(region)) {
+    regex txt_regex("(\\d+)\\.\\.(\\d+)$");
+    string tabix_region = regex_replace(region, txt_regex, "$1-$2");
+
+    if (tabixFile->setRegion(tabix_region)) {
         if (tabixFile->getNextLine(line)) {
 	    justSetRegion = true;
             return true;
