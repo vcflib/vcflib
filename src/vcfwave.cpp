@@ -449,7 +449,7 @@ int main(int argc, char** argv) {
                             auto overlap = [] (unsigned int pos,tuple<unsigned int, unsigned int> range) {
                                 auto start = get<0>(range);
                                 auto end = get<1>(range);
-                                return (pos >= start || pos <= end);
+                                return (pos >= start && pos <= end);
                             };
                             if (overlap(pos1,check_range) || overlap(pos2,check_range)) {
                                 int i = 0;
