@@ -7,8 +7,7 @@ assignees: ''
 ---
 **Only bug reports!**
 
-The C++ version of VCFLIB is in *maintenance* mode. Use the github issue
-tracker to report bugs *only*. For comments, questions and features,
+Use the github issue tracker to report bugs *only*. For comments, questions and features,
 please use the google group mailing list as stated on the
 [README](https://github.com/vcflib/vcflib/blob/master/README.md)!
 
