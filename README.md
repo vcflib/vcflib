@@ -16,6 +16,8 @@ Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput B
 
 ![Humpty Logo - CC0 license](./logos/humpty-dumpty.jpg)
 
+**November 2024**: a fresh release with, mostly, pangenome related fixes.
+
 **January 2023**: this is vcflib's first *Humpty Dumpty* release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
 Often variant callers are not perfect.
 **vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, unlike Humpty Dumpty, take them apart and put them together again.

@@ -14,10 +14,9 @@
 ;;
 ;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env && cd build")
 ;;
-;;   cd build
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
-;;   cmake  -DCMAKE_BUILD_TYPE=Debug ..
-;;   cmake --build .
+;;   make -j 12
+;;   ctest .
 ;;
 ;; debug example
 ;;
@@ -29,7 +28,9 @@
 ;;
 ;;   guix shell -C -D -f guix.scm --expose=/home/wrk/opt/zig-linux-x86_64-0.11.0-dev.987+a1d82352d/=/zig
 ;;
-;; and add /zig to the PATH.
+;; and add /zig to the PATH. E.g.
+;;
+;;   export PATH=/zig:$PATH
 
 (use-modules
   ((guix licenses) #:prefix license:)
