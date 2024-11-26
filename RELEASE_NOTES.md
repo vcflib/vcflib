@@ -12,6 +12,26 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog v1.0.12 (20241122)
+
+* Improved parsing of INFO and FORMAT lines by @jeizenga in https://github.com/vcflib/vcflib/pull/374
+* Support external tabixpp by @adamnovak in https://github.com/vcflib/vcflib/pull/375
+* Fix vcfwave.cpp by @AndreaGuarracino in https://github.com/vcflib/vcflib/pull/407
+* Use regex to find the '..' between postions and replace it with '-' by @debbyku in https://github.com/vcflib/vcflib/pull/405
+* Fix tag-fail long option that was overriden by tag-pass in vcffilter.cpp by @Gullumluvl in https://github.com/vcflib/vcflib/pull/404
+* `vcfwave`: fix condition to avoid nullifying valid SNPs and MNPs by @AndreaGuarracino in https://github.com/vcflib/vcflib/pull/408
+* Upgraded Zig support to 0.13.0 by @pjotrp
+* Merged multichoose code into vcflib since no one else uses it
+* Added sources for canonicalize too
+* Moved Fasta.h (fastahack) dependencies from Variant.h into sources
+* Updated multichoose and simde modules
+* Improved vcfwave support
+
+### New Contributors
+* @jeizenga made their first contribution in https://github.com/vcflib/vcflib/pull/374
+* @debbyku made their first contribution in https://github.com/vcflib/vcflib/pull/405
+* @Gullumluvl made their first contribution in https://github.com/vcflib/vcflib/pull/404
+
 ## ChangeLog v1.0.11-pre ()
 
 + Stopped vendoring wfa2lib by default - so now the Debian build command is
