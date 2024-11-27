@@ -12,7 +12,7 @@
 ;;
 ;; or in one go
 ;;
-;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env && cd build")
+;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env && ln -v -s $GUIX_ENVIRONMENT/bin/bash /bin/bash && cd build")
 ;;
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
 ;;   make -j 12
@@ -93,9 +93,9 @@
        ("smithwaterman" ,smithwaterman) ;; dev version not in Debian
        ("tabixpp" ,tabixpp)
        ("time" ,time) ;; for tests
-       ("wfa2-lib" ,wfa2-lib) ; optional
+       ("wfa2-lib" ,wfa2-lib) ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
        ("xz" ,xz)
-       ;; ("zig" ,zig)
+       ;; ("zig" ,zig) ; for when zig gets up-to-date on Guix
        ("zlib" ,zlib)))
     (native-inputs
      `(("pkg-config" ,pkg-config)))
