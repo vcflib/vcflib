@@ -12,6 +12,11 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog v1.0.13 (?)
+
+* Updated simde submodule
+* Fix CMakeLists.txt not to try to install wfa-lib when it is a package
+
 ## ChangeLog v1.0.12 (20241122)
 
 * Improved parsing of INFO and FORMAT lines by @jeizenga in https://github.com/vcflib/vcflib/pull/374
