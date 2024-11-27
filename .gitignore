@@ -133,4 +133,5 @@ hello
 paper/plos_latex_template.bbl
 paper/plos_latex_template.blg
 paper/plos_latex_template.out
-
+src/zig/.zig-cache/
+zig-linux-x86_64-*/
