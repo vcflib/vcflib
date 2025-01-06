@@ -172,7 +172,7 @@ set(vcflib_SOURCE
     contrib/c-progress-bar/progress.c
 )
 
-if (tabixpp_LOCAL) # add the tabixpp source file and use a no-op target
+if (tabixpp_LOCAL) # add the tabixpp source file
     list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
 endif()
 
