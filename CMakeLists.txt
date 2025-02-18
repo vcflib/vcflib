@@ -381,8 +381,7 @@ if(WFA_GITMODULE)
   add_subdirectory(${WFA_LOCAL})
   set(WFALIB wfa2) # pick up the wfa2 lib target from the included CMakeLists.txt
 else(WFA_GITMODULE)
-  include_directories($ENV{CMAKE_PREFIX_PATH}/include/wfa2lib)
-  set(WFA_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/wfa2lib)
+  find_path(WFA_INCLUDE_DIRS wavefront/wfa.hpp PATH_SUFFIXES wfa2lib)
   find_library(WFALIB wfa2 wfa REQUIRED) # distro search for shared lib
 endif(WFA_GITMODULE)
 
