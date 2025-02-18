@@ -184,6 +184,7 @@ set(vcflib_SOURCE
 
 if (TABIXPP_LOCAL) # add the tabixpp source file
     list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
+    list(APPEND INCLUDES ${TABIXPP_LOCAL}/tabix.hpp)
 endif()
 
 add_library(vcflib STATIC
@@ -465,7 +466,7 @@ if (NOT BUILD_ONLY_LIB)
     target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} vcflib)
     target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} ${WFALIB})
   endforeach(WFBIN ${BINS})
-  install(TARGETS ${BINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS ${BINS} ${WFBINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # ---- Copy scripts
   foreach(SCRIPT ${SCRIPTS})
@@ -601,4 +602,4 @@ endif(WFA_GITMODULE)
 
 install(FILES ${INCLUDES} DESTINATION include/vcflib)
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/man/ DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/man/ DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
