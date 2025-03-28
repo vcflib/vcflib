@@ -8,10 +8,10 @@
 */
 
 #include "Variant.h"
-#include "split.h"
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
+#include "index.hpp"
 
 #include <string>
 #include <iostream>
@@ -245,17 +245,6 @@ void calc(copyNcounts * d){
 
 
 //------------------------------- SUBROUTINE --------------------------------
-
-void loadIndices(map<int, int> & index, string set){
-
-  vector<string>  indviduals = split(set, ",");
-
-  vector<string>::iterator it = indviduals.begin();
-
-  for(; it != indviduals.end(); it++){
-    index[ atoi( (*it).c_str() ) ] = 1;
-  }
-}
 
 // gotta load the dat so that we can permute using open MP
 void loadDat(copyNcounts * d,

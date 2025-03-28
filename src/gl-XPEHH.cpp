@@ -11,6 +11,7 @@
 #include "split.h"
 #include "cdflib.hpp"
 #include "pdflib.hpp"
+#include "index.hpp"
 
 #include <string>
 #include <iostream>
@@ -181,17 +182,6 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
       population.fis = 0.00001;
     }
   }  
-}
-
-void loadIndices(map<int, int> & index, string set){
-  
-  vector<string>  indviduals = split(set, ",");
-
-  vector<string>::iterator it = indviduals.begin();
-  
-  for(; it != indviduals.end(); it++){
-    index[ atoi( (*it).c_str() ) ] = 1;
-  }
 }
 
 void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background, string state, string seqid){
@@ -433,16 +423,16 @@ int main(int argc, char** argv) {
 
   // set region to scaffold
 
-  string region = "NA"; 
+  string region = "NA";
 
   // using vcflib; thanks to Erik Garrison 
 
   VariantCallFile variantFile;
 
   // zero based index for the target and background indivudals 
-  
+
   map<int, int> it, ib;
-  
+
   // deltaaf is the difference of allele frequency we bother to look at 
 
   // ancestral state is set to zero by default
@@ -450,7 +440,7 @@ int main(int argc, char** argv) {
   string mut = "1";
 
   int counts = 0;
-  
+
   // phased 
 
   int phased = 0;
@@ -604,7 +594,7 @@ int main(int argc, char** argv) {
     while (variantFile.getNextVariant(var)) {
         map<string, map<string, vector<string> > >::iterator s     = var.samples.begin(); 
         map<string, map<string, vector<string> > >::iterator sEnd  = var.samples.end();
-        
+
 	// biallelic sites naturally 
 
 	if(var.alt.size() > 1){

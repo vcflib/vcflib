@@ -13,6 +13,7 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "makeUnique.h"
+#include "index.hpp"
 
 #include <string>
 #include <iostream>
@@ -66,16 +67,6 @@ void clearHaplotypes(string **haplotypes, int ntarget){
   for(int i= 0; i < ntarget; i++){
     haplotypes[i][0].clear();
     haplotypes[i][1].clear();
-  }
-}
-
-void loadIndices(map<int, int> & index, string set){
-
-  vector<string>  indviduals = split(set, ",");
-  vector<string>::iterator it = indviduals.begin();
-
-  for(; it != indviduals.end(); it++){
-    index[ atoi( (*it).c_str() ) ] = 1;
   }
 }
 
