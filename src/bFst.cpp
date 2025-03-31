@@ -8,8 +8,8 @@
 */
 
 #include "Variant.h"
-#include "split.h"
 #include "pdflib.hpp"
+#include "index.hpp"
 
 #include <string>
 #include <iostream>
@@ -332,18 +332,6 @@ int cmp(const void *x, const void *y)
   if (xx < yy) return -1;
   if (xx > yy) return  1;
   return 0;
-}
-
-
-void loadIndices(map<int, int> & index, string set){
-
-  vector<string>  indviduals = split(set, ",");
-
-  vector<string>::iterator it = indviduals.begin();
-
-  for(; it != indviduals.end(); it++){
-    index[ atoi( (*it).c_str() ) ] = 1;
-  }
 }
 
 

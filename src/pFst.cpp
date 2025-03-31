@@ -12,6 +12,7 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
+#include "index.hpp"
 
 #include <string>
 #include <iostream>
@@ -78,16 +79,6 @@ double bound(double v){
   return v;
 }
 
-void loadIndices(map<int, int> & index, string set){
-
-  vector<string>  indviduals = split(set, ",");
-
-  vector<string>::iterator it = indviduals.begin();
-
-  for(; it != indviduals.end(); it++){
-    index[ atoi( (*it).c_str() ) ] = 1;
-  }
-}
 
 double logLbinomial(double x, double n, double p){
 
