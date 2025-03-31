@@ -176,7 +176,7 @@ if (tabixpp_LOCAL) # add the tabixpp source file
     list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
 endif()
 
-add_library(vcflib STATIC
+add_library(vcflib
     ${vcflib_SOURCE}
     )
 
@@ -441,6 +441,9 @@ endif()
 
 # ---- Build all
 
+if (BUILD_SHARED_LIBS)
+  target_link_libraries(vcflib PUBLIC ${vcflib_LIBS} ${WFALIB})
+endif()
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
