@@ -4,15 +4,7 @@
 ;;
 ;; To get a development container (emacs shell will work)
 ;;
-;;   guix shell -C -D -f guix.scm
-;;
-;; For the tests you need /usr/bin/env. In a container create it with
-;;
-;;   mkdir -p /usr/bin /bin ; ln -v -s $GUIX_ENVIRONMENT/bin/env /usr/bin/env ; ln -v -s $GUIX_ENVIRONMENT/bin/bash /bin/bash
-;;
-;; or in one go
-;;
-;;   guix shell -C -D -f guix.scm -- bash --init-file <(echo "mkdir -p /usr/bin && ln -s \$GUIX_ENVIRONMENT/bin/env /usr/bin/env && ln -v -s $GUIX_ENVIRONMENT/bin/bash /bin/bash && cd build")
+;;   guix shell -C -D -F -f guix.scm
 ;;
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
 ;;   make -j 12
