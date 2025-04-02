@@ -6,7 +6,6 @@
 #include "allele.hpp"
 #include <vector>
 #include <set>
-#include <iostream>
 
 namespace vcflib {
 

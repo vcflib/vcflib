@@ -19,6 +19,8 @@
 
 #include "var.hpp"
 
+#include <iostream>
+
 genotype::~genotype(){}
 
 zvar::~zvar(){}
