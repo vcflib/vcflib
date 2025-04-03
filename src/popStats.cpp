@@ -22,8 +22,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <memory>
+
 #include "gpatInfo.hpp"
-#include "makeUnique.h"
 
 using namespace std;
 using namespace vcflib;
@@ -221,22 +222,21 @@ int main(int argc, char** argv) {
 	    index += 1;
 	}
 
-  using Detail::makeUnique;
 
-	unique_ptr<genotype> populationTarget      ;
+	std::unique_ptr<genotype> populationTarget      ;
 	unique_ptr<genotype> populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget     = makeUnique<pl>();
+	  populationTarget     = std::make_unique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = makeUnique<gl>();
+	  populationTarget     = std::make_unique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = makeUnique<gp>();
+	  populationTarget     = std::make_unique<gp>();
 	}
 	if(type == "GT"){
-    populationTarget     = makeUnique<gt>();
+    populationTarget     = std::make_unique<gt>();
 	}
 
 	populationTarget->loadPop(target, var.position);

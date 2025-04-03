@@ -12,7 +12,6 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -24,6 +23,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <limits.h>
+#include <memory>
 
 using namespace std;
 using namespace vcflib;
@@ -565,28 +565,27 @@ int main(int argc, char** argv) {
         sindex += 1;
       }
 
-      using Detail::makeUnique;
 
-      unique_ptr<genotype> populationTarget;
-      unique_ptr<genotype> populationBackground;
-      unique_ptr<genotype> populationTotal;
+      std::unique_ptr<genotype> populationTarget;
+      std::unique_ptr<genotype> populationBackground;
+      std::unique_ptr<genotype> populationTotal;
 
       if (type == "PL"){
-        populationTarget     = makeUnique<pl>();
-        populationBackground = makeUnique<pl>();
-        populationTotal      = makeUnique<pl>();
+        populationTarget     = std::make_unique<pl>();
+        populationBackground = std::make_unique<pl>();
+        populationTotal      = std::make_unique<pl>();
       } else if (type == "GL"){
-        populationTarget     = makeUnique<gl>();
-        populationBackground = makeUnique<gl>();
-        populationTotal      = makeUnique<gl>();
+        populationTarget     = std::make_unique<gl>();
+        populationBackground = std::make_unique<gl>();
+        populationTotal      = std::make_unique<gl>();
       } else if (type == "GP"){
-        populationTarget     = makeUnique<gp>();
-        populationBackground = makeUnique<gp>();
-        populationTotal      = makeUnique<gp>();
+        populationTarget     = std::make_unique<gp>();
+        populationBackground = std::make_unique<gp>();
+        populationTotal      = std::make_unique<gp>();
       } else if (type == "GT"){
-        populationTarget     = makeUnique<gt>();
-        populationBackground = makeUnique<gt>();
-        populationTotal      = makeUnique<gt>();
+        populationTarget     = std::make_unique<gt>();
+        populationBackground = std::make_unique<gt>();
+        populationTotal      = std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target,         var.position);

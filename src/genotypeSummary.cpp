@@ -9,7 +9,6 @@
 
 #include "Variant.h"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -20,6 +19,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <memory>
+
 #include "gpatInfo.hpp"
 
 using namespace std;
@@ -314,21 +315,20 @@ int main(int argc, char** argv) {
 	    index += 1;
 	}
 
-  using Detail::makeUnique;
 
-	unique_ptr<genotype> populationTarget      ;
+	std::unique_ptr<genotype> populationTarget      ;
 
 	if(type == "PL"){
-	  populationTarget     = makeUnique<pl>();
+	  populationTarget     = std::make_unique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = makeUnique<gl>();
+	  populationTarget     = std::make_unique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = makeUnique<gp>();
+	  populationTarget     = std::make_unique<gp>();
 	}
 	if(type == "GT"){
-    populationTarget     = makeUnique<gt>();
+    populationTarget     = std::make_unique<gt>();
 	}
 
 	populationTarget->loadPop(target, var.position);

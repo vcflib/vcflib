@@ -21,8 +21,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <memory>
+
 #include "gpatInfo.hpp"
-#include "makeUnique.h"
 
 using namespace std;
 using namespace vcflib;
@@ -235,26 +236,25 @@ int main(int argc, char** argv) {
 	  continue;
 	}
 
-	using Detail::makeUnique;
 
-	unique_ptr<genotype> populationTarget      ;
-	unique_ptr<genotype> populationBackground  ;
+	std::unique_ptr<genotype> populationTarget      ;
+	std::unique_ptr<genotype> populationBackground  ;
 
 	if(type == "PL"){
-	  populationTarget      = makeUnique<pl>();
-	  populationBackground  = makeUnique<pl>();
+	  populationTarget      = std::make_unique<pl>();
+	  populationBackground  = std::make_unique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = makeUnique<gl>();
-	  populationBackground = makeUnique<gl>();
+	  populationTarget     = std::make_unique<gl>();
+	  populationBackground = std::make_unique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = makeUnique<gp>();
-	  populationBackground = makeUnique<gp>();
+	  populationTarget     = std::make_unique<gp>();
+	  populationBackground = std::make_unique<gp>();
 	}
 	if(type == "GT"){
-          populationTarget     = makeUnique<gt>();
-          populationBackground = makeUnique<gt>();
+          populationTarget     = std::make_unique<gt>();
+          populationBackground = std::make_unique<gt>();
         }
 
 	populationTarget->loadPop(target, var.position);

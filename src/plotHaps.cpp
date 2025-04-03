@@ -12,7 +12,6 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -23,6 +22,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <memory>
 
 using namespace std;
 using namespace vcflib;
@@ -344,21 +344,19 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      using Detail::makeUnique;
-
-      unique_ptr<genotype> populationTarget    ;
+      std::unique_ptr<genotype> populationTarget    ;
 
       if(type == "PL"){
-	populationTarget     = makeUnique<pl>();
+	populationTarget     = std::make_unique<pl>();
       }
       if(type == "GL"){
-	populationTarget     = makeUnique<gl>();
+	populationTarget     = std::make_unique<gl>();
       }
       if(type == "GP"){
-	populationTarget     = makeUnique<gp>();
+	populationTarget     = std::make_unique<gp>();
       }
       if(type == "GT"){
-	populationTarget     = makeUnique<gt>();
+	populationTarget     = std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target, var.position);

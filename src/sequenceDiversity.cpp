@@ -22,7 +22,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
-#include "makeUnique.h"
+#include <memory>
+
 #include "gpatInfo.hpp"
 
 using namespace std;
@@ -412,31 +413,30 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      unique_ptr<genotype> populationTarget    ;
-      unique_ptr<genotype> populationBackground;
-      unique_ptr<genotype> populationTotal     ;
+      std::unique_ptr<genotype> populationTarget    ;
+      std::unique_ptr<genotype> populationBackground;
+      std::unique_ptr<genotype> populationTotal     ;
 
-      using Detail::makeUnique;
 
       if(type == "PL"){
-	populationTarget     = makeUnique<pl>();
-	populationBackground = makeUnique<pl>();
-	populationTotal      = makeUnique<pl>();
+	populationTarget     = std::make_unique<pl>();
+	populationBackground = std::make_unique<pl>();
+	populationTotal      = std::make_unique<pl>();
       }
       if(type == "GL"){
-	populationTarget     = makeUnique<gl>();
-	populationBackground = makeUnique<gl>();
-	populationTotal      = makeUnique<gl>();
+	populationTarget     = std::make_unique<gl>();
+	populationBackground = std::make_unique<gl>();
+	populationTotal      = std::make_unique<gl>();
       }
       if(type == "GP"){
-	populationTarget     = makeUnique<gp>();
-	populationBackground = makeUnique<gp>();
-	populationTotal      = makeUnique<gp>();
+	populationTarget     = std::make_unique<gp>();
+	populationBackground = std::make_unique<gp>();
+	populationTotal      = std::make_unique<gp>();
       }
       if(type == "GT"){
-  populationTarget     = makeUnique<gt>();
-  populationBackground = makeUnique<gt>();
-  populationTotal      = makeUnique<gt>();
+  populationTarget     = std::make_unique<gt>();
+  populationBackground = std::make_unique<gt>();
+  populationTotal      = std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target,         var.position);

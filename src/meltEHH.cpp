@@ -14,6 +14,7 @@
 #include "var.hpp"
 #include "index.hpp"
 
+#include <memory>
 #include <string>
 #include <iostream>
 #include <math.h>
@@ -23,7 +24,6 @@
 #include <stdio.h>
 #include <getopt.h>
 #include "gpatInfo.hpp"
-#include "makeUnique.h"
 // maaas speed
 
 #if defined HAS_OPENMP
@@ -378,8 +378,7 @@ void loadPhased(string **haplotypes, genotype * pop, int ntarget){
 
   int indIndex = 0;
 
-  for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
-    string g = (*ind);
+  for(const auto& g : pop->gts){
     vector< string > gs = split(g, "|");
     haplotypes[indIndex][0].append(gs[0]);
     haplotypes[indIndex][1].append(gs[1]);
@@ -392,7 +391,7 @@ int main(int argc, char** argv) {
   globalOpts.threads = 1   ;
   globalOpts.af      = 0.05;
 
-  // zero based index for the target and background indivudals
+  // zero based index for the target and background individuals
 
   map<int, int> it, ib;
 
@@ -598,21 +597,19 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      using Detail::makeUnique;
-
-      unique_ptr<genotype> populationTarget;
+      std::unique_ptr<genotype> populationTarget;
 
       if(globalOpts.type == "PL"){
-	populationTarget     = makeUnique<pl>();
+	populationTarget     = std::make_unique<pl>();
       }
       if(globalOpts.type == "GL"){
-	populationTarget     = makeUnique<gl>();
+	populationTarget     = std::make_unique<gl>();
       }
       if(globalOpts.type == "GP"){
-	populationTarget     = makeUnique<gp>();
+	populationTarget     = std::make_unique<gp>();
       }
       if(globalOpts.type == "GT"){
-	populationTarget     = makeUnique<gt>();
+	populationTarget     = std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target, var.position);
