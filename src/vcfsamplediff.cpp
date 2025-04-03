@@ -16,11 +16,9 @@ using namespace std;
 using namespace vcflib;
 
 bool samplesDiffer(vector<string>& samples, Variant& var) {
-
     string genotype;
 
-    for (vector<string>::iterator s = samples.begin(); s != samples.end(); ++s) {
-        string& sampleName = *s;
+    for (const auto& sampleName : samples) {
         map<string, map<string, vector<string> > >::iterator f = var.samples.find(sampleName);
         if (f != var.samples.end()) {
             map<string, vector<string> >& sample = f->second;
