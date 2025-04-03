@@ -37,20 +37,6 @@ void printSummary(char** argv) {
     exit(0);
 }
 
-bool isPhased(Variant& var) {
-    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-        map<string, vector<string> >& sample = s->second;
-        map<string, vector<string> >::iterator g = sample.find("GT");
-        if (g != sample.end()) {
-            string gt = g->second.front();
-            if (gt.size() > 1 && gt.find("|") == string::npos) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 int main(int argc, char** argv) {
 
     string vcfFileName;
@@ -168,7 +154,7 @@ int main(int argc, char** argv) {
                 cout << cluster.front() << endl;
                 cluster.clear();
             }
-        } else if (isPhased(var)) {
+        } else if (var.isPhased()) {
             if (cluster.empty()
                 || cluster.back().sequenceName == var.sequenceName
                 && var.position - cluster.back().position + cluster.back().ref.size() - 1 <= windowsize) {
