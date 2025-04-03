@@ -187,13 +187,13 @@ double var(vector<double> & data, double mu){
 */
 
 
-double windowAvg(std::vector<double> & rangeData){
+double windowAvg(const std::vector<double> & rangeData){
 
   long double n = 0;
   long double s = 0;
 
-  for(std::vector<double>::iterator it = rangeData.begin(); it != rangeData.end(); it++){
-    s += *it;
+  for(const auto& elm : rangeData){
+    s += elm;
     n += 1;
   }
 

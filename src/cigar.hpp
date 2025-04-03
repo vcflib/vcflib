@@ -12,7 +12,7 @@ namespace vcflib {
 using namespace std;
 
 typedef vector<pair<int, char> > Cigar;
-string varCigar(vector<VariantAllele>& vav, bool xForMismatch = false);
+string varCigar(const vector<VariantAllele>& vav, bool xForMismatch = false);
 string mergeCigar(const string& c1, const string& c2);
 vector<pair<int, char> > splitUnpackedCigar(const string& cigarStr);
 vector<pair<int, string> > old_splitCigar(const string& cigarStr);
