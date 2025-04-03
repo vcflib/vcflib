@@ -172,21 +172,19 @@ void loadGeneticMap(int start, int end){
   }
 }
 
-
-void clearHaplotypes(string **haplotypes, int ntarget){
-  for(int i= 0; i < ntarget; i++){
-    haplotypes[i][0].clear();
-    haplotypes[i][1].clear();
-  }
+void clearHaplotypes(std::vector<std::pair<std::string, std::string>>& haplotypes) {
+    for (int i = 0; i < haplotypes.size(); i++) {
+        haplotypes[i].first.clear();
+        haplotypes[i].second.clear();
+    }
 }
-
 void countHaps(int nhaps, map<string, int> & targetH,
-	       string **haplotypes, int start, int end){
+	       const std::vector<std::pair<std::string, std::string>>& haplotypes, int start, int end){
 
   for(int i = 0; i < nhaps; i++){
 
-    std::string h1 =  haplotypes[i][0].substr(start, (end - start)) ;
-    std::string h2 =  haplotypes[i][1].substr(start, (end - start)) ;
+    std::string h1 =  haplotypes[i].first.substr(start, (end - start)) ;
+    std::string h2 =  haplotypes[i].second.substr(start, (end - start)) ;
 
     if(targetH.find(h1)  == targetH.end()){
       targetH[h1] = 1;
@@ -239,7 +237,7 @@ void computeNs(map<string, int> & targetH, int start,
   }
 }
 
-bool calcEhh(string **haplotypes, int start,
+bool calcEhh(std::vector<std::pair<std::string, std::string>>& haplotypes, int start,
 	     int end, char ref, int nhaps,
 	     double * ehh, double  div, bool dir){
 
@@ -261,7 +259,7 @@ bool calcEhh(string **haplotypes, int start,
   return true;
 }
 
-int integrate(string **haplotypes   ,
+int integrate(std::vector<std::pair<std::string, std::string>>& haplotypes   ,
 	      vector<long int> & pos,
 	      bool         direction,
 	      int               maxl,
@@ -339,11 +337,11 @@ int integrate(string **haplotypes   ,
   return 10;
 }
 
-void calc(string **haplotypes, int nhaps,
+void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps,
 	  vector<double> & afs, vector<long int> & pos,
 	  vector<int> & target, vector<int> & background, string seqid){
 
-  int maxl = haplotypes[0][0].length();
+  int maxl = haplotypes[0].first.length();
 
 #if defined HAS_OPENMP
 #pragma omp parallel for schedule(dynamic, 20)
@@ -396,15 +394,14 @@ void calc(string **haplotypes, int nhaps,
   }
 }
 
-void loadPhased(string **haplotypes, genotype * pop, int ntarget){
+void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
 
   int indIndex = 0;
 
-  for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
-    string g = (*ind);
+  for(const auto& g : pop->gts){
     vector< string > gs = split(g, "|");
-    haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);
+    haplotypes[indIndex].first.append(gs[0]);
+    haplotypes[indIndex].second.append(gs[1]);
     indIndex += 1;
   }
 }
@@ -578,11 +575,8 @@ int main(int argc, char** argv) {
 
     vector<double> afs;
 
-    string **haplotypes = new string*[target_h.size()];
-    for (int i = 0; i < target_h.size(); i++) {
-      haplotypes[i] = new string[2];
-    }
 
+    std::vector<std::pair<std::string, std::string>> haplotypes(target_h.size());
 
     while (variantFile.getNextVariant(var)) {
 
@@ -648,7 +642,7 @@ int main(int argc, char** argv) {
 
     calc(haplotypes, target_h.size(), afs, positions,
 	 target_h, background_h, globalOpts.seqid);
-    clearHaplotypes(haplotypes, target_h.size());
+    clearHaplotypes(haplotypes);
 
     exit(0);
 

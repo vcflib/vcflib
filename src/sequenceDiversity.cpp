@@ -63,10 +63,10 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string **haplotypes, int ntarget){
-  for(int i= 0; i < ntarget; i++){
-    haplotypes[i][0].clear();
-    haplotypes[i][1].clear();
+void clearHaplotypes(std::vector<std::pair<std::string, std::string>>& haplotypes){
+  for(int i= 0; i < haplotypes.size(); i++){
+    haplotypes[i].first.clear();
+    haplotypes[i].second.clear();
   }
 }
 
@@ -110,13 +110,13 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
 
 
 //calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
-void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
+void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
 
-  if(haplotypes[0][0].length() < (window-1) ){
+  if(haplotypes[0].first.length() < (window-1) ){
     return;
   }
 
-  for(int snpA = 0; snpA < haplotypes[0][0].length() - window; snpA += 1){
+  for(int snpA = 0; snpA < haplotypes[0].first.length() - window; snpA += 1){
 
     map <string, int> targetHaplotypes;
 
@@ -126,8 +126,8 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> t
       string haplotypeA;
       string haplotypeB;
 
-      haplotypeA += haplotypes[target[targetIndex]][0].substr(snpA, window) ;
-      haplotypeB += haplotypes[target[targetIndex]][1].substr(snpA, window) ;
+      haplotypeA += haplotypes[target[targetIndex]].first.substr(snpA, window) ;
+      haplotypeB += haplotypes[target[targetIndex]].second.substr(snpA, window) ;
 
       targetHaplotypes[haplotypeA]++;
       targetHaplotypes[haplotypeB]++;
@@ -149,15 +149,14 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> t
 
 }
 
-void loadPhased(string **haplotypes, genotype * pop, int ntarget){
+void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
 
   int indIndex = 0;
 
-  for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
-    string g = (*ind);
+  for(const auto& g : pop->gts){
     vector< string > gs = split(g, "|");
-    haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);
+    haplotypes[indIndex].first.append(gs[0]);
+    haplotypes[indIndex].second.append(gs[1]);
     indIndex += 1;
   }
 }
@@ -365,11 +364,8 @@ int main(int argc, char** argv) {
     vector<double>   targetAFS;
     vector<double>   backgroundAFS;
 
-    string **haplotypes = new string*[nsamples];
-	for (int i = 0; i < nsamples; i++) {
-	  haplotypes[i] = new string[2];
-	}
-
+    std::vector<std::pair<std::string, std::string>> haplotypes(nsamples);
+ 
     string currentSeqid = "NA";
 
     while (variantFile.getNextVariant(var)) {
@@ -383,10 +379,10 @@ int main(int argc, char** argv) {
 	continue;
       }
       if(currentSeqid != var.sequenceName){
-	if(haplotypes[0][0].length() > windowSize){
+	if(haplotypes[0].first.length() > windowSize){
 	  calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid);
 	}
-	clearHaplotypes(haplotypes, nsamples);
+	clearHaplotypes(haplotypes);
 	positions.clear();
 	currentSeqid = var.sequenceName;
 	targetAFS.clear();
