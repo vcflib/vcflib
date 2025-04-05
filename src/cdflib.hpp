@@ -6,6 +6,7 @@
 
     This software is published under the MIT License. See the LICENSE file.
 */
+#pragma once
 
 double algdiv ( double *a, double *b );
 double alnrel ( double *a );

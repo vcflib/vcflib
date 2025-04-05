@@ -15,9 +15,9 @@
 using namespace std;
 using namespace vcflib;
 
-bool listContains(list<string>& l, string& v) {
-    for (list<string>::iterator i = l.begin(); i != l.end(); ++i) {
-        if (*i == v) return true;
+bool listContains(const list<string>& l, const string& v) {
+    for (const auto& elm : l) {
+        if (elm == v) return true;
     }
     return false;
 }

@@ -108,13 +108,13 @@ void closeOutputs(map<string, map<int, SampleFastaFile*> >& outputs) {
     }
 }
 
-void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, vector<string>& sampleNames, string& seqName, map<string, int>& ploidies, string& prefix) {
+void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, const vector<string>& sampleNames, const string& seqName, map<string, int>& ploidies, string& prefix) {
     closeOutputs(outputs);
-    for (vector<string>::iterator s = sampleNames.begin(); s != sampleNames.end(); ++s) {
-        map<int, SampleFastaFile*>& outs = outputs[*s];
-        int p = ploidies[*s];
+    for (const auto& sampleName: sampleNames) {
+        map<int, SampleFastaFile*>& outs = outputs[sampleName];
+        int p = ploidies[sampleName];
         for (int i = 0; i < p; ++i) {
-            string thisSeqName = *s + "_" + seqName + ":" + convert(i);
+            string thisSeqName = sampleName + "_" + seqName + ":" + convert(i);
             string fileName = prefix + thisSeqName + ".fa";
             if (!outs[i]) {
                 SampleFastaFile* fp = new SampleFastaFile;

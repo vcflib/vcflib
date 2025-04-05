@@ -12,7 +12,6 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -23,6 +22,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <memory>
 
 using namespace std;
 using namespace vcflib;
@@ -50,114 +50,27 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string **haplotypes, int ntarget){
-  for(int i= 0; i < ntarget; i++){
-    haplotypes[i][0].clear();
-    haplotypes[i][1].clear();
-  }
-}
 
 
-void calc(string **haplotypes, int nhaps, vector<double> afs, vector<long int> pos, vector<int> & target, vector<int> & background, string seqid){
 
-  for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
-
-    double ehhA = 1;
-    double ehhR = 1;
-
-    double iHSA = 1;
-    double iHSR = 1;
-
-    int start = snp;
-    int end   = snp;
-    int core  = snp;
-
-    while( ehhA > 0.05 && ehhR > 0.05 ) {
-
-      start -= 1;
-      end   += 1;
-
-      if(start == -1){
-	break;
-      }
-      if(end == haplotypes[0][0].length() - 1){
-	break;
-      }
-
-      map<string , int> targetH;
-
-      double sumrT = 0;
-      double sumaT = 0;
-      double nrefT = 0;
-      double naltT = 0;
-
-      for(int i = 0; i < nhaps; i++){
-	targetH[ haplotypes[i][0].substr(start, (end - start)) ]++;
-	targetH[ haplotypes[i][1].substr(start, (end - start)) ]++;
-      }
-      for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){
-	if( (*th).first.substr((end-start)/2, 1) == "1"){
-	   sumaT += r8_choose(th->second, 2);
-	   naltT += th->second;
-	}
-	else{
-	  sumrT += r8_choose(th->second, 2);
-	  nrefT += th->second;
-	}
-      }
-
-      ehhA = sumaT / (r8_choose(naltT, 2));
-      ehhR = sumrT / (r8_choose(nrefT, 2));
-
-      iHSA += ehhA;
-      iHSR += ehhR;
-    }
-    cout << seqid << "\t" << pos[snp] << "\t" << afs[snp] << "\t" << iHSA << "\t" << iHSR << "\t" << iHSA/iHSR << endl;
-  }
-}
-
-double EHH(string **haplotypes, int nhaps){
-
-  map<string , int> hapcounts;
-
-  for(int i = 0; i < nhaps; i++){
-    hapcounts[ haplotypes[i][0] ]++;
-    hapcounts[ haplotypes[i][1] ]++;
-  }
-
-  double sum = 0;
-  double nh  = 0;
-
-  for( map<string, int>::iterator it = hapcounts.begin(); it != hapcounts.end(); it++){
-    nh  += it->second;
-    sum += r8_choose(it->second, 2);
-  }
-
-  double max = (sum /  r8_choose(nh, 2));
-
-  return max;
-
-}
-
-void loadPhased(string **haplotypes, genotype * pop, int ntarget){
+void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
 
   int indIndex = 0;
 
-  for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
-    string g = (*ind);
+  for(const auto& g : pop->gts){
     vector< string > gs = split(g, "|");
-    haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);
+    haplotypes[indIndex].first.append(gs[0]);
+    haplotypes[indIndex].second.append(gs[1]);
     indIndex += 1;
   }
 }
 
-void printHaplotypes(string **haps, vector<int> target, vector<long int> pos){
-  for(int snp = 0; snp < haps[0][1].length(); snp++){
+void printHaplotypes(const std::vector<std::pair<std::string, std::string>>& haps, const std::vector<int>& target, vector<long int> pos){
+  for(int snp = 0; snp < haps[0].second.length(); snp++){
     cout << pos[snp] << "\t" ;
     for(int ind = 0; ind < target.size(); ind++){
-      cout << haps[target[ind]][0].substr(snp , 1) << "\t";
-      cout << haps[target[ind]][1].substr(snp , 1) << "\t";
+      cout << haps[target[ind]].first.substr(snp , 1) << "\t";
+      cout << haps[target[ind]].second.substr(snp , 1) << "\t";
     }
     cout << endl;
   }
@@ -310,10 +223,7 @@ int main(int argc, char** argv) {
 
     vector<double> afs;
 
-    string **haplotypes = new string*[target_h.size()];
-	for (int i = 0; i < target_h.size(); i++) {
-	  haplotypes[i] = new string[2];
-	}
+    std::vector<std::pair<std::string, std::string>> haplotypes(target_h.size());
 
     string currentSeqid = "NA";
 
@@ -344,21 +254,19 @@ int main(int argc, char** argv) {
 	sindex += 1;
       }
 
-      using Detail::makeUnique;
-
-      unique_ptr<genotype> populationTarget    ;
+      std::unique_ptr<genotype> populationTarget    ;
 
       if(type == "PL"){
-	populationTarget     = makeUnique<pl>();
+	populationTarget     = std::make_unique<pl>();
       }
       if(type == "GL"){
-	populationTarget     = makeUnique<gl>();
+	populationTarget     = std::make_unique<gl>();
       }
       if(type == "GP"){
-	populationTarget     = makeUnique<gp>();
+	populationTarget     = std::make_unique<gp>();
       }
       if(type == "GT"){
-	populationTarget     = makeUnique<gt>();
+	populationTarget     = std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target, var.position);

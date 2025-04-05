@@ -6,6 +6,8 @@
 
     This software is published under the MIT License. See the LICENSE file.
 */
+#pragma once
+
 
 double i4_binomial_pdf ( int n, double p, int k );
 int i4_binomial_sample ( int n, double pp );

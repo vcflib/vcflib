@@ -6,6 +6,8 @@
 
     This software is published under the MIT License. See the LICENSE file.
 */
+#pragma once
+
 
 void advance_state ( int k );
 bool antithetic_get ( );

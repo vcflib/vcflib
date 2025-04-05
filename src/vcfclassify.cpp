@@ -16,7 +16,7 @@
 using namespace std;
 using namespace vcflib;
 
-bool isTransition(string& ref, string& alt) {
+bool isTransition(const string& ref, const string& alt) {
     if (((ref == "A" && alt == "G") || (ref == "G" && alt == "A")) ||
         ((ref == "C" && alt == "T") || (ref == "T" && alt == "C"))) {
         return true;
@@ -25,22 +25,18 @@ bool isTransition(string& ref, string& alt) {
     }
 }
 
-bool hasTransition(Variant& var) {
-    string& ref = var.ref;
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& alt = *a;
-        if (isTransition(ref, alt)) {
+bool hasTransition(const Variant& var) {
+    for (const auto& alt : var.alt) {
+        if (isTransition(var.ref, alt)) {
             return true;
         }
     }
     return false;
 }
 
-bool hasTransversion(Variant& var) {
-    string& ref = var.ref;
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& alt = *a;
-        if (!isTransition(ref, alt)) {
+bool hasTransversion(const Variant& var) {
+    for (const auto& alt : var.alt) {
+        if (!isTransition(var.ref, alt)) {
             return true;
         }
     }
@@ -59,10 +55,8 @@ bool hasInsertion(Variant& var) {
 }
 
 bool hasDeletion(Variant& var) {
-    string& ref = var.ref;
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& alt = *a;
-        if (ref.size() > alt.size()) {
+    for (const auto& alt : var.alt) {
+        if (var.ref.size() > alt.size()) {
             return true;
         }
     }
@@ -70,10 +64,8 @@ bool hasDeletion(Variant& var) {
 }
 
 bool hasMNP(Variant& var) {
-    string& ref = var.ref;
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& alt = *a;
-        if (ref.size() > 1 && alt.size() == ref.size()) {
+    for (const auto& alt : var.alt) {
+        if (var.ref.size() > 1 && alt.size() == var.ref.size()) {
             return true;
         }
     }
@@ -81,10 +73,8 @@ bool hasMNP(Variant& var) {
 }
 
 bool hasSNP(Variant& var) {
-    string& ref = var.ref;
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& alt = *a;
-        if (ref.size() == 1 && alt.size() == 1) {
+    for (const auto& alt : var.alt) {
+        if (var.ref.size() == 1 && alt.size() == 1) {
             return true;
         }
     }

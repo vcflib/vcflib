@@ -70,14 +70,13 @@ void printHelp(void){
   cerr << endl << endl;
 }
 
-double ngreater(list<score> & rangeData, double val){
+double ngreater(const std::list<score> & rangeData, double val){
 
   double n = 0;
 
 
-  for(list<score>::iterator it = rangeData.begin();
-      it != rangeData.end(); it++ ){
-    if(it->score >= val){
+  for(const auto& elm : rangeData){
+    if(elm.score >= val){
       n += 1;
     }
   }
@@ -85,26 +84,26 @@ double ngreater(list<score> & rangeData, double val){
 }
 
 
-double windowAvg(list<score> & rangeData){
+double windowAvg(const std::list<score>& rangeData){
 
   double n = 0;
   double s = 0;
 
-  for(list<score>::iterator it = rangeData.begin(); it != rangeData.end(); it++){
-    s += it->score;
+  for(const auto& elm : rangeData){
+    s += elm.score;
     n += 1;
   }
   return (s/n);
 }
 
 //calculation of Patterson's D statistic
-double dStatistic(list<score> & rangeData){
+double dStatistic(const std::list<score> & rangeData){
 
   double abba = 0;
   double baba = 0;
   double dstat ;
-  for(list<score>::iterator it = rangeData.begin(); it != rangeData.end(); it++){
-    if(it->score == 0){ // means we have BABA locus
+  for(const auto& elm : rangeData){
+    if(elm.score == 0){ // means we have BABA locus
       baba += 1;
     }
     else{ // count towards ABBA locus
@@ -380,9 +379,9 @@ int main(int argc, char** argv) {
     cerr << "FATAL: no lines -- or -- couldn't open file" << endl;
   }
 
-  for( map< string, streampos>::iterator it = seqidIndex.begin(); it != seqidIndex.end(); it++){
-    cerr << "INFO: processing seqid : "<< (it->first) << endl;
-    processSeqid(ifs, (it->first),(it->second), opt);
+  for(const auto&[first, second] : seqidIndex) {
+    cerr << "INFO: processing seqid : "<< first << endl;
+    processSeqid(ifs, first, second, opt);
   }
 
   ifs.close();

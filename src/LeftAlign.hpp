@@ -6,7 +6,6 @@
 #include "cigar.hpp"
 #include <vector>
 #include <set>
-#include <iostream>
 #include <cmath>
 
 namespace vcflib {

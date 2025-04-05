@@ -12,7 +12,6 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -389,16 +388,16 @@ int main(int argc, char** argv) {
       unique_ptr<genotype> populationTarget    ;
       
       if(globalOpts.type == "PL"){
-	populationTarget     makeUnique<pl>();
+	populationTarget     std::make_unique<pl>();
       }
       if(globalOpts.type == "GL"){
-	populationTarget     makeUnique<gl>();
+	populationTarget     std::make_unique<gl>();
       }
       if(globalOpts.type == "GP"){
-	populationTarget     makeUnique<gp>();
+	populationTarget     std::make_unique<gp>();
       }
       if(globalOpts.type == "GT"){
-	populationTarget     makeUnique<gt>();
+	populationTarget     std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target, var.sequenceName, var.position);

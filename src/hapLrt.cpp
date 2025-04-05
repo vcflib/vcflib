@@ -12,7 +12,6 @@
 #include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -24,6 +23,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <limits.h>
+#include <memory>
 
 using namespace std;
 using namespace vcflib;
@@ -63,17 +63,16 @@ void printHelp(void){
   exit(1);
 }
 
-void clearHaplotypes(string **haplotypes, int ntarget){
-  for(int i= 0; i < ntarget; i++){
-    haplotypes[i][0].clear();
-    haplotypes[i][1].clear();
-  }
+void clearHaplotypes(std::vector<std::pair<std::string,std::string>>& haplotypes) {
+    for (int i = 0; i < haplotypes.size(); i++) {
+        haplotypes[i].first.clear();
+        haplotypes[i].second.clear();
+    }
 }
-
 //changed (carson) --> void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]), int maxI){
-void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]){
+void findLengths(std::vector<std::pair<std::string, std::string>>& haplotypes, vector<int> group, int core, int lengths[]){
   int gmax = group.size();
-  int smax = haplotypes[0][0].length();
+  int smax = haplotypes[0].first.length();
   int matrix[gmax*2][gmax*2];
 
   for(int i = 0 ; i < gmax*2; i++){
@@ -82,14 +81,12 @@ void findLengths(string **haplotypes, vector<int> group, int core, int lengths[]
 
   for(int i = 0; i < gmax*2; i++){ //get group member 1
     int g = (i < gmax) ? group[i] : group[i-gmax];
-    int c = (i < gmax) ? 0 : 1;
 
-    string& currentHap = haplotypes[g][c];
+    string& currentHap = (i < gmax) ? haplotypes[g].first : haplotypes[g].second;
     for(int j = i+1; j < gmax*2; j++){ //get group member 2 for comparison
       int ag = (j < gmax) ? group[j] : group[j-gmax];
-      int ac = (j < gmax) ? 0 : 1;
 
-      string& altHap = haplotypes[ag][ac];
+      string& altHap = (j < gmax) ? haplotypes[ag].first : haplotypes[ag].second;
 
       typedef string::const_iterator iter;
       iter cBeg = currentHap.begin(), cEnd = currentHap.end();
@@ -232,7 +229,7 @@ double var(int dat[], int n, double mean){
 
 }
 
-void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background,  vector<int> total,  string seqid){
+void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background,  vector<int> total,  string seqid){
 
   //moved (carson)
   int tl = 2*target.size();
@@ -242,7 +239,7 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> a
   //treat as buffers to seed findLengths (carson)
 
 
-  for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
+  for(int snp = 0; snp < haplotypes[0].first.length(); snp++){
 
     int targetLengths[tl];
     int backgroundLengths[bl];
@@ -296,18 +293,17 @@ void calc(string **haplotypes, int nhaps, vector<long int> pos, vector<double> a
   }
 }
 
-void loadPhased(string **haplotypes, genotype * pop, int ntarget){
+void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
 
   int indIndex = 0;
 
-  for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
-    string g = (*ind);
+  for(const auto& g : pop->gts){
 //    if((haplotypes[0][0].size() % 100) == 0){
 //      cerr << "string size:"  << haplotypes[0][0].size() << endl;
 //    }
     vector< string > gs = split(g, "|");
-    haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);
+    haplotypes[indIndex].first.append(gs[0]);
+    haplotypes[indIndex].first.append(gs[1]);
     indIndex += 1;
   }
 }
@@ -500,11 +496,7 @@ int main(int argc, char** argv) {
     vector<long int> positions;
     vector<double>   afs;
 
-    //string haplotypes [nsamples][2];
-    string **haplotypes = new string*[nsamples];
-    for (int i = 0; i < nsamples; i++) {
-      haplotypes[i] = new string[2];
-    }
+    std::vector<std::pair<std::string, std::string>> haplotypes(nsamples);
 
     string currentSeqid = "NA";
 
@@ -523,10 +515,10 @@ int main(int argc, char** argv) {
       }
 
       if(currentSeqid != var.sequenceName){
-        if(haplotypes[0][0].length() > 10){
+        if(haplotypes[0].first.length() > 10){
           calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
         }
-        clearHaplotypes(haplotypes, nsamples);
+        clearHaplotypes(haplotypes);
         positions.clear();
         currentSeqid = var.sequenceName;
         afs.clear();
@@ -565,28 +557,27 @@ int main(int argc, char** argv) {
         sindex += 1;
       }
 
-      using Detail::makeUnique;
 
-      unique_ptr<genotype> populationTarget;
-      unique_ptr<genotype> populationBackground;
-      unique_ptr<genotype> populationTotal;
+      std::unique_ptr<genotype> populationTarget;
+      std::unique_ptr<genotype> populationBackground;
+      std::unique_ptr<genotype> populationTotal;
 
       if (type == "PL"){
-        populationTarget     = makeUnique<pl>();
-        populationBackground = makeUnique<pl>();
-        populationTotal      = makeUnique<pl>();
+        populationTarget     = std::make_unique<pl>();
+        populationBackground = std::make_unique<pl>();
+        populationTotal      = std::make_unique<pl>();
       } else if (type == "GL"){
-        populationTarget     = makeUnique<gl>();
-        populationBackground = makeUnique<gl>();
-        populationTotal      = makeUnique<gl>();
+        populationTarget     = std::make_unique<gl>();
+        populationBackground = std::make_unique<gl>();
+        populationTotal      = std::make_unique<gl>();
       } else if (type == "GP"){
-        populationTarget     = makeUnique<gp>();
-        populationBackground = makeUnique<gp>();
-        populationTotal      = makeUnique<gp>();
+        populationTarget     = std::make_unique<gp>();
+        populationBackground = std::make_unique<gp>();
+        populationTotal      = std::make_unique<gp>();
       } else if (type == "GT"){
-        populationTarget     = makeUnique<gt>();
-        populationBackground = makeUnique<gt>();
-        populationTotal      = makeUnique<gt>();
+        populationTarget     = std::make_unique<gt>();
+        populationBackground = std::make_unique<gt>();
+        populationTotal      = std::make_unique<gt>();
       }
 
       populationTarget->loadPop(target,         var.position);

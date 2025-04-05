@@ -4,11 +4,10 @@ namespace vcflib {
 
 // generates cigar from allele parsed by parsedAlternates
 // Note: this function is not used in vcflib
-string varCigar(vector<VariantAllele>& vav, bool xForMismatch) {
+string varCigar(const vector<VariantAllele>& vav, bool xForMismatch) {
     string cigar;
     pair<int, string> element;
-    for (vector<VariantAllele>::iterator v = vav.begin(); v != vav.end(); ++v) {
-        VariantAllele& va = *v;
+    for (const auto& va : vav) {
         if (va.ref != va.alt) {
             if (element.second == "M") {
                 cigar += convert(element.first) + element.second;
