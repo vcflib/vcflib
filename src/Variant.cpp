@@ -1550,12 +1550,12 @@ map<int, int> decomposeGenotype(const string& genotype) {
     }
     vector<string> haps = split(genotype, splitter);
     map<int, int> decomposed;
-    for (vector<string>::iterator h = haps.begin(); h != haps.end(); ++h) {
+    for (const auto& h : haps) {
         int alt;
-        if (*h == ".") {
+        if (h == ".") {
             ++decomposed[NULL_ALLELE];
         } else {
-            convert(*h, alt);
+            convert(h, alt);
             ++decomposed[alt];
         }
     }
@@ -1573,12 +1573,12 @@ vector<int> decomposePhasedGenotype(const string& genotype) {
         exit(1);
     }
     vector<int> decomposed;
-    for (vector<string>::iterator h = haps.begin(); h != haps.end(); ++h) {
+    for (const auto& h : haps) {
         int alt;
-        if (*h == ".") {
+        if (h == ".") {
             decomposed.push_back(NULL_ALLELE);
         } else {
-            convert(*h, alt);
+            convert(h, alt);
             decomposed.push_back(alt);
         }
     }
@@ -1587,25 +1587,27 @@ vector<int> decomposePhasedGenotype(const string& genotype) {
 
 string genotypeToString(const map<int, int>& genotype) {
     vector<int> s;
-    for (map<int, int>::const_iterator g = genotype.begin(); g != genotype.end(); ++g) {
-        int a = g->first;
-        int c = g->second;
+    for (const auto& g : genotype) {
+        int a = g.first;
+        int c = g.second;
         for (int i = 0; i < c; ++i) s.push_back(a);
     }
     sort(s.begin(), s.end());
     vector<string> r;
-    for (vector<int>::iterator i = s.begin(); i != s.end(); ++i) {
-        if (*i == NULL_ALLELE) r.push_back(".");
-        else r.push_back(convert(*i));
+    r.reserve(s.size());
+
+    for (const auto& i : s) {
+        if (i == NULL_ALLELE) r.push_back(".");
+        else r.push_back(convert(i));
     }
     return join(r, "/"); // TODO adjust for phased/unphased
 }
 
 string phasedGenotypeToString(const vector<int>& genotype) {
     vector<string> r;
-    for (vector<int>::const_iterator i = genotype.begin(); i != genotype.end(); ++i) {
-        if (*i == NULL_ALLELE) r.push_back(".");
-        else r.push_back(convert(*i));
+    for (const auto& i : genotype) {
+        if (i == NULL_ALLELE) r.push_back(".");
+        else r.push_back(convert(i));
     }
     return join(r, "|");
 }
@@ -1619,8 +1621,8 @@ bool isHom(const map<int, int>& genotype) {
 }
 
 bool hasNonRef(const map<int, int>& genotype) {
-    for (map<int, int>::const_iterator g = genotype.begin(); g != genotype.end(); ++g) {
-        if (g->first != 0) {
+    for (const auto& g : genotype) {
+        if (g.first != 0) {
             return true;
         }
     }
@@ -1641,8 +1643,8 @@ bool isNull(const map<int, int>& genotype) {
 
 int ploidy(const map<int, int>& genotype) {
     int i = 0;
-    for (map<int, int>::const_iterator g = genotype.begin(); g != genotype.end(); ++g) {
-        i += g->second;
+    for (const auto& g : genotype) {
+        i += g.second;
     }
     return i;
 }
@@ -1652,8 +1654,7 @@ int ploidy(const map<int, int>& genotype) {
 
 map<string, vector<VariantAllele> > Variant::flatAlternates(void) {
     map<string, vector<VariantAllele> > variantAlleles;
-    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string& alternate = *a;
+    for (const auto& alternate: alt) {
         vector<VariantAllele>& variants = variantAlleles[alternate];
         variants.push_back(VariantAllele(ref, alternate, position));
     }
@@ -1670,16 +1671,17 @@ map<pair<int, int>, int> Variant::getGenotypeIndexesDiploid(void) {
     map<pair<int, int>, int> genotypeIndexes;
     //map<int, map<Genotype*, int> > vcfGenotypeOrder;
     vector<int> indexes;
+    indexes.reserve(alleles.size());
     for (int i = 0; i < alleles.size(); ++i) {
         indexes.push_back(i);
     }
     int ploidy = 2; // ONLY diploid
     vector<vector<int> > genotypes = multichoose(ploidy, indexes);
-    for (vector<vector<int> >::iterator g = genotypes.begin(); g != genotypes.end(); ++g) {
-        sort(g->begin(), g->end());  // enforce e.g. 0/1, 0/2, 1/2 ordering over reverse
+    for (auto& g : genotypes) {
+        sort(g.begin(), g.end());  // enforce e.g. 0/1, 0/2, 1/2 ordering over reverse
         // XXX this does not handle non-diploid!!!!
-        int j = g->front();
-        int k = g->back();
+        int j = g.front();
+        int k = g.back();
         genotypeIndexes[make_pair(j, k)] = (k * (k + 1) / 2) + j;
     }
     return genotypeIndexes;
@@ -1700,11 +1702,10 @@ void Variant::updateAlleleIndexes(void) {
 
     int altIndex = getAltAlleleIndex(altAllele);  // this is the alt-relative index, 0-based
 
-    for (map<string, int>::iterator c = vcf->infoCounts.begin();
-	 c != vcf->infoCounts.end(); ++c) {
-      int count = c->second;
+    for (const auto& c: vcf->infoCounts) {
+      int count = c.second;
       if (count == ALLELE_NUMBER) {
-	string key = c->first;
+	const string& key = c.first;
 	map<string, vector<string> >::iterator v = info.find(key);
 	if (v != info.end()) {
 	  vector<string>& vals = v->second;
@@ -1721,11 +1722,10 @@ void Variant::updateAlleleIndexes(void) {
       }
     }
 
-    for (map<string, int>::iterator c = vcf->formatCounts.begin();
-	 c != vcf->formatCounts.end(); ++c) {
-      int count = c->second;
+    for (const auto& c : vcf->formatCounts) {
+      int count = c.second;
       if (count == ALLELE_NUMBER) {
-            string key = c->first;
+            const string& key = c.first;
             for (map<string, map<string, vector<string> > >::iterator
 		   s = samples.begin(); s != samples.end(); ++s) {
 	      map<string, vector<string> >& sample = s->second;
@@ -1809,17 +1809,17 @@ void Variant::updateAlleleIndexes(void) {
     vector<int> toRemove;
     toRemove.push_back(altSpecIndex);
     map<int, map<int, int> > glMappingByPloidy;
-    for (set<int>::iterator p = ploidies.begin(); p != ploidies.end(); ++p) {
-        glMappingByPloidy[*p] = glReorder(*p, alt.size() + 1, alleleIndexMapping, toRemove);
+    for (const auto p : ploidies) {
+        glMappingByPloidy[p] = glReorder(p, alt.size() + 1, alleleIndexMapping, toRemove);
     }
 
-    for (map<string, map<string, vector<string> > >::iterator s = samples.begin(); s != samples.end(); ++s) {
-        map<string, vector<string> >& sample = s->second;
-        map<string, vector<string> >::iterator glsit = sample.find("GL");
+    for (auto& s : samples) {
+        auto& sample = s.second;
+        auto glsit = sample.find("GL");
         if (glsit != sample.end()) {
             vector<string>& gls = glsit->second; // should be split already
             map<int, string> newgls;
-            map<int, int>& newOrder = glMappingByPloidy[samplePloidy[s->first]];
+            map<int, int>& newOrder = glMappingByPloidy[samplePloidy[s.first]];
             int i = 0;
             for (vector<string>::iterator g = gls.begin(); g != gls.end(); ++g, ++i) {
                 int j = newOrder[i];
@@ -1829,8 +1829,8 @@ void Variant::updateAlleleIndexes(void) {
             }
             // update the gls
             gls.clear();
-            for (map<int, string>::iterator g = newgls.begin(); g != newgls.end(); ++g) {
-                gls.push_back(g->second);
+            for (const auto& g : newgls) {
+                gls.push_back(g.second);
             }
         }
     }
@@ -1854,23 +1854,23 @@ string unionInfoHeaderLines(string& s1, string& s2) {
     vector<string> result;
     set<string> l2;
     string lastHeaderLine; // this one needs to be at the end
-    for (vector<string>::iterator s = lines2.begin(); s != lines2.end(); ++s) {
-        if (s->substr(0,6) == "##INFO") {
-            l2.insert(*s);
+    for (const auto& s : lines2) {
+        if (s.substr(0,6) == "##INFO") {
+            l2.insert(s);
         }
     }
-    for (vector<string>::iterator s = lines1.begin(); s != lines1.end(); ++s) {
-        if (l2.count(*s)) {
-            l2.erase(*s);
+    for (const auto& s : lines1) {
+        if (l2.count(s)) {
+            l2.erase(s);
         }
-        if (s->substr(0,6) == "#CHROM") {
-            lastHeaderLine = *s;
+        if (s.substr(0,6) == "#CHROM") {
+            lastHeaderLine = s;
         } else {
-            result.push_back(*s);
+            result.push_back(s);
         }
     }
-    for (set<string>::iterator s = l2.begin(); s != l2.end(); ++s) {
-        result.push_back(*s);
+    for (const auto& s : l2) {
+        result.push_back(s);
     }
     if (lastHeaderLine.empty()) {
         cerr << "could not find CHROM POS ... header line" << endl;
@@ -1893,10 +1893,10 @@ list<list<int> > _glorder(int ploidy, int alts) {
         list<list<int> > results;
         for (int n = 0; n < alts; ++n) {
             list<list<int> > x = _glorder(ploidy - 1, alts);
-            for (list<list<int> >::iterator v = x.begin(); v != x.end(); ++v) {
-                if (v->front() <= n) {
-                    v->push_front(n);
-                    results.push_back(*v);
+            for (auto& v : x) {
+                if (v.front() <= n) {
+                    v.push_front(n);
+                    results.push_back(v);
                 }
             }
         }
@@ -1908,8 +1908,8 @@ list<list<int> > _glorder(int ploidy, int alts) {
 // list of integers (as written in the GT field)
 list<list<int> > glorder(int ploidy, int alts) {
     list<list<int> > results = _glorder(ploidy, alts);
-    for (list<list<int> >::iterator v = results.begin(); v != results.end(); ++v) {
-        v->reverse();
+    for (auto& v : results) {
+        v.reverse();
     }
     return results;
 }
@@ -1920,8 +1920,8 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts) {
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
     int i = 0;
     for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v, ++i) {
-        for (list<int>::iterator q = v->begin(); q != v->end(); ++q) {
-            if (*q == alt) {
+        for (const auto& q : v) {
+            if (q == alt) {
                 gls.push_back(i);
                 break;
             }
@@ -2158,17 +2158,17 @@ vector<Variant*> Variant::matchingHaplotypes() {
         // initialize the header_lines with the above vector.
         // Set the key as the ##_type_ and the value as an empty string
         // Empty strings are ignored when outputting as string (getHeaderString)
-        for (vector<string>::const_iterator header_lines_iter = this->header_line_names_ordered.begin(); header_lines_iter != this->header_line_names_ordered.end(); ++header_lines_iter)
+        for (const auto& header_lines_iter : this->header_line_names_ordered)
         {
-            this->header_lines[(*header_lines_iter)] = "";
+            this->header_lines[header_lines_iter] = "";
         }
 
         // initialize the header_lines with the above vector.
         // Set the key as the ##_type_ and the value as an empty vector<string>
         // Empty vectors are ignored when outputting as string (getHeaderString)
-        for (vector<string>::const_iterator header_lists_iter = this->header_list_names_ordered.begin(); header_lists_iter != this->header_list_names_ordered.end(); ++header_lists_iter)
+        for (const auto& header_lists_iter : header_list_names_ordered)
         {
-            this->header_lists[(*header_lists_iter)] = vector<string>(0);
+            this->header_lists[header_lists_iter] = vector<string>(0);
         }
 
     }
@@ -2197,27 +2197,27 @@ vector<Variant*> Variant::matchingHaplotypes() {
         string header_string;
 
         // start by adding the header_lines
-        for (vector<string>::const_iterator header_lines_iter = this->header_line_names_ordered.begin(); header_lines_iter != this->header_line_names_ordered.end(); ++header_lines_iter)
+        for (const auto& header_lines_iter : header_line_names_ordered)
         {
-            if (this->header_lines[(*header_lines_iter)] != "")
+            if (this->header_lines[header_lines_iter] != "")
             {
-                header_string += this->header_lines[(*header_lines_iter)] + "\n";
+                header_string += this->header_lines[header_lines_iter] + "\n";
             }
         }
 
         // next add header_lists
-        for (vector<string>::const_iterator header_lists_iter = this->header_list_names_ordered.begin(); header_lists_iter != this->header_list_names_ordered.end(); ++header_lists_iter)
+        for (const auto& header_lists_iter : header_list_names_ordered)
         {
-            vector<string> tmp_header_lists = this->header_lists[(*header_lists_iter)];
-            for (vector<string>::const_iterator header_list = tmp_header_lists.begin(); header_list != tmp_header_lists.end(); ++header_list)
+            vector<string> tmp_header_lists = this->header_lists[header_lists_iter];
+            for (const auto& header_list : tmp_header_lists)
             {
-                header_string += (*header_list) + "\n";
+                header_string += header_list + "\n";
             }
         }
 
         // last add header columns
-        vector<string>::const_iterator last_element = this->header_columns.end() - 1;
-        for (vector<string>::const_iterator header_column_iter = this->header_columns.begin(); header_column_iter != this->header_columns.end(); ++header_column_iter)
+        const auto last_element = this->header_columns.end() - 1;
+        for (const auto header_column_iter = this->header_columns.begin(); header_column_iter != this->header_columns.end(); ++header_column_iter)
         {
             string delimiter = (header_column_iter == last_element) ? "\n" : "\t";
             header_string += (*header_column_iter) + delimiter;
@@ -2290,8 +2290,7 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
     // padding is used to ensure a stable alignment of the alternates to the reference
     // without having to go back and look at the full reference sequence
     int paddingLen = max(10, (int) (ref.size()));  // dynamically determine optimum padding length
-    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
-        string& alternate = *a;
+    for (const auto& alternate : alt) {
         paddingLen = max(paddingLen, (int) (alternate.size()));
     }
     char padChar = 'Z';
@@ -2316,9 +2315,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
 
     string cigar;
 
-    for (vector<string>::iterator a = alt.begin(); a != alt.end(); ++a) {
+    for (const auto& alternate : alt) {
 
-      string& alternate = *a;
       vector<VariantAllele>& variants = variantAlleles[alternate];
       string alternateQuery_M;
       if (flankingRefLeft.empty() && flankingRefRight.empty()) {
