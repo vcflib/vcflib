@@ -67,8 +67,7 @@ std::string toUpper(const std::string& seq) {
 
 bool allATGCN(const string& s, bool allowLowerCase){
     if (allowLowerCase){
-       for (string::const_iterator i = s.begin(); i != s.end(); ++i){
-            char c = *i;
+       for (const auto c : s){
             if (c != 'A' && c != 'a' &&
                 c != 'C' && c != 'c' &&
                 c != 'T' && c != 't' &&
@@ -79,8 +78,7 @@ bool allATGCN(const string& s, bool allowLowerCase){
         }
     }
     else{
-        for (string::const_iterator i = s.begin(); i != s.end(); ++i){
-            char c = *i;
+        for (const auto c : s){
             if (c != 'A' && c != 'C' && c != 'T' && c != 'G' && c != 'N'){
                 return false;
             }
@@ -172,17 +170,16 @@ void Variant::parse(string& line, bool parseSamples) {
 	  vector<string> samplefields = split(*sample, ':');
 	  vector<string>::iterator i = samplefields.begin();
 
-	  for (vector<string>::iterator f = format.begin();
-	       f != format.end(); ++f) {
+	  for (const auto& f : format) {
 
 	    if(i != samplefields.end()){
-	      samples[name][*f] = split(*i, ',');
+	      samples[name][f] = split(*i, ',');
               ++i;
 	    }
 	    else{
 	      std::vector<string> missing;
 	      missing.push_back(".");
-	      samples[name][*f] = missing;
+	      samples[name][f] = missing;
 	    }
 	  }
 	}
@@ -1217,10 +1214,10 @@ void VariantCallFile::addHeaderLine(string line) {
 vector<string>& unique(vector<string>& strings) {
     set<string> uniq;
     vector<string> res;
-    for (vector<string>::const_iterator s = strings.begin(); s != strings.end(); ++s) {
-        if (uniq.find(*s) == uniq.end()) {
-            res.push_back(*s);
-            uniq.insert(*s);
+    for (const auto& s : strings) {
+        if (uniq.find(s) == uniq.end()) {
+            res.push_back(s);
+            uniq.insert(s);
         }
     }
     strings = res;
@@ -1230,8 +1227,7 @@ vector<string>& unique(vector<string>& strings) {
 vector<string> VariantCallFile::infoIds(void) {
     vector<string> tags;
     vector<string> headerLines = split(header, '\n');
-    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
+    for (const auto& line : headerLines) {
         if (line.find("##INFO") == 0) {
             size_t pos = line.find("ID=");
             if (pos != string::npos) {
@@ -1249,8 +1245,7 @@ vector<string> VariantCallFile::infoIds(void) {
 vector<string> VariantCallFile::formatIds(void) {
     vector<string> tags;
     vector<string> headerLines = split(header, '\n');
-    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
+    for (const auto& line : headerLines) {
         if (line.find("##FORMAT") == 0) {
             size_t pos = line.find("ID=");
             if (pos != string::npos) {
@@ -1269,8 +1264,7 @@ void VariantCallFile::removeInfoHeaderLine(string const & tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
     string id = "ID=" + tag + ",";
-    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& line = *s;
+    for (const auto& line : headerLines) {
         if (line.find("##INFO") == 0) {
             if (line.find(id) == string::npos) {
                 newHeader.push_back(line);
@@ -1286,8 +1280,7 @@ void VariantCallFile::removeGenoHeaderLine(string const & tag) {
     vector<string> headerLines = split(header, '\n');
     vector<string> newHeader;
     string id = "ID=" + tag + ",";
-    for (vector<string>::iterator s = headerLines.begin(); s != headerLines.end(); ++s) {
-        string& headerLine = *s;
+    for (const auto& headerLine : headerLines) {
         if (headerLine.find("##FORMAT") == 0) {
             if (headerLine.find(id) == string::npos) {
                 newHeader.push_back(headerLine);
@@ -1371,8 +1364,7 @@ bool VariantCallFile::parseHeader(string& hs) {
     header = hs; // stores the header in the object instance
 
     vector<string> headerLines = split(header, "\n");
-    for (vector<string>::iterator h = headerLines.begin(); h != headerLines.end(); ++h) {
-        string headerLine = *h;
+    for (const auto& headerLine : headerLines) {
         if (headerLine.substr(0,2) == "##") {
             // meta-information headerLines
             // TODO parse into map from info/format key to type
@@ -1393,7 +1385,7 @@ bool VariantCallFile::parseHeader(string& hs) {
                     vector<string> fields = split(entryData, "=,");
                     if (fields.size() < 8) {
                         cerr << "header line does not have all of the required fields: ID, Number, Type, and Description" << endl
-                             << headerLine << endl;;
+                             << headerLine << endl;
                         exit(1);
                     }
                     // get the required fields from the header line
@@ -2370,11 +2362,10 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
       int altpos = 0;
       int refpos = 0;
 
-      for (vector<pair<int, string> >::iterator e = cigarData.begin();
-	   e != cigarData.end(); ++e) {
+      for (const auto& e : cigarData) {
 
-	int len = e->first;
-	string type = e->second;
+	int len = e.first;
+	const string& type = e.second;
 
 	switch (type.at(0)) {
 	case 'I':

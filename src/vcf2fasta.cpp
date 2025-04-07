@@ -101,9 +101,10 @@ map<string, int>& getPloidies(Variant& var, map<string, int>& ploidies, int defa
 }
 
 void closeOutputs(map<string, map<int, SampleFastaFile*> >& outputs) {
-    for (map<string, map<int, SampleFastaFile*> >::iterator f = outputs.begin(); f != outputs.end(); ++f) {
-        for (map<int, SampleFastaFile*>::iterator s = f->second.begin(); s != f->second.end(); ++s) {
-            delete s->second;
+    // TODO: revisit, potential for memory leaks
+	for (auto& f : outputs) {
+        for (auto& s : f.second) {
+            delete s.second;
         }
     }
 }
@@ -142,10 +143,10 @@ void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& 
         if (var.sequenceName != lastSeq || lastSeq.empty()) {
             if (!lastSeq.empty()) {
                 string ref5prime = reference.getSubSequence(lastSeq, lastEnd, reference.sequenceLength(lastSeq)-lastEnd);
-                for (map<string, map<int, SampleFastaFile*> >::iterator s = outputs.begin(); s != outputs.end(); ++s) {
-                    map<int, SampleFastaFile*>& f = s->second;
-                    for (map<int, SampleFastaFile*>::iterator o = f.begin(); o != f.end(); ++o) {
-                        o->second->write(ref5prime);
+                for (auto& s  : outputs) {
+                    map<int, SampleFastaFile*>& f = s.second;
+                    for (auto& o : f) {
+                        o.second->write(ref5prime);
                     }
                 }
             }
@@ -200,10 +201,10 @@ void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& 
     // write last sequences
     {
         string ref5prime = reference.getSubSequence(lastSeq, lastEnd, reference.sequenceLength(lastSeq)-lastEnd);
-        for (map<string, map<int, SampleFastaFile*> >::iterator s = outputs.begin(); s != outputs.end(); ++s) {
-            map<int, SampleFastaFile*>& f = s->second;
-            for (map<int, SampleFastaFile*>::iterator o = f.begin(); o != f.end(); ++o) {
-                o->second->write(ref5prime);
+        for (auto& s : outputs) {
+            map<int, SampleFastaFile*>& f = s.second;
+            for (auto& o : f) {
+                o.second->write(ref5prime);
             }
         }
     }

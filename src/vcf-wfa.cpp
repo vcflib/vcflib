@@ -546,16 +546,16 @@ void Variant::reduceAlleles(
         v.sequenceName = var.sequenceName;
         v.position = a->position; // ... by definition, this should be == if the variant was found
         if (v.ref.size() < a->ref.size()) {
-            for (vector<string>::iterator va = v.alt.begin(); va != v.alt.end(); ++va) {
-                *va += a->ref.substr(v.ref.size());
+            for (auto& va : v.alt) {
+                va += a->ref.substr(v.ref.size());
             }
             v.ref = a->ref;
         }
         v.alt.push_back(a->alt);
 
         int alleleIndex = v.alt.size();
-        for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
-            unpackedAlleleIndexes[*i][v.position] = alleleIndex;
+        for (const auto& originalIndex : originalIndexes) {
+            unpackedAlleleIndexes[originalIndex][v.position] = alleleIndex;
             //unpackedAlleleInversions[*i] = v.inv
         }
         // add null allele
@@ -607,9 +607,9 @@ void Variant::reduceAlleles(
         string& genotype = sample["GT"].front();
         vector<string> genotypeStrs = split(genotype, "|/");
         vector<int> genotypeIndexes;
-        for (vector<string>::iterator s = genotypeStrs.begin(); s != genotypeStrs.end(); ++s) {
+        for (const auto& genotypeStr : genotypeStrs) {
             int i;
-            if (!convert(*s, i)) {
+            if (!convert(genotypeStr, i)) {
                 genotypeIndexes.push_back(ALLELE_NULL);
             } else {
                 genotypeIndexes.push_back(i);
