@@ -1920,7 +1920,7 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts) {
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
     int i = 0;
     for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v, ++i) {
-        for (const auto& q : v) {
+        for (const auto& q : *v) {
             if (q == alt) {
                 gls.push_back(i);
                 break;
@@ -2217,7 +2217,7 @@ vector<Variant*> Variant::matchingHaplotypes() {
 
         // last add header columns
         const auto last_element = this->header_columns.end() - 1;
-        for (const auto header_column_iter = this->header_columns.begin(); header_column_iter != this->header_columns.end(); ++header_column_iter)
+        for (auto header_column_iter = this->header_columns.begin(); header_column_iter != this->header_columns.end(); ++header_column_iter)
         {
             string delimiter = (header_column_iter == last_element) ? "\n" : "\t";
             header_string += (*header_column_iter) + delimiter;
