@@ -3,10 +3,7 @@ on: [push, pull_request]
 jobs:
   arch:
     name: vcflib-CI
-    env:
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-    runs-on: ${{ matrix.os }}
-
+    
     strategy:
       matrix:
           include:
@@ -20,6 +17,9 @@ jobs:
                 python-version: "3.11"
               - os: ubuntu-24.04
                 python-version: "3.12"
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+    runs-on: ${{ matrix.os }}
 
     steps:
     - name: apt update
