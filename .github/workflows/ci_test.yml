@@ -10,16 +10,8 @@ jobs:
     strategy:
         matrix:
             include:
-                 - os: ubuntu-22.04
+                 - os: ubuntu-20.04
                    python-version: "3.8"
-                 - os: ubuntu-22.04
-                   python-version: "3.9"
-                 - os: ubuntu-22.04
-                   python-version: "3.10"
-                 - os: ubuntu-22.04
-                   python-version: "3.11"
-                 - os: ubuntu-22.04
-                   python-version: "3.12"
     steps:
     - name: apt update
       run: sudo apt-get -o Acquire::Retries=3 update
