@@ -147,8 +147,8 @@ int parseOpts(int argc, char** argv)
 return 1;
 }
 
-bool sortAF(iHSdat * L, iHSdat * R){
-  if(L->af < R->af){
+bool sortAF(const iHSdat& L, const iHSdat& R){
+  if(L.af < R.af){
     return true;
   }
   return false;
@@ -187,13 +187,13 @@ double var(vector<double> & data, double mu){
 */
 
 
-double windowAvg(std::vector<double> & rangeData){
+double windowAvg(const std::vector<double> & rangeData){
 
   long double n = 0;
   long double s = 0;
 
-  for(std::vector<double>::iterator it = rangeData.begin(); it != rangeData.end(); it++){
-    s += *it;
+  for(const auto& elm : rangeData){
+    s += elm;
     n += 1;
   }
 
@@ -213,33 +213,33 @@ double windowAvg(std::vector<double> & rangeData){
 
 */
 
-void normalize(std::vector<iHSdat *> & data, int * pos){
+void normalize(std::vector<iHSdat> & data, int * pos){
 
   std::vector<double> windat;
 
   int start = *pos;
   int end   = *pos;
 
-  while((abs(data[start]->af - data[end]->af ) < globalOpts.afDiff)
+  while((abs(data[start].af - data[end].af ) < globalOpts.afDiff)
 	&& end < data.size() -1 ){
     end += 1;
   }
 
   for(int i = start; i <= end; i++){
-    windat.push_back(data[i]->iHS);
+    windat.push_back(data[i].iHS);
   }
 
   double avg = windowAvg(windat);
   double sd  = sqrt(var(windat, avg));
 
-  std::cerr << "start: " << data[start]->af << " "
-	    << "end: " << data[end]->af  << " "
+  std::cerr << "start: " << data[start].af << " "
+	    << "end: " << data[end].af  << " "
             << "n iHS scores: " << windat.size() << " "
 	    << "mean: " << avg << " "
 	    << "sd: " << sd << std::endl;
 
   for(int i = start; i <= end; i++){
-    data[i]->niHS = (data[i]->iHS - avg) / (sd);
+    data[i].niHS = (data[i].iHS - avg) / (sd);
   }
 
   *pos = end;
@@ -261,28 +261,25 @@ int main( int argc, char** argv)
     exit(1);
   }
 
-  std::vector<iHSdat *> data;
+  std::vector<iHSdat> data;
 
   string line;
   ifstream myfile (globalOpts.file);
   if (myfile.is_open())
     {
-      while ( getline (myfile,line) ){
-	vector<string> lineDat = split(line, '\t');
-
-	iHSdat * tp = new iHSdat;
-	tp->seqid = lineDat[0];
-	tp->start = lineDat[1];
-	tp->af    = atof(lineDat[2].c_str());
-	tp->ehhR  = atof(lineDat[3].c_str());
-	tp->ehhA  = atof(lineDat[4].c_str());
-	tp->iHS   = atof(lineDat[5].c_str());
-	tp->F1    = lineDat[6].c_str();
-	tp->F2    = lineDat[7].c_str();
-	tp->niHS  = 0;
-
-	data.push_back(tp);
-
+      while ( getline (myfile,line) ) {
+			vector<string> lineDat = split(line, '\t');
+			data.emplace_back();
+			auto& tp = data.back();
+			tp.seqid = lineDat[0];
+			tp.start = lineDat[1];
+			tp.af    = atof(lineDat[2].c_str());
+			tp.ehhR  = atof(lineDat[3].c_str());
+			tp.ehhA  = atof(lineDat[4].c_str());
+			tp.iHS   = atof(lineDat[5].c_str());
+			tp.F1    = lineDat[6].c_str();
+			tp.F2    = lineDat[7].c_str();
+			tp.niHS  = 0;
       }
 
     myfile.close();
@@ -305,15 +302,15 @@ int main( int argc, char** argv)
 
 
   for(int i = 0; i < data.size(); i++){
-    std::cout << data[i]->seqid << "\t"
-	      << data[i]->start << "\t"
-	      << data[i]->af << "\t"
-	      << data[i]->ehhR << "\t"
-	      << data[i]->ehhA << "\t"
-	      << data[i]->iHS << "\t"
-	      << data[i]->niHS << "\t"
-	      << data[i]->F1 << "\t"
-	      << data[i]->F2 << std::endl;
+    std::cout << data[i].seqid << "\t"
+	      << data[i].start << "\t"
+	      << data[i].af << "\t"
+	      << data[i].ehhR << "\t"
+	      << data[i].ehhA << "\t"
+	      << data[i].iHS << "\t"
+	      << data[i].niHS << "\t"
+	      << data[i].F1 << "\t"
+	      << data[i].F2 << std::endl;
 
   }
 

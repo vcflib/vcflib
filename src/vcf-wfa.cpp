@@ -546,16 +546,16 @@ void Variant::reduceAlleles(
         v.sequenceName = var.sequenceName;
         v.position = a->position; // ... by definition, this should be == if the variant was found
         if (v.ref.size() < a->ref.size()) {
-            for (vector<string>::iterator va = v.alt.begin(); va != v.alt.end(); ++va) {
-                *va += a->ref.substr(v.ref.size());
+            for (auto& va : v.alt) {
+                va += a->ref.substr(v.ref.size());
             }
             v.ref = a->ref;
         }
         v.alt.push_back(a->alt);
 
         int alleleIndex = v.alt.size();
-        for (vector<int>::iterator i = originalIndexes.begin(); i != originalIndexes.end(); ++i) {
-            unpackedAlleleIndexes[*i][v.position] = alleleIndex;
+        for (const auto& originalIndex : originalIndexes) {
+            unpackedAlleleIndexes[originalIndex][v.position] = alleleIndex;
             //unpackedAlleleInversions[*i] = v.inv
         }
         // add null allele
@@ -607,19 +607,18 @@ void Variant::reduceAlleles(
         string& genotype = sample["GT"].front();
         vector<string> genotypeStrs = split(genotype, "|/");
         vector<int> genotypeIndexes;
-        for (vector<string>::iterator s = genotypeStrs.begin(); s != genotypeStrs.end(); ++s) {
+        for (const auto& genotypeStr : genotypeStrs) {
             int i;
-            if (!convert(*s, i)) {
+            if (!convert(genotypeStr, i)) {
                 genotypeIndexes.push_back(ALLELE_NULL);
             } else {
                 genotypeIndexes.push_back(i);
             }
         }
         map<long unsigned int, vector<int> > positionIndexes;
-        for (vector<int>::iterator g = genotypeIndexes.begin(); g != genotypeIndexes.end(); ++g) {
-            int oldIndex = *g;
-            for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-                const long unsigned int& p = v->first;
+        for (const auto oldIndex : genotypeIndexes) {
+            for (const auto& v : variants) {
+                const long unsigned int& p = v.first;
                 if (oldIndex == 0) { // reference
                     positionIndexes[p].push_back(0);
                 } else {
@@ -627,13 +626,13 @@ void Variant::reduceAlleles(
                 }
             }
         }
-        for (map<long unsigned int, Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-            Variant& variant = v->second;
-            vector<int>& gtints = positionIndexes[v->first];
+        for (auto& v : variants) {
+            Variant& variant = v.second;
+            vector<int>& gtints = positionIndexes[v.first];
             vector<string> gtstrs;
-            for (vector<int>::iterator i = gtints.begin(); i != gtints.end(); ++i) {
-                if (*i != ALLELE_NULL) {
-                    gtstrs.push_back(convert(*i));
+            for (const auto i : gtints) {
+                if (i != ALLELE_NULL) {
+                    gtstrs.push_back(convert(i));
                 } else {
                     gtstrs.push_back(".");
                 }

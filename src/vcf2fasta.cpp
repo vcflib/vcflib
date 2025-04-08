@@ -101,20 +101,21 @@ map<string, int>& getPloidies(Variant& var, map<string, int>& ploidies, int defa
 }
 
 void closeOutputs(map<string, map<int, SampleFastaFile*> >& outputs) {
-    for (map<string, map<int, SampleFastaFile*> >::iterator f = outputs.begin(); f != outputs.end(); ++f) {
-        for (map<int, SampleFastaFile*>::iterator s = f->second.begin(); s != f->second.end(); ++s) {
-            delete s->second;
+    // TODO: revisit, potential for memory leaks
+	for (auto& f : outputs) {
+        for (auto& s : f.second) {
+            delete s.second;
         }
     }
 }
 
-void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, vector<string>& sampleNames, string& seqName, map<string, int>& ploidies, string& prefix) {
+void initOutputs(map<string, map<int, SampleFastaFile*> >& outputs, const vector<string>& sampleNames, const string& seqName, map<string, int>& ploidies, string& prefix) {
     closeOutputs(outputs);
-    for (vector<string>::iterator s = sampleNames.begin(); s != sampleNames.end(); ++s) {
-        map<int, SampleFastaFile*>& outs = outputs[*s];
-        int p = ploidies[*s];
+    for (const auto& sampleName: sampleNames) {
+        map<int, SampleFastaFile*>& outs = outputs[sampleName];
+        int p = ploidies[sampleName];
         for (int i = 0; i < p; ++i) {
-            string thisSeqName = *s + "_" + seqName + ":" + convert(i);
+            string thisSeqName = sampleName + "_" + seqName + ":" + convert(i);
             string fileName = prefix + thisSeqName + ".fa";
             if (!outs[i]) {
                 SampleFastaFile* fp = new SampleFastaFile;
@@ -142,10 +143,10 @@ void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& 
         if (var.sequenceName != lastSeq || lastSeq.empty()) {
             if (!lastSeq.empty()) {
                 string ref5prime = reference.getSubSequence(lastSeq, lastEnd, reference.sequenceLength(lastSeq)-lastEnd);
-                for (map<string, map<int, SampleFastaFile*> >::iterator s = outputs.begin(); s != outputs.end(); ++s) {
-                    map<int, SampleFastaFile*>& f = s->second;
-                    for (map<int, SampleFastaFile*>::iterator o = f.begin(); o != f.end(); ++o) {
-                        o->second->write(ref5prime);
+                for (auto& s  : outputs) {
+                    map<int, SampleFastaFile*>& f = s.second;
+                    for (auto& o : f) {
+                        o.second->write(ref5prime);
                     }
                 }
             }
@@ -200,10 +201,10 @@ void vcf2fasta(VariantCallFile& variantFile, FastaReference& reference, string& 
     // write last sequences
     {
         string ref5prime = reference.getSubSequence(lastSeq, lastEnd, reference.sequenceLength(lastSeq)-lastEnd);
-        for (map<string, map<int, SampleFastaFile*> >::iterator s = outputs.begin(); s != outputs.end(); ++s) {
-            map<int, SampleFastaFile*>& f = s->second;
-            for (map<int, SampleFastaFile*>::iterator o = f.begin(); o != f.end(); ++o) {
-                o->second->write(ref5prime);
+        for (auto& s : outputs) {
+            map<int, SampleFastaFile*>& f = s.second;
+            for (auto& o : f) {
+                o.second->write(ref5prime);
             }
         }
     }

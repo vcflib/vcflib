@@ -9,7 +9,6 @@
 
 #include "Variant.h"
 #include "var.hpp"
-#include "makeUnique.h"
 #include "index.hpp"
 
 #include <string>
@@ -20,6 +19,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <memory>
+
 #include "gpatInfo.hpp"
 
 using namespace std;
@@ -241,7 +242,7 @@ int main(int argc, char** argv) {
     vector<string> samples = variantFile.sampleNames;
     int nsamples = samples.size();
 
-    vector<indv *> countData;
+    vector<indv> countData;
     vector<string > countDataSampleName;
 
     for ( map<int ,int>::iterator x=it.begin(); x!=it.end(); ++x) {
@@ -251,15 +252,12 @@ int main(int argc, char** argv) {
 
 
     for(int i = 0; i < it.size(); i++){
-      indv * dip = new indv;
-
-      dip->nhet   = 0;
-      dip->nhom   = 0;
-      dip->nalt   = 0;
-      dip->nocall = 0;
-
-      countData.push_back(dip);
-
+		countData.emplace_back();
+		auto& dip = countData.back();
+        dip.nhet   = 0;
+        dip.nhom   = 0;
+        dip.nalt   = 0;
+        dip.nocall = 0;
     }
 
 
@@ -314,44 +312,43 @@ int main(int argc, char** argv) {
 	    index += 1;
 	}
 
-  using Detail::makeUnique;
 
-	unique_ptr<genotype> populationTarget      ;
+	std::unique_ptr<genotype> populationTarget      ;
 
 	if(type == "PL"){
-	  populationTarget     = makeUnique<pl>();
+	  populationTarget     = std::make_unique<pl>();
 	}
 	if(type == "GL"){
-	  populationTarget     = makeUnique<gl>();
+	  populationTarget     = std::make_unique<gl>();
 	}
 	if(type == "GP"){
-	  populationTarget     = makeUnique<gp>();
+	  populationTarget     = std::make_unique<gp>();
 	}
 	if(type == "GT"){
-    populationTarget     = makeUnique<gt>();
+    populationTarget     = std::make_unique<gt>();
 	}
 
 	populationTarget->loadPop(target, var.position);
 
 	for(int i = 0; i < populationTarget->genoIndex.size() ; i++){
 	  if(populationTarget->genoIndex[i] == -1){
-	    countData[i]->nocall += 1;
+	    countData[i].nocall += 1;
 	  }
 	  else if (populationTarget->genoIndex[i] == 0) {
             if (!use_ancestral_state || ref_is_ancestral_allele) {
-	      countData[i]->nhom += 1;
+	      countData[i].nhom += 1;
             } else {
-	      countData[i]->nalt += 1;
+	      countData[i].nalt += 1;
             }
 	  }
 	  else if (populationTarget->genoIndex[i] == 1){
-	    countData[i]->nhet += 1;
+	    countData[i].nhet += 1;
 	  }
 	  else if (populationTarget->genoIndex[i] == 2) {
             if (!use_ancestral_state || ref_is_ancestral_allele) {
-	      countData[i]->nalt += 1;
+	      countData[i].nalt += 1;
             } else {
-	      countData[i]->nhom += 1;
+	      countData[i].nhom += 1;
             }
 	  }
 	  else{
@@ -372,10 +369,10 @@ cerr << var << endl;
     }
     for(int i = 0; i < countData.size(); i++){
         std::cout << countDataSampleName[i]
-                  << "\t" << countData[i]->nocall
-                  << "\t" << countData[i]->nhom
-                  << "\t" << countData[i]->nhet
-                  << "\t" << countData[i]->nalt
+                  << "\t" << countData[i].nocall
+                  << "\t" << countData[i].nhom
+                  << "\t" << countData[i].nhet
+                  << "\t" << countData[i].nalt
                   << std::endl;
     }
 
