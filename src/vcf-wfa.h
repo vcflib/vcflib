@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "wavefront/wfa.hpp"
+#include <wavefront/wfa.hpp>
 
 namespace vcflib {
 

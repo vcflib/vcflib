@@ -156,6 +156,8 @@ set(vcflib_SOURCE
     src/pdflib.cpp
     src/cdflib.cpp
     src/split.cpp
+    src/index.cpp
+    src/phase.cpp
     src/rkmh.cpp
     src/murmur3.cpp
     src/LeftAlign.cpp

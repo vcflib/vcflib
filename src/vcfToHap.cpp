@@ -13,6 +13,7 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
+#include "phased.hpp"
 
 #include <string>
 #include <iostream>
@@ -173,18 +174,6 @@ void clearHaplotypes(string haplotypes[][2], int ntarget){
   }
 }
 
-void loadPhased(string haplotypes[][2], genotype * pop, int ntarget){
-  
-  int indIndex = 0;
-
-  for(vector<string>::iterator ind = pop->gts.begin(); ind != pop->gts.end(); ind++){
-    string g = (*ind);
-    vector< string > gs = split(g, "|");
-    haplotypes[indIndex][0].append(gs[0]);
-    haplotypes[indIndex][1].append(gs[1]);
-    indIndex += 1;
-  }
-}
 
 int main(int argc, char** argv) {
 
@@ -355,8 +344,8 @@ int main(int argc, char** argv) {
     
     vector<double> afs;
 
-    string haplotypes [target_h.size()][2];    
-    
+    vector<pair<string, string>> haplotypes(target_h.size());
+
 
     while (variantFile.getNextVariant(var)) {
 
@@ -408,7 +397,7 @@ int main(int argc, char** argv) {
       }
       positions.push_back(var.position);
       afs.push_back(populationTarget->af);
-      loadPhased(haplotypes, populationTarget.get(), populationTarget->gts.size()); 
+      loadPhased(haplotypes, populationTarget.get()); 
     }
 
     if(!globalOpts.geneticMapFile.empty()){
@@ -417,8 +406,8 @@ int main(int argc, char** argv) {
       cerr << "INFO: finished loading genetics map" << endl;
     }
     
-    if(positions.size() != haplotypes[0][0].size()){
-      std::cerr << "FATAL: there are " << positions.size() << " and " << haplotypes[0][0].size() << " haplotype SNPs" << endl;
+    if(positions.size() != haplotypes[0].first.size()){
+      std::cerr << "FATAL: there are " << positions.size() << " and " << haplotypes[0].first.size() << " haplotype SNPs" << endl;
       exit(1);
     }
 

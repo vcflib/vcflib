@@ -13,6 +13,8 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
+#include "gpatInfo.hpp"
+#include "phase.hpp"
 
 #include <memory>
 #include <string>
@@ -23,7 +25,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
-#include "gpatInfo.hpp"
+
 // maaas speed
 
 #if defined HAS_OPENMP
@@ -372,18 +374,6 @@ void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhap
   }
 }
 
-void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
-
-  int indIndex = 0;
-
-  for(const auto& g : pop->gts){
-    vector< string > gs = split(g, "|");
-    haplotypes[indIndex].first.append(gs[0]);
-    haplotypes[indIndex].first.append(gs[1]);
-    indIndex += 1;
-  }
-}
-
 int main(int argc, char** argv) {
 
   globalOpts.threads = 1   ;
@@ -617,7 +607,7 @@ int main(int argc, char** argv) {
       }
       positions.push_back(var.position);
       afs.push_back(populationTarget->af);
-      loadPhased(haplotypes, populationTarget.get(), populationTarget->gts.size());
+      loadPhased(haplotypes, populationTarget.get());
     }
 
     if(!globalOpts.geneticMapFile.empty()){

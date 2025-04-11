@@ -8,23 +8,12 @@
 */
 #pragma once
 
-#include "split.h"
 
 #include <map>
 #include <string>
-#include <vector>
 
-#include <cstdlib>
 
 namespace vcflib
 {
-	inline void loadIndices(std::map<int, int>& index, const std::string& set)
-	{
-		const std::vector<std::string> individuals = split(set, ",");
-
-		for (const auto& individual : individuals)
-		{
-			index[std::atoi(individual.c_str())] = 1;
-		}
-	}
+    void loadIndices(std::map<int, int>& index, const std::string& set);
 }
