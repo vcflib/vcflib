@@ -44,8 +44,11 @@ THE SOFTWARE.
 
 
 */
-#include <fstream>
 #include "split.h"
+#include "stats.hpp"
+#include "gpatInfo.hpp"
+
+#include <fstream>
 #include <vector>
 #include <map>
 #include <string>
@@ -57,7 +60,6 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "gpatInfo.hpp"
 
 #include <omp.h>
 // print lock
@@ -232,21 +234,6 @@ bool getContiguousWindow(const vector<score> & data, vector<double> & load, int 
   }
   return true;
 }
-
-
-//------------------------------- SUBROUTINE --------------------------------
-
-double mean(vector<double> & data){
-
-  double sum = 0;
-
-  for(vector<double>::iterator it = data.begin(); it != data.end(); it++){
-    sum += (*it);
-  }
-  return sum / data.size();
-}
-
-
 
 //------------------------------- SUBROUTINE --------------------------------
 /*

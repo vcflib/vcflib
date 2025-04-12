@@ -9,6 +9,7 @@
 
 #include "Variant.h"
 #include "split.h"
+#include "stats.hpp"
 #include "Fasta.h"
 #include <getopt.h>
 #include <algorithm>
@@ -33,19 +34,6 @@ void printSummary(char** argv) {
          << endl;
     cerr << endl << "Type: transformation" << endl << endl;
     exit(0);
-}
-
-double median(vector<double> &v)
-{
-    size_t n = v.size() / 2;
-    nth_element(v.begin(), v.begin()+n, v.end());
-    return v[n];
-}
-
-double mean(vector<double> &v)
-{
-    double sum = accumulate(v.begin(), v.end(), 0.0);
-    return sum / v.size();
 }
 
 enum StatType { MEAN, MEDIAN, MIN, MAX };

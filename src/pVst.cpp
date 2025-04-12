@@ -12,6 +12,7 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
+#include "stats.hpp"
 
 #include <string>
 #include <iostream>
@@ -125,26 +126,6 @@ inline double var(vector<double> & d, double mu){
 
 */
 
-
-inline double mean(vector<int> & data){
-
-  double sum = 0;
-
-  for(vector<int>::iterator it = data.begin(); it != data.end(); it++){
-    sum += (*it);
-  }
-  return sum / data.size();
-}
-
-inline double mean(vector<double> & data){
-
-  double sum = 0;
-
-  for(vector<double>::iterator it = data.begin(); it != data.end(); it++){
-    sum += (*it);
-  }
-  return sum / data.size();
-}
 
 double vst(copyNcounts * d){
 

@@ -156,6 +156,7 @@ set(vcflib_SOURCE
     src/pdflib.cpp
     src/cdflib.cpp
     src/split.cpp
+    src/stats.cpp
     src/index.cpp
     src/phase.cpp
     src/rkmh.cpp
