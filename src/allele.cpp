@@ -1,6 +1,7 @@
 #include "allele.hpp"
 
 #include <iostream>
+#include <tuple> // for std::tie
 
 namespace vcflib {
 
