@@ -140,6 +140,10 @@ output in <a href="../data/regression/vcfwave_4.vcf">vcfwave_4.vcf</a>
 >>> run_stdout("vcfwave -L 10000 ../samples/grch38#chr4_10083863-10181258.vcf", ext="vcf")
 output in <a href="../data/regression/vcfwave_5.vcf">vcfwave_5.vcf</a>
 
+# ./vcfwave -L 10000 ../samples/test_variant_drop.vcf > ../test/data/regression/test_variant_drop_regression.vcf
+>>> run_stdout("vcfwave -L 10000 ../samples/test_variant_drop.vcf", ext="vcf")
+output in <a href="../data/regression/test_variant_drop_regression.vcf">test_variant_drop_regression.vcf</a>
+
 ```
 
 ## Inversions
