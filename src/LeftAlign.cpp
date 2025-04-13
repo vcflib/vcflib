@@ -1,5 +1,7 @@
 #include "LeftAlign.hpp"
 
+#include <iostream>
+
 // Attempts to left-realign all the indels represented by the alignment cigar.
 //
 // This is done by shifting all indels as far left as they can go without

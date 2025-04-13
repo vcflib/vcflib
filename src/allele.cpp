@@ -1,10 +1,12 @@
 #include "allele.hpp"
 
+#include <iostream>
+
 namespace vcflib {
 
 using namespace std;
 
-ostream& operator<<(ostream& out, VariantAllele& var) {
+ostream& operator<<(ostream& out, const VariantAllele& var) {
     out << var.position << " " << var.ref << " -> " << var.alt;
     return out;
 }
@@ -23,7 +25,7 @@ bool operator==(const VariantAllele& a, const VariantAllele& b) {
 }
 
 bool VariantAllele::is_pure_indel(void) {
-    return ref.size() > 0 &&  alt == "" || alt.size() > 0 && ref == "";
+    return !ref.empty() && alt.empty() || !alt.empty() && ref.empty();
 }
 
 // shift 1bp in between the two variants to be in the "left" (first) allele
@@ -54,7 +56,7 @@ void shift_mid_right(VariantAllele& a, VariantAllele& b) {
     } else {
         // a is pure indel
         // if del, the position will shift when merging
-        if (a.ref.size() && !a.alt.size()) {
+        if (!a.ref.empty() && a.alt.empty()) {
             b.position = a.position;
         }
         // else if pure ins, no change in position

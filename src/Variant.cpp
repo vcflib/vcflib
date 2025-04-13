@@ -136,12 +136,12 @@ void Variant::parse(string& line, bool parseSamples) {
     // Process the INFO fields
     if (fields.size() > 7) {
         vector<string> infofields = split(fields.at(7), ';');
-        for (auto field: infofields) {
+        for (const auto& field: infofields) {
             if (field == ".") {
                 continue;
             }
             vector<string> kv = split(field, '='); // note that field gets split in place
-            auto key = kv.at(0);
+            const auto& key = kv.at(0);
             if (kv.size() == 2) {
                 split(kv.at(1), ',', info[key]); // value gets split in place
                 infoOrderedKeys.push_back(key);
@@ -164,25 +164,24 @@ void Variant::parse(string& line, bool parseSamples) {
         vector<string>::iterator sampleName = sampleNames.begin();
         vector<string>::iterator sample = fields.begin() + 9;
         for (; sample != fields.end() && sampleName != sampleNames.end();
-	     ++sample, ++sampleName) {
-	  string& name = *sampleName;
+                ++sample, ++sampleName) {
+			string& name = *sampleName;
 
-	  vector<string> samplefields = split(*sample, ':');
-	  vector<string>::iterator i = samplefields.begin();
+			vector<string> samplefields = split(*sample, ':');
+        	vector<string>::iterator i = samplefields.begin();
 
-	  for (const auto& f : format) {
-
-	    if(i != samplefields.end()){
-	      samples[name][f] = split(*i, ',');
-              ++i;
-	    }
-	    else{
-	      std::vector<string> missing;
-	      missing.push_back(".");
-	      samples[name][f] = missing;
-	    }
-	  }
-	}
+        	for (const auto& f : format) {
+        		if(i != samplefields.end()){
+        			samples[name][f] = split(*i, ',');
+        			++i;
+        		}
+        		else{
+        			std::vector<string> missing;
+        			missing.push_back(".");
+        			samples[name][f] = missing;
+        		}
+        	}
+                }
 
         if (sampleName != sampleNames.end()) {
             cerr << "error: more sample names in header than sample fields" << endl;

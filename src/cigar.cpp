@@ -1,5 +1,7 @@
 #include "cigar.hpp"
 
+#include <iostream>
+
 namespace vcflib {
 
 // generates cigar from allele parsed by parsedAlternates

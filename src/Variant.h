@@ -108,7 +108,7 @@ public:
     vector<string> infoIds(void);
     vector<string> formatIds(void);
 
-    bool open(string& filename) {
+    bool open(const string& filename) {
         vector<string> filenameParts = split(filename, ".");
         if (filenameParts.back() == "gz" || filenameParts.back() == "bgz") {
             return openTabix(filename);
@@ -117,16 +117,16 @@ public:
         }
     }
 
-    bool openFile(string& filename) {
+    bool openFile(const string& filename) {
         file = &_file;
         _file.open(filename.c_str(), ifstream::in);
         parsedHeader = parseHeader();
         return parsedHeader;
     }
 
-    bool openTabix(string& filename) {
+    bool openTabix(const string& filename) {
         usingTabix = true;
-        tabixFile = new Tabix(filename);
+        tabixFile = new Tabix(const_cast<string&>(filename));
         parsedHeader = parseHeader();
         return parsedHeader;
     }

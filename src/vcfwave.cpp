@@ -190,13 +190,14 @@ int main(int argc, char** argv) {
 
     off_t file_size = -1;
 
-    if (optind < argc) {
-        string filename = argv[optind];
-        variantFile.open(filename);
-        file_size = get_file_size(filename.c_str());
-    } else {
-        variantFile.open(std::cin);
-    }
+    // if (optind < argc) {
+        // string filename = argv[optind];
+    std::string filename = "/home/michael/.vs/vcflib/bcbe07f2-32f0-42c5-b880-c82adae1adeb/src/samples/test_variant_drop.vcf";
+    variantFile.open(filename);
+    file_size = get_file_size(filename.c_str());
+    // } else {
+        // variantFile.open(std::cin);
+    // }
 
     if (!variantFile.is_open()) {
         return 1;
@@ -242,7 +243,7 @@ int main(int argc, char** argv) {
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
         int max_allele_length = 0;
-        for (auto allele: var.alt) {
+        for (const auto& allele: var.alt) {
           if (debug) cerr << allele << ":" << allele.length() << "," << max_allele_length << endl;
           if (allele.length() >= max_allele_length) {
              max_allele_length = allele.length();
@@ -295,18 +296,17 @@ int main(int argc, char** argv) {
             // Unpack wavefront results and set values for each unique allele
             for (const auto [alt0, wfvalue] : varAlleles) {               
                 bool is_inv = wfvalue.second;
-                for (auto wfmatch: wfvalue.first) {
-                    auto ref = wfmatch.ref;
-                    auto aligned = wfmatch.alt;
-                    auto wfpos = wfmatch.position;
+                for (const auto& wfmatch: wfvalue.first) {
+                    const auto& ref = wfmatch.ref;
+                    const auto& aligned = wfmatch.alt;
+                    const auto wfpos = wfmatch.position;
                     int alt_index,AC=-1,AN = -1;
                     string AT;
                     double AF = -1;
-                    string wftag = alt0+":"+to_string(wfpos)+":"+ref+"/"+aligned;
                     if (ref != aligned) {
-                        auto index = [&](vector<string> v, string allele) {
+                        auto index = [&](const vector<string>& v, const string& allele) {
                             //auto check = (is_inv ? reverse_complement(allele) : allele); DISABLED
-                            auto check = allele;
+                            const auto& check = allele;
                             auto it = find(v.begin(), v.end(), check);
                             return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check + ")") : it - v.begin() );
                         };
@@ -324,36 +324,38 @@ int main(int argc, char** argv) {
                             AN = stoi(var.info["AN"].at(alt_index));
                         }
                     }
-                    auto relpos = wfpos - var.position;
-                    auto u = &unique[wftag];
-                    u->pos0 = var.position;
-                    u->ref0 = var.ref;
-                    u->alt0 = alt0;
-                    u->ref1 = ref;
-                    u->algn = aligned;
-                    u->pos1 = wfpos;
-                    u->altidx = alt_index;
-                    u->relpos = relpos;
-                    u->AC = AC;
-                    u->AF = AF;
-                    u->AN = AN;
-                    u->AT = AT;
-                    u->is_inv = is_inv;
+                    const auto relpos = wfpos - var.position;
+
+                	const string wftag = alt0 + ":" + to_string(wfpos) + ":" + ref + "/" + aligned;
+                    auto& u = unique[wftag];
+                    u.pos0 = var.position;
+                    u.ref0 = var.ref;
+                    u.alt0 = alt0;
+                    u.ref1 = ref;
+                    u.algn = aligned;
+                    u.pos1 = wfpos;
+                    u.altidx = alt_index;
+                    u.relpos = relpos;
+                    u.AC = AC;
+                    u.AF = AF;
+                    u.AN = AN;
+                    u.AT = AT;
+                    u.is_inv = is_inv;
                 }
             }
             // Collect genotypes for every allele from the main record. This code is
             // effectively mirrored in Python in realign.py:
             RecGenotypes genotypes;
             auto samples = var.samples;
-            for (auto sname: var.sampleNames) {
-                auto genotype1 = samples[sname]["GT"].front();
+            for (const auto& sname: var.sampleNames) {
+                const auto& genotype1 = samples[sname]["GT"].front();
                 vector<string> genotypeStrs = split(genotype1, "|/");
                 Genotypes gts;
                 std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? ALLELE_NULL2 : stoi(n)); });
                 genotypes.push_back(gts);
             }
             // Now plug in the new indices for listed genotypes
-            for (auto [tag,aln]: unique) {
+            for (auto& [_,aln]: unique) {
                 RecGenotypes aln_genotypes = genotypes; // make a copy
                 auto altidx1 = aln.altidx+1;
                 for (auto &gt: aln_genotypes) {
@@ -366,16 +368,16 @@ int main(int argc, char** argv) {
                         i++;
                     }
                 }
-                unique[tag].genotypes = aln_genotypes;
+                aln.genotypes = aln_genotypes;
             }
 
             // Merge records that describe the exact same variant (in
             // earlier jargon a 'primitive allele' in a new dict named
             // variants and adjust AC, AF and genotypes:
             TrackInfo track_variants;
-            for (auto [key,v] : unique) {
-                auto ref = v.ref1;
-                auto aligned = v.algn;
+            for (const auto& [_,v] : unique) {
+                const auto& ref = v.ref1;
+                const auto& aligned = v.algn;
                 if (ref != aligned) {
                     auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv) + "_"+ v.AT; 
                     if (track_variants.count(ntag)>0 && track_variants[ntag].AN == v.AN) { // this variant already exists
@@ -383,18 +385,6 @@ int main(int argc, char** argv) {
                         // Check AN number is equal so we can compute AF by addition
                         //assert(track_variants[ntag].AN == v.AN);
                         track_variants[ntag].AF += v.AF;
-                        // Merge genotypes if they come from different alleles
-                        if (v.altidx != track_variants[ntag].altidx) {
-                            auto track_genotypes = track_variants[ntag].genotypes;
-                            for (auto sample: v.genotypes) { // all samples
-                                int i = 0;
-                                for (auto g: sample) { // all genotypes
-                                    if (g && sample[i]>0)
-                                        sample[i] = 1; // always one genotype in play
-                                    i++;
-                                }
-                            }
-                        }
                     }
                     else {
                         track_variants[ntag] = v;
@@ -404,7 +394,7 @@ int main(int argc, char** argv) {
             unique.clear();
             // The following section updates the INFO TYPE and INV field:
             // Adjust TYPE field to set snp/mnp/ins/del
-            for (auto [key,v] : track_variants) {
+            for (auto& [_,v] : track_variants) {
                 auto ref_len = v.ref1.length();
                 auto aln_len = v.algn.length();
                 string type;
@@ -428,10 +418,9 @@ int main(int argc, char** argv) {
                 v.type = type;
                 v.size = size;
                 v.origin = var.sequenceName+":"+to_string(var.position);
-                track_variants[key] = v;
             }
             // Here we correct for deletions - overlapping cals for SNP and MNP get nullified.
-            for (auto [key,v]: track_variants) {
+            for (const auto& [_,v]: track_variants) {
                 if (v.type == "del") {
                     auto del_ref_len = v.ref1.length();
                     auto del_aln_len = v.algn.length();
@@ -473,7 +462,7 @@ int main(int argc, char** argv) {
             }
             // The following section outputs all tracked alleles one by one:
             int ct = 0;
-            for (auto [key,v]: track_variants) {
+            for (const auto& [_,v]: track_variants) {
                 ct++;
                 Variant newvar(variantFile);
                 newvar.sequenceName = var.sequenceName;
@@ -530,7 +519,7 @@ int main(int argc, char** argv) {
                 cout.precision(2);
                 cout << newvar;
                 cout << "\tGT";
-                for (auto gts: v.genotypes) {
+                for (const auto& gts: v.genotypes) {
                     cout << "\t";
                     int idx = 0;
                     for (auto gt : gts) {
