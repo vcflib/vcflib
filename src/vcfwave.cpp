@@ -377,7 +377,7 @@ int main(int argc, char** argv) {
                 auto ref = v.ref1;
                 auto aligned = v.algn;
                 if (ref != aligned) {
-                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv);
+                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv) + "_"+ v.AT; 
                     if (track_variants.count(ntag)>0 && track_variants[ntag].AN == v.AN) { // this variant already exists
                         track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
