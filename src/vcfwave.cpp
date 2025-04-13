@@ -190,14 +190,14 @@ int main(int argc, char** argv) {
 
     off_t file_size = -1;
 
-    // if (optind < argc) {
-        // string filename = argv[optind];
-    std::string filename = "/home/michael/.vs/vcflib/bcbe07f2-32f0-42c5-b880-c82adae1adeb/src/samples/test_variant_drop.vcf";
-    variantFile.open(filename);
-    file_size = get_file_size(filename.c_str());
-    // } else {
-        // variantFile.open(std::cin);
-    // }
+    if (optind < argc) {
+        string filename = argv[optind];
+        variantFile.open(filename);
+        file_size = get_file_size(filename.c_str());
+    }
+    else {
+        variantFile.open(std::cin);
+    }
 
     if (!variantFile.is_open()) {
         return 1;
