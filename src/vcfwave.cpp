@@ -13,6 +13,8 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <cstdlib>
 
 #include <getopt.h>
 #ifdef WFA_PARALLEL
@@ -22,7 +24,6 @@
 #include "Variant.h"
 #include "vcf-wfa.h"
 #include "convert.h"
-#include "join.h"
 #include "split.h"
 #include "progress.h"
 
@@ -39,7 +40,7 @@ double convertStrDbl(const string& s) {
 }
 
 void printSummary(char** argv) {
-    std::string text = R"(
+    const std::string text = R"(
 usage: vcfwave [options] [file]
 
 Realign reference and alternate alleles with WFA, parsing out the
@@ -101,19 +102,19 @@ int main(int argc, char** argv) {
             {
                 /* These options set a flag. */
                 //{"verbose", no_argument,       &verbose_flag, 1},
-                {"help", no_argument, 0, 'h'},
-                {"wf-params", required_argument, 0, 'p'},
-                {"max-length", required_argument, 0, 'L'},
-                {"inv-kmer", required_argument, 0, 'K'},
-                {"inv-min", required_argument, 0, 'I'},
-                {"tag-parsed", required_argument, 0, 'f'},
-                {"keep-info", no_argument, 0, 'k'},
-                {"keep-geno", no_argument, 0, 'g'},
-                {"threads", required_argument, 0, 't'},
-                {"nextgen", no_argument, 0, 'n'},
-                {"quiet", no_argument, 0, 'q'},
-                {"debug", no_argument, 0, 'd'},
-                {0, 0, 0, 0}
+                {"help", no_argument, nullptr, 'h'},
+                {"wf-params", required_argument, nullptr, 'p'},
+                {"max-length", required_argument, nullptr, 'L'},
+                {"inv-kmer", required_argument, nullptr, 'K'},
+                {"inv-min", required_argument, nullptr, 'I'},
+                {"tag-parsed", required_argument, nullptr, 'f'},
+                {"keep-info", no_argument, nullptr, 'k'},
+                {"keep-geno", no_argument, nullptr, 'g'},
+                {"threads", required_argument, nullptr, 't'},
+                {"nextgen", no_argument, nullptr, 'n'},
+                {"quiet", no_argument, nullptr, 'q'},
+                {"debug", no_argument, nullptr, 'd'},
+                {nullptr, 0, nullptr, 0}
             };
         /* getopt_long stores the option index here. */
         int option_index = 0;
@@ -191,7 +192,7 @@ int main(int argc, char** argv) {
     off_t file_size = -1;
 
     if (optind < argc) {
-        string filename = argv[optind];
+        const string filename = argv[optind];
         variantFile.open(filename);
         file_size = get_file_size(filename.c_str());
     }
@@ -206,7 +207,8 @@ int main(int argc, char** argv) {
     // parse the alignment parameters
     vector<string> p_str = split(paramString, ',');
     vector<int> p;
-    for (auto& s : p_str) { p.push_back(atoi(s.c_str())); }
+    p.reserve(p_str.size());
+    for (const auto& s : p_str) { p.push_back(atoi(s.c_str())); }
 
     auto wfa_params = wavefront_aligner_attr_default;
     wfa_params.memory_mode = wavefront_memory_ultralow; // note this is overridden in Variant.cpp
@@ -294,7 +296,7 @@ int main(int argc, char** argv) {
             TrackInfo unique; // Track all alleles
 
             // Unpack wavefront results and set values for each unique allele
-            for (const auto [alt0, wfvalue] : varAlleles) {               
+            for (const auto& [alt0, wfvalue] : varAlleles) {               
                 bool is_inv = wfvalue.second;
                 for (const auto& wfmatch: wfvalue.first) {
                     const auto& ref = wfmatch.ref;
@@ -308,7 +310,7 @@ int main(int argc, char** argv) {
                             //auto check = (is_inv ? reverse_complement(allele) : allele); DISABLED
                             const auto& check = allele;
                             auto it = find(v.begin(), v.end(), check);
-                            return (it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check + ")") : it - v.begin() );
+                            return it == v.end() ? throw std::runtime_error("Unexpected value error for allele (inv="+to_string(is_inv)+ " " +check + ")") : it - v.begin();
                         };
                         alt_index = index(var.alt,alt0); // throws error if missing
                         if (var.info["AC"].size() > alt_index) {
@@ -351,13 +353,13 @@ int main(int argc, char** argv) {
                 const auto& genotype1 = samples[sname]["GT"].front();
                 vector<string> genotypeStrs = split(genotype1, "|/");
                 Genotypes gts;
-                std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](auto n){ return (n == "." ? ALLELE_NULL2 : stoi(n)); });
+                std::transform(genotypeStrs.begin(), genotypeStrs.end(), std::back_inserter(gts), [](const auto& n){ return (n == "." ? ALLELE_NULL2 : stoi(n)); });
                 genotypes.push_back(gts);
             }
             // Now plug in the new indices for listed genotypes
             for (auto& [_,aln]: unique) {
                 RecGenotypes aln_genotypes = genotypes; // make a copy
-                auto altidx1 = aln.altidx+1;
+                const auto altidx1 = aln.altidx+1;
                 for (auto &gt: aln_genotypes) {
                     int i = 0;
                     for (auto g: gt) {

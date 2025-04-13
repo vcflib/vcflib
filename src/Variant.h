@@ -126,6 +126,7 @@ public:
 
     bool openTabix(const string& filename) {
         usingTabix = true;
+        // Tabix does not modify the string, better to keep rest of the interface clean
         tabixFile = new Tabix(const_cast<string&>(filename));
         parsedHeader = parseHeader();
         return parsedHeader;
