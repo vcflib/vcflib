@@ -1,9 +1,7 @@
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <sstream>
-#include <tuple>
+#include <iosfwd>
 
 namespace vcflib {
 
@@ -14,7 +12,7 @@ using namespace std;
 */
 
 class VariantAllele {
-    friend ostream& operator<<(ostream& out, VariantAllele& var);
+    friend ostream& operator<<(ostream& out, const VariantAllele& var);
     friend bool operator<(const VariantAllele& a, const VariantAllele& b);
     friend VariantAllele operator+(const VariantAllele& a, const VariantAllele& b);
     friend bool operator==(const VariantAllele& a, const VariantAllele& b);

@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2                                                                                                   
+##FILTER=<ID=PASS,Description="All filters passed">                                                                    
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">                                                           
+##INFO=<ID=CONFLICT,Number=.,Type=String,Description="Sample names for which there are multiple paths in the graph with conflicting alleles">                                                                                                
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Total number of alternate alleles in called genotypes">               
+##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1]">                         
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">                                         
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">                         
+##INFO=<ID=LV,Number=1,Type=Integer,Description="Level in the snarl tree (0=top level)">                               
+##INFO=<ID=PS,Number=1,Type=String,Description="ID of variant corresponding to parent snarl">                          
+##INFO=<ID=AT,Number=R,Type=String,Description="Allele Traversal as path in graph">                                    
+##contig=<ID=chrVII,length=1091538>                                                                                    
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	DBVPG6044	SK1	UWOPS034614	Y12	YPS128                                                                                                               
+chrVII	545097	>225698>225707	AC	ATATTGAGAAATGTATGGT,AT	60	.	NS=4;LV=0;AF=0.5,0.5;AT=>225698>225699>225707,>225698>225700>225701>225702>225703>225704>225705>225706>225707,>225698>225706>225707;AN=4;AC=2,2	GT	1	1	.	2	2                                                                                          
