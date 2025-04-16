@@ -13,6 +13,8 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
+#include "gpatInfo.hpp"
+#include "phase.hpp"
 
 #include <string>
 #include <iostream>
@@ -24,7 +26,6 @@
 #include <getopt.h>
 #include <memory>
 
-#include "gpatInfo.hpp"
 
 using namespace std;
 using namespace vcflib;
@@ -147,18 +148,6 @@ void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, in
 
   }
 
-}
-
-void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
-
-  int indIndex = 0;
-
-  for(const auto& g : pop->gts){
-    vector< string > gs = split(g, "|");
-    haplotypes[indIndex].first.append(gs[0]);
-    haplotypes[indIndex].second.append(gs[1]);
-    indIndex += 1;
-  }
 }
 
 int main(int argc, char** argv) {
@@ -448,7 +437,7 @@ int main(int argc, char** argv) {
       targetAFS.push_back(populationTarget->af);
       backgroundAFS.push_back(populationBackground->af);
       positions.push_back(var.position);
-      loadPhased(haplotypes, populationTotal.get(), nsamples);
+      loadPhased(haplotypes, populationTotal.get());
 
     }
 

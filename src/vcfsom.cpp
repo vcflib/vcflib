@@ -11,7 +11,9 @@
 
 #include "Variant.h"
 #include "split.h"
+#include "stats.hpp"
 #include "convert.h"
+
 #include <string>
 #include <iostream>
 #include <set>
@@ -22,40 +24,6 @@
 
 using namespace std;
 using namespace vcflib;
-
-double mean(const vector<double>& data) {
-    double total = 0;
-    for (vector<double>::const_iterator i = data.begin(); i != data.end(); ++i) {
-        total += *i;
-    }
-    return total/data.size();
-}
-
-double median(vector <double>& data) {
-    double median;
-    size_t size = data.size();
-    // ascending order
-    sort(data.begin(), data.end());
-    // get middle value
-    if (size % 2 == 0) {
-        median = (data[size/2-1] + data[size/2]) / 2;
-    } else {
-        median = data[size/2];
-    }
-    return median;
-}
-
-double variance(const vector <double>& data, const double mean) {
-    double total = 0;
-    for (vector <double>::const_iterator i = data.begin(); i != data.end(); ++i) {
-        total += (*i - mean)*(*i - mean);
-    }
-    return total / (data.size());
-}
-
-double standard_deviation(const vector <double>& data, const double mean) {
-    return sqrt(variance(data, mean));
-}
 
 struct Stats {
     double mean;

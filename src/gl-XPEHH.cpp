@@ -662,7 +662,7 @@ int main(int argc, char** argv) {
             localPhase(haplotypes, zdat, (it.size() + ib.size()));
           }
           else{
-            loadPhased(haplotypes, zdat, (it.size() + ib.size()));
+            loadPhased(haplotypes, zdat);
           }
           while(!zdat.empty()){
             zdat.pop_front();
@@ -674,7 +674,7 @@ int main(int argc, char** argv) {
       localPhase(haplotypes, zdat, (it.size() + ib.size()));
     }
     else{
-      loadPhased(haplotypes, zdat, (it.size() + ib.size()));
+      loadPhased(haplotypes, zdat);
     }
     while(!zdat.empty()){
       zdat.pop_front();

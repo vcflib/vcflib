@@ -13,6 +13,7 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
+#include "phase.hpp"
 
 #include <string>
 #include <iostream>
@@ -48,21 +49,6 @@ void printHelp(void){
   cerr << endl;
 
   exit(1);
-}
-
-
-
-
-void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
-
-  int indIndex = 0;
-
-  for(const auto& g : pop->gts){
-    vector< string > gs = split(g, "|");
-    haplotypes[indIndex].first.append(gs[0]);
-    haplotypes[indIndex].second.append(gs[1]);
-    indIndex += 1;
-  }
 }
 
 void printHaplotypes(const std::vector<std::pair<std::string, std::string>>& haps, const std::vector<int>& target, vector<long int> pos){
@@ -273,7 +259,7 @@ int main(int argc, char** argv) {
 
       positions.push_back(var.position);
       afs.push_back(populationTarget->af);
-      loadPhased(haplotypes, populationTarget.get(), populationTarget->gts.size());
+      loadPhased(haplotypes, populationTarget.get());
     }
 
     printHaplotypes( haplotypes, target_h, positions);

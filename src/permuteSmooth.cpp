@@ -45,8 +45,11 @@ THE SOFTWARE.
 
 
 */
-#include <fstream>
 #include "split.h"
+#include "stats.hpp"
+#include "gpatInfo.hpp"
+
+#include <fstream>
 #include <vector>
 #include <map>
 #include <string>
@@ -58,7 +61,6 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "gpatInfo.hpp"
 
 #if defined HAS_OPENMP
 #include <omp.h>
@@ -251,21 +253,6 @@ bool getContiguousWindow(vector<score *> & data,
   return true;
 }
 
-
-//------------------------------- SUBROUTINE --------------------------------
-
-double mean(vector<double> & data){
-
-  double sum = 0;
-
-  for(vector<double>::iterator it = data.begin(); it != data.end(); it++){
-    sum += (*it);
-  }
-  return sum / data.size();
-}
-
-
-
 //------------------------------- SUBROUTINE --------------------------------
 /*
  Function input  : score, n, data
@@ -299,7 +286,7 @@ bool permute(double s, int n, vector<score *> & data,
       getWindow = getContiguousWindow(data, scores, n, &nfail);
     }
 
-    double ns = mean(scores);
+    double ns = vcflib::mean(scores);
 
     if(ns > s){
       *nSuc += 1;

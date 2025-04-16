@@ -13,6 +13,7 @@
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
+#include "phase.hpp"
 
 #include <string>
 #include <iostream>
@@ -290,21 +291,6 @@ void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhap
 
     cout << seqid << "\t" << pos[snp] << "\t" << tm << "\t" << bm  <<  "\t" << 1-p <<  "\t" << dir <<  endl;
 
-  }
-}
-
-void loadPhased(std::vector<std::pair<std::string, std::string>>& haplotypes, genotype * pop, int ntarget){
-
-  int indIndex = 0;
-
-  for(const auto& g : pop->gts){
-//    if((haplotypes[0][0].size() % 100) == 0){
-//      cerr << "string size:"  << haplotypes[0][0].size() << endl;
-//    }
-    vector< string > gs = split(g, "|");
-    haplotypes[indIndex].first.append(gs[0]);
-    haplotypes[indIndex].first.append(gs[1]);
-    indIndex += 1;
   }
 }
 
@@ -593,7 +579,7 @@ int main(int argc, char** argv) {
 
       afs.push_back(populationTotal->af);
       positions.push_back(var.position);
-      loadPhased(haplotypes, populationTotal.get(), nsamples);
+      loadPhased(haplotypes, populationTotal.get());
     }  
 
     calc(haplotypes, nsamples, positions, afs, iti, ibi, itot, currentSeqid);
