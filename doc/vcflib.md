@@ -98,7 +98,7 @@ the library's utility for most users.
  | [vcfindex](./vcfindex.md) | Adds an index number to the INFO field (id=position) |
  | [vcfinfo2qual](./vcfinfo2qual.md) | Sets QUAL from info field tag keyed by [key]. The VCF file may be omitted and read from stdin. The average of the field is used if it contains multiple values. |
  | [vcfinfosummarize](./vcfinfosummarize.md) | Take annotations given in the per-sample fields and add the mean, median, min, or max to the site-level INFO. |
- | [vcfintersect](./vcfintersect.md) | VCF set analysis |
+ | [vcfintersect](./vcfintersect.md) | VCF 1.0.12 set analysis |
  | [vcfkeepgeno](./vcfkeepgeno.md) | Reduce file size by removing FORMAT fields not listed on the command line from sample specifications in the output |
  | [vcfkeepinfo](./vcfkeepinfo.md) | To decrease file size remove INFO fields not listed on the command line |
  | [vcfkeepsamples](./vcfkeepsamples.md) | outputs each record in the vcf file, removing samples not listed on the command line |
@@ -166,7 +166,7 @@ Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput B
 
 # LICENSE
 
-Copyright 2011-2024 (C) Erik Garrison and vcflib contributors.
-Copyright 2020-2024 (C) Pjotr Prins
+Copyright 2011-2025 (C) Erik Garrison and vcflib contributors.
+Copyright 2020-2025 (C) Pjotr Prins
 MIT licensed.
 
