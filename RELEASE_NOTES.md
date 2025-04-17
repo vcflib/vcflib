@@ -16,7 +16,7 @@ and
 
 * Zig support was added to Guix and Conda - and we expect it to be more common soon
 * Addind release protocol to README - so I don't forget bumping version etc.
-* Fixed vcfwave issues and conda build (thanks Michael Kovaliov, aka @RedPenguin100)
+* Fixed vcfwave issues (see https://github.com/vcflib/vcflib/issues/416) and conda build (thanks Michael Kovaliov, aka @RedPenguin100)
 * Fixed github actions (Michael)
 * Lots of minor refactoring and cleanup, as well as a memory leak (Michael)
 * tabix.hpp fixed and set `WFA_INCLUDE_DIRS` and `-DBUILD_SHARED_LIBS=ON` (thanks Michael Cho, aka @cho-m)
