@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   arch:
     name: vcflib-CI
-    
+
     strategy:
       matrix:
           include:
@@ -20,10 +20,6 @@ jobs:
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
     runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
     steps:
     - name: apt update
       run: sudo apt-get -o Acquire::Retries=3 update
