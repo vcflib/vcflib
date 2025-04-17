@@ -10,6 +10,10 @@ I think it won't have much impact replacing it with another allocator because vc
 If anyone wants to try we could replace it.
 The good thing about the test allocator is that it complains if things do not get cleaned up.
 
+Note that Zig is not supported on all platforms (yet). Guix has a recent version now, as well as
+Anaconda.
+We expect major distros to start supporting Zig in 2025 because the bootstrap story is more or less resolved with Guix.
+
 ## Build
 
 To add zig to your build environment simply download the binary and add it to the path. Next setup the Cmake build environment in the usual way:

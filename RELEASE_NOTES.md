@@ -12,8 +12,15 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
-## ChangeLog v1.0.13 (?)
+## ChangeLog v1.0.13 (20250417)
 
+* Zig support was added to Guix and Conda - and we expect it to be more common soon
+* Addind release protocol to README - so I don't forget bumping version etc.
+* Fixed vcfwave issues and conda build (thanks Michael Kovaliov, aka @RedPenguin100)
+* Fixed github actions (Michael)
+* Lots of minor refactoring and cleanup, as well as a memory leak (Michael)
+* tabix.hpp fixed and set `WFA_INCLUDE_DIRS` and `-DBUILD_SHARED_LIBS=ON` (thanks Michael Cho, aka @cho-m)
+* Cmake fixes (thanks Adam Novak)
 * Updated simde submodule
 * Fix CMakeLists.txt not to try to install wfa-lib when it is a package
 

@@ -399,7 +399,7 @@ cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=1 ..
 make VERBOSE=1
 ```
 
-More on `zig` can be found in the souce code [README](./src/zig/README.md).
+More on `zig` can be found in the source code [README](./src/zig/README.md).
 
 ### Using a recent C++ compiler
 
@@ -466,6 +466,22 @@ you to add a working test case as described in 'adding tests'.
 ## LICENSE
 
 This software is distributed under the free software [MIT LICENSE](./LICENSE).
+
+## RELEASES
+
+vcflib is released on github. The tarballs are used by Linux distributions to build and release vcflib binaries.
+For a release the following protocol is followed:
+
+- [ ] Build and test using a recent `guix pull` -- see [guix.scm](./guix.scm) header
+- [ ] Update RELEASE_NOTES checking git record since last release
+- [ ] Bump VERSION file
+- [ ] Update documentation to reflect latest
+- [ ] Create github release after pushing and checking CI
+- [ ] Copy release notes to github release
+- [ ] Add full tarball with git submodules for conda and such
+- [ ] Add static binaries for vcfwave and vcfcreatemulti
+
+See also [RELEASE_NOTES.md](./RELEASE_NOTES.md)
 
 ## CREDIT
 
