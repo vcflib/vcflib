@@ -150,7 +150,7 @@ set(vcflib_SOURCE
     ${vcfwfa_SOURCE}
     src/vcf-c-api.cpp
     src/Variant.cpp
-    src/canonicalize.cpp
+    # src/canonicalize.cpp --- merged back into Variant.h, see https://github.com/vcflib/vcflib/issues/417
     src/rnglib.cpp
     src/var.cpp
     src/pdflib.cpp
