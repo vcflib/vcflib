@@ -17,21 +17,33 @@ include(GNUInstallDirs)
 
 find_package(PkgConfig REQUIRED)
 find_package(pybind11 CONFIG)
+find_package(LibLZMA REQUIRED)
+# include(FindCURL) # for htslib?
+find_package(ZLIB REQUIRED)
+find_package(BZip2 REQUIRED)
 
 include(GNUInstallDirs)
-include(FindBZip2)
-include(FindLibLZMA)
-include(FindZLIB)
-include(FindCURL) # for htslib
+# include(FindBZip2)
+# include(FindLibLZMA)
+# include(FindZLIB)
+# include(FindCURL) # for htslib
 
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
   WHAT REQUIRED_PACKAGES_NOT_FOUND)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
+if (BUILD_STATIC)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  set(BUILD_SHARED_LIBS OFF)
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+else ()
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
+endif ()
 
 # ---- Options
 
+option(BUILD_STATIC "Build static binary" OFF)
 option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
@@ -59,7 +71,6 @@ pkg_check_modules(htslib IMPORTED_TARGET htslib)   # Optionally builds from cont
 pkg_check_modules(tabixpp IMPORTED_TARGET tabixpp) # Optionally builds from contrib/
 
 # ---- Build switches
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ipo_supported})
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -407,19 +418,32 @@ else (ZIG)
   add_definitions(-DNO_ZIG=1)
 endif (ZIG)
 
-set(vcflib_DEPS
-  CURL::libcurl
-  )
+# set(vcflib_DEPS
+#   CURL::libcurl
+# )
 
-if (ZIG)
-  list(APPEND vcflib_DEPS ZIG-EXT)
-endif ()
+# if (ZIG)
+#   list(APPEND vcflib_DEPS ZIG-EXT)
+# endif ()
+
+if (htslib_LOCAL)
+  target_link_libraries(vcflib htslib)
+else ()
+  target_link_libraries(vcflib PkgConfig::htslib)
+endif()
+
+
+# ${CURL_LIBRARIES}
+  # ${ZLIB_LIBRARIES}
+  # ${LIBLZMA_LIBRARIES}
+  # ${BZIP2_LIBRARIES}
 
 set(vcflib_LIBS
-  ${CURL_LIBRARIES}
-  ${ZLIB_LIBRARIES}
-  ${LIBLZMA_LIBRARIES}
-  ${BZIP2_LIBRARIES}
+  hts
+  deflate
+  lzma
+  z
+  bz2
   ${CMAKE_THREAD_LIBS_INIT}
   ${WFA_LINK_LIBRARIES}
 )
@@ -429,11 +453,6 @@ if (ZIG)
 endif()
 
 
-if (htslib_LOCAL)
-  target_link_libraries(vcflib htslib)
-else (htslib_LOCAL)
-  target_link_libraries(vcflib PkgConfig::htslib)
-endif()
 
 if (NOT tabixpp_LOCAL)
   target_link_libraries(vcflib PkgConfig::tabixpp)
@@ -469,12 +488,13 @@ if (NOT BUILD_ONLY_LIB)
 
 endif()
 
-# ---- Python bindings - mostly for testing at this stage
-pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
-add_dependencies(pyvcflib ${vcflib_DEPS})
-target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
-install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
+if (NOT BUILD_STATIC)
+  # ---- Python bindings - mostly for testing at this stage
+  pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
+  # add_dependencies(pyvcflib ${vcflib_DEPS})
+  target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
+  install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
 # ---- Test
 
 enable_testing()
