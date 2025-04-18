@@ -1,6 +1,8 @@
 ;; To use this file to build HEAD of vcflib:
 ;;
 ;;   guix build -f guix.scm
+;;   guix build -L . vcflib-local-htslib-git  # test local htslib build
+;;   guix build -L . vcflib-static-git --tune=native
 ;;
 ;; To get a development container (emacs shell will work)
 ;;
@@ -78,15 +80,10 @@
     (build-system cmake-build-system)
     (inputs
      (list
-       ;; autoconf  ;; htslib build requirement
-       ;; automake  ;; htslib build requirement
-       ;; openssl   ;; htslib build requirement
-       ;; curl      ;; htslib build requirement
        fastahack    ;; dev version not in Debian
        ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
-       gdb
-       htslib
-       libdeflate
+       ;; gdb
+       htslib ;; disable to test local build, also tabixpp
        pandoc ; for man pages
        perl
        python
@@ -109,6 +106,28 @@ and operating on records of genomic variation as it can be described by the VCF
 format, and a collection of command-line utilities for executing complex
 manipulations on VCF files.")
     (license license:expat)))
+
+(define-public vcflib-local-htslib-git
+  "Test embedded htslib - part of tabixpp submodule"
+  (package
+    (inherit vcflib-git)
+    (name "vcflib-local-htslib-git")
+    (arguments
+     `(#:tests? #f ;; tests don't work when running build directly
+       #:configure-flags
+       ,#~(list
+           ;; "-DBUILD_OPTIMIZED=ON"       ;; we don't use the standard cmake optimizations
+           "-DCMAKE_BUILD_TYPE=Generic"))) ;; to optimize use guix --tune=march-type (e.g. --tune=native)
+    (inputs
+     (modify-inputs (package-inputs vcflib-git)
+                    (delete "htslib" "tabixpp")
+                    (prepend
+                     autoconf  ;; htslib build requirements
+                     automake
+                     libdeflate
+                     openssl
+                     curl)))))
+
 
 ;; ==== The following is for static binary builds using gcc - used mostly for deployment ===
 

@@ -18,15 +18,10 @@ include(GNUInstallDirs)
 find_package(PkgConfig REQUIRED)
 find_package(pybind11 CONFIG)
 find_package(LibLZMA REQUIRED)
-# include(FindCURL) # for htslib?
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
 
 include(GNUInstallDirs)
-# include(FindBZip2)
-# include(FindLibLZMA)
-# include(FindZLIB)
-# include(FindCURL) # for htslib
 
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
@@ -120,12 +115,12 @@ include_directories(include)
 include_directories(contrib/fastahack)
 include_directories(contrib/intervaltree)
 include_directories(contrib/smithwaterman)
-# include_directories(contrib/multichoose) merged with vcflib
 include_directories(contrib/filevercmp)
 include_directories(contrib/c-progress-bar)
 
 if(NOT htslib_FOUND)
   message(STATUS "Using included htslib")
+  include(FindCURL) # for htslib
   set(htslib_LOCAL contrib/tabixpp/htslib)
   set(tabixpp_FOUND OFF) # also build tabixpp if htslib is missing
 endif()
@@ -145,7 +140,6 @@ endif()
 
 file(GLOB INCLUDES
   src/*.h*
-  # contrib/multichoose/*.h*
   contrib/intervaltree/*.h*
   contrib/smithwaterman/*.h*
   contrib/fastahack/*.h*
@@ -418,29 +412,20 @@ else (ZIG)
   add_definitions(-DNO_ZIG=1)
 endif (ZIG)
 
-# set(vcflib_DEPS
-#   CURL::libcurl
-# )
-
-# if (ZIG)
-#   list(APPEND vcflib_DEPS ZIG-EXT)
-# endif ()
-
 if (htslib_LOCAL)
   target_link_libraries(vcflib htslib)
 else ()
   target_link_libraries(vcflib PkgConfig::htslib)
 endif()
 
+if (htslib_LOCAL)
+  set(vcflib_LIBS curl deflate) # local build requires linking curl explicitly
+else()
+  set(vcflib_LIBS hts)
+endif()
 
-# ${CURL_LIBRARIES}
-  # ${ZLIB_LIBRARIES}
-  # ${LIBLZMA_LIBRARIES}
-  # ${BZIP2_LIBRARIES}
-
-set(vcflib_LIBS
-  hts
-  deflate
+list(APPEND vcflib_LIBS
+  # deflate
   lzma
   z
   bz2
@@ -451,8 +436,6 @@ set(vcflib_LIBS
 if (ZIG)
   list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
 endif()
-
-
 
 if (NOT tabixpp_LOCAL)
   target_link_libraries(vcflib PkgConfig::tabixpp)
@@ -491,11 +474,10 @@ endif()
 if (NOT BUILD_STATIC)
   # ---- Python bindings - mostly for testing at this stage
   pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
-  # add_dependencies(pyvcflib ${vcflib_DEPS})
+  # add_dependencies(pyvcflib CURL::libcurl)
   target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
   install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
-# ---- Test
 
 enable_testing()
 

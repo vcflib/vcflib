@@ -374,7 +374,7 @@ Build dependencies can be viewed in the github-CI scripts (see badges above), as
 - htslib
 - tabixpp
 - WFA2 (wfa2lib)
-- pybind11 (for testing)
+- pybind11 (for python bindings and testing)
 
 For include files add
 
@@ -405,7 +405,7 @@ More on `zig` can be found in the source code [README](./src/zig/README.md).
 
 ### Using a recent C++ compiler
 
-You may encounter something like libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by ...vcflib/build/pyvcflib.cpython-310-x86_64-linux-gnu.so). This is caused by the python pyvcflib not running against a python interpreter compiled with the same libstdc++ dependency. That is a bit nasty to solve. For now make sure to match C++ compilers for the python module.
+You may encounter something like libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by ...vcflib/build/pyvcflib.cpython-310-x86_64-linux-gnu.so). This is caused by the python pyvcflib not running against a python interpreter compiled with the same libstdc++ dependency. That is a bit nasty to solve. For now make sure to match C++ compilers for the python module. It is also possible to disable the python build.
 
 ### Using a different htslib
 
