@@ -4,6 +4,7 @@
 # creates library in zig-out
 echo "ZIG PATH $PATH"
 zig version
+export ZIG_GLOBAL_CACHE_DIR=$PWD # see https://github.com/ziglang/zig/issues/19400
 zig build $*
 exit $?
 
