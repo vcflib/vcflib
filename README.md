@@ -16,17 +16,18 @@ Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, Prins P (2022), PLoS Comput B
 
 ![Humpty Logo - CC0 license](./logos/humpty-dumpty.jpg)
 
+**April 2025**: fixes, updates and downloadable binaries. See [v1.0.13 release](https://github.com/vcflib/vcflib/releases/tag/v1.0.13).
+
 **November 2024**: a fresh release with, mostly, pangenome related fixes.
 
 **January 2023**: this is vcflib's first *Humpty Dumpty* release: [vcfcreatemulti](./doc/vcfcreatemulti.md) is the natural companion to [vcfwave](./doc/vcfwave.md).
 Often variant callers are not perfect.
+
 **vcfwave** with its companion tool **vcfcreatemulti** can take an existing VCF file that contains multiple complex overlapping and even nested alleles and, unlike Humpty Dumpty, take them apart and put them together again.
 Thereby, hopefully, creating sane VCF output that is useful for analysis and getting rid of false positives.
 
 We created these tools by including the state-of-the-art [biWFA](https://github.com/smarco/WFA2-lib) wavefront aligner.
 The tools are particularly useful for the output from structural variation callers and pangenome genotypers, such as used by the Human Pangenome Reference Consortium (HPRC) because of overlapping ALT segments.
-
-See also [RELEASE_NOTES.md](./RELEASE_NOTES.md)
 
 **May 2022**: the [vcflib paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009123) has been published on PLoS Computational Biology!
 
@@ -472,15 +473,15 @@ This software is distributed under the free software [MIT LICENSE](./LICENSE).
 vcflib is released on github. The tarballs are used by Linux distributions to build and release vcflib binaries.
 For a release the following protocol is followed:
 
-- [X] Build and test using a recent `guix pull` -- see [guix.scm](./guix.scm) header
-- [X] Update RELEASE_NOTES checking git record since last release
-- [X] Bump VERSION file
-- [X] Update documentation to reflect latest (see CMakeLists.txt)
+- [ ] Build and test using a recent `guix pull` -- see [guix.scm](./guix.scm) header
+- [ ] Update RELEASE_NOTES checking git record since last release
+- [ ] Bump VERSION file
+- [ ] Update documentation to reflect latest (see CMakeLists.txt)
 - [ ] Check issue tracker for information
 - [ ] Create github release after pushing and checking CI
 - [ ] Copy release notes to github release
 - [ ] Add full tarball with git submodules for conda and such
-- [ ] Add static binaries for vcfwave and vcfcreatemulti
+- [ ] Add static binaries for vcfwave, vcfcreatemulti, etc and provide download link
 
 See also [RELEASE_NOTES.md](./RELEASE_NOTES.md)
 
