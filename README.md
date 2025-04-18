@@ -472,10 +472,11 @@ This software is distributed under the free software [MIT LICENSE](./LICENSE).
 vcflib is released on github. The tarballs are used by Linux distributions to build and release vcflib binaries.
 For a release the following protocol is followed:
 
-- [ ] Build and test using a recent `guix pull` -- see [guix.scm](./guix.scm) header
-- [ ] Update RELEASE_NOTES checking git record since last release
-- [ ] Bump VERSION file
-- [ ] Update documentation to reflect latest
+- [X] Build and test using a recent `guix pull` -- see [guix.scm](./guix.scm) header
+- [X] Update RELEASE_NOTES checking git record since last release
+- [X] Bump VERSION file
+- [X] Update documentation to reflect latest (see CMakeLists.txt)
+- [ ] Check issue tracker for information
 - [ ] Create github release after pushing and checking CI
 - [ ] Copy release notes to github release
 - [ ] Add full tarball with git submodules for conda and such

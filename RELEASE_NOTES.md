@@ -23,6 +23,7 @@ and
 * Cmake fixes (thanks Adam Novak)
 * Updated simde submodule
 * Fix CMakeLists.txt not to try to install wfa-lib when it is a package
+* Reverted on Canocalize extraction in Variant class because of downstream use, see https://github.com/vcflib/vcflib/issues/417
 
 ## ChangeLog v1.0.12 (20241122)
 
