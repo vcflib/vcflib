@@ -77,27 +77,28 @@
     (source (local-file %source-dir #:recursive? #t))
     (build-system cmake-build-system)
     (inputs
-     `(("autoconf" ,autoconf)   ;; htslib build requirement
-       ("automake" ,automake)   ;; htslib build requirement
-       ("openssl" ,openssl)     ;; htslib build requirement
-       ("curl" ,curl)           ;; htslib build requirement
-       ("fastahack" ,fastahack) ;; dev version not in Debian
+     (list
+       ;; autoconf  ;; htslib build requirement
+       ;; automake  ;; htslib build requirement
+       ;; openssl   ;; htslib build requirement
+       ;; curl      ;; htslib build requirement
+       fastahack    ;; dev version not in Debian
        ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
-       ("gdb" ,gdb)
-       ("htslib" ,htslib)
-       ("pandoc" ,pandoc)       ;; for generation man pages
-       ("perl" ,perl)
-       ("python" ,python)
-       ("python-pytest" ,python-pytest)
-       ("pybind11" ,pybind11)
-       ("ruby" ,ruby)           ;; for generating man pages
-       ("smithwaterman" ,smithwaterman) ;; dev version not in Debian
-       ("tabixpp" ,tabixpp)
-       ("time" ,time) ;; for tests
-       ("wfa2-lib" ,wfa2-lib) ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
-       ("xz" ,xz)
-       ("zig" ,zig)
-       ("zlib" ,zlib)))
+       gdb
+       htslib
+       libdeflate
+       pandoc ; for man pages
+       perl
+       python
+       python-pytest
+       pybind11
+       ruby ; for man pages
+       smithwaterman
+       tabixpp
+       time ; for tests
+       wfa2-lib ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
+       xz
+       zig))
     (native-inputs
      `(("pkg-config" ,pkg-config)))
     (home-page "https://github.com/vcflib/vcflib/")
