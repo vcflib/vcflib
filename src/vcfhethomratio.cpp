@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
 
     map<string, unsigned int> hetCounts;
     map<string, unsigned int> homCounts;
-    for (vector<string>::iterator s = variantFile.sampleNames.begin(); s != variantFile.sampleNames.end(); ++s) {
-        hetCounts[*s] = 0;
-        homCounts[*s] = 0;
+    for (const auto& s : variantFile.sampleNames) {
+        hetCounts[s] = 0;
+        homCounts[s] = 0;
     }
 
     Variant var(variantFile);

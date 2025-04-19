@@ -109,8 +109,8 @@ double bound(double v){
 inline double var(vector<double> & d, double mu){
   double variance = 0;
 
-  for(vector<double>::iterator it = d.begin(); it != d.end(); it++){
-    variance += pow((*it) - mu,2);
+  for(const auto& it : d){
+    variance += pow(it - mu,2);
   }
 
   return variance / (d.size() - 1);
@@ -233,21 +233,19 @@ void loadDat(copyNcounts * d,
 	     vector < map< string, vector<string> > > & target,
 	     vector < map< string, vector<string> > > & background){
 
-  for(vector < map< string, vector<string> > >::iterator it
-	= target.begin(); it!= target.end(); it++){
-    d->target.push_back( atof((*it)[type].front().c_str()) );
-    d->total.push_back(  atof((*it)[type].front().c_str()) );
+  for(auto& it : target){
+    d->target.push_back( atof(it[type].front().c_str()) );
+    d->total.push_back(  atof(it[type].front().c_str()) );
 
-    d->targetV += (*it)[type].front();
+    d->targetV += it[type].front();
     d->targetV += ",";
 
   }
-  for(vector < map< string, vector<string> > >::iterator it
-	= background.begin(); it!= background.end(); it++){
-    d->background.push_back( atof((*it)[type].front().c_str()) );
-    d->total.push_back( atof((*it)[type].front().c_str()) );
+  for(auto& it : background){
+    d->background.push_back( atof(it[type].front().c_str()) );
+    d->total.push_back( atof(it[type].front().c_str()) );
 
-    d->backgroundV += (*it)[type].front();
+    d->backgroundV += it[type].front();
     d->backgroundV += ",";
 
   }
@@ -420,9 +418,8 @@ int main(int argc, char** argv) {
       }
 
       std::map<string, bool> formatMap;
-      for(std::vector<std::string>::iterator itz = var.format.begin();
-	  itz != var.format.end(); itz++){
-	formatMap[*itz] = true;
+      for(const auto& itz : var.format){
+		formatMap[itz] = true;
       }
 
       if(formatMap.find(type) == formatMap.end()){

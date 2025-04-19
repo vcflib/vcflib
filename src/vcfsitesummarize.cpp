@@ -79,11 +79,11 @@ Type: statistics
     cout << "CHROM\tPOS\tID\tREF\tQUAL\tFILTER";
 
     // configurable info field
-    for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
-        cout << "\t" << *i;
+    for (const auto& infoField : infofields) {
+        cout << "\t" << infoField;
     }
-    for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
-        cout << "\t" << *i;
+    for (const auto& infoFlag : infoflags) {
+        cout << "\t" << infoFlag;
     }
     cout << endl;
 
@@ -97,9 +97,8 @@ Type: statistics
 	     << var.quality << "\t"
 	     << var.filter;
 
-	for (vector<string>::iterator i = infofields.begin(); i != infofields.end(); ++i) {
+	for (const auto& name : infofields) {
 	    vector<string> value;
-	    string& name = *i;
 	    map<string, vector<string> >::iterator f = var.info.find(name);
 	    if (f != var.info.end()) {
             value = f->second;
@@ -113,9 +112,8 @@ Type: statistics
 	    }
 	}
 
-	for (vector<string>::iterator i = infoflags.begin(); i != infoflags.end(); ++i) {
+	for (const auto& name : infoflags) {
 	    string value;
-	    string& name = *i;
 	    map<string, bool>::iterator f = var.infoFlags.find(name);
 	    cout << "\t";
 	    if (f != var.infoFlags.end()) {

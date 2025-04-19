@@ -21,9 +21,9 @@
 // for both class S and T and an ostream, as it is e.g. in the case of strings
 // and character arrays
 template<class S, class T>
-std::string join(std::vector<T>& elems, S& delim) {
+std::string join(const std::vector<T>& elems, S& delim) {
     std::stringstream ss;
-    typename std::vector<T>::iterator e = elems.begin();
+    typename std::vector<T>::const_iterator e = elems.begin();
     if (e != elems.end()) {
         ss << *e++;
         for (; e != elems.end(); ++e) {

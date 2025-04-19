@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
 
     unsigned int hetAlleleCount = 0;
     map<string, unsigned int> hetCounts;
-    for (vector<string>::iterator s = variantFile.sampleNames.begin(); s != variantFile.sampleNames.end(); ++s) {
-        hetCounts[*s] = 0;
+    for (const auto& sampleName : variantFile.sampleNames) {
+        hetCounts[sampleName] = 0;
     }
 
     Variant var(variantFile);

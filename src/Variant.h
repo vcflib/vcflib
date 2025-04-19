@@ -347,7 +347,7 @@ public:
     int getAltAlleleIndex(const string& allele);
     void updateAlleleIndexes(void);
     void addFormatField(const string& key);
-    void setOutputSampleNames(vector<string>& outputSamples);
+    void setOutputSampleNames(const vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
     int getNumSamples(void);
     int getNumValidGenotypes(void);

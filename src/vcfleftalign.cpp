@@ -36,8 +36,8 @@ void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<A
     ref = pad + leftFlank + var.ref + rightFlank + pad;
 
     // and iterate through the alternates, generating alignments
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string alt = pad + leftFlank + *a + rightFlank + pad;
+    for (const auto& a : var.alt) {
+        string alt = pad + leftFlank + a + rightFlank + pad;
         CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
         unsigned int referencePos;
         string cigar;

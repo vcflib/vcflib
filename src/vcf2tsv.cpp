@@ -26,17 +26,16 @@ void loadGenoSS(std::stringstream & ss,
                 std::stringstream & info,
                 vcflib::Variant & var,
                 vcflib::VariantCallFile & vcf,
-                std::string & nullval,
-                std::vector<std::string> & formatfields){
-
-
-    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-        const string& sampleName = s->first;
+                const std::string & nullval,
+                const std::vector<std::string> & formatfields){
+    for (const auto& s : var.samples) {
+        const string& sampleName = s.first;
         ss << info.str() << "\t" << sampleName;
-        map<string, vector<string> >& sample = s->second;
-        for (vector<string>::iterator f = formatfields.begin(); f != formatfields.end(); ++f) {
-            if (sample.find(*f) != sample.end()) {
-                ss << "\t" << join(sample[*f], ",");
+        const map<string, vector<string> >& sample = s.second;
+        for (const auto& f : formatfields) {
+            const auto sampleIt = sample.find(f);
+        	if (sampleIt != sample.end()) {
+                ss << "\t" << join(sampleIt->second, ",");
             } else {
                 ss << "\t" << nullval;
             }

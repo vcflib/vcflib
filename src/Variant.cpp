@@ -221,7 +221,7 @@ bool Variant::isSymbolicSV() const{
 
     bool ref_valid = allATGCN(this->ref);
     bool alts_valid = true;
-    for (auto a : this->alt){
+    for (const auto& a : this->alt){
         if (!allATGCN(a)){
             alts_valid = false;
         }
@@ -255,7 +255,7 @@ int Variant::getMaxReferencePos(){
         // We are cannonicalized and must have a correct END
 
         int end = 0;
-        for (auto s : this->info.at("END")){
+        for (const auto& s : this->info.at("END")){
             // Get the latest one defined.
             end = max(abs(stoi(s)), end);
         }
@@ -274,7 +274,7 @@ int Variant::getMaxReferencePos(){
         if (this->info.find("END") != this->info.end()){
             // We have an END; blindly trust it
             int end = 0;
-            for (auto s : this->info.at("END")){
+            for (const auto& s : this->info.at("END")){
                 // Get the latest one defined.
                 end = max(abs(stoi(s)), end);
             }
@@ -286,7 +286,7 @@ int Variant::getMaxReferencePos(){
             // There's no endpoint, but we know an SVLEN.
             // A negative SVLEN means a deletion, so if we find one we can say we delete that much.
             int deleted = 0;
-            for (auto s : this->info.at("SVLEN")){
+            for (const auto& s : this->info.at("SVLEN")){
                 int alt_len = stoi(s);
                 if (alt_len > 0){
                     // Not a deletion, so doesn't affect any ref bases
@@ -1116,7 +1116,7 @@ VariantFieldType Variant::infoType(const string& key) {
             vector<string> ordered_keys, missing_keys;  // the output list
             // first lookup the keys that appear both in infoOrdered keys
             // and the info field:
-            for (auto name: var.infoOrderedKeys)
+            for (const auto& name: var.infoOrderedKeys)
             {
                 lookup_keys[name] = true;
                 if (!var.info[name].empty()) ordered_keys.push_back(name);
@@ -1134,12 +1134,12 @@ VariantFieldType Variant::infoType(const string& key) {
             ordered_keys.insert(ordered_keys.end(), missing_keys.begin(), missing_keys.end());
             // output the ordered info fields
             string s = "";
-            for (auto name: ordered_keys) {
-                auto value = var.info[name];
+            for (const auto& name: ordered_keys) {
+                const auto& value = var.info[name];
                 if (!value.empty()) {
                     s += name + "=" + join(value, ",") + ";" ;
                 } else {
-                    auto infoflag = var.infoFlags[name];
+                    const auto infoflag = var.infoFlags[name];
                     if (infoflag == true)
                         s += name + ";";
                 }
@@ -1151,24 +1151,24 @@ VariantFieldType Variant::infoType(const string& key) {
         if (!var.format.empty()) {
             out << "\t";
             string format = "";
-            for (auto f: var.format) {
+            for (const auto& f: var.format) {
                 format += f + ":";
             }
             auto len = format.length();
             if (len)
                 out << format.substr(0, len-1); // chop s1.substr(0, i-1);
-            for (auto s: var.outputSampleNames) {
+            for (const auto& s: var.outputSampleNames) {
                 out << "\t";
-                map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(s);
+                const auto sampleItr = var.samples.find(s);
                 if (sampleItr == var.samples.end()) {
                     out << ".";
                 } else {
-                    map<string, vector<string> >& sample = sampleItr->second;
+                    const map<string, vector<string> >& sample = sampleItr->second;
                     if (sample.size() == 0) {
                         out << ".";
                     } else {
                         for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                            map<string, vector<string> >::iterator g = sample.find(*f);
+                            const auto g = sample.find(*f);
                             out << ((f == var.format.begin()) ? "" : ":");
                             if (g != sample.end() && !g->second.empty()) {
                                 out << join(g->second, ",");
@@ -1183,7 +1183,7 @@ VariantFieldType Variant::infoType(const string& key) {
         return out;
     }
 
-    void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
+    void Variant::setOutputSampleNames(const vector<string>& samplesToOutput) {
         outputSampleNames = samplesToOutput;
     }
 

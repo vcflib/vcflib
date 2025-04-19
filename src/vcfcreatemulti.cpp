@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
             // that the window may get expanded at every step.
             auto first = vars.front();
             auto maxpos = first.position + first.ref.size();
-            for (auto v: vars) {
+            for (const auto& v: vars) {
                 if (maxpos < v.position + v.ref.size()) {
                     maxpos = v.position + v.ref.size();
                 }

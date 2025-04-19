@@ -57,17 +57,17 @@ Type: transformation
 
   vector<string> headerLines = split (variantFile.header, "\n");
 
-  for(vector<string>::iterator it = headerLines.begin(); it != headerLines.end(); it++){
+  for(const auto& headerLine : headerLines){
 
     //    cerr << "h:" <<  (*it) << endl;
 
-  if((*it).substr(0,8) == "##contig"){
-    string contigInfo = (*it).substr(10, (*it).length() -11);
+  if(headerLine.substr(0,8) == "##contig"){
+    string contigInfo = headerLine.substr(10, headerLine.length() -11);
     //    cerr << contigInfo << endl;
     vector<string> info = split(contigInfo, ",");
-    for(vector<string>::iterator sub = info.begin(); sub != info.end(); sub++){
+    for(const auto& sub : info){
       //      cerr << "s:" << (*sub) << endl;
-      vector<string> subfield = split((*sub), "=");
+      vector<string> subfield = split(sub, "=");
       if(subfield[0] == "ID"){
 	cout << subfield[1] << "\t";
       }

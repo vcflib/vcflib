@@ -69,7 +69,7 @@ map<string, vector<VariantAllele> > VariantLegacy::legacy_parsedAlternates(
 
     if (flankingRefLeft.empty() && flankingRefRight.empty()) {
         paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));
-        for (auto a: alt) {
+        for (const auto& a: alt) {
             paddingLen = max(paddingLen, (int) (a.size()));
         }
         char padChar = 'Z';
@@ -96,7 +96,7 @@ map<string, vector<VariantAllele> > VariantLegacy::legacy_parsedAlternates(
     // ACCCCCACCCCCACC
     // padded ref ZZZZZZZZZZZZZZZQACCCCCACCCCCACCZZZZZZZZZZZZZZZ
 
-    for (auto alternate: alt) { // iterate ALT strings
+    for (const auto& alternate: alt) { // iterate ALT strings
         unsigned int referencePos;
         string alternateQuery_M;
         if (OLDPADDING) {
