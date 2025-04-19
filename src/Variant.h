@@ -342,8 +342,8 @@ public:
     bool getInfoValueBool(const string& key, int index = INDEX_NONE);
     double getInfoValueFloat(const string& key, int index = INDEX_NONE);
     string getInfoValueString(const string& key, int index = INDEX_NONE);
-    void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
-    void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
+    void printAlt(ostream& out) const;      // print a comma-sep list of alternate alleles to an ostream
+    void printAlleles(ostream& out) const;  // print a comma-sep list of *all* alleles to an ostream
     int getAltAlleleIndex(const string& allele);
     void updateAlleleIndexes(void);
     void addFormatField(const string& key);

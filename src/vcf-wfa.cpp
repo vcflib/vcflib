@@ -390,12 +390,12 @@ void Variant::reduceAlleles(
     if (var.info.find("AF") != var.info.end()) {
         hasAf = true;
         for (const auto& a : var.alt) {
-            vector<VariantAllele>& vars = varAlleles[a].first;
-            for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+            const vector<VariantAllele>& vars = varAlleles[a].first;
+            for (const auto& va : vars) {
                 double freq;
                 try {
                     convert(var.info["AF"].at(var.altAlleleIndexes[a]), freq);
-                    alleleStuff[*va].freq += freq;
+                    alleleStuff[va].freq += freq;
                 } catch (...) {
                     cerr << "vcfallelicprimitives WARNING: AF does not have count == alts @ "
                          << var.sequenceName << ":" << var.position << endl;

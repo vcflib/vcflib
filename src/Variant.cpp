@@ -1068,16 +1068,16 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
-    void Variant::printAlt(ostream& out) {
-        for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
+    void Variant::printAlt(ostream& out) const {
+        for (vector<string>::const_iterator i = alt.begin(); i != alt.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alt.end() - 1)) out << ",";
         }
     }
 
-    void Variant::printAlleles(ostream& out) {
-        for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
+    void Variant::printAlleles(ostream& out) const {
+        for (vector<string>::const_iterator i = alleles.begin(); i != alleles.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alleles.end() - 1)) out << ",";

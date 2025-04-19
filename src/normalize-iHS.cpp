@@ -168,8 +168,8 @@ bool sortAF(const iHSdat& L, const iHSdat& R){
 double var(vector<double> & data, double mu){
   double variance = 0;
 
-  for(vector<double>::iterator it = data.begin(); it != data.end(); it++){
-    variance += pow((*it) - mu,2);
+  for(const auto& d : data){
+    variance += pow(d - mu,2);
   }
 
   return variance / (data.size() - 1);

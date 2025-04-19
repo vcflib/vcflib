@@ -91,7 +91,7 @@ double entropy(const string& st) {
     return ent;
 }
 
-bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug) {
+bool leftAlign(const string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug) {
 
     int arsOffset = 0; // pointer to insertion point in aligned reference sequence
     string alignedReferenceSequence = referenceSequence;
@@ -108,10 +108,7 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
     string softEnd;
 
     stringstream cigar_before, cigar_after;
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin();
-        c != cigar.end(); ++c) {
-        unsigned int l = c->first;
-        char t = c->second;
+    for (const auto& [l, t] : cigar) {
 
         cigar_before << l << t;
         if (t == 'M') { // match or mismatch
@@ -347,10 +344,7 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
 
     cigar = newCigar;
 
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin();
-        c != cigar.end(); ++c) {
-        unsigned int l = c->first;
-        char t = c->second;
+    for (const auto& [l, t] : cigar) {
         cigar_after << l << t;
     }
 
