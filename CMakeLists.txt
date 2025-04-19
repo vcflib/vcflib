@@ -9,8 +9,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(vcflib)
 
-set(CMAKE_CXX_STANDARD 17)
+enable_testing()
 
+set(CMAKE_CXX_STANDARD 17)
 include(ExternalProject)
 include(FeatureSummary)
 include(GNUInstallDirs)
@@ -450,6 +451,7 @@ endif()
 if (BUILD_SHARED_LIBS)
   target_link_libraries(vcflib PUBLIC ${vcflib_LIBS} ${WFALIB})
 endif()
+
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
@@ -468,18 +470,15 @@ if (NOT BUILD_ONLY_LIB)
   foreach(SCRIPT ${SCRIPTS})
     install(PROGRAMS ./scripts/${SCRIPT} DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ${SCRIPT})
   endforeach(SCRIPT ${SCRIPTS})
-
 endif()
 
-if (NOT BUILD_STATIC)
+if (NOT BUILD_STATIC) # only when not building static
   # ---- Python bindings - mostly for testing at this stage
   pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
   # add_dependencies(pyvcflib CURL::libcurl)
   target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
   install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
-
-enable_testing()
 
 function(add_pytest TEST_FILE)
   add_test(
@@ -488,7 +487,7 @@ function(add_pytest TEST_FILE)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH};PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}")
 endfunction()
 
 function(add_pydoctest TEST_FILE)
@@ -499,9 +498,8 @@ function(add_pydoctest TEST_FILE)
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest;PATH=${CMAKE_BINARY_DIR}:$ENV{PATH}")
 endfunction()
-
 
 function(add_doctest TEST_FILE)
   add_test(
@@ -545,7 +543,7 @@ endif (ZIG)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 
-# ---- Build docs
+# ---- Build documentation
 #
 # Generates man pages for the python doctests. Don't need
 # to run every time so it is a separate command. For pandoc logic see

@@ -81,7 +81,7 @@ type: filter
 Filter VCF records that have an allele count > 10 results in 1471 matches for
 
 ```python
->>> sh("../build/vcffilter -f 'AC > 10' ../samples/grch38#chr4_10083863-10181258.vcf|wc -l")
+>>> sh("vcffilter -f 'AC > 10' ../samples/grch38#chr4_10083863-10181258.vcf|wc -l")
 546
 
 ```

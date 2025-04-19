@@ -1,7 +1,7 @@
 ;; To use this file to build HEAD of vcflib:
 ;;
 ;;   guix build -f guix.scm
-;;   guix build -L . vcflib-local-htslib-git  # test local htslib build
+;;   guix build -L . vcflib-local-htslib-git  # test local htslib build - fails because of path rewrites
 ;;   guix build -L . vcflib-static-git --tune=native
 ;;
 ;; To get a development container (emacs shell will work)
@@ -16,7 +16,7 @@
 ;;
 ;;   env LD_LIBRARY_PATH=$GUIX_ENVIRONMENT/lib gdb --args vcfallelicprimitives -m ../samples/10158243.vcf
 ;;
-;;   guix shell -L . -C -D -F vcflib-static-git --tune=native
+;;   guix shell -L . -C -D -F vcflib-static-git
 ;;
 ;; support other (external) zig compiler
 ;;
@@ -78,11 +78,13 @@
     (version %version)
     (source (local-file %source-dir #:recursive? #t))
     (build-system cmake-build-system)
+    ;; (arguments
+    ;;  `(#:tests? #f ;; tests don't work when running build directly - use shell for now
+    ;;   ))
     (inputs
+     ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
      (list
        fastahack    ;; dev version not in Debian
-       ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
-       ;; gdb
        htslib ;; disable to test local build, also tabixpp
        pandoc ; for man pages
        perl
@@ -106,6 +108,29 @@ and operating on records of genomic variation as it can be described by the VCF
 format, and a collection of command-line utilities for executing complex
 manipulations on VCF files.")
     (license license:expat)))
+
+(define-public vcflib-test-one-git
+  "Build and test one target"
+  (package
+    (inherit vcflib-git)
+    (name "vcflib-test-one-git")
+    (arguments
+     `(#:tests? #t
+       #:configure-flags
+       ,#~(list
+           ;; "-DBUILD_OPTIMIZED=ON"       ;; we don't use the standard cmake optimizations
+           "-DCMAKE_BUILD_TYPE=Generic") ;; to optimize use guix --tune=march-type (e.g. --tune=native)
+       #:phases
+       ,#~(modify-phases %standard-phases
+                         (delete 'install)
+                         (replace 'build
+                                  (lambda* (#:key make-flags #:allow-other-keys)
+                                    (invoke "make" "-j 12" "vcfcreatemulti")))
+                         (replace 'check
+                                  (lambda* (#:key tests? #:allow-other-keys)
+                                    (when tests?
+                                      (invoke "ctest" "-R" "vcfcreatemulti" "--verbose")))))))))
+
 
 (define-public vcflib-local-htslib-git
   "Test embedded htslib - part of tabixpp submodule"

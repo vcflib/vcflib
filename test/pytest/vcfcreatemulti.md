@@ -79,7 +79,7 @@ this now gets converted into the following:
 
 ```python
 
->>> sh("../build/vcfcreatemulti ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
+>>> sh("vcfcreatemulti ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1,3,64,3,2,1;AF=0.011236,0.033708,0.719101,0.033708,0.022472,0.011236;AN=89,89,89,89,89,89;AT=>3655>3656>3657>3660>3662,>3655>3656>3660>3662,>3655>3656>3657>3658>3659>3660>3662,>3655>3656>3657>3658>3660>3662,>3655>3660>3662,>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0,0,0,0,0,0;TYPE=del,del,del,del,del,snp;combined=10158244-10158257      GT      0|0     3|3     3|3     3|0     1|3     0|4     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     4|5     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|4     3|3     3|3     5|0     3|0     3|3     0|3     3|3     3|3     2|3     3|2     3|3     3|3     0|3     3|3     3|3     3|0     3|2     3|3     0
 
 ```
@@ -182,7 +182,7 @@ output in <a href="../data/regression/vcfcreatemulti_3.vcf">vcfcreatemulti_3.vcf
 Check if the legacy version is still the same. Note it only retains the first genotype and has duplicate 'CC' alt alleles. INFO fields are not correct either.
 
 ```python
->>> sh("../build/vcfcreatemulti --legacy ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
+>>> sh("vcfcreatemulti --legacy ../samples/10158243-after-vcfwave.vcf|grep -v ^\#")
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C,CC,CCCCCACC,CCCCCACCCCCAC,CCCCCACCCCCACA   60      .       AC=1;AF=0.011236;AN=89;AT=>3655>3656>3657>3660>3662;NS=45;LV=0;ORIGIN=grch38#chr4:10158243;LEN=12;INV=0;TYPE=del;combined=10158244-10158257     GT      0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0
 
 ```
