@@ -1057,8 +1057,8 @@ VariantFieldType Variant::infoType(const string& key) {
 
     void Variant::addFormatField(const string& key) {
         bool hasTag = false;
-        for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
-            if (*t == key) {
+        for (const auto& t : format) {
+            if (t == key) {
                 hasTag = true;
                 break;
             }
@@ -1234,7 +1234,7 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
-    RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) {
+    RuleToken::RuleToken(const string& tokenstr, map<string, VariantFieldType>& variables) {
         isVariable = false;
         if (tokenstr == "!") {
             type = RuleToken::NOT_OPERATOR;
@@ -1942,7 +1942,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         }
 }
 
-bool VariantCallFile::setRegion(string seq, long int start, long int end) {
+bool VariantCallFile::setRegion(const string& seq, long int start, long int end) {
     stringstream regionstr;
     if (end) {
         regionstr << seq << ":" << start << "-" << end;
@@ -1952,7 +1952,7 @@ bool VariantCallFile::setRegion(string seq, long int start, long int end) {
     return setRegion(regionstr.str());
 }
 
-bool VariantCallFile::setRegion(string region) {
+bool VariantCallFile::setRegion(const string& region) {
     if (!usingTabix) {
         cerr << "cannot setRegion on a non-tabix indexed file" << endl;
         exit(1);
@@ -2172,24 +2172,22 @@ void Variant::updateAlleleIndexes(void) {
     for (const auto& c : vcf->formatCounts) {
       int count = c.second;
       if (count == ALLELE_NUMBER) {
-            const string& key = c.first;
-            for (map<string, map<string, vector<string> > >::iterator
-		   s = samples.begin(); s != samples.end(); ++s) {
-	      map<string, vector<string> >& sample = s->second;
-	      map<string, vector<string> >::iterator v = sample.find(key);
-	      if (v != sample.end()) {
-		vector<string>& vals = v->second;
-		vector<string> tokeep;
-		int i = 0;
-		for (vector<string>::iterator a = vals.begin();
-		     a != vals.end(); ++a, ++i) {
-		  if (i != altIndex) {
-		    tokeep.push_back(*a);
-		  }
-		}
-		vals = tokeep;
-	      }
-            }
+      	const string& key = c.first;
+      	for (auto& [_, sample] : samples) {
+      		map<string, vector<string> >::iterator v = sample.find(key);
+      		if (v != sample.end()) {
+      			vector<string>& vals = v->second;
+      			vector<string> tokeep;
+      			int i = 0;
+      			for (vector<string>::iterator a = vals.begin();
+                    a != vals.end(); ++a, ++i) {
+      				if (i != altIndex) {
+      					tokeep.push_back(*a);
+      				}
+                    }
+      			vals = tokeep;
+      		}
+      	}
       }
     }
 
@@ -2383,9 +2381,9 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts) {
 map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMapping, vector<int>& altsToRemove) {
     map<int, int> mapping;
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
-    for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v) {
-        for (list<int>::iterator n = v->begin(); n != v->end(); ++n) {
-            *n = alleleIndexMapping[*n];
+    for (auto& v : orderedGenotypes) {
+        for (auto& n : v) {
+            n = alleleIndexMapping[n];
         }
     }
     list<list<int> > newOrderedGenotypes = glorder(ploidy, numalts - altsToRemove.size());
@@ -2715,8 +2713,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               float gapOpenPenalty,
                                                               float gapExtendPenalty,
                                                               float repeatGapExtendPenalty,
-                                                              string flankingRefLeft,
-                                                              string flankingRefRight) {
+                                                              const string& flankingRefLeft,
+                                                              const string& flankingRefRight) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 

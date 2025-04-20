@@ -230,7 +230,7 @@ double var(int dat[], int n, double mean){
 
 }
 
-void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, const vector<long int>& pos, const vector<double>& afs, const vector<int> & target, const vector<int> & background,  const vector<int>& total,  string seqid){
+void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, const vector<long int>& pos, const vector<double>& afs, const vector<int> & target, const vector<int> & background,  const vector<int>& total,  const string& seqid){
 
   //moved (carson)
   int tl = 2*target.size();

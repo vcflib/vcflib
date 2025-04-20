@@ -50,20 +50,20 @@ Type: filter
     while (variantFile.getNextVariant(var)) {
         set<string> alleles;
         vector<string> alleles_to_remove;
-        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-            if (*a != var.ref) {
-                if (alleles.find(*a) == alleles.end()) {
-                    alleles.insert(*a);
+        for (const auto& a : var.alt) {
+            if (a != var.ref) {
+                if (alleles.find(a) == alleles.end()) {
+                    alleles.insert(a);
                 } else {
-                    alleles_to_remove.push_back(*a);
+                    alleles_to_remove.push_back(a);
                 }
             } else {
-                alleles_to_remove.push_back(*a); // same as ref
+                alleles_to_remove.push_back(a); // same as ref
             }
         }
-        for (vector<string>::iterator a = alleles_to_remove.begin(); a != alleles_to_remove.end(); ++a) {
-            cerr << "removing " << *a << " from " << var.sequenceName << ":" << var.position << endl;
-            var.removeAlt(*a);
+        for (const auto& a : alleles_to_remove) {
+            cerr << "removing " << a << " from " << var.sequenceName << ":" << var.position << endl;
+            var.removeAlt(a);
         }
         cout << var << endl;
     }

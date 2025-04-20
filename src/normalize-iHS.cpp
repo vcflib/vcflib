@@ -165,7 +165,7 @@ bool sortAF(const iHSdat& L, const iHSdat& R){
 
 */
 
-double var(vector<double> & data, double mu){
+double var(const vector<double> & data, double mu){
   double variance = 0;
 
   for(const auto& d : data){

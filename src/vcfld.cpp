@@ -63,7 +63,7 @@ void clearHaplotypes(std::vector<std::pair<std::string, std::string>>& haplotype
   }
 }
 
-void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, long int window, int derived, vector<int> & target, vector<int> & background, string seqid){
+void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, long int window, int derived, vector<int> & target, vector<int> & background, const string& seqid){
 
   for(int long snpA = 0; snpA < haplotypes[0].first.length() - 100; snpA++){
 

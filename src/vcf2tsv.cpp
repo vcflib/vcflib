@@ -67,25 +67,23 @@ void loadInfoSS(std::stringstream & ss,
             << var.filter;
 
 
-        for(std::map<std::string, bool>::iterator it = infoToKeep.begin(); it != infoToKeep.end(); it++){
-
-
-            if(var.info.find(it->first) == var.info.end()){
+        for(const auto& it : infoToKeep) {
+        	if(var.info.find(it.first) == var.info.end()){
                 o << "\t" << nullval ;
             }
             else{
-                if(it->second == true){
-                    o << "\t" << var.info[it->first].front();
+                if(it.second == true){
+                    o << "\t" << var.info[it.first].front();
                 }
                 else{
-                    if(vcf.infoCounts.find(it->first) == vcf.infoCounts.end()){
+                    if(vcf.infoCounts.find(it.first) == vcf.infoCounts.end()){
 
-                        if(vcf.infoCounts[it->first] == ALLELE_NUMBER){
-                            o << "\t" << var.info[it->first].at(altindex) ;
+                        if(vcf.infoCounts[it.first] == ALLELE_NUMBER){
+                            o << "\t" << var.info[it.first].at(altindex) ;
                         }
                     }
                     else{
-                        o << "\t" << join(var.info[it->first], ",") ;
+                        o << "\t" << join(var.info[it.first], ",") ;
                     }
                 }
             }

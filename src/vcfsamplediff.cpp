@@ -146,8 +146,8 @@ int main(int argc, char** argv) {
     // TODO check if AC is present
     // ensure that AC is listed as an info field
     string line = "##INFO=<ID=" + tag + ",Number=1,Type=String,Description=\"Samples";
-    for (vector<string>::iterator s = samples.begin(); s != samples.end(); ++s) {
-        line += " " + *s;
+    for (const auto& sample : samples) {
+        line += " " + sample;
     }
     line += " have different genotypes\">";
     variantFile.addHeaderLine(line);

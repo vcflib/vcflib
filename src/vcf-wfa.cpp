@@ -333,7 +333,7 @@ void Variant::reduceAlleles(
     map<string, pair<vector<VariantAllele>, bool> > varAlleles,
     VariantCallFile &variantFile,
     Variant var,
-    string parseFlag,
+    const string& parseFlag,
     bool keepInfo,
     bool keepGeno,
     bool debug)
@@ -530,9 +530,7 @@ void Variant::reduceAlleles(
             v.info["AC"].push_back(convert(alleleStuff[*a].count));
         }
         if (keepInfo) {
-            for (map<string, vector<string> >::iterator infoit = var.info.begin();
-                 infoit != var.info.end(); ++infoit) {
-                string key = infoit->first;
+            for (const auto&[key, _] : var.info) {
                 if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
                     v.info[key].push_back(alleleStuff[*a].info[key]);
                 }

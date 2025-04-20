@@ -114,7 +114,7 @@ double dStatistic(const std::list<score> & rangeData){
   return (dstat);
 }
 
-void processSeqid(ifstream & file, string seqid, streampos offset, opts & opt){
+void processSeqid(ifstream & file, const string& seqid, streampos offset, opts & opt){
 
   string line ;
 
