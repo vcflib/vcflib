@@ -79,13 +79,16 @@
     (source (local-file %source-dir #:recursive? #t))
     (build-system cmake-build-system)
     ;; (arguments
-    ;;  `(#:tests? #f ;; tests don't work when running build directly - use shell for now
-    ;;   ))
+    ;; `(#:tests? #t
+    ;;   #:configure-flags
+    ;;   ,#~(list
+    ;;       ;; "-DBUILD_OPTIMIZED=ON"       ;; we don't use the standard cmake optimizations
+    ;;       "-DCMAKE_BUILD_TYPE=Debug"))) ;; to optimize use guix --tune=march-type (e.g. --tune=native)
     (inputs
      ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
      (list
        fastahack    ;; dev version not in Debian
-       htslib ;; disable to test local build, also tabixpp
+       htslib ;; disable to test local build, also disable tabixpp in that case
        pandoc ; for man pages
        perl
        python
@@ -119,7 +122,7 @@ manipulations on VCF files.")
        #:configure-flags
        ,#~(list
            ;; "-DBUILD_OPTIMIZED=ON"       ;; we don't use the standard cmake optimizations
-           "-DCMAKE_BUILD_TYPE=Generic") ;; to optimize use guix --tune=march-type (e.g. --tune=native)
+           "-DCMAKE_BUILD_TYPE=Debug") ;; to optimize use guix --tune=march-type (e.g. --tune=native)
        #:phases
        ,#~(modify-phases %standard-phases
                          (delete 'install)

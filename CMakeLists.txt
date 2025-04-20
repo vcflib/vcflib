@@ -272,7 +272,6 @@ set(BINS
     vcfcreatemulti
 )
 
-
 set(WFBINS # Introduce wavefront dependency
     vcfallelicprimitives
     vcfcleancomplex
@@ -415,28 +414,24 @@ endif (ZIG)
 
 if (htslib_LOCAL)
   target_link_libraries(vcflib htslib)
+  set(vcflib_LIBS curl deflate) # local build requires linking curl explicitly
 else ()
   target_link_libraries(vcflib PkgConfig::htslib)
-endif()
-
-if (htslib_LOCAL)
-  set(vcflib_LIBS curl deflate) # local build requires linking curl explicitly
-else()
   set(vcflib_LIBS hts)
 endif()
 
-list(APPEND vcflib_LIBS
-  # deflate
+list(APPEND htslib_dependencies
   lzma
   z
   bz2
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${WFA_LINK_LIBRARIES}
 )
 
-if (ZIG)
-  list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
-endif()
+list(APPEND vcflib_LIBS
+  ${CMAKE_THREAD_LIBS_INIT}
+)
+
+#  # ${WFA_LINK_LIBRARIES}
+
 
 if (NOT tabixpp_LOCAL)
   target_link_libraries(vcflib PkgConfig::tabixpp)
@@ -464,6 +459,10 @@ if (NOT BUILD_ONLY_LIB)
     target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} vcflib)
     target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} ${WFALIB})
   endforeach(WFBIN ${BINS})
+  if (ZIG)
+    # list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
+    target_link_libraries(vcfcreatemulti PUBLIC ${vcflib_LIBS} ${ZIG_LINK_LIBRARIES} vcflib)
+  endif()
   install(TARGETS ${BINS} ${WFBINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # ---- Copy scripts
@@ -471,6 +470,7 @@ if (NOT BUILD_ONLY_LIB)
     install(PROGRAMS ./scripts/${SCRIPT} DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ${SCRIPT})
   endforeach(SCRIPT ${SCRIPTS})
 endif()
+
 
 if (NOT BUILD_STATIC) # only when not building static
   # ---- Python bindings - mostly for testing at this stage
