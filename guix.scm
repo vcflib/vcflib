@@ -125,11 +125,11 @@ manipulations on VCF files.")
                          (delete 'install)
                          (replace 'build
                                   (lambda* (#:key make-flags #:allow-other-keys)
-                                    (invoke "make" "-j 12" "vcfcreatemulti")))
+                                    (invoke "make" "-j 12" "pyvcflib")))
                          (replace 'check
                                   (lambda* (#:key tests? #:allow-other-keys)
                                     (when tests?
-                                      (invoke "ctest" "-R" "vcfcreatemulti" "--verbose")))))))))
+                                      (invoke "ctest" "-R" "pyvcflib" "--verbose")))))))))
 
 
 (define-public vcflib-local-htslib-git
