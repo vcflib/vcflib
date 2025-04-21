@@ -178,9 +178,9 @@ int main(int argc, char** argv) {
         int currentWindow = window;
         int scale = 2;
         if (var.ref.size()*scale > currentWindow) currentWindow = var.ref.size()*scale;
-        for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
-            if (a->size()*scale > currentWindow) {
-                currentWindow = a->size()*scale;
+        for (const auto& a : var.alleles) {
+            if (a.size() * scale > currentWindow) {
+                currentWindow = a.size() * scale;
             }
         }
 

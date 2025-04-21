@@ -54,14 +54,12 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         //cout << var << endl;
-        for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-            string name = s->first;
-            map<string, vector<string> >& sample = s->second;
+        for (auto& [name, sample] : var.samples) {
             string& genotype = sample["GT"].front();
             vector<string> gt = split(genotype, "|/");
             int alt = 0;
-            for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {
-                if (*g != "0")
+            for (const auto& g : gt) {
+                if (g != "0")
                     ++alt;
             }
             if (alt != gt.size()) {
