@@ -34,15 +34,15 @@ int countAlts(Variant& var, int alleleIndex) {
 
 int countAlleles(Variant& var) {
     int alleles = 0;
-    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-        map<string, vector<string> >& sample = s->second;
-        map<string, vector<string> >::iterator gt = sample.find("GT");
+    for (const auto& s : var.samples) {
+        const map<string, vector<string> >& sample = s.second;
+        const auto gt = sample.find("GT");
         if (gt != sample.end()) {
             map<int, int> genotype = decomposeGenotype(gt->second.front());
-            for (map<int, int>::iterator g = genotype.begin(); g != genotype.end(); ++g) {
-		if (g->first != NULL_ALLELE) {
-		    alleles += g->second;
-		}
+            for (const auto& g : genotype) {
+            	if (g.first != NULL_ALLELE) {
+            		alleles += g.second;
+            	}
             }
         }
     }

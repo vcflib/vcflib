@@ -1057,8 +1057,8 @@ VariantFieldType Variant::infoType(const string& key) {
 
     void Variant::addFormatField(const string& key) {
         bool hasTag = false;
-        for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
-            if (*t == key) {
+        for (const auto& t : format) {
+            if (t == key) {
                 hasTag = true;
                 break;
             }
@@ -1068,16 +1068,16 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
-    void Variant::printAlt(ostream& out) {
-        for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
+    void Variant::printAlt(ostream& out) const {
+        for (vector<string>::const_iterator i = alt.begin(); i != alt.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alt.end() - 1)) out << ",";
         }
     }
 
-    void Variant::printAlleles(ostream& out) {
-        for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
+    void Variant::printAlleles(ostream& out) const {
+        for (vector<string>::const_iterator i = alleles.begin(); i != alleles.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alleles.end() - 1)) out << ",";
@@ -1135,11 +1135,11 @@ VariantFieldType Variant::infoType(const string& key) {
             // output the ordered info fields
             string s = "";
             for (const auto& name: ordered_keys) {
-                auto value = var.info[name];
+                const auto& value = var.info[name];
                 if (!value.empty()) {
                     s += name + "=" + join(value, ",") + ";" ;
                 } else {
-                    auto infoflag = var.infoFlags[name];
+                    const auto infoflag = var.infoFlags[name];
                     if (infoflag == true)
                         s += name + ";";
                 }
@@ -1163,12 +1163,12 @@ VariantFieldType Variant::infoType(const string& key) {
                 if (sampleItr == var.samples.end()) {
                     out << ".";
                 } else {
-                    map<string, vector<string> >& sample = sampleItr->second;
+                    const map<string, vector<string> >& sample = sampleItr->second;
                     if (sample.empty()) {
                         out << ".";
                     } else {
                         for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                            map<string, vector<string> >::iterator g = sample.find(*f);
+                            const auto g = sample.find(*f);
                             out << ((f == var.format.begin()) ? "" : ":");
                             if (g != sample.end() && !g->second.empty()) {
                                 out << join(g->second, ",");
@@ -1183,7 +1183,7 @@ VariantFieldType Variant::infoType(const string& key) {
         return out;
     }
 
-    void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
+    void Variant::setOutputSampleNames(const vector<string>& samplesToOutput) {
         outputSampleNames = samplesToOutput;
     }
 
@@ -2172,24 +2172,22 @@ void Variant::updateAlleleIndexes(void) {
     for (const auto& c : vcf->formatCounts) {
       int count = c.second;
       if (count == ALLELE_NUMBER) {
-            const string& key = c.first;
-            for (map<string, map<string, vector<string> > >::iterator
-		   s = samples.begin(); s != samples.end(); ++s) {
-	      map<string, vector<string> >& sample = s->second;
-	      map<string, vector<string> >::iterator v = sample.find(key);
-	      if (v != sample.end()) {
-		vector<string>& vals = v->second;
-		vector<string> tokeep;
-		int i = 0;
-		for (vector<string>::iterator a = vals.begin();
-		     a != vals.end(); ++a, ++i) {
-		  if (i != altIndex) {
-		    tokeep.push_back(*a);
-		  }
-		}
-		vals = tokeep;
-	      }
-            }
+      	const string& key = c.first;
+      	for (auto& [_, sample] : samples) {
+      		map<string, vector<string> >::iterator v = sample.find(key);
+      		if (v != sample.end()) {
+      			vector<string>& vals = v->second;
+      			vector<string> tokeep;
+      			int i = 0;
+      			for (vector<string>::iterator a = vals.begin();
+                    a != vals.end(); ++a, ++i) {
+      				if (i != altIndex) {
+      					tokeep.push_back(*a);
+      				}
+                    }
+      			vals = tokeep;
+      		}
+      	}
       }
     }
 
@@ -2383,9 +2381,9 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts) {
 map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMapping, vector<int>& altsToRemove) {
     map<int, int> mapping;
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
-    for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v) {
-        for (list<int>::iterator n = v->begin(); n != v->end(); ++n) {
-            *n = alleleIndexMapping[*n];
+    for (auto& v : orderedGenotypes) {
+        for (auto& n : v) {
+            n = alleleIndexMapping[n];
         }
     }
     list<list<int> > newOrderedGenotypes = glorder(ploidy, numalts - altsToRemove.size());
@@ -2715,8 +2713,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               float gapOpenPenalty,
                                                               float gapExtendPenalty,
                                                               float repeatGapExtendPenalty,
-                                                              string flankingRefLeft,
-                                                              string flankingRefRight) {
+                                                              const string& flankingRefLeft,
+                                                              const string& flankingRefRight) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 

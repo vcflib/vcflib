@@ -78,7 +78,7 @@ map<string, pair<vector<VariantAllele>,bool> > WfaVariant::wfa_parsedAlternates(
     */
 
 // #pragma omp parallel for
-    for (const auto& alternate : alt) { // iterate ALT strings
+    for (const auto& alternate: alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
         // unsigned int referencePos;
@@ -389,13 +389,13 @@ void Variant::reduceAlleles(
     bool hasAf = false;
     if (var.info.find("AF") != var.info.end()) {
         hasAf = true;
-        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-            vector<VariantAllele>& vars = varAlleles[*a].first;
-            for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+        for (const auto& a : var.alt) {
+            const vector<VariantAllele>& vars = varAlleles[a].first;
+            for (const auto& va : vars) {
                 double freq;
                 try {
-                    convert(var.info["AF"].at(var.altAlleleIndexes[*a]), freq);
-                    alleleStuff[*va].freq += freq;
+                    convert(var.info["AF"].at(var.altAlleleIndexes[a]), freq);
+                    alleleStuff[va].freq += freq;
                 } catch (...) {
                     cerr << "vcfallelicprimitives WARNING: AF does not have count == alts @ "
                          << var.sequenceName << ":" << var.position << endl;
@@ -423,11 +423,10 @@ void Variant::reduceAlleles(
     }
 
     if (keepInfo) {
-        for (map<string, vector<string> >::iterator infoit = var.info.begin();
-             infoit != var.info.end(); ++infoit) {
-            const string& key = infoit->first;
+        for (const auto& infoit : var.info) {
+            const string& key = infoit.first;
             for (const auto& alternate : var.alt) {
-                vector<VariantAllele>& vars = varAlleles[alternate].first;
+                const vector<VariantAllele>& vars = varAlleles[alternate].first;
                 for (const auto& va : vars) {
                     string val;
                     vector<string>& vals = var.info[key];
@@ -531,9 +530,7 @@ void Variant::reduceAlleles(
             v.info["AC"].push_back(convert(alleleStuff[*a].count));
         }
         if (keepInfo) {
-            for (map<string, vector<string> >::iterator infoit = var.info.begin();
-                 infoit != var.info.end(); ++infoit) {
-                string key = infoit->first;
+            for (const auto&[key, _] : var.info) {
                 if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
                     v.info[key].push_back(alleleStuff[*a].info[key]);
                 }

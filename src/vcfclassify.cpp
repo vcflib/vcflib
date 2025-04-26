@@ -45,8 +45,7 @@ bool hasTransversion(const Variant& var) {
 
 bool hasInsertion(Variant& var) {
     string& ref = var.ref;
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string& alt = *a;
+    for (const auto& alt : var.alt) {
         if (ref.size() < alt.size()) {
             return true;
         }

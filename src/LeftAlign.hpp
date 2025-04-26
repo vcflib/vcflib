@@ -55,7 +55,7 @@ double entropy(const string& st);
 
 int countMismatches(string& alternateSequence, string referenceSequence);
 
-bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug);
+bool leftAlign(const string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug);
 
 bool stablyLeftAlign(string& alternateSequence, string referenceSequence, Cigar& cigar, int maxiterations, bool debug);
 

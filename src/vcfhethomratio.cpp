@@ -42,17 +42,15 @@ int main(int argc, char** argv) {
 
     map<string, unsigned int> hetCounts;
     map<string, unsigned int> homCounts;
-    for (vector<string>::iterator s = variantFile.sampleNames.begin(); s != variantFile.sampleNames.end(); ++s) {
-        hetCounts[*s] = 0;
-        homCounts[*s] = 0;
+    for (const auto& s : variantFile.sampleNames) {
+        hetCounts[s] = 0;
+        homCounts[s] = 0;
     }
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         //cout << var << endl;
-        for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-            string name = s->first;
-            map<string, vector<string> >& sample = s->second;
+        for (auto& [name, sample] : var.samples) {
             string& gt = sample["GT"].front();
             map<int, int> genotype = decomposeGenotype(gt);
             if (isHet(genotype)) {

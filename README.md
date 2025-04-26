@@ -3,7 +3,7 @@
 ### A C++ library for parsing and manipulating VCF files.
 
 [![Github-CI](https://github.com/vcflib/vcflib/actions/workflows/ci_test.yml/badge.svg?branch=master)](https://github.com/vcflib/vcflib/actions)
-[![AnacondaBadge](https://anaconda.org/bioconda/vcflib/badges/version.svg)](https://anaconda.org/bioconda/vcflib) [![DL](https://anaconda.org/bioconda/vcflib/badges/downloads.svg)](https://anaconda.org/bioconda/vcflib) [![BrewBadge](https://img.shields.io/badge/%F0%9F%8D%BAbrew-vcflib-brightgreen.svg)](https://github.com/brewsci/homebrew-bio) [![GuixBadge](https://img.shields.io/badge/gnuguix-vcflib-brightgreen.svg)](https://packages.guix.gnu.org/packages/vcflib/) [![DebianBadge](https://badges.debian.net/badges/debian/testing/libvcflib-dev/version.svg)](https://packages.debian.org/testing/libvcflib-dev) [![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html) [![Chat on Matrix](https://matrix.to/img/matrix-badge.svg)](https://matrix.to/#/#vcflib:matrix.org)
+[![AnacondaBadge](https://anaconda.org/bioconda/vcflib/badges/version.svg)](https://anaconda.org/bioconda/vcflib) [![DL](https://anaconda.org/bioconda/vcflib/badges/downloads.svg)](https://anaconda.org/bioconda/vcflib) [![BrewBadge](https://img.shields.io/badge/%F0%9F%8D%BAbrew-vcflib-brightgreen.svg)](https://github.com/brewsci/homebrew-bio) [![Guix](https://packages.guix.gnu.org/packages/vcflib/badges/latest-version.svg)](https://packages.guix.gnu.org/packages/vcflib) [![DebianBadge](https://badges.debian.net/badges/debian/testing/libvcflib-dev/version.svg)](https://packages.debian.org/testing/libvcflib-dev) [![C++0x](https://img.shields.io/badge/Language-C++0x-steelblue.svg)](https://www.cprogramming.com/c++11/what-is-c++0x.html) [![Chat on Matrix](https://matrix.to/img/matrix-badge.svg)](https://matrix.to/#/#vcflib:matrix.org)
 
 Vcflib and related tools are the workhorses in bioinformatics for processing the VCF variant calling format. See
 
@@ -373,7 +373,7 @@ Build dependencies can be viewed in the github-CI scripts (see badges above), as
 - htslib
 - tabixpp
 - WFA2 (wfa2lib)
-- pybind11 (for testing)
+- pybind11 (for python bindings and testing)
 
 For include files add
 
@@ -404,7 +404,7 @@ More on `zig` can be found in the source code [README](./src/zig/README.md).
 
 ### Using a recent C++ compiler
 
-You may encounter something like libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by ...vcflib/build/pyvcflib.cpython-310-x86_64-linux-gnu.so). This is caused by the python pyvcflib not running against a python interpreter compiled with the same libstdc++ dependency. That is a bit nasty to solve. For now make sure to match C++ compilers for the python module.
+You may encounter something like libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by ...vcflib/build/pyvcflib.cpython-310-x86_64-linux-gnu.so). This is caused by the python pyvcflib not running against a python interpreter compiled with the same libstdc++ dependency. That is a bit nasty to solve. For now make sure to match C++ compilers for the python module. It is also possible to disable the python build.
 
 ### Using a different htslib
 

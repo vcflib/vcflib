@@ -277,13 +277,13 @@ int main(int argc, char** argv) {
         bool hasAc = false;
         if (var.info.find("AC") != var.info.end()) {
             hasAc = true;
-            for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                vector<VariantAllele>& vars = varAlleles[*a];
-                for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+            for (const auto& a  : var.alt) {
+                vector<VariantAllele>& vars = varAlleles[a];
+                for (const auto& va  : vars) {
                     int freq;
                     try {
-                        convert(var.info["AC"].at(var.altAlleleIndexes[*a]), freq);
-                        alleleStuff[*va].count += freq;
+                        convert(var.info["AC"].at(var.altAlleleIndexes[a]), freq);
+                        alleleStuff[va].count += freq;
                     } catch (...) {
                         cerr << "vcfallelicprimitives WARNING: AC does not have count == alts @ "
                              << var.sequenceName << ":" << var.position << endl;
@@ -403,7 +403,7 @@ int main(int argc, char** argv) {
             }
             if (keepInfo) {
                 for (const auto& infoit: var.info) {
-                    string key = infoit.first;
+                    const string& key = infoit.first;
                     if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
                         v.info[key].push_back(alleleStuff[a].info[key]);
                     }

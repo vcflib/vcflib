@@ -73,10 +73,10 @@ double entropy(const string& st) {
     vector<char> stvec(st.begin(), st.end());
     set<char> alphabet(stvec.begin(), stvec.end());
     vector<double> freqs;
-    for (set<char>::iterator c = alphabet.begin(); c != alphabet.end(); ++c) {
+    for (const auto c : alphabet) {
         int ctr = 0;
-        for (vector<char>::iterator s = stvec.begin(); s != stvec.end(); ++s) {
-            if (*s == *c) {
+        for (const auto s : stvec) {
+            if (s == c) {
                 ++ctr;
             }
         }
@@ -84,14 +84,14 @@ double entropy(const string& st) {
     }
     double ent = 0;
     double ln2 = log(2);
-    for (vector<double>::iterator f = freqs.begin(); f != freqs.end(); ++f) {
-        ent += *f * log(*f)/ln2;
+    for (const auto f : freqs) {
+        ent += f * log(f)/ln2;
     }
     ent = -ent;
     return ent;
 }
 
-bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug) {
+bool leftAlign(const string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug) {
 
     int arsOffset = 0; // pointer to insertion point in aligned reference sequence
     string alignedReferenceSequence = referenceSequence;
@@ -108,10 +108,7 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
     string softEnd;
 
     stringstream cigar_before, cigar_after;
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin();
-        c != cigar.end(); ++c) {
-        unsigned int l = c->first;
-        char t = c->second;
+    for (const auto& [l, t] : cigar) {
 
         cigar_before << l << t;
         if (t == 'M') { // match or mismatch
@@ -347,10 +344,7 @@ bool leftAlign(string& alternateSequence, Cigar& cigar, string& referenceSequenc
 
     cigar = newCigar;
 
-    for (vector<pair<int, char> >::const_iterator c = cigar.begin();
-        c != cigar.end(); ++c) {
-        unsigned int l = c->first;
-        char t = c->second;
+    for (const auto& [l, t] : cigar) {
         cigar_after << l << t;
     }
 

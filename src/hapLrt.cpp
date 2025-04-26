@@ -230,7 +230,7 @@ double var(int dat[], int n, double mean){
 
 }
 
-void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int , vector<long int> pos, const vector<double>& , const vector<int> & target, const vector<int> & background,  const vector<int>& total,  const string& seqid){
+void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, const vector<long int>& pos, const vector<double>& afs, const vector<int> & target, const vector<int> & background,  const vector<int>& total,  const string& seqid){
 
   //moved (carson)
   int tl = 2*target.size();
@@ -408,12 +408,12 @@ int main(int argc, char** argv) {
       if(!variantFile.setRegion(region)){ //check if region is even specified in header
         bool region_exists = false;
         vector<string> headerLines = split (variantFile.header, "\n");
-        for(vector<string>::iterator it = headerLines.begin(); it != headerLines.end(); it++){
-          if((*it).substr(0,8) == "##contig"){
-            string contigInfo = (*it).substr(10, (*it).length() -11);
+        for(const auto& headerLine : headerLines){
+          if(headerLine.substr(0,8) == "##contig"){
+            string contigInfo = headerLine.substr(10, headerLine.length() -11);
             vector<string> info = split(contigInfo, ",");
-            for(vector<string>::iterator sub = info.begin(); sub != info.end(); sub++){
-              vector<string> subfield = split((*sub), "=");
+            for(const auto& sub : info){
+              vector<string> subfield = split(sub, "=");
               if (subfield[0] != "ID") break;
               if(subfield[1] == region){
                 region_exists = true;
@@ -457,10 +457,8 @@ int main(int argc, char** argv) {
 
     int index = 0, indexi = 0;
 
-    for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
-
-      string samplename  = (*samp);
-
+    // TODO: fix loop
+    for(const auto& _ : samples){
       if(targetIndex.find(index) != targetIndex.end()){
         iti.push_back(indexi);
         //	itot.push_back(indexi);

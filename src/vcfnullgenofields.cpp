@@ -115,12 +115,10 @@ int main(int argc, char** argv) {
     map<string, vector<string> > full_null_val; // values to set missing genotypes ('.') with
     full_null_val.insert(pair<string,vector<string> >("GT", null_GTval_vector));
 
-    for( map<string, VariantFieldType>::iterator formats = variantFile.formatTypes.begin();
-        formats != variantFile.formatTypes.end();
-        ++formats ){
-        if( formats->first != "GT" ){
-            out_formats.push_back(formats->first);
-            full_null_val.insert(pair<string,vector<string> >(formats->first, null_val_vector));
+    for(const auto& formats : variantFile.formatTypes){
+        if( formats.first != "GT" ){
+            out_formats.push_back(formats.first);
+            full_null_val.insert(pair<string,vector<string> >(formats.first, null_val_vector));
         }
     }
 

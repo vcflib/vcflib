@@ -59,7 +59,7 @@ void printHelp(void){
 void clearHaplotypes(std::vector<std::pair<std::string, std::string>>& haplotypes) {
   for(int i= 0; i < haplotypes.size(); i++){
     haplotypes[i].first.clear();
-    haplotypes[i].first.clear();
+    haplotypes[i].second.clear();
   }
 }
 

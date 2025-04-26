@@ -141,20 +141,20 @@ int main(int argc, char** argv) {
             {
                 // populate the meta information lines
                 string column_headers_line;
-                for (vector<string>::const_iterator meta_iter = header_lines.begin(); meta_iter != header_lines.end(); ++meta_iter)
+                for (const auto& meta : header_lines)
                 {
-                    vcf_header.addMetaInformationLine(*meta_iter);
-                    if ((*meta_iter).find("#CHROM") != string::npos) // store the header column position
+                    vcf_header.addMetaInformationLine(meta);
+                    if (meta.find("#CHROM") != string::npos) // store the header column position
                     {
-                        column_headers_line = (*meta_iter);
+                        column_headers_line = meta;
                     }
                 }
                 if (column_headers_line.size() > 0) // if there are header columns then add them
                 {
                     vector<string> header_columns = split(column_headers_line, "\t");
-                    for (vector<string>::const_iterator column_iter = header_columns.begin(); column_iter != header_columns.end(); ++column_iter)
+                    for (const auto& column : header_columns)
                     {
-                        vcf_header.addHeaderColumn(*column_iter);
+                        vcf_header.addHeaderColumn(column);
                     }
                 }
             }

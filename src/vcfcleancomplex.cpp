@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
             string& alternate = var.alt.front();
             vector<VariantAllele>& vs = parsedAlts[alternate];
             vector<VariantAllele> valleles;
-            for (vector<VariantAllele>::iterator a = vs.begin(); a != vs.end(); ++a) {
-                if (a->ref != a->alt) {
-                    valleles.push_back(*a);
+            for (const auto& a : vs) {
+                if (a.ref != a.alt) {
+                    valleles.push_back(a);
                 }
             }
             if (valleles.size() == 1) {

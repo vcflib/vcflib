@@ -9,29 +9,37 @@
 cmake_minimum_required(VERSION 3.16)
 project(vcflib)
 
-set(CMAKE_CXX_STANDARD 17)
+enable_testing()
 
+set(CMAKE_CXX_STANDARD 17)
 include(ExternalProject)
 include(FeatureSummary)
 include(GNUInstallDirs)
 
+find_package(BZip2 REQUIRED)   # htslib
+find_package(LibLZMA REQUIRED) # htslib
 find_package(PkgConfig REQUIRED)
+find_package(ZLIB REQUIRED)
 find_package(pybind11 CONFIG)
 
 include(GNUInstallDirs)
-include(FindBZip2)
-include(FindLibLZMA)
-include(FindZLIB)
-include(FindCURL) # for htslib
 
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
   WHAT REQUIRED_PACKAGES_NOT_FOUND)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
+if (BUILD_STATIC)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  set(BUILD_SHARED_LIBS OFF)
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+else ()
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
+endif ()
 
 # ---- Options
 
+option(BUILD_STATIC "Build static binary" OFF)
 option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
@@ -59,7 +67,6 @@ pkg_check_modules(htslib IMPORTED_TARGET htslib)   # Optionally builds from cont
 pkg_check_modules(tabixpp IMPORTED_TARGET tabixpp) # Optionally builds from contrib/
 
 # ---- Build switches
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ipo_supported})
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -109,12 +116,12 @@ include_directories(include)
 include_directories(contrib/fastahack)
 include_directories(contrib/intervaltree)
 include_directories(contrib/smithwaterman)
-# include_directories(contrib/multichoose) merged with vcflib
 include_directories(contrib/filevercmp)
 include_directories(contrib/c-progress-bar)
 
 if(NOT htslib_FOUND)
   message(STATUS "Using included htslib")
+  include(FindCURL) # for htslib
   set(htslib_LOCAL contrib/tabixpp/htslib)
   set(tabixpp_FOUND OFF) # also build tabixpp if htslib is missing
 endif()
@@ -134,7 +141,6 @@ endif()
 
 file(GLOB INCLUDES
   src/*.h*
-  # contrib/multichoose/*.h*
   contrib/intervaltree/*.h*
   contrib/smithwaterman/*.h*
   contrib/fastahack/*.h*
@@ -265,7 +271,6 @@ set(BINS
     vcfinfosummarize
     vcfcreatemulti
 )
-
 
 set(WFBINS # Introduce wavefront dependency
     vcfallelicprimitives
@@ -407,33 +412,27 @@ else (ZIG)
   add_definitions(-DNO_ZIG=1)
 endif (ZIG)
 
-set(vcflib_DEPS
-  CURL::libcurl
-  )
-
-if (ZIG)
-  list(APPEND vcflib_DEPS ZIG-EXT)
-endif ()
-
-set(vcflib_LIBS
-  ${CURL_LIBRARIES}
-  ${ZLIB_LIBRARIES}
-  ${LIBLZMA_LIBRARIES}
-  ${BZIP2_LIBRARIES}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${WFA_LINK_LIBRARIES}
-)
-
-if (ZIG)
-  list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
-endif()
-
-
 if (htslib_LOCAL)
   target_link_libraries(vcflib htslib)
-else (htslib_LOCAL)
+  set(vcflib_LIBS curl deflate) # local build requires linking curl explicitly
+else ()
   target_link_libraries(vcflib PkgConfig::htslib)
+  set(vcflib_LIBS hts)
 endif()
+
+list(APPEND htslib_dependencies
+  lzma
+  z
+  bz2
+)
+
+list(APPEND vcflib_LIBS
+  ${CMAKE_THREAD_LIBS_INIT}
+  ${htslib_dependencies} # linking htslib for everything is not needed if we have our own bgzip reader
+)
+
+#  # ${WFA_LINK_LIBRARIES}
+
 
 if (NOT tabixpp_LOCAL)
   target_link_libraries(vcflib PkgConfig::tabixpp)
@@ -448,6 +447,7 @@ endif()
 if (BUILD_SHARED_LIBS)
   target_link_libraries(vcflib PUBLIC ${vcflib_LIBS} ${WFALIB})
 endif()
+
 if (NOT BUILD_ONLY_LIB)
   foreach(BIN ${BINS})
     add_executable(${BIN} src/${BIN}.cpp)
@@ -460,24 +460,26 @@ if (NOT BUILD_ONLY_LIB)
     target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} vcflib)
     target_link_libraries(${WFBIN} PUBLIC ${vcflib_LIBS} ${WFALIB})
   endforeach(WFBIN ${BINS})
+  if (ZIG)
+    # list(APPEND vcflib_LIBS ${ZIG_LINK_LIBRARIES})
+    target_link_libraries(vcfcreatemulti PUBLIC ${vcflib_LIBS} ${ZIG_LINK_LIBRARIES} vcflib)
+  endif()
   install(TARGETS ${BINS} ${WFBINS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
   # ---- Copy scripts
   foreach(SCRIPT ${SCRIPTS})
     install(PROGRAMS ./scripts/${SCRIPT} DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ${SCRIPT})
   endforeach(SCRIPT ${SCRIPTS})
-
 endif()
 
-# ---- Python bindings - mostly for testing at this stage
-pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
-add_dependencies(pyvcflib ${vcflib_DEPS})
-target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
-install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-# ---- Test
-
-enable_testing()
+if (NOT BUILD_STATIC) # only when not building static
+  # ---- Python bindings - mostly for testing at this stage
+  pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
+  # add_dependencies(pyvcflib CURL::libcurl)
+  target_link_libraries(pyvcflib PUBLIC vcflib ${vcflib_LIBS} ${WFALIB})
+  install(TARGETS pyvcflib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
 
 function(add_pytest TEST_FILE)
   add_test(
@@ -486,7 +488,7 @@ function(add_pytest TEST_FILE)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}:$ENV{GUIX_PROFILE}/lib;PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}")
 endfunction()
 
 function(add_pydoctest TEST_FILE)
@@ -497,9 +499,8 @@ function(add_pydoctest TEST_FILE)
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest")
+      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}:$ENV{GUIX_PROFILE}/lib;PATH=${CMAKE_BINARY_DIR}:$ENV{PATH}")
 endfunction()
-
 
 function(add_doctest TEST_FILE)
   add_test(
@@ -543,7 +544,7 @@ endif (ZIG)
 add_pydoctest(vcfnulldotslashdot)
 add_doctest(doc/vcfintersect)
 
-# ---- Build docs
+# ---- Build documentation
 #
 # Generates man pages for the python doctests. Don't need
 # to run every time so it is a separate command. For pandoc logic see

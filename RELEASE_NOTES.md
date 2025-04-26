@@ -12,6 +12,12 @@ and
 - tabix -p vcf my_file.vcf.gz
 - pangenie, vg deconstruct, vcfbub
 
+## ChangeLog ongoing
+
+* CMake: Improved linker speeds by moving some libs
+* CMake: Improved markdown/pydoc tests, so we don't show the path to the binary
+* guix.scm has multiple outputs including static binaries and a test mode
+
 ## ChangeLog v1.0.13 (20250417)
 
 * Zig support was added to Guix and Conda - and we expect it to be more common soon

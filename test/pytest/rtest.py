@@ -6,8 +6,6 @@ import inspect
 import re
 from subprocess import Popen, PIPE
 
-bindir = "../build"
-
 regressiondir = "data/regression"
 tmpdir = "tmp"
 
@@ -18,11 +16,9 @@ def cat(cmd):
 
 def head(cmd, lines=4):
     cmd2 = cmd.split(" ")
-    # print("-------------------->",cmd2,file=sys.stderr)
     cmd1 = cmd2[0]
-    if not os.path.isfile(cmd1):
-        cmd1 = f"{bindir}/{cmd1}"
     cmds = [cmd1]+cmd2[1:]
+    print("-------------------->",cmds,file=sys.stderr)
     p = Popen(cmds, stdout=PIPE, stderr=PIPE, close_fds=True)
     output = p.communicate()
     out = output[0]
@@ -33,11 +29,11 @@ def head(cmd, lines=4):
     header = out.decode().expandtabs(tabsize=8).split("\n")[0:lines]
     header = ['>' if l=='' else l for l in header]
     header = [l.replace(VERSION+" ", "") for l in header]
-    header = [l.replace("../build/", "") for l in header]
     print("\n".join(header))
 
 def sh(cmd):
-    cmds = ['bash','-c',cmd]
+    cmds = ['bash','-c']+[cmd]
+    print("-------------------->",cmds,file=sys.stderr)
     p = Popen(cmds, stdout=PIPE, stderr=PIPE, close_fds=True)
     output = p.communicate()
     out = output[0]
@@ -72,7 +68,7 @@ def run_stdout(cmd, ext = "vcf", uniq = None):
         name += "." + ext
 
     tmpfn = tmpdir + "/" + name
-    os.system(f"{bindir}/{cmd} > {tmpfn}")
+    os.system(f"{cmd} > {tmpfn}")
     cmpfn = regressiondir+"/"+name
     sys.stdout.writelines(difflib.unified_diff(open(cmpfn).readlines(),open(tmpfn).readlines(),cmpfn,tmpfn,n=1))
     print(f"output in <a href=\"../data/regression/{name}\">{name}</a>")

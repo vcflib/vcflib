@@ -41,9 +41,8 @@ Type: transformation
         return 1;
     }
 
-    for (vector<string>::iterator sample = variantFile.sampleNames.begin();
-            sample != variantFile.sampleNames.end(); ++sample) {
-        cout << *sample << endl;
+    for (const auto& sample : variantFile.sampleNames) {
+        cout << sample << endl;
     }
 
     return 0;
