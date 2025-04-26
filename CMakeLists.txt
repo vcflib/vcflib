@@ -16,11 +16,11 @@ include(ExternalProject)
 include(FeatureSummary)
 include(GNUInstallDirs)
 
+find_package(BZip2 REQUIRED)   # htslib
+find_package(LibLZMA REQUIRED) # htslib
 find_package(PkgConfig REQUIRED)
-find_package(pybind11 CONFIG)
-find_package(LibLZMA REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(BZip2 REQUIRED)
+find_package(pybind11 CONFIG)
 
 include(GNUInstallDirs)
 
@@ -428,6 +428,7 @@ list(APPEND htslib_dependencies
 
 list(APPEND vcflib_LIBS
   ${CMAKE_THREAD_LIBS_INIT}
+  ${htslib_dependencies} # linking htslib for everything is not needed if we have our own bgzip reader
 )
 
 #  # ${WFA_LINK_LIBRARIES}

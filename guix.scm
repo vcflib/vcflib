@@ -1,7 +1,7 @@
 ;; To use this file to build HEAD of vcflib:
 ;;
 ;;   guix build -f guix.scm
-;;   guix build -L . vcflib-local-htslib-git  # test local htslib build - fails because of path rewrites
+;;   guix build -L . vcflib-local-htslib-git  # test local htslib build - fails because of path rewrites, use shell for now
 ;;   guix build -L . vcflib-static-git --tune=native
 ;;
 ;; To get a development container (emacs shell will work)
@@ -9,14 +9,20 @@
 ;;   guix shell -C -D -F -f guix.scm
 ;;
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
-;;   make -j 12
+;;   make -j 12 VERBOSE=1
 ;;   ctest .
 ;;
-;; debug example
+;; in guix shell debug example:
 ;;
 ;;   env LD_LIBRARY_PATH=$GUIX_ENVIRONMENT/lib gdb --args vcfallelicprimitives -m ../samples/10158243.vcf
 ;;
+;; environment for static binaries:
+;;
 ;;   guix shell -L . -C -D -F vcflib-static-git
+;;
+;; environment for building with local htslib:
+;;
+;;   guix shell -L . -C -D -F vcflib-local-htslib-git
 ;;
 ;; support other (external) zig compiler
 ;;
@@ -88,7 +94,7 @@
      ;; ("gcc" ,gcc-13)       ;; test against latest - won't build python bindings
      (list
        fastahack    ;; dev version not in Debian
-       htslib ;; disable to test local build, also disable tabixpp in that case
+       htslib ;; disable to test local build - with local package below
        pandoc ; for man pages
        perl
        python
