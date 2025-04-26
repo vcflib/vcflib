@@ -40,7 +40,7 @@ struct pop{
 
 };
 
-double unphred(string phred){
+double unphred(const string& phred){
   double unphred = atof(phred.c_str());
   unphred = unphred / -10;
   return unphred;

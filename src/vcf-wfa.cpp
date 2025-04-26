@@ -78,11 +78,10 @@ map<string, pair<vector<VariantAllele>,bool> > WfaVariant::wfa_parsedAlternates(
     */
 
 // #pragma omp parallel for
-    for (auto a: alt) { // iterate ALT strings
+    for (const auto& alternate : alt) { // iterate ALT strings
         //for (uint64_t idx = 0; idx < alt.size(); ++idx) {
         //auto& a = alt[idx];
         // unsigned int referencePos;
-        string alternate = a;
         pair<vector<VariantAllele>, bool>& _v = variantAlleles[alternate];
         bool is_inv = false;
         // get the alt/ref mapping in inversion space
@@ -93,7 +92,7 @@ map<string, pair<vector<VariantAllele>,bool> > WfaVariant::wfa_parsedAlternates(
             && max((int)ref.size(), (int)alt.size()) > invMinLen) {
             // check if it's more likely for us to align as an inversion
             auto alt_sketch = rkmh::hash_sequence(
-                a.c_str(), a.size(), invKmerLen, a.size()-invKmerLen+1);
+                alternate.c_str(), alternate.size(), invKmerLen, alternate.size()-invKmerLen+1);
             if (rkmh::compare(alt_sketch, ref_sketch_fwd, invKmerLen)
                 > rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen)) {
                 is_inv = true;
@@ -334,22 +333,22 @@ void Variant::reduceAlleles(
     map<string, pair<vector<VariantAllele>, bool> > varAlleles,
     VariantCallFile &variantFile,
     Variant var,
-    string parseFlag,
+    const string& parseFlag,
     bool keepInfo,
     bool keepGeno,
     bool debug)
 {
     set<VariantAllele> alleles;
     // collect unique alleles
-    for (auto a: varAlleles) {
-        for (auto va: a.second.first) {
+    for (const auto& a: varAlleles) {
+        for (const auto& va: a.second.first) {
             if (debug) cerr << a.first << " " << va << endl;
             alleles.insert(va); // only inserts first unique allele and ignores next ones
         }
     }
 
     int altcount = 0;
-    for (auto a: alleles) {
+    for (const auto& a: alleles) {
         if (a.ref != a.alt) {
             ++altcount;
             if (debug) cerr << altcount << "$" << a << endl;
@@ -363,9 +362,9 @@ void Variant::reduceAlleles(
 
     // collect variant allele indexed membership
     map<VariantAllele, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
-    for (auto a: varAlleles) {
+    for (const auto& a: varAlleles) {
         int index = var.altAlleleIndexes[a.first] + 1; // make non-relative
-        for (auto va: a.second.first) {
+        for (const auto& va: a.second.first) {
             variantAlleleIndexes[va].push_back(index);
         }
     }
@@ -379,10 +378,10 @@ void Variant::reduceAlleles(
     };
     map<VariantAllele, var_info_t> alleleStuff;
 
-    for (auto a: var.alt) {
-        auto varalleles = varAlleles[a].first;
+    for (const auto& a: var.alt) {
+        const auto& varalleles = varAlleles[a].first;
         bool is_inv = varAlleles[a].second;
-        for (auto va: varalleles) {
+        for (const auto& va: varalleles) {
             alleleStuff[va].in_inv += is_inv;
         }
     }
@@ -408,9 +407,9 @@ void Variant::reduceAlleles(
     bool hasAc = false;
     if (var.info.find("AC") != var.info.end()) {
         hasAc = true;
-        for (auto a: var.alt) {
-            auto vars = varAlleles[a].first;
-            for (auto va: vars) {
+        for (const auto& a: var.alt) {
+            const auto& vars = varAlleles[a].first;
+            for (const auto& va: vars) {
                 int count;
                 try {
                     convert(var.info["AC"].at(var.altAlleleIndexes[a]), count);

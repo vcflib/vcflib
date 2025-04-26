@@ -180,6 +180,7 @@ int main(int argc, char** argv) {
 
     if (adjustVcf) {
         vector<string> commandline;
+        commandline.reserve(argc);
         for (int i = 0; i < argc; ++i)
             commandline.push_back(argv[i]);
         variantFile.addHeaderLine("##INFO=<ID=" + adjustedTag + ",Number=A,Type=String,Description=\"CIGAR when remapped using"+ join(commandline, " ") +"\">");

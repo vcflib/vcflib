@@ -65,7 +65,7 @@ void annotateWithGenotypes(Variant& varA, Variant& varB, string& annotationTag) 
             string& otherGenotype = other["GT"].front();
             // XXX this must compare the genotypes in the two files
 
-            if (otherGenotype.find("|") != string::npos) {
+            if (otherGenotype.find('|') != string::npos) {
               vector<int> gtB = decomposePhasedGenotype(otherGenotype);
               vector<int> gtnew;
               gtnew.reserve(gtB.size());

@@ -96,6 +96,7 @@ int main(int argc, char** argv) {
         }
 
         vector<Variant> variants;
+        variants.reserve(numalt);
         for (int i = 0; i < numalt; ++i) {
             variants.push_back(var);
         }

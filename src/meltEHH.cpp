@@ -332,8 +332,8 @@ int integrate(std::vector<std::pair<std::string, std::string>>& haplotypes,
 }
 
 void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps,
-	  vector<double> & afs, vector<long int> & pos,
-	  vector<int> & target, vector<int> & background, string seqid){
+	  const vector<double> &, vector<long int> & pos,
+	  const vector<int> &, const vector<int> &, const string&){
 
   int maxl = haplotypes[0].first.length();
 

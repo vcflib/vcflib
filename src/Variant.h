@@ -182,8 +182,8 @@ public:
 
     bool getNextVariant(Variant& var);
 
-    bool setRegion(string region);
-    bool setRegion(string seq, long int start, long int end = 0);
+    bool setRegion(const string& region);
+    bool setRegion(const string& seq, long int start, long int end = 0);
     vector<string> getHeaderLinesFromFile();
 
 private:
@@ -359,7 +359,7 @@ public:
 	map<string, pair<vector<VariantAllele>, bool> > varAlleles,
 	VariantCallFile &variantFile,
 	Variant var,
-	string parseFlag,
+	const string& parseFlag,
 	bool keepInfo=true,
 	bool keepGeno=true,
 	bool debug=false);
@@ -399,7 +399,7 @@ public:
                        };
 
     // constructor
-    RuleToken(string token, map<string, VariantFieldType>& variables);
+    RuleToken(const string& token, map<string, VariantFieldType>& variables);
     RuleToken(void)
         : type(BOOLEAN_VARIABLE)
         , state(false)

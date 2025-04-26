@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
         int max_allele_length = 0;
-        for (auto allele: var.alt) {
+        for (const auto& allele: var.alt) {
           if (debug) cerr << allele << ":" << allele.length() << "," << max_allele_length << endl;
           global_max_length = max(allele.length(),global_max_length);
           if (allele.length() >= max_allele_length) {
@@ -215,8 +215,8 @@ int main(int argc, char** argv) {
 
         set<VariantAllele> alleles;
         // collect unique alleles
-        for (auto a: varAlleles) {
-            for (auto va: a.second) {
+        for (const auto& a: varAlleles) {
+            for (const auto& va: a.second) {
                 if (debug) cerr << a.first << " " << va << endl;
                 alleles.insert(va); // only inserts first unique allele and ignores if two are the same
             }
@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
 
         // count unique alleles
         int altcount = 0;
-        for (auto a: alleles) {
+        for (const auto& a: alleles) {
             if (a.ref != a.alt) {
                 ++altcount;
                 if (debug) cerr << altcount << "$" << a << endl;
@@ -239,9 +239,9 @@ int main(int argc, char** argv) {
 
         // collect variant allele indexed membership
         map<VariantAllele, vector<int> > variantAlleleIndexes; // from serialized VariantAllele to indexes
-        for (auto a: varAlleles) {
+        for (const auto& a: varAlleles) {
             int index = var.altAlleleIndexes[a.first] + 1; // make non-relative
-            for (auto va: a.second) {
+            for (const auto& va: a.second) {
                 variantAlleleIndexes[va].push_back(index);
             }
         }
@@ -258,9 +258,9 @@ int main(int argc, char** argv) {
         bool hasAf = false;
         if (var.info.find("AF") != var.info.end()) {
             hasAf = true;
-            for (auto a: var.alt) {
-                auto& vars = varAlleles[a];
-                for (auto va: vars) {
+            for (const auto& a: var.alt) {
+                const auto& vars = varAlleles[a];
+                for (const auto& va: vars) {
                     double freq;
                     try {
                         convert(var.info["AF"].at(var.altAlleleIndexes[a]), freq);
@@ -293,13 +293,13 @@ int main(int argc, char** argv) {
         }
 
         if (keepInfo) {
-            for (auto infoit: var.info) {
-                string key = infoit.first;
-                for (auto a: var.alt) {
+            for (const auto& infoit: var.info) {
+                const string& key = infoit.first;
+                for (const auto& a: var.alt) {
                     vector<VariantAllele>& vars = varAlleles[a];
-                    for (auto va: vars) {
+                    for (const auto& va: vars) {
                         string val;
-                        vector<string>& vals = var.info[key];
+                        const vector<string>& vals = var.info[key];
                         if (vals.size() == var.alt.size()) { // allele count for info
                             val = vals.at(var.altAlleleIndexes[a]);
                         } else if (vals.size() == 1) { // site-wise count
@@ -402,7 +402,7 @@ int main(int argc, char** argv) {
                 v.info["AC"].push_back(convert(alleleStuff[a].count));
             }
             if (keepInfo) {
-                for (auto infoit: var.info) {
+                for (const auto& infoit: var.info) {
                     string key = infoit.first;
                     if (key != "AF" && key != "AC" && key != "TYPE" && key != "LEN") { // don't clobber previous
                         v.info[key].push_back(alleleStuff[a].info[key]);
@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
         }
 
         // handle deletions
-        for (auto a: alleles) {
+        for (const auto& a: alleles) {
             const auto ref = a.ref;
             const auto alt = a.alt;
             int len = 0;
@@ -454,8 +454,7 @@ int main(int argc, char** argv) {
         }
 
         // genotypes
-        for (auto s: var.sampleNames) {
-            string& sampleName = s;
+        for (const auto& sampleName : var.sampleNames) {
             if (var.samples.find(sampleName) == var.samples.end()) {
                 continue;
             }
@@ -466,7 +465,7 @@ int main(int argc, char** argv) {
             string& genotype = sample["GT"].front();
             vector<string> genotypeStrs = split(genotype, "|/");
             vector<int> genotypeIndexes;
-            for (auto gs: genotypeStrs) {
+            for (const auto& gs: genotypeStrs) {
                 int i;
                 if (!convert(gs, i)) {
                     genotypeIndexes.push_back(ALLELE_NULL);

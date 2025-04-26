@@ -117,7 +117,7 @@ const char **var_geno(void *var, const char **ret) {
     auto v = static_cast<Variant*>(var);
     auto samples = v->samples;
     int idx = 0;
-    for (auto sname: v->sampleNames) {
+    for (const auto& sname: v->sampleNames) {
         // cout << sname ;
         // cout << samples[sname]["GT"].front() << endl;
 

@@ -125,6 +125,7 @@ int main(int argc, char** argv) {
     init_genrand(seed);
 
     vector<string> args;
+    args.reserve(argc);
     for (int i = 0; i < argc; ++i) {
         args.push_back(argv[i]);
     }

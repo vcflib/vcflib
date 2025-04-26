@@ -221,7 +221,7 @@ bool Variant::isSymbolicSV() const{
 
     bool ref_valid = allATGCN(this->ref);
     bool alts_valid = true;
-    for (auto a : this->alt){
+    for (const auto& a : this->alt){
         if (!allATGCN(a)){
             alts_valid = false;
         }
@@ -255,7 +255,7 @@ int Variant::getMaxReferencePos(){
         // We are cannonicalized and must have a correct END
 
         int end = 0;
-        for (auto s : this->info.at("END")){
+        for (const auto& s : this->info.at("END")){
             // Get the latest one defined.
             end = max(abs(stoi(s)), end);
         }
@@ -274,7 +274,7 @@ int Variant::getMaxReferencePos(){
         if (this->info.find("END") != this->info.end()){
             // We have an END; blindly trust it
             int end = 0;
-            for (auto s : this->info.at("END")){
+            for (const auto& s : this->info.at("END")){
                 // Get the latest one defined.
                 end = max(abs(stoi(s)), end);
             }
@@ -286,7 +286,7 @@ int Variant::getMaxReferencePos(){
             // There's no endpoint, but we know an SVLEN.
             // A negative SVLEN means a deletion, so if we find one we can say we delete that much.
             int deleted = 0;
-            for (auto s : this->info.at("SVLEN")){
+            for (const auto& s : this->info.at("SVLEN")){
                 int alt_len = stoi(s);
                 if (alt_len > 0){
                     // Not a deletion, so doesn't affect any ref bases
@@ -1116,7 +1116,7 @@ VariantFieldType Variant::infoType(const string& key) {
             vector<string> ordered_keys, missing_keys;  // the output list
             // first lookup the keys that appear both in infoOrdered keys
             // and the info field:
-            for (auto name: var.infoOrderedKeys)
+            for (const auto& name: var.infoOrderedKeys)
             {
                 lookup_keys[name] = true;
                 if (!var.info[name].empty()) ordered_keys.push_back(name);
@@ -1134,7 +1134,7 @@ VariantFieldType Variant::infoType(const string& key) {
             ordered_keys.insert(ordered_keys.end(), missing_keys.begin(), missing_keys.end());
             // output the ordered info fields
             string s = "";
-            for (auto name: ordered_keys) {
+            for (const auto& name: ordered_keys) {
                 auto value = var.info[name];
                 if (!value.empty()) {
                     s += name + "=" + join(value, ",") + ";" ;
@@ -1151,20 +1151,20 @@ VariantFieldType Variant::infoType(const string& key) {
         if (!var.format.empty()) {
             out << "\t";
             string format = "";
-            for (auto f: var.format) {
+            for (const auto& f: var.format) {
                 format += f + ":";
             }
             auto len = format.length();
             if (len)
                 out << format.substr(0, len-1); // chop s1.substr(0, i-1);
-            for (auto s: var.outputSampleNames) {
+            for (const auto& s: var.outputSampleNames) {
                 out << "\t";
-                map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(s);
+                const auto sampleItr = var.samples.find(s);
                 if (sampleItr == var.samples.end()) {
                     out << ".";
                 } else {
                     map<string, vector<string> >& sample = sampleItr->second;
-                    if (sample.size() == 0) {
+                    if (sample.empty()) {
                         out << ".";
                     } else {
                         for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
@@ -1234,7 +1234,7 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
-    RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) {
+    RuleToken::RuleToken(const string& tokenstr, map<string, VariantFieldType>& variables) {
         isVariable = false;
         if (tokenstr == "!") {
             type = RuleToken::NOT_OPERATOR;
@@ -1942,7 +1942,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         }
 }
 
-bool VariantCallFile::setRegion(string seq, long int start, long int end) {
+bool VariantCallFile::setRegion(const string& seq, long int start, long int end) {
     stringstream regionstr;
     if (end) {
         regionstr << seq << ":" << start << "-" << end;
@@ -1952,7 +1952,7 @@ bool VariantCallFile::setRegion(string seq, long int start, long int end) {
     return setRegion(regionstr.str());
 }
 
-bool VariantCallFile::setRegion(string region) {
+bool VariantCallFile::setRegion(const string& region) {
     if (!usingTabix) {
         cerr << "cannot setRegion on a non-tabix indexed file" << endl;
         exit(1);
@@ -1992,7 +1992,7 @@ map<string, int> decomposeGenotype(string& genotype) {
 
 map<int, int> decomposeGenotype(const string& genotype) {
     string splitter = "/";
-    if (genotype.find("|") != string::npos) {
+    if (genotype.find('|') != string::npos) {
         splitter = "|";
     }
     vector<string> haps = split(genotype, splitter);
@@ -2011,7 +2011,7 @@ map<int, int> decomposeGenotype(const string& genotype) {
 
 vector<int> decomposePhasedGenotype(const string& genotype) {
     string splitter = "/";
-    if (genotype.find("|") != string::npos) {
+    if (genotype.find('|') != string::npos) {
         splitter = "|";
     }
     vector<string> haps = split(genotype, splitter);
@@ -2220,7 +2220,7 @@ void Variant::updateAlleleIndexes(void) {
         if (sample.find("GT") != sample.end()) {
             string& gt = sample["GT"].front();
             string splitter = "/";
-            if (gt.find("|") != string::npos) {
+            if (gt.find('|') != string::npos) {
                 splitter = "|";
             }
 
@@ -2426,7 +2426,7 @@ bool Variant::isPhased(void) {
         map<string, vector<string> >::iterator g = sample.find("GT");
         if (g != sample.end()) {
             string gt = g->second.front();
-            if (gt.size() > 1 && gt.find("|") == string::npos) {
+            if (gt.size() > 1 && gt.find('|') == string::npos) {
                 return false;
             }
         }
@@ -2623,7 +2623,7 @@ vector<Variant*> Variant::matchingHaplotypes() {
     void VCFHeader::addMetaInformationLine(const string& meta_line)
     {
         // get the meta_line unique key (first chars before the =)
-        unsigned int meta_line_index = meta_line.find("=", 0);
+        unsigned int meta_line_index = meta_line.find('=', 0);
         string meta_line_prefix = meta_line.substr(0, meta_line_index);
 
         // check if the meta_line_prefix is in the header_lines, if so add it to the appropirate list
@@ -2676,17 +2676,17 @@ vector<Variant*> Variant::matchingHaplotypes() {
     {
         // extract the id from meta_line
         size_t meta_line_id_start_idx = meta_line.find("ID=", 0); // used for the start of the substring index
-        size_t meta_line_id_end_idx = meta_line.find(",", meta_line_id_start_idx); // used for end of the substring index
+        size_t meta_line_id_end_idx = meta_line.find(',', meta_line_id_start_idx); // used for end of the substring index
         string meta_line_id = (meta_line_id_start_idx < meta_line_id_end_idx) ? meta_line.substr(meta_line_id_start_idx, meta_line_id_end_idx - meta_line_id_start_idx) : "";
 
-        for (vector<string>::const_iterator iter = meta_lines.begin(); iter != meta_lines.end(); ++iter)
+        for (const auto& meta_line : meta_lines)
         {
-            // extract the id from iter's meta_line string
-            size_t iter_meta_line_id_start_idx = (*iter).find("ID=", 0);
-            size_t iter_meta_line_id_end_idx = (*iter).find(",", iter_meta_line_id_start_idx);
-            string iter_meta_line_id = (iter_meta_line_id_start_idx < iter_meta_line_id_end_idx) ? (*iter).substr(iter_meta_line_id_start_idx, iter_meta_line_id_end_idx - iter_meta_line_id_start_idx) : "";
-            // compare the meta_line_id with the iter_meta_line_id
-            if (strcasecmp(meta_line_id.c_str(), iter_meta_line_id.c_str()) == 0)
+            // extract the id from meta_line string
+            size_t meta_line_id_start_idx = meta_line.find("ID=", 0);
+            size_t meta_line_id_end_idx = meta_line.find(",", meta_line_id_start_idx);
+            string meta_line_id = (meta_line_id_start_idx < meta_line_id_end_idx) ? meta_line.substr(meta_line_id_start_idx, meta_line_id_end_idx - meta_line_id_start_idx) : "";
+            // compare the meta_line_id with the meta_line_id
+            if (strcasecmp(meta_line_id.c_str(), meta_line_id.c_str()) == 0)
             {
                 return true;
             }
