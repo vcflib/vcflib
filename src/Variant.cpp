@@ -221,7 +221,7 @@ bool Variant::isSymbolicSV() const{
 
     bool ref_valid = allATGCN(this->ref);
     bool alts_valid = true;
-    for (auto a : this->alt){
+    for (const auto& a : this->alt){
         if (!allATGCN(a)){
             alts_valid = false;
         }
@@ -255,7 +255,7 @@ int Variant::getMaxReferencePos(){
         // We are cannonicalized and must have a correct END
 
         int end = 0;
-        for (auto s : this->info.at("END")){
+        for (const auto& s : this->info.at("END")){
             // Get the latest one defined.
             end = max(abs(stoi(s)), end);
         }
@@ -274,7 +274,7 @@ int Variant::getMaxReferencePos(){
         if (this->info.find("END") != this->info.end()){
             // We have an END; blindly trust it
             int end = 0;
-            for (auto s : this->info.at("END")){
+            for (const auto& s : this->info.at("END")){
                 // Get the latest one defined.
                 end = max(abs(stoi(s)), end);
             }
@@ -286,7 +286,7 @@ int Variant::getMaxReferencePos(){
             // There's no endpoint, but we know an SVLEN.
             // A negative SVLEN means a deletion, so if we find one we can say we delete that much.
             int deleted = 0;
-            for (auto s : this->info.at("SVLEN")){
+            for (const auto& s : this->info.at("SVLEN")){
                 int alt_len = stoi(s);
                 if (alt_len > 0){
                     // Not a deletion, so doesn't affect any ref bases
@@ -1057,8 +1057,8 @@ VariantFieldType Variant::infoType(const string& key) {
 
     void Variant::addFormatField(const string& key) {
         bool hasTag = false;
-        for (vector<string>::iterator t = format.begin(); t != format.end(); ++t) {
-            if (*t == key) {
+        for (const auto& t : format) {
+            if (t == key) {
                 hasTag = true;
                 break;
             }
@@ -1068,16 +1068,16 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
-    void Variant::printAlt(ostream& out) {
-        for (vector<string>::iterator i = alt.begin(); i != alt.end(); ++i) {
+    void Variant::printAlt(ostream& out) const {
+        for (vector<string>::const_iterator i = alt.begin(); i != alt.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alt.end() - 1)) out << ",";
         }
     }
 
-    void Variant::printAlleles(ostream& out) {
-        for (vector<string>::iterator i = alleles.begin(); i != alleles.end(); ++i) {
+    void Variant::printAlleles(ostream& out) const {
+        for (vector<string>::const_iterator i = alleles.begin(); i != alleles.end(); ++i) {
             out << *i;
             // add a comma for all but the last alternate allele
             if (i != (alleles.end() - 1)) out << ",";
@@ -1116,7 +1116,7 @@ VariantFieldType Variant::infoType(const string& key) {
             vector<string> ordered_keys, missing_keys;  // the output list
             // first lookup the keys that appear both in infoOrdered keys
             // and the info field:
-            for (auto name: var.infoOrderedKeys)
+            for (const auto& name: var.infoOrderedKeys)
             {
                 lookup_keys[name] = true;
                 if (!var.info[name].empty()) ordered_keys.push_back(name);
@@ -1134,12 +1134,12 @@ VariantFieldType Variant::infoType(const string& key) {
             ordered_keys.insert(ordered_keys.end(), missing_keys.begin(), missing_keys.end());
             // output the ordered info fields
             string s = "";
-            for (auto name: ordered_keys) {
-                auto value = var.info[name];
+            for (const auto& name: ordered_keys) {
+                const auto& value = var.info[name];
                 if (!value.empty()) {
                     s += name + "=" + join(value, ",") + ";" ;
                 } else {
-                    auto infoflag = var.infoFlags[name];
+                    const auto infoflag = var.infoFlags[name];
                     if (infoflag == true)
                         s += name + ";";
                 }
@@ -1151,24 +1151,24 @@ VariantFieldType Variant::infoType(const string& key) {
         if (!var.format.empty()) {
             out << "\t";
             string format = "";
-            for (auto f: var.format) {
+            for (const auto& f: var.format) {
                 format += f + ":";
             }
             auto len = format.length();
             if (len)
                 out << format.substr(0, len-1); // chop s1.substr(0, i-1);
-            for (auto s: var.outputSampleNames) {
+            for (const auto& s: var.outputSampleNames) {
                 out << "\t";
-                map<string, map<string, vector<string> > >::iterator sampleItr = var.samples.find(s);
+                const auto sampleItr = var.samples.find(s);
                 if (sampleItr == var.samples.end()) {
                     out << ".";
                 } else {
-                    map<string, vector<string> >& sample = sampleItr->second;
+                    const map<string, vector<string> >& sample = sampleItr->second;
                     if (sample.size() == 0) {
                         out << ".";
                     } else {
                         for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
-                            map<string, vector<string> >::iterator g = sample.find(*f);
+                            const auto g = sample.find(*f);
                             out << ((f == var.format.begin()) ? "" : ":");
                             if (g != sample.end() && !g->second.empty()) {
                                 out << join(g->second, ",");
@@ -1183,7 +1183,7 @@ VariantFieldType Variant::infoType(const string& key) {
         return out;
     }
 
-    void Variant::setOutputSampleNames(vector<string>& samplesToOutput) {
+    void Variant::setOutputSampleNames(const vector<string>& samplesToOutput) {
         outputSampleNames = samplesToOutput;
     }
 
@@ -1234,7 +1234,7 @@ VariantFieldType Variant::infoType(const string& key) {
         }
     }
 
-    RuleToken::RuleToken(string tokenstr, map<string, VariantFieldType>& variables) {
+    RuleToken::RuleToken(const string& tokenstr, map<string, VariantFieldType>& variables) {
         isVariable = false;
         if (tokenstr == "!") {
             type = RuleToken::NOT_OPERATOR;
@@ -1942,7 +1942,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
         }
 }
 
-bool VariantCallFile::setRegion(string seq, long int start, long int end) {
+bool VariantCallFile::setRegion(const string& seq, long int start, long int end) {
     stringstream regionstr;
     if (end) {
         regionstr << seq << ":" << start << "-" << end;
@@ -1952,7 +1952,7 @@ bool VariantCallFile::setRegion(string seq, long int start, long int end) {
     return setRegion(regionstr.str());
 }
 
-bool VariantCallFile::setRegion(string region) {
+bool VariantCallFile::setRegion(const string& region) {
     if (!usingTabix) {
         cerr << "cannot setRegion on a non-tabix indexed file" << endl;
         exit(1);
@@ -2172,24 +2172,22 @@ void Variant::updateAlleleIndexes(void) {
     for (const auto& c : vcf->formatCounts) {
       int count = c.second;
       if (count == ALLELE_NUMBER) {
-            const string& key = c.first;
-            for (map<string, map<string, vector<string> > >::iterator
-		   s = samples.begin(); s != samples.end(); ++s) {
-	      map<string, vector<string> >& sample = s->second;
-	      map<string, vector<string> >::iterator v = sample.find(key);
-	      if (v != sample.end()) {
-		vector<string>& vals = v->second;
-		vector<string> tokeep;
-		int i = 0;
-		for (vector<string>::iterator a = vals.begin();
-		     a != vals.end(); ++a, ++i) {
-		  if (i != altIndex) {
-		    tokeep.push_back(*a);
-		  }
-		}
-		vals = tokeep;
-	      }
-            }
+      	const string& key = c.first;
+      	for (auto& [_, sample] : samples) {
+      		map<string, vector<string> >::iterator v = sample.find(key);
+      		if (v != sample.end()) {
+      			vector<string>& vals = v->second;
+      			vector<string> tokeep;
+      			int i = 0;
+      			for (vector<string>::iterator a = vals.begin();
+                    a != vals.end(); ++a, ++i) {
+      				if (i != altIndex) {
+      					tokeep.push_back(*a);
+      				}
+                    }
+      			vals = tokeep;
+      		}
+      	}
       }
     }
 
@@ -2383,9 +2381,9 @@ list<int> glsWithAlt(int alt, int ploidy, int numalts) {
 map<int, int> glReorder(int ploidy, int numalts, map<int, int>& alleleIndexMapping, vector<int>& altsToRemove) {
     map<int, int> mapping;
     list<list<int> > orderedGenotypes = glorder(ploidy, numalts);
-    for (list<list<int> >::iterator v = orderedGenotypes.begin(); v != orderedGenotypes.end(); ++v) {
-        for (list<int>::iterator n = v->begin(); n != v->end(); ++n) {
-            *n = alleleIndexMapping[*n];
+    for (auto& v : orderedGenotypes) {
+        for (auto& n : v) {
+            n = alleleIndexMapping[n];
         }
     }
     list<list<int> > newOrderedGenotypes = glorder(ploidy, numalts - altsToRemove.size());
@@ -2715,8 +2713,8 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
                                                               float gapOpenPenalty,
                                                               float gapExtendPenalty,
                                                               float repeatGapExtendPenalty,
-                                                              string flankingRefLeft,
-                                                              string flankingRefRight) {
+                                                              const string& flankingRefLeft,
+                                                              const string& flankingRefRight) {
 
     map<string, vector<VariantAllele> > variantAlleles;
 

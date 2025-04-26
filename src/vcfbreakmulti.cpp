@@ -108,13 +108,13 @@ int main(int argc, char** argv) {
                     altsToRemove.push_back(var.alt.at(j));
                 }
             }
-            for (vector<string>::iterator a = altsToRemove.begin(); a != altsToRemove.end(); ++a) {
-                v.removeAlt(*a);
+            for (const auto& a : altsToRemove) {
+                v.removeAlt(a);
             }
         }
 
-        for (vector<Variant>::iterator v = variants.begin(); v != variants.end(); ++v) {
-            cout << *v << endl;
+        for (auto& v : variants) {
+            cout << v << endl;
         }
     }
 

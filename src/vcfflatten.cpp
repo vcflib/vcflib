@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
             int ploidy = 2;
             vector<vector<int> > genotypesToKeep = multichoose(ploidy, alleleIndexes);
             map<int, bool> genotypeIndexesToKeep;
-            for (vector<vector<int> >::iterator k = genotypesToKeep.begin(); k != genotypesToKeep.end(); ++k) {
-                pair<int, int> genotype = make_pair(k->front(), k->back()); // vectors are guaranteed to be diploid per multichoose
+            for (const auto& k : genotypesToKeep) {
+                pair<int, int> genotype = make_pair(k.front(), k.back()); // vectors are guaranteed to be diploid per multichoose
                 genotypeIndexesToKeep[genotypeIndexes[genotype]] = true;
             }
             // we are diploid, so there should be exactly 3 genotypes
@@ -139,10 +139,8 @@ int main(int argc, char** argv) {
             // for all the infocounts
             // find the ones which are == GENOTYPE_NUMBER or ALLELE_NUMBER
             //     and fix em up
-            for (map<string, int>::iterator c = variantFile.infoCounts.begin(); c != variantFile.infoCounts.end(); ++c) {
-                int count = c->second;
+            for (const auto& [key, count]: variantFile.infoCounts) {
                 if (count == GENOTYPE_NUMBER) {
-                    string key = c->first;
                     map<string, vector<string> >::iterator v = var.info.find(key);
                     if (v != var.info.end()) {
                         vector<string>& vals = v->second;
@@ -156,7 +154,6 @@ int main(int argc, char** argv) {
                         vals = tokeep;
                     }
                 } else if (count == ALLELE_NUMBER) {
-                    string key = c->first;
                     map<string, vector<string> >::iterator v = var.info.find(key);
                     if (v != var.info.end()) {
                         vector<string>& vals = v->second;
@@ -178,10 +175,8 @@ int main(int argc, char** argv) {
 
             // for each sample
             //   remove info fields which now refer to nothing
-            for (map<string, int>::iterator c = variantFile.formatCounts.begin(); c != variantFile.formatCounts.end(); ++c) {
-                int count = c->second;
+            for (const auto& [key, count] : variantFile.formatCounts) {
                 if (count == GENOTYPE_NUMBER) {
-                    string key = c->first;
                     for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
                         map<string, vector<string> >& sample = s->second;
                         map<string, vector<string> >::iterator v = sample.find(key);
@@ -198,9 +193,7 @@ int main(int argc, char** argv) {
                         }
                     }
                 } else if (count == ALLELE_NUMBER) {
-                    string key = c->first;
-                    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-                        map<string, vector<string> >& sample = s->second;
+                    for (auto& [_, sample] : var.samples) {
                         map<string, vector<string> >::iterator v = sample.find(key);
                         if (v != sample.end()) {
                             vector<string>& vals = v->second;

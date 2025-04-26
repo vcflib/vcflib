@@ -34,7 +34,7 @@ public:
     string seqname;
     int linewidth;
 
-    void write(string sequence) {
+    void write(const string& sequence) {
         linebuffer += sequence;
         while (linebuffer.length() > linewidth) {
             fastafile << linebuffer.substr(0, linewidth) << endl;

@@ -232,7 +232,7 @@ int parseOpts(int argc, char** argv)
 
 */
 
-bool getContiguousWindow(vector<score *> & data,
+bool getContiguousWindow(const vector<score *> & data,
 			 vector<double> & load,
 			 int n, int * nfail){
   int r = rand() % data.size();

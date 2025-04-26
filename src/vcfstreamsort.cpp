@@ -134,12 +134,12 @@ int main(int argc, char** argv) {
         }
     }
     //cerr << "done processing input, cleaning up" << endl;
-    for (list<string>::iterator s = sequenceNames.begin(); s != sequenceNames.end(); ++s) {
-        map<long int, map<string, vector<Variant> > >& q = records[*s];
-        for (map<long int, map<string, vector<Variant> > >::iterator r = q.begin(); r != q.end(); ++r) {
-            for (map<string, vector<Variant> >::iterator v = r->second.begin(); v != r->second.end(); ++v) {
-                for (vector<Variant>::iterator s = v->second.begin(); s != v->second.end(); ++s) {
-                    cout << s->originalLine << endl;
+    for (const auto& sequenceName : sequenceNames) {
+        map<long int, map<string, vector<Variant> > >& q = records[sequenceName];
+        for (const auto& r : q) {
+            for (const auto& v : r.second) {
+                for (const auto& s : v.second) {
+                    cout << s.originalLine << endl;
                 }
             }
             --numrecords;

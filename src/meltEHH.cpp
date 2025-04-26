@@ -204,34 +204,33 @@ void countHaps(int nhaps, map<string, int> & targetH,
 void computeNs(map<string, int> & targetH, int start,
 	       int end, double * sumT, char ref, bool dir){
 
-  for( map<string, int>::iterator th = targetH.begin();
-       th != targetH.end(); th++){
+  for(const auto& th : targetH){
 
-    if(th->second < 2){
+    if(th.second < 2){
       continue;
     }
 
 
     // end is extending ; check first base
     if(dir){
-      if( th->first[0] == ref){
+      if( th.first[0] == ref){
 
 	//	std::cerr << "count dat: " << th->first << " " << th->second << " " << ref << " " << dir << endl;
 
 
-	*sumT += r8_choose(th->second, 2);
+	*sumT += r8_choose(th.second, 2);
       }
     }
 
     // start is extending ; check last base
     else{
 
-      int last = th->first.size() -1;
-      if( th->first[last] == ref ){
+      int last = th.first.size() -1;
+      if( th.first[last] == ref ){
 	//	std::cerr << "count dat:" << th->first << " " << th->second << " " << ref << " " << dir << endl;
 
 
-      	*sumT += r8_choose(th->second, 2);
+      	*sumT += r8_choose(th.second, 2);
       }
     }
   }
@@ -536,13 +535,12 @@ int main(int argc, char** argv) {
     vector<string> samples = variantFile.sampleNames;
     int nsamples = samples.size();
 
-    for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
-
-      string sampleName = (*samp);
+    // TODO: fix loop
+    for(const auto& _ : samples){
 
       if(it.find(index) != it.end() ){
-	target_h.push_back(indexi);
-	indexi++;
+		target_h.push_back(indexi);
+		indexi++;
       }
       index++;
     }

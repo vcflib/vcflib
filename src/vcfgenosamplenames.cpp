@@ -59,10 +59,9 @@ Type: transformation
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         var.format.push_back("SN");
-        for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin();
-             s != var.samples.end(); ++s) {
-            s->second["SN"].clear();
-            s->second["SN"].push_back(s->first);
+        for (auto& s : var.samples) {
+            s.second["SN"].clear();
+            s.second["SN"].push_back(s.first);
         }
         cout << var << endl;
     }

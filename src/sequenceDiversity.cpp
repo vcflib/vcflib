@@ -75,9 +75,8 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
 
   double nchooseSum = 0;
   // summing over all possible haplotypes
-  for(map<string, int>::iterator it = hapWin.begin();
-      it != hapWin.end(); it++){
-    nchooseSum += r8_choose(it->second, 2);
+  for(const auto& it : hapWin){
+    nchooseSum += r8_choose(it.second, 2);
   }
 
   double piSum = 0;
@@ -111,7 +110,7 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
 
 
 //calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
-void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, string seqid){
+void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, const string& seqid){
 
   if(haplotypes[0].first.length() < (window-1) ){
     return;
@@ -336,11 +335,10 @@ int main(int argc, char** argv) {
 
     int index = 0, indexi = 0;
 
-    for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
-      string sampleName = (*samp);
+    for(const auto& _ : samples){
       if(targetIndex.find(index) != targetIndex.end() ){
-	target_h.push_back(indexi);
-	indexi++;
+	    target_h.push_back(indexi);
+	    indexi++;
       }
       if(backgroundIndex.find(index) != backgroundIndex.end()){
 	background_h.push_back(indexi);

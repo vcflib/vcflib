@@ -54,9 +54,9 @@ int main(int argc, char** argv) {
     Variant var(variantFile);
 
     vector<string> formatIds = variantFile.formatIds();
-    for (vector<string>::iterator i = formatIds.begin(); i != formatIds.end(); ++i) {
-        if (!fieldsToKeep.count(*i)) {
-            variantFile.removeGenoHeaderLine(*i);
+    for (const auto& i : formatIds) {
+        if (!fieldsToKeep.count(i)) {
+            variantFile.removeGenoHeaderLine(i);
         }
     }
 

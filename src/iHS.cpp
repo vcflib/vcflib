@@ -202,37 +202,36 @@ void countHaps(int nhaps, map<string, int> & targetH,
   }
 }
 
-void computeNs(map<string, int> & targetH, int start,
+void computeNs(const map<string, int> & targetH, int start,
 	       int end, double * sumT, char ref, bool dir){
 
-  for( map<string, int>::iterator th = targetH.begin();
-       th != targetH.end(); th++){
+  for( const auto& th : targetH){
 
-    if(th->second < 2){
+    if(th.second < 2){
       continue;
     }
 
 
     // end is extending ; check first base
     if(dir){
-      if( th->first[0] == ref){
+      if( th.first[0] == ref){
 
-	//	std::cerr << "count dat: " << th->first << " " << th->second << " " << ref << " " << dir << endl;
+	//	std::cerr << "count dat: " << th.first << " " << th.second << " " << ref << " " << dir << endl;
 
 
-	*sumT += r8_choose(th->second, 2);
+	*sumT += r8_choose(th.second, 2);
       }
     }
 
     // start is extending ; check last base
     else{
 
-      int last = th->first.size() -1;
-      if( th->first[last] == ref ){
-	//	std::cerr << "count dat:" << th->first << " " << th->second << " " << ref << " " << dir << endl;
+      int last = th.first.size() -1;
+      if( th.first[last] == ref ){
+	//	std::cerr << "count dat:" << th.first << " " << th.second << " " << ref << " " << dir << endl;
 
 
-      	*sumT += r8_choose(th->second, 2);
+      	*sumT += r8_choose(th.second, 2);
       }
     }
   }
@@ -340,7 +339,7 @@ int integrate(std::vector<std::pair<std::string, std::string>>& haplotypes   ,
 
 void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps,
 	  vector<double> & afs, vector<long int> & pos,
-	  vector<int> & target, vector<int> & background, string seqid){
+	  vector<int> & target, vector<int> & background, const string& seqid){
 
   int maxl = haplotypes[0].first.length();
 
@@ -548,13 +547,13 @@ int main(int argc, char** argv) {
     vector<string> samples = variantFile.sampleNames;
     int nsamples = samples.size();
 
-    for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
+    // TODO: fix loop
+    for(const auto& _ : samples){
 
-      string sampleName = (*samp);
 
       if(it.find(index) != it.end() ){
-	target_h.push_back(indexi);
-	indexi++;
+		target_h.push_back(indexi);
+		indexi++;
       }
       index++;
     }

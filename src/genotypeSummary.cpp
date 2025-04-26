@@ -245,9 +245,9 @@ int main(int argc, char** argv) {
     vector<indv> countData;
     vector<string > countDataSampleName;
 
-    for ( map<int ,int>::iterator x=it.begin(); x!=it.end(); ++x) {
+    for (const auto& x : it) {
 
-        countDataSampleName.push_back(samples[x->first] );
+        countDataSampleName.push_back(samples[x.first]);
     }
 
 
@@ -271,8 +271,8 @@ int main(int argc, char** argv) {
 	if(snp){
 	  bool hit =false;
 
-	  for(vector<string>::iterator it = var.alleles.begin(); it != var.alleles.end(); it++){
-	    if((*it).size() > 1){
+	  for(const auto& allele : var.alleles){
+	    if(allele.size() > 1){
 	      hit = true;
 	    }
 	  }
@@ -289,8 +289,8 @@ int main(int argc, char** argv) {
     string ancestral_allele = var.info["AA"].front();
     // if we do not have a polarized site with only allowed bases in the ancestral allele, skip it
     bool allowed = true;
-    for (string::iterator c = ancestral_allele.begin(); c != ancestral_allele.end(); ++c) {
-      if (!allowed_ancestral_bases.count(*c)) {
+    for (const auto c : ancestral_allele) {
+      if (!allowed_ancestral_bases.count(c)) {
         allowed = false;
         break;
       }

@@ -36,8 +36,8 @@ void getAlignment(Variant& var, FastaReference& reference, string& ref, vector<A
     ref = pad + leftFlank + var.ref + rightFlank + pad;
 
     // and iterate through the alternates, generating alignments
-    for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-        string alt = pad + leftFlank + *a + rightFlank + pad;
+    for (const auto& a : var.alt) {
+        string alt = pad + leftFlank + a + rightFlank + pad;
         CSmithWatermanGotoh sw(matchScore, mismatchScore, gapOpenPenalty, gapExtendPenalty);
         unsigned int referencePos;
         string cigar;
@@ -178,9 +178,9 @@ int main(int argc, char** argv) {
         int currentWindow = window;
         int scale = 2;
         if (var.ref.size()*scale > currentWindow) currentWindow = var.ref.size()*scale;
-        for (vector<string>::iterator a = var.alleles.begin(); a != var.alleles.end(); ++a) {
-            if (a->size()*scale > currentWindow) {
-                currentWindow = a->size()*scale;
+        for (const auto& a : var.alleles) {
+            if (a.size() * scale > currentWindow) {
+                currentWindow = a.size() * scale;
             }
         }
 

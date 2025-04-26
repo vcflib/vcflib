@@ -82,10 +82,10 @@ Variant createMultiallelic_legacy(vector<Variant>& vars) {
     mvar.ref = ref;
 
     // Correct alts using the new reference
-    for (vector<Variant>::iterator v = vars.begin(); v != vars.end(); ++v) {
+    for (const auto& v : vars) {
         // add alternates and splice them into the reference
-        int p5diff = v->position - mvar.position;
-        int p3diff = (mvar.position + mvar.ref.size()) - (v->position + v->ref.size());
+        int p5diff = v.position - mvar.position;
+        int p3diff = (mvar.position + mvar.ref.size()) - (v.position + v.ref.size());
         string before;
         string after;
         if (p5diff > 0) {
@@ -95,15 +95,15 @@ Variant createMultiallelic_legacy(vector<Variant>& vars) {
             after = mvar.ref.substr(mvar.ref.size() - p3diff);
         }
         if (p5diff || p3diff) {
-            for (vector<string>::iterator a = v->alt.begin(); a != v->alt.end(); ++a) {
+            for (const auto& a : v.alt) {
                 mvar.alt.push_back(before);
                 string& alt = mvar.alt.back();
-                alt.append(*a);
+                alt.append(a);
                 alt.append(after);
             }
         } else {
-            for (vector<string>::iterator a = v->alt.begin(); a != v->alt.end(); ++a) {
-                mvar.alt.push_back(*a);
+            for (const auto& a : v.alt) {
+                mvar.alt.push_back(a);
             }
         }
     }
@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
             // that the window may get expanded at every step.
             auto first = vars.front();
             auto maxpos = first.position + first.ref.size();
-            for (auto v: vars) {
+            for (const auto& v: vars) {
                 if (maxpos < v.position + v.ref.size()) {
                     maxpos = v.position + v.ref.size();
                 }

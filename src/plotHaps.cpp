@@ -54,9 +54,10 @@ void printHelp(void){
 void printHaplotypes(const std::vector<std::pair<std::string, std::string>>& haps, const std::vector<int>& target, vector<long int> pos){
   for(int snp = 0; snp < haps[0].second.length(); snp++){
     cout << pos[snp] << "\t" ;
-    for(int ind = 0; ind < target.size(); ind++){
-      cout << haps[target[ind]].first.substr(snp , 1) << "\t";
-      cout << haps[target[ind]].second.substr(snp , 1) << "\t";
+    for (const int t : target)
+    {
+      cout << haps[t].first.substr(snp , 1) << "\t";
+      cout << haps[t].second.substr(snp , 1) << "\t";
     }
     cout << endl;
   }

@@ -26,17 +26,16 @@ void loadGenoSS(std::stringstream & ss,
                 std::stringstream & info,
                 vcflib::Variant & var,
                 vcflib::VariantCallFile & vcf,
-                std::string & nullval,
-                std::vector<std::string> & formatfields){
-
-
-    for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-        const string& sampleName = s->first;
+                const std::string & nullval,
+                const std::vector<std::string> & formatfields){
+    for (const auto& s : var.samples) {
+        const string& sampleName = s.first;
         ss << info.str() << "\t" << sampleName;
-        map<string, vector<string> >& sample = s->second;
-        for (vector<string>::iterator f = formatfields.begin(); f != formatfields.end(); ++f) {
-            if (sample.find(*f) != sample.end()) {
-                ss << "\t" << join(sample[*f], ",");
+        const map<string, vector<string> >& sample = s.second;
+        for (const auto& f : formatfields) {
+            const auto sampleIt = sample.find(f);
+        	if (sampleIt != sample.end()) {
+                ss << "\t" << join(sampleIt->second, ",");
             } else {
                 ss << "\t" << nullval;
             }
@@ -68,25 +67,23 @@ void loadInfoSS(std::stringstream & ss,
             << var.filter;
 
 
-        for(std::map<std::string, bool>::iterator it = infoToKeep.begin(); it != infoToKeep.end(); it++){
-
-
-            if(var.info.find(it->first) == var.info.end()){
+        for(const auto& it : infoToKeep) {
+        	if(var.info.find(it.first) == var.info.end()){
                 o << "\t" << nullval ;
             }
             else{
-                if(it->second == true){
-                    o << "\t" << var.info[it->first].front();
+                if(it.second == true){
+                    o << "\t" << var.info[it.first].front();
                 }
                 else{
-                    if(vcf.infoCounts.find(it->first) == vcf.infoCounts.end()){
+                    if(vcf.infoCounts.find(it.first) == vcf.infoCounts.end()){
 
-                        if(vcf.infoCounts[it->first] == ALLELE_NUMBER){
-                            o << "\t" << var.info[it->first].at(altindex) ;
+                        if(vcf.infoCounts[it.first] == ALLELE_NUMBER){
+                            o << "\t" << var.info[it.first].at(altindex) ;
                         }
                     }
                     else{
-                        o << "\t" << join(var.info[it->first], ",") ;
+                        o << "\t" << join(var.info[it.first], ",") ;
                     }
                 }
             }

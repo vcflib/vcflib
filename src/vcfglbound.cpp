@@ -131,15 +131,15 @@ int main(int argc, char** argv) {
                 // find the gl max
                 vector<string>& glstrs = l->second;
                 vector<double> gls;
-                for (vector<string>::iterator gl = glstrs.begin(); gl != glstrs.end(); ++gl) {
+                for (const auto& gl : glstrs) {
                     double d;
-                    convert(*gl, d);
+                    convert(gl, d);
                     gls.push_back(d);
                 }
 
                 isbroken = false; // reset every iteration
-                for (vector<double>::iterator g = gls.begin(); g != gls.end(); ++g) {
-                    if (*g > 0) {
+                for (const auto g : gls) {
+                    if (g > 0) {
                         isbroken = true;
                         break;
                     }
@@ -156,22 +156,22 @@ int main(int argc, char** argv) {
 
                 // normalize GLs to -10 min 0 max using division by max and bounding at -10
                 double minGL = 0;
-                for (vector<double>::iterator g = gls.begin(); g != gls.end(); ++g) {
-                    if (*g < minGL) minGL = *g;
+                for (const auto g : gls) {
+                    if (g < minGL) minGL = g;
                 }
                 double maxGL = minGL;
-                for (vector<double>::iterator g = gls.begin(); g != gls.end(); ++g) {
-                    if (*g > maxGL) maxGL = *g;
+                for (const auto g : gls) {
+                    if (g > maxGL) maxGL = g;
                 }
                 // modify gls
-                for (vector<double>::iterator g = gls.begin(); g != gls.end(); ++g) {
-                    *g = max(glBound, *g - maxGL);
+                for (auto& g : gls) {
+                    g = max(glBound, g - maxGL);
                 }
 
                 // and pack back into GL field
                 glstrs.clear();
-                for (vector<double>::iterator g = gls.begin(); g != gls.end(); ++g) {
-                    glstrs.push_back(convert(*g));
+                for (const auto& g : gls) {
+                    glstrs.push_back(convert(g));
                 }
             }
         }

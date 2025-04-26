@@ -182,8 +182,8 @@ public:
 
     bool getNextVariant(Variant& var);
 
-    bool setRegion(string region);
-    bool setRegion(string seq, long int start, long int end = 0);
+    bool setRegion(const string& region);
+    bool setRegion(const string& seq, long int start, long int end = 0);
     vector<string> getHeaderLinesFromFile();
 
 private:
@@ -225,8 +225,8 @@ public:
                                                          float gapOpenPenalty = 15.0f,
                                                          float gapExtendPenalty = 6.66f,
                                                          float repeatGapExtendPenalty = 0.0f,
-                                                         string flankingRefLeft = "",
-                                                         string flankingRefRight = "");
+                                                         const string& flankingRefLeft = "",
+                                                         const string& flankingRefRight = "");
 
     // the same output format as parsedAlternates, without parsing
     map<string, vector<VariantAllele> > flatAlternates(void);
@@ -342,12 +342,12 @@ public:
     bool getInfoValueBool(const string& key, int index = INDEX_NONE);
     double getInfoValueFloat(const string& key, int index = INDEX_NONE);
     string getInfoValueString(const string& key, int index = INDEX_NONE);
-    void printAlt(ostream& out);      // print a comma-sep list of alternate alleles to an ostream
-    void printAlleles(ostream& out);  // print a comma-sep list of *all* alleles to an ostream
+    void printAlt(ostream& out) const;      // print a comma-sep list of alternate alleles to an ostream
+    void printAlleles(ostream& out) const;  // print a comma-sep list of *all* alleles to an ostream
     int getAltAlleleIndex(const string& allele);
     void updateAlleleIndexes(void);
     void addFormatField(const string& key);
-    void setOutputSampleNames(vector<string>& outputSamples);
+    void setOutputSampleNames(const vector<string>& outputSamples);
     map<pair<int, int>, int> getGenotypeIndexesDiploid(void);
     int getNumSamples(void);
     int getNumValidGenotypes(void);
@@ -359,7 +359,7 @@ public:
 	map<string, pair<vector<VariantAllele>, bool> > varAlleles,
 	VariantCallFile &variantFile,
 	Variant var,
-	string parseFlag,
+	const string& parseFlag,
 	bool keepInfo=true,
 	bool keepGeno=true,
 	bool debug=false);
@@ -399,7 +399,7 @@ public:
                        };
 
     // constructor
-    RuleToken(string token, map<string, VariantFieldType>& variables);
+    RuleToken(const string& token, map<string, VariantFieldType>& variables);
     RuleToken(void)
         : type(BOOLEAN_VARIABLE)
         , state(false)

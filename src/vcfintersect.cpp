@@ -314,8 +314,8 @@ int main(int argc, char** argv) {
             Variant* v = &otherVariants[ovar.sequenceName].back();
             otherVariantIntervals[ovar.sequenceName].push_back(Interval<size_t, Variant*>(left, right, v));
         }
-        for (map<string, vector<Interval<size_t, Variant*> > >::iterator j = otherVariantIntervals.begin(); j != otherVariantIntervals.end(); ++j) {
-            variantIntervals[j->first] = IntervalTree<size_t, Variant*>((vector<Interval<size_t, Variant*> >&&)j->second);
+        for (const auto&[key, value] : otherVariantIntervals) {
+            variantIntervals[key] = IntervalTree<size_t, Variant*>((vector<Interval<size_t, Variant*> >&&)value);
         }
 
     }
@@ -375,8 +375,8 @@ int main(int argc, char** argv) {
 
             vector<Variant*> overlapping;
 
-            for (vector<Interval<size_t, Variant*> >::iterator r = results.begin(); r != results.end(); ++r) {
-                overlapping.push_back(r->value);
+            for (const auto& r : results) {
+                overlapping.push_back(r.value);
             }
 
 

@@ -47,21 +47,19 @@ int main(int argc, char** argv) {
 
     unsigned int hetAlleleCount = 0;
     map<string, unsigned int> hetCounts;
-    for (vector<string>::iterator s = variantFile.sampleNames.begin(); s != variantFile.sampleNames.end(); ++s) {
-        hetCounts[*s] = 0;
+    for (const auto& sampleName : variantFile.sampleNames) {
+        hetCounts[sampleName] = 0;
     }
 
     Variant var(variantFile);
     while (variantFile.getNextVariant(var)) {
         //cout << var << endl;
-        for (map<string, map<string, vector<string> > >::iterator s = var.samples.begin(); s != var.samples.end(); ++s) {
-            string name = s->first;
-            map<string, vector<string> >& sample = s->second;
+        for (auto& [name, sample] : var.samples) {
             string& genotype = sample["GT"].front();
             vector<string> gt = split(genotype, "|/");
             int alt = 0;
-            for (vector<string>::iterator g = gt.begin(); g != gt.end(); ++g) {
-                if (*g != "0")
+            for (const auto& g : gt) {
+                if (g != "0")
                     ++alt;
             }
             if (alt != gt.size()) {
