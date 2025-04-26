@@ -30,9 +30,9 @@ fn split_samples(str: []const u8) *ArrayList([] const u8) {
     defer list.deinit();
     
     var splits = if (@hasDecl(std.mem, "splitScalar"))
-        std.mem.splitScalar(u8, str, " ")
+        std.mem.splitScalar(u8, str, ' ')
     else
-        std.mem.split(u8, str, " ");
+        std.mem.split(u8, str, ' ');
     while (splits.next()) |chunk| {
         list.append(chunk) catch |err| {
             std.debug.print("out of memory {}\n", .{err});
