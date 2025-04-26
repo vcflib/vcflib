@@ -153,7 +153,8 @@ int main(int argc, char** argv) {
 
         vector<string>& idxs = var.info[idname+".alt"];
         idxs.clear();
-        for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
+        // TODO: fix for loop
+        for (const auto& _ : var.alt) {
             idxs.push_back(convert(uid++));
         }
         cout << var << endl;

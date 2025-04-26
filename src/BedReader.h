@@ -130,8 +130,9 @@ public:
     vector<BedTarget*> targetsContained(BedTarget& target) {
         vector<Interval<size_t, BedTarget*> > results = intervals[target.seq].findContained(target.left, target.right);
         vector<BedTarget*> contained;
-        for (vector<Interval<size_t, BedTarget*> >::iterator r = results.begin(); r != results.end(); ++r) {
-            contained.push_back(r->value);
+        contained.reserve(results.size());
+        for (const auto& res : results) {
+            contained.push_back(res.value);
         }
         return contained;
     }
@@ -139,8 +140,9 @@ public:
     vector<BedTarget*> targetsOverlapping(BedTarget& target) {
         vector<Interval<size_t, BedTarget*> > results = intervals[target.seq].findOverlapping(target.left, target.right);
         vector<BedTarget*> overlapping;
-        for (vector<Interval<size_t, BedTarget*> >::iterator r = results.begin(); r != results.end(); ++r) {
-            overlapping.push_back(r->value);
+        overlapping.reserve(results.size());
+        for (const auto& r : results) {
+            overlapping.push_back(r.value);
         }
         return overlapping;
     }

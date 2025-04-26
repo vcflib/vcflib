@@ -425,19 +425,19 @@ void Variant::reduceAlleles(
     if (keepInfo) {
         for (map<string, vector<string> >::iterator infoit = var.info.begin();
              infoit != var.info.end(); ++infoit) {
-            string key = infoit->first;
-            for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
-                vector<VariantAllele>& vars = varAlleles[*a].first;
-                for (vector<VariantAllele>::iterator va = vars.begin(); va != vars.end(); ++va) {
+            const string& key = infoit->first;
+            for (const auto& alternate : var.alt) {
+                vector<VariantAllele>& vars = varAlleles[alternate].first;
+                for (const auto& va : vars) {
                     string val;
                     vector<string>& vals = var.info[key];
                     if (vals.size() == var.alt.size()) { // allele count for info
-                        val = vals.at(var.altAlleleIndexes[*a]);
+                        val = vals.at(var.altAlleleIndexes[alternate]);
                     } else if (vals.size() == 1) { // site-wise count
                         val = vals.front();
                     } // don't handle other multiples... how would we do this without going crazy?
                     if (!val.empty()) {
-                        alleleStuff[*va].info[key] = val;
+                        alleleStuff[va].info[key] = val;
                     }
                 }
             }
@@ -469,8 +469,8 @@ void Variant::reduceAlleles(
         vector<int>& originalIndexes = variantAlleleIndexes[*a];
         string type;
         int len = 0;
-        if (a->ref.size() && a->alt.size()
-            && a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
+        if (!a->ref.empty() && !a->alt.empty()
+	        && a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
             if (a->ref.size() > a->alt.size()) {
                 type = "del";
                 len = a->ref.size() - a->alt.size();
