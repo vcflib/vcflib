@@ -14,9 +14,13 @@ and
 
 ## ChangeLog ongoing
 
+* Updated zig compile for 0.14 (MichaelK)
+* Lots of refactoring (MichaelK)
 * CMake: Improved linker speeds by moving some libs
 * CMake: Improved markdown/pydoc tests, so we don't show the path to the binary
 * guix.scm has multiple outputs including static binaries and a test mode
+* guix.scm has procedure for building with local htslib and tabixpp only
+* Added @RedPenguin100 Michael Kovaliov as a maintainer (welcome!)
 
 ## ChangeLog v1.0.13 (20250417)
 
