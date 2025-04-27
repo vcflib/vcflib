@@ -110,7 +110,9 @@ void pi(map<string, int> & hapWin, int nHaps, double * pi, double * eHH, int wle
 
 
 //calc(haplotypes, nsamples, positions, targetAFS, backgroundAFS, external, derived, windowSize, target_h, background_h, currentSeqid)
-void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> tafs, vector<double> bafs, int external, int derived, int window,  vector<int> & target, vector<int> & background, const string& seqid){
+void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, int, 
+    vector<long int> pos, const vector<double>&, const vector<double>&, int ,
+    int, int window,  const vector<int> & target, const vector<int> & , const string& seqid){
 
   if(haplotypes[0].first.length() < (window-1) ){
     return;
@@ -121,13 +123,13 @@ void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, in
     map <string, int> targetHaplotypes;
 
 
-    for(int targetIndex = 0; targetIndex < target.size(); targetIndex++ ){
+    for(const auto t : target){
 
       string haplotypeA;
       string haplotypeB;
 
-      haplotypeA += haplotypes[target[targetIndex]].first.substr(snpA, window) ;
-      haplotypeB += haplotypes[target[targetIndex]].second.substr(snpA, window) ;
+      haplotypeA += haplotypes[t].first.substr(snpA, window) ;
+      haplotypeB += haplotypes[t].second.substr(snpA, window) ;
 
       targetHaplotypes[haplotypeA]++;
       targetHaplotypes[haplotypeB]++;

@@ -92,7 +92,7 @@ map<string, pair<vector<VariantAllele>,bool> > WfaVariant::wfa_parsedAlternates(
             && max((int)ref.size(), (int)alt.size()) > invMinLen) {
             // check if it's more likely for us to align as an inversion
             auto alt_sketch = rkmh::hash_sequence(
-                alternate.c_str(), alternate .size(), invKmerLen, alternate.size() - invKmerLen + 1);
+                alternate.c_str(), alternate.size(), invKmerLen, alternate.size()-invKmerLen+1);
             if (rkmh::compare(alt_sketch, ref_sketch_fwd, invKmerLen)
                 > rkmh::compare(alt_sketch, ref_sketch_rev, invKmerLen)) {
                 is_inv = true;
@@ -408,7 +408,7 @@ void Variant::reduceAlleles(
     if (var.info.find("AC") != var.info.end()) {
         hasAc = true;
         for (const auto& a: var.alt) {
-            auto vars = varAlleles[a].first;
+            const auto& vars = varAlleles[a].first;
             for (const auto& va: vars) {
                 int count;
                 try {
@@ -425,13 +425,13 @@ void Variant::reduceAlleles(
     if (keepInfo) {
         for (const auto& infoit : var.info) {
             const string& key = infoit.first;
-            for (const auto& a : var.alt) {
-                vector<VariantAllele>& vars = varAlleles[a].first;
+            for (const auto& alternate : var.alt) {
+                const vector<VariantAllele>& vars = varAlleles[alternate].first;
                 for (const auto& va : vars) {
                     string val;
                     vector<string>& vals = var.info[key];
                     if (vals.size() == var.alt.size()) { // allele count for info
-                        val = vals.at(var.altAlleleIndexes[a]);
+                        val = vals.at(var.altAlleleIndexes[alternate]);
                     } else if (vals.size() == 1) { // site-wise count
                         val = vals.front();
                     } // don't handle other multiples... how would we do this without going crazy?
@@ -468,8 +468,8 @@ void Variant::reduceAlleles(
         vector<int>& originalIndexes = variantAlleleIndexes[*a];
         string type;
         int len = 0;
-        if (a->ref.size() && a->alt.size()
-            && a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
+        if (!a->ref.empty() && !a->alt.empty()
+	        && a->ref.at(0) == a->alt.at(0)) { // well-behaved indels
             if (a->ref.size() > a->alt.size()) {
                 type = "del";
                 len = a->ref.size() - a->alt.size();

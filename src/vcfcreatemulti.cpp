@@ -48,6 +48,7 @@ Type: transformation
 // pointers (for zig).
 vector<void *> ptr_vec(vector<Variant> &vars) {
     vector<void *> ptrs;
+    ptrs.reserve(vars.size());
     for (auto &v: vars) {
         ptrs.push_back(&v);
     }

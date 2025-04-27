@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
         if (var.info.find("AF") != var.info.end()) {
             hasAf = true;
             for (const auto& a: var.alt) {
-                auto& vars = varAlleles[a];
+                const auto& vars = varAlleles[a];
                 for (const auto& va: vars) {
                     double freq;
                     try {
@@ -294,12 +294,12 @@ int main(int argc, char** argv) {
 
         if (keepInfo) {
             for (const auto& infoit: var.info) {
-                string key = infoit.first;
+                const string& key = infoit.first;
                 for (const auto& a: var.alt) {
                     vector<VariantAllele>& vars = varAlleles[a];
                     for (const auto& va: vars) {
                         string val;
-                        vector<string>& vals = var.info[key];
+                        const vector<string>& vals = var.info[key];
                         if (vals.size() == var.alt.size()) { // allele count for info
                             val = vals.at(var.altAlleleIndexes[a]);
                         } else if (vals.size() == 1) { // site-wise count
@@ -454,7 +454,7 @@ int main(int argc, char** argv) {
         }
 
         // genotypes
-        for (const auto& sampleName: var.sampleNames) {
+        for (const auto& sampleName : var.sampleNames) {
             if (var.samples.find(sampleName) == var.samples.end()) {
                 continue;
             }

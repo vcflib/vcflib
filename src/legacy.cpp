@@ -68,9 +68,9 @@ map<string, vector<VariantAllele> > VariantLegacy::legacy_parsedAlternates(
     char anchorChar = 'Q'; // overwrites first pos of sequence
 
     if (flankingRefLeft.empty() && flankingRefRight.empty()) {
-        paddingLen = (useWaveFront ? 10 : max(10, (int) (ref.size())));
+        paddingLen = (useWaveFront ? 10 : max(10, static_cast<int> (ref.size())));
         for (const auto& a: alt) {
-            paddingLen = max(paddingLen, (int) (a.size()));
+            paddingLen = max(paddingLen, static_cast<int> (a.size()));
         }
         char padChar = 'Z';
         rpadding = string(paddingLen, padChar); // repeat padChar

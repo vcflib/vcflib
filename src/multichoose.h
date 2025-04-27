@@ -54,10 +54,11 @@ std::vector< std::vector<T> > multichoose(int k, std::vector<T>& objects) {
     }
 
     j=k;
-    while(1){
+    while(true){
         std::vector<T> multiset;
-        for(int i=0;i<k;i++)
-            multiset.push_back(*a[i]);
+        multiset.reserve(k);
+        for(const auto elm : a)
+            multiset.push_back(*elm);
         choices.push_back(multiset);
         j=k;
         do {

@@ -26,8 +26,8 @@ public:
 
     bool homopolymer(void);
 
-    VCFIndelAllele(bool i, int l, int p, int rp, const string& s)
-        : insertion(i), length(l), position(p), readPosition(rp), sequence(s)
+    VCFIndelAllele(bool i, int l, int p, int rp, string s)
+        : insertion(i), length(l), position(p), readPosition(rp), sequence(std::move(s))
         { }
 };
 

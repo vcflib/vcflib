@@ -21,15 +21,15 @@
 
 #include <iostream>
 
-genotype::~genotype(){}
+genotype::~genotype() = default;
 
-zvar::~zvar(){}
+zvar::~zvar() = default;
 
 void zvar::setPopName(string  popName){
-  name = popName;
+  name = std::move(popName);
 }
 
-pooled::~pooled(){}
+pooled::~pooled() = default;
 
 double pooled::bound(double v){
   if(v <= 0.00001){
@@ -41,7 +41,7 @@ double pooled::bound(double v){
   return v;
 }
 
-gl::~gl(){}
+gl::~gl() = default;
 
 gl::gl(void){
   nalt  = 0;
@@ -58,7 +58,7 @@ gl::gl(void){
   beta  = 0.01;
 }
 
-pl::~pl(){}
+pl::~pl() = default;
 
 pl::pl(void){
   nalt  = 0;
@@ -94,7 +94,7 @@ gp::gp(void){
 
 }
 
-gt::~gt(){}
+gt::~gt() = default;
 
 gt::gt(void){
   nalt  = 0;

@@ -124,9 +124,9 @@ int main(int argc, char** argv) {
 
                 string& gt = g->second.front();
                 // if we are fixing null but the genotype is fully specified, continue
-                if (fixNull && gt.find(".") == string::npos) continue;
+                if (fixNull && gt.find('.') == string::npos) continue;
                 string splitter = "/";
-                if (gt.find("|") != string::npos) splitter = "|";
+                if (gt.find('|') != string::npos) splitter = "|";
                 int samplePloidy = split(gt, splitter).size();
                 int numAlleles = var.alt.size() + 1; // including reference
 

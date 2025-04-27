@@ -1164,7 +1164,7 @@ VariantFieldType Variant::infoType(const string& key) {
                     out << ".";
                 } else {
                     const map<string, vector<string> >& sample = sampleItr->second;
-                    if (sample.size() == 0) {
+                    if (sample.empty()) {
                         out << ".";
                     } else {
                         for (vector<string>::iterator f = var.format.begin(); f != var.format.end(); ++f) {
@@ -1992,7 +1992,7 @@ map<string, int> decomposeGenotype(string& genotype) {
 
 map<int, int> decomposeGenotype(const string& genotype) {
     string splitter = "/";
-    if (genotype.find("|") != string::npos) {
+    if (genotype.find('|') != string::npos) {
         splitter = "|";
     }
     vector<string> haps = split(genotype, splitter);
@@ -2011,7 +2011,7 @@ map<int, int> decomposeGenotype(const string& genotype) {
 
 vector<int> decomposePhasedGenotype(const string& genotype) {
     string splitter = "/";
-    if (genotype.find("|") != string::npos) {
+    if (genotype.find('|') != string::npos) {
         splitter = "|";
     }
     vector<string> haps = split(genotype, splitter);
@@ -2218,7 +2218,7 @@ void Variant::updateAlleleIndexes(void) {
         if (sample.find("GT") != sample.end()) {
             string& gt = sample["GT"].front();
             string splitter = "/";
-            if (gt.find("|") != string::npos) {
+            if (gt.find('|') != string::npos) {
                 splitter = "|";
             }
 
@@ -2424,7 +2424,7 @@ bool Variant::isPhased(void) {
         map<string, vector<string> >::iterator g = sample.find("GT");
         if (g != sample.end()) {
             string gt = g->second.front();
-            if (gt.size() > 1 && gt.find("|") == string::npos) {
+            if (gt.size() > 1 && gt.find('|') == string::npos) {
                 return false;
             }
         }
@@ -2621,7 +2621,7 @@ vector<Variant*> Variant::matchingHaplotypes() {
     void VCFHeader::addMetaInformationLine(const string& meta_line)
     {
         // get the meta_line unique key (first chars before the =)
-        unsigned int meta_line_index = meta_line.find("=", 0);
+        unsigned int meta_line_index = meta_line.find('=', 0);
         string meta_line_prefix = meta_line.substr(0, meta_line_index);
 
         // check if the meta_line_prefix is in the header_lines, if so add it to the appropirate list
@@ -2674,17 +2674,17 @@ vector<Variant*> Variant::matchingHaplotypes() {
     {
         // extract the id from meta_line
         size_t meta_line_id_start_idx = meta_line.find("ID=", 0); // used for the start of the substring index
-        size_t meta_line_id_end_idx = meta_line.find(",", meta_line_id_start_idx); // used for end of the substring index
+        size_t meta_line_id_end_idx = meta_line.find(',', meta_line_id_start_idx); // used for end of the substring index
         string meta_line_id = (meta_line_id_start_idx < meta_line_id_end_idx) ? meta_line.substr(meta_line_id_start_idx, meta_line_id_end_idx - meta_line_id_start_idx) : "";
 
-        for (vector<string>::const_iterator iter = meta_lines.begin(); iter != meta_lines.end(); ++iter)
+        for (const auto& meta_line : meta_lines)
         {
-            // extract the id from iter's meta_line string
-            size_t iter_meta_line_id_start_idx = (*iter).find("ID=", 0);
-            size_t iter_meta_line_id_end_idx = (*iter).find(",", iter_meta_line_id_start_idx);
-            string iter_meta_line_id = (iter_meta_line_id_start_idx < iter_meta_line_id_end_idx) ? (*iter).substr(iter_meta_line_id_start_idx, iter_meta_line_id_end_idx - iter_meta_line_id_start_idx) : "";
-            // compare the meta_line_id with the iter_meta_line_id
-            if (strcasecmp(meta_line_id.c_str(), iter_meta_line_id.c_str()) == 0)
+            // extract the id from meta_line string
+            size_t meta_line_id_start_idx = meta_line.find("ID=", 0);
+            size_t meta_line_id_end_idx = meta_line.find(",", meta_line_id_start_idx);
+            string meta_line_id = (meta_line_id_start_idx < meta_line_id_end_idx) ? meta_line.substr(meta_line_id_start_idx, meta_line_id_end_idx - meta_line_id_start_idx) : "";
+            // compare the meta_line_id with the meta_line_id
+            if (strcasecmp(meta_line_id.c_str(), meta_line_id.c_str()) == 0)
             {
                 return true;
             }

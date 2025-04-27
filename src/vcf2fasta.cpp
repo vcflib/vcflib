@@ -42,9 +42,9 @@ public:
         }
     }
 
-    SampleFastaFile(void) { }
+    SampleFastaFile(void) = default;
 
-    void open(string& m_filename, string& m_seqname, int m_linewidth = 80) {
+    void open(const string& m_filename, const string& m_seqname, int m_linewidth = 80) {
         filename = m_filename;
         seqname = m_seqname;
         pos = 0;

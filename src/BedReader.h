@@ -30,12 +30,12 @@ string strip(string const& str, char const* separators = " \t") {
 }
 
 void parseRegion(
-    string& region,
+    const string& region,
     string& startSeq,
     int& startPos,
     int& stopPos) {
 
-    size_t foundFirstColon = region.find(":");
+    const size_t foundFirstColon = region.find(':');
 
     // we only have a single string, use the whole sequence as the target
     if (foundFirstColon == string::npos) {
@@ -48,7 +48,7 @@ void parseRegion(
         size_t foundRangeSep = region.find(sep, foundFirstColon);
         if (foundRangeSep == string::npos) {
             sep = "-";
-            foundRangeSep = region.find("-", foundFirstColon);
+            foundRangeSep = region.find('-', foundFirstColon);
         }
         if (foundRangeSep == string::npos) {
             startPos = atoi(region.substr(foundFirstColon + 1).c_str());
@@ -78,15 +78,15 @@ public:
     int right;   // right position, adjusted to 0-base
     string desc; // descriptive information, target name typically
 
-    BedTarget(string s) {
+    BedTarget(const string& s) {
         parseRegion(s, seq, left, right); 
     }
 
     BedTarget(string s, int l, int r, string d = "")
-        : seq(s)
+        : seq(std::move(s))
         , left(l)
         , right(r)
-        , desc(d)
+        , desc(std::move(d))
     { }
 
 };
@@ -130,8 +130,9 @@ public:
     vector<BedTarget*> targetsContained(BedTarget& target) {
         vector<Interval<size_t, BedTarget*> > results = intervals[target.seq].findContained(target.left, target.right);
         vector<BedTarget*> contained;
-        for (const auto& r : results) {
-            contained.push_back(r.value);
+        contained.reserve(results.size());
+        for (const auto& res : results) {
+            contained.push_back(res.value);
         }
         return contained;
     }
@@ -139,6 +140,7 @@ public:
     vector<BedTarget*> targetsOverlapping(BedTarget& target) {
         vector<Interval<size_t, BedTarget*> > results = intervals[target.seq].findOverlapping(target.left, target.right);
         vector<BedTarget*> overlapping;
+        overlapping.reserve(results.size());
         for (const auto& r : results) {
             overlapping.push_back(r.value);
         }

@@ -130,15 +130,15 @@ int  containsRef(const string& gt){
 
 void loadIndices(vector<int> & tree, const string& set){
 
-  vector<string>  individuals = split(set, ",");
+  const vector<string>  individuals = split(set, ',');
 
   if(individuals.size() < 4){
     cerr << "FATAL: the abba-baba requires four individuals provided to the tree option" << endl;
     exit(1);
   }
-  for(const auto& it : individuals){
+  for(const auto& individual : individuals){
 
-    int indx = atoi(it.c_str());
+    int indx = atoi(individual.c_str());
     cerr << indx << endl; //print sample index for user check
     tree.push_back(indx);
   }
