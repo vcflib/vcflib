@@ -191,18 +191,16 @@ double likelihood(pop & population, double af, double fis){
 
   phardy(genotypeProbs, af, fis);
 
-  vector<int>::iterator it = population.geno_index.begin();
-
   int geno_indx = 0;
 
-  for(; it != population.geno_index.end(); it++){
+  for(const auto idx : population.geno_index){
 
     double aa = population.unphred_p[geno_indx][0] + log(genotypeProbs[0]);
     double ab = population.unphred_p[geno_indx][1] + log(genotypeProbs[1]);
     double bb = population.unphred_p[geno_indx][2] + log(genotypeProbs[2]);
     double norm = exp(aa) + exp(ab) + exp(bb);
 
-    double prop = population.unphred_p[geno_indx][*it] +  log(genotypeProbs[*it]);
+    double prop = population.unphred_p[geno_indx][idx] +  log(genotypeProbs[idx]);
 
     loglikelihood += (prop - norm);
 

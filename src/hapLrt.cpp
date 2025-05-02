@@ -60,9 +60,9 @@ void printHelp(void){
 }
 
 void clearHaplotypes(std::vector<std::pair<std::string,std::string>>& haplotypes) {
-    for (auto& haplotype : haplotypes) {
-        haplotype.first.clear();
-        haplotype.second.clear();
+    for (auto& [first, second] : haplotypes) {
+        first.clear();
+        second.clear();
     }
 }
 //changed (carson) --> void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]), int maxI){

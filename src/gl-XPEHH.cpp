@@ -58,14 +58,12 @@ void initPop(pop & population){
 
 void loadPop( vector< map< string, vector<string> > >& group, pop & population, string seqid, long int pos, int phased){
 
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-  
   population.seqid = seqid;
   population.pos   = pos  ;
     
-  for(; targ_it != group.end(); targ_it++){
+  for(auto& target : group){
     
-    string genotype = (*targ_it)["GT"].front();
+    string genotype = target["GT"].front();
     
     vector<double> phreds;
     
@@ -75,9 +73,9 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
 
       if(genotype != "./."){
 	
-	double pa  = exp( unphred((*targ_it)["PL"][0])) ; 
-	double pab = exp( unphred((*targ_it)["PL"][1])) ; 
-	double pbb = exp( unphred((*targ_it)["PL"][2])) ; 
+	double pa  = exp( unphred(target["PL"][0])) ;
+	double pab = exp( unphred(target["PL"][1])) ;
+	double pbb = exp( unphred(target["PL"][2])) ;
 	
 	double norm = pa + pab + pbb  ;
 	

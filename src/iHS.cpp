@@ -170,9 +170,9 @@ void loadGeneticMap(int start, int end){
 }
 
 void clearHaplotypes(std::vector<std::pair<std::string, std::string>>& haplotypes) {
-    for (auto& haplotype : haplotypes) {
-        haplotype.first.clear();
-        haplotype.second.clear();
+    for (auto& [first, second] : haplotypes) {
+        first.clear();
+        second.clear();
     }
 }
 void countHaps(int nhaps, map<string, int> & targetH,

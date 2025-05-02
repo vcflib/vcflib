@@ -142,11 +142,10 @@ vector<pair<int, char> > cleanCigar(const vector<pair<int, char> >& cigar) {
 string joinCigar(const vector<pair<int, char> >& cigar) {
     string cigarStr;
     bool has_error = false;
-    for (auto c: cigar) {
-        auto len = c.first;
+    for (const auto& [len, c]: cigar) {
         if (len < 0) has_error = true;
         if (len != 0) {
-            cigarStr += convert(len) + c.second;
+            cigarStr += convert(len) + c;
         }
     }
     if (has_error) {
@@ -158,20 +157,20 @@ string joinCigar(const vector<pair<int, char> >& cigar) {
 
 string joinCigarList(const list<pair<int, char> >& cigar) {
     string cigarStr;
-    for (const auto& c : cigar) {
-        cigarStr += convert(c.first) + c.second;
+    for (const auto& [len, c] : cigar) {
+        cigarStr += convert(len) + c;
     }
     return cigarStr;
 }
 
 int cigarRefLen(const vector<pair<int, char> >& cigar) {
-    int len = 0;
-    for (const auto& c : cigar) {
-        if (c.second == 'M' || c.second == 'D' || c.second == 'X') {
-            len += c.first;
+    int totalLen = 0;
+    for (const auto& [len, c] : cigar) {
+        if (c == 'M' || c == 'D' || c == 'X') {
+            totalLen += len;
         }
     }
-    return len;
+    return totalLen;
 }
 
 bool isEmptyCigarElement(const pair<int, char>& elem) {
@@ -206,9 +205,9 @@ vector<pair<int, string> > old_splitCigar(const string& cigarStr) {
 
 string old_joinCigar(const vector<pair<int, string> >& cigar) {
     string cigarStr;
-    for (const auto& c : cigar) {
-        if (c.first) {
-            cigarStr += convert(c.first) + c.second;
+    for (const auto& [len, c] : cigar) {
+        if (len) {
+            cigarStr += convert(len) + c;
         }
     }
     return cigarStr;
@@ -216,9 +215,9 @@ string old_joinCigar(const vector<pair<int, string> >& cigar) {
 
 string old_joinCigar(const vector<pair<int, char> >& cigar) {
     string cigarStr;
-    for (const auto& c : cigar) {
-        if (c.first) {
-            cigarStr += convert(c.first) + string(1, c.second);
+    for (const auto& [len, c] : cigar) {
+        if (len) {
+            cigarStr += convert(len) + string(1, c);
         }
     }
     return cigarStr;
