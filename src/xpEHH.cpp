@@ -8,8 +8,6 @@
 */
 
 #include "Variant.h"
-#include "split.h"
-#include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
@@ -19,12 +17,9 @@
 #include <iostream>
 #include <math.h>  
 #include <cmath>
-#include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
-
-#include "phase.hpp"
 
 using namespace std;
 using namespace vcflib;
@@ -73,7 +68,7 @@ void clearHaplotypes(vector<pair<string,string>>& haplotypes, int ntarget){
   }
 }
 
-void calc(const vector<pair<string, string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background, string seqid){
+void calc(const vector<pair<string, string>>& haplotypes, int /*nhaps*/, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background, string seqid){
 
   for(int snp = 0; snp < haplotypes[0].first.length(); snp++){
     

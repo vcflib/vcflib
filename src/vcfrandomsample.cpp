@@ -9,11 +9,13 @@
 
 #include "Variant.h"
 #include "BedReader.h"
+#include "convert.h"
+#include "join.h"
+
 #include <getopt.h>
 #include "mt19937ar.h"
 #include <sstream>
 #include <iostream>
-#include "convert.h"
 
 using namespace std;
 using namespace vcflib;

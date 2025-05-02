@@ -19,20 +19,15 @@
 #include <iostream>
 #include <fstream>
 #include <utility>
-#include <stdlib.h>
-#include <assert.h>
+#include <cassert>
 #include <stack>
 #include <queue>
 #include <set>
-#include <functional>
-#include <cstdio>
 #include "split.h"
-#include "join.h"
 #include <tabix.hpp>
-#include "convert.h"
-#include "rkmh.hpp"
-#include "LeftAlign.hpp"
 #include <Fasta.h>
+
+#include "allele.hpp"
 
 // The following includes moved into their sources because of lib dependencies
 // #include <SmithWatermanGotoh.h>

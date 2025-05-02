@@ -15,6 +15,8 @@
 #include "ssw_cpp.hpp"
 #include <regex>
 
+#include "join.h"
+
 namespace vcflib {
 
 static char rev_arr [26] = {84, 66, 71, 68, 69, 70, 67, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 65,

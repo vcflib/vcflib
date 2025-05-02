@@ -8,9 +8,11 @@
 */
 
 #include "Variant.h"
-#include "split.h"
+#include "join.h"
+
 #include <string>
 #include <iostream>
+
 
 using namespace std;
 using namespace vcflib;

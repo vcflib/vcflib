@@ -45,7 +45,6 @@ THE SOFTWARE.
 
 */
 #include "split.h"
-#include "stats.hpp"
 #include "gpatInfo.hpp"
 
 #include <fstream>
@@ -53,13 +52,10 @@ THE SOFTWARE.
 #include <map>
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 #include <omp.h>
 // print lock

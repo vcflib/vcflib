@@ -7,6 +7,8 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
+#include "convert.h"
+
 #include "Variant.h"
 
 using namespace std;

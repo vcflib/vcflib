@@ -432,8 +432,8 @@ int main(int argc, char** argv) {
 
         // handle deletions
         for (const auto& a: alleles) {
-            const auto ref = a.ref;
-            const auto alt = a.alt;
+            const auto& ref = a.ref;
+            const auto& alt = a.alt;
             int len = 0;
             if (ref.at(0) == alt.at(0)
                 && ref.size() > alt.size()) {

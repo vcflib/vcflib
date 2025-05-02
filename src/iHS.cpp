@@ -9,18 +9,14 @@
 
 #include "Variant.h"
 #include "split.h"
-#include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <cstdlib>
 #include <getopt.h>
 #include <memory>
 
@@ -174,9 +170,9 @@ void loadGeneticMap(int start, int end){
 }
 
 void clearHaplotypes(std::vector<std::pair<std::string, std::string>>& haplotypes) {
-    for (int i = 0; i < haplotypes.size(); i++) {
-        haplotypes[i].first.clear();
-        haplotypes[i].second.clear();
+    for (auto& haplotype : haplotypes) {
+        haplotype.first.clear();
+        haplotype.second.clear();
     }
 }
 void countHaps(int nhaps, map<string, int> & targetH,

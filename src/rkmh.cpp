@@ -1,5 +1,9 @@
 #include "rkmh.hpp"
 
+#include <limits>
+#include <algorithm>
+#include <cmath>
+
 namespace rkmh {
 
 // Check a string (as a char*) for non-canonical DNA bases

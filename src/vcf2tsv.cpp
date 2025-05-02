@@ -10,6 +10,13 @@
 #include "Variant.h"
 #include <getopt.h>
 
+#include <vector>
+#include <string>
+#include <sstream>
+
+#include "join.h"
+
+
 using namespace std;
 using namespace vcflib;
 

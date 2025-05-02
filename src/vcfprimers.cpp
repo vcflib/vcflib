@@ -8,9 +8,10 @@
 */
 
 #include "Variant.h"
-#include "split.h"
-#include "Fasta.h"
+
+#include <Fasta.h>
 #include <getopt.h>
+#include <iostream>
 
 using namespace std;
 using namespace vcflib;

@@ -8,7 +8,6 @@
 */
 
 #include <sstream>
-#include <stdlib.h>
 #include <time.h>
 #include "Variant.h"
 #include <cmath>

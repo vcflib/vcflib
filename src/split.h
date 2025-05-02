@@ -13,8 +13,7 @@
 // functions to split a string by a specific delimiter
 #include <string>
 #include <vector>
-#include <sstream>
-#include <string.h>
+
 
 // thanks to Evan Teran, http://stackoverflow.com/questions/236129/how-to-split-a-string/236803#236803
 

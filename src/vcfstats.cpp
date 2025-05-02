@@ -8,7 +8,6 @@
 */
 
 #include "legacy.h"
-#include "split.h"
 #include "convert.h"
 #include <getopt.h>
 

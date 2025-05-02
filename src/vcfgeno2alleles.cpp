@@ -9,8 +9,10 @@
 
 #include "Variant.h"
 #include "split.h"
+
 #include <string>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace vcflib;

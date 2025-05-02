@@ -8,8 +8,8 @@
 */
 
 #include "Variant.h"
-#include "split.h"
-#include "Fasta.h"
+
+#include <Fasta.h>
 #include <getopt.h>
 #include <cmath>
 

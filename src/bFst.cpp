@@ -13,11 +13,8 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 #include "gpatInfo.hpp"
 
@@ -59,20 +56,17 @@ void initPop(pop & population){
 }
 
 void loadPop( vector< map< string, vector<string> > >& group, pop & population){
-
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-
   int index = 0;
 
-  for(; targ_it != group.end(); targ_it++){
+  for(auto& target : group){
 
-    string genotype = (*targ_it)["GT"].front();
+    string genotype = target["GT"].front();
 
     vector<double> phreds;
 
-    phreds.push_back( unphred((*targ_it)["PL"][0]));
-    phreds.push_back( unphred((*targ_it)["PL"][1]));
-    phreds.push_back( unphred((*targ_it)["PL"][2]));
+    phreds.push_back( unphred(target["PL"][0]));
+    phreds.push_back( unphred(target["PL"][1]));
+    phreds.push_back( unphred(target["PL"][2]));
 
     double scaled ;
     double norm   = log(exp(phreds[0]) + exp(phreds[1]) + exp(phreds[2]));

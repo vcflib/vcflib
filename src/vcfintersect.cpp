@@ -13,8 +13,10 @@
 #include <getopt.h>
 #include "Fasta.h"
 #include <algorithm>
+#include "convert.h"
 #include <list>
 #include <set>
+#include <sstream>
 
 using namespace std;
 using namespace vcflib;

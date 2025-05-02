@@ -8,9 +8,6 @@
 */
 
 #include "Variant.h"
-#include "split.h"
-#include "cdflib.hpp"
-#include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 #include "gpatInfo.hpp"
@@ -19,11 +16,8 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 #include <memory>
 
@@ -81,13 +75,13 @@ void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, in
       targetHaplotypes["10"] = 1;
       targetHaplotypes["00"] = 1;
 
-      for(int targetIndex = 0; targetIndex < target.size(); targetIndex++ ){
+      for(const auto currentTarget : target){
 
 	string haplotypeA;
 	string haplotypeB;
 
-	haplotypeA += haplotypes[target[targetIndex]].first.substr(snpA, 1) +=  haplotypes[target[targetIndex]].first.substr(snpB, 1);
-	haplotypeB += haplotypes[target[targetIndex]].second.substr(snpA, 1) +=  haplotypes[target[targetIndex]].second.substr(snpB, 1);
+	haplotypeA += haplotypes[currentTarget].first.substr(snpA, 1) +=  haplotypes[currentTarget].first.substr(snpB, 1);
+	haplotypeB += haplotypes[currentTarget].second.substr(snpA, 1) +=  haplotypes[currentTarget].second.substr(snpB, 1);
 
 	targetHaplotypes[haplotypeA]++;
 	targetHaplotypes[haplotypeB]++;
@@ -127,6 +121,10 @@ void calc(const std::vector<std::pair<std::string, std::string>>& haplotypes, in
 
   }
 
+}
+
+int get_value(int derived) {
+	return derived;
 }
 
 int main(int argc, char** argv) {
@@ -245,7 +243,7 @@ int main(int argc, char** argv) {
 	    }
 	  case 'd':
 	    {
-	      derived == 1;
+	      get_value(derived) == 1;
 	      cerr << "INFO: count haplotypes \"11\" rather than \"00\"" << endl;
 	      break;
 	    }

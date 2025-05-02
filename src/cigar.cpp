@@ -1,4 +1,6 @@
 #include "cigar.hpp"
+#include "join.h"
+#include "convert.h"
 
 #include <iostream>
 
@@ -56,21 +58,21 @@ vector<pair<int, char> > splitUnpackedCigar(const string& cigarStr) {
     int num = 0;
     char type = cigarStr[0];
     // cerr << "[" << cigarStr << "]" << endl; // 18,12,14
-    for (char c: cigarStr) {
+    for (const char c: cigarStr) {
         // cerr << "[" << c << "]";
         if (isdigit(c)) {
           cerr << "Is this a valid unpacked CIGAR? <" << cigarStr << ">?" << endl;
           exit(1);
         }
         if (c != type) {
-          cigar.push_back(make_pair(num, type));
+          cigar.emplace_back(num, type);
           //cerr << num << ":" << type << ", ";
           type = c;
           num = 0;
         }
         num += 1;
     }
-    cigar.push_back(make_pair(num, type));
+    cigar.emplace_back(num, type);
     //cerr << num << ":" << type << ", ";
     return cigar;
 }

@@ -20,6 +20,7 @@
 #include "var.hpp"
 
 #include <iostream>
+#include <cmath>
 
 genotype::~genotype() = default;
 

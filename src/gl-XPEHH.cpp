@@ -9,17 +9,13 @@
 
 #include "Variant.h"
 #include "split.h"
-#include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "index.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>  
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 
 using namespace std;
@@ -184,7 +180,7 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
   }  
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background, string state, string seqid){
+void calc(string haplotypes[][2], int /*nhaps*/, vector<long int> pos, vector<int> & target, vector<int> & background, string state, string seqid){
 
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
@@ -320,7 +316,7 @@ void appendHaplotypes(string tmpHaplotypes[][2], string haplotypes[][2], int nta
   }
 }
 
-void loadPhased(string haplotypes[][2], list<pop> & window, int ntarget){
+void loadPhased(string haplotypes[][2], list<pop> & window, int /*ntarget*/){
   for(list<pop>::iterator pos = window.begin(); pos != window.end(); pos++){
     int indIndex = 0;
     for(vector<int>::iterator ind = pos->geno_index.begin(); ind != pos->geno_index.end(); ind++){

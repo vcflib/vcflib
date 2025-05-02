@@ -13,6 +13,7 @@
 #include "gpatInfo.hpp"
 #include <getopt.h>
 #include <algorithm>
+#include "convert.h"
 #include <numeric>
 
 

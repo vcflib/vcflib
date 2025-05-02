@@ -15,33 +15,47 @@ namespace vcflib
 		return v[n];
 	}
 
-	double mean(const vector<double>& v)
+	double mean(const vector<double>& data)
 	{
-		double sum = accumulate(v.cbegin(), v.cend(), 0.0);
-		return sum / v.size();
+		double sum = accumulate(data.cbegin(), data.cend(), 0.0);
+		return sum / data.size();
 	}
 
 
-	double mean(const vector<int>& v)
+	double mean(const vector<int>& data)
 	{
 		double sum = 0;
 
-		for (vector<int>::const_iterator it = v.cbegin(); it != v.cend(); ++it) {
-			sum += (*it);
+		for (const auto d : data) {
+			sum += d;
 		}
-		return sum / v.size();
+		return sum / data.size();
 	}
 
 
 	double variance(const vector <double>& data, const double mean) {
 		double total = 0;
-		for (vector <double>::const_iterator i = data.cbegin(); i != data.cend(); ++i) {
-			total += (*i - mean) * (*i - mean);
+		for (const auto x : data) {
+			total += (x - mean) * (x - mean);
 		}
 		return total / (data.size());
 	}
 
+	double sample_variance(const std::vector<double> &data, double mean) {
+		double variance = 0;
+
+		for(const auto& d : data){
+			variance += pow(d - mean,2);
+		}
+
+		return variance / (data.size() - 1);
+	}
+
 	double standard_deviation(const vector <double>& data, const double mean) {
 		return sqrt(variance(data, mean));
+	}
+
+	double sample_standard_deviation(const std::vector<double> &data, double mean) {
+		return sqrt(sample_variance(data, mean));
 	}
 }

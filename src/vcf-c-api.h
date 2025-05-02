@@ -5,6 +5,7 @@
 // do not use extern "C" because this file ought to be ready for a C compiler (!C++)
 
 // VCF constructors
+#pragma once
 
 void *var_parse(const char *line, bool parse_samples);
 

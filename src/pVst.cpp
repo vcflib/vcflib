@@ -8,25 +8,20 @@
 */
 
 #include "Variant.h"
-#include "cdflib.hpp"
-#include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 #include "stats.hpp"
+#include "gpatInfo.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 #include <algorithm>
-#include <ctime>
-#include <cstdlib>
 #include <random>
-#include "gpatInfo.hpp"
+#include <sstream>
+
 
 #if defined HAS_OPENMP
 #include <omp.h>

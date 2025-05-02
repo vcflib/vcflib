@@ -49,15 +49,12 @@ THE SOFTWARE.
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <algorithm>
 #include "split.h"
 #include "gpatInfo.hpp"
+#include "stats.hpp"
 
 struct options{
   std::string file;
@@ -165,16 +162,6 @@ bool sortAF(const iHSdat& L, const iHSdat& R){
 
 */
 
-double var(const vector<double> & data, double mu){
-  double variance = 0;
-
-  for(const auto& d : data){
-    variance += pow(d - mu,2);
-  }
-
-  return variance / (data.size() - 1);
-}
-
 
 //------------------------------- SUBROUTINE --------------------------------
 /*
@@ -230,7 +217,7 @@ void normalize(std::vector<iHSdat> & data, int * pos){
   }
 
   double avg = windowAvg(windat);
-  double sd  = sqrt(var(windat, avg));
+  double sd  = vcflib::sample_standard_deviation(windat, avg);
 
   std::cerr << "start: " << data[start].af << " "
 	    << "end: " << data[end].af  << " "

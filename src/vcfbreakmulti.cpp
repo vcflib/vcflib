@@ -9,7 +9,6 @@
 
 #include "Variant.h"
 #include "convert.h"
-#include <set>
 #include <getopt.h>
 
 using namespace std;

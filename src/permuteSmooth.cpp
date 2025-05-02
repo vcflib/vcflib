@@ -54,13 +54,10 @@ THE SOFTWARE.
 #include <map>
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdio>
 #include <unistd.h>
-#include <stdlib.h>
 
 #if defined HAS_OPENMP
 #include <omp.h>

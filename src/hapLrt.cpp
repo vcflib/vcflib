@@ -10,20 +10,15 @@
 #include "Variant.h"
 #include "split.h"
 #include "cdflib.hpp"
-#include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 #include "phase.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
-#include <limits.h>
 #include <memory>
 
 using namespace std;
@@ -65,9 +60,9 @@ void printHelp(void){
 }
 
 void clearHaplotypes(std::vector<std::pair<std::string,std::string>>& haplotypes) {
-    for (int i = 0; i < haplotypes.size(); i++) {
-        haplotypes[i].first.clear();
-        haplotypes[i].second.clear();
+    for (auto& haplotype : haplotypes) {
+        haplotype.first.clear();
+        haplotype.second.clear();
     }
 }
 //changed (carson) --> void findLengths(string haplotypes[][2], vector<int> group, int core, int lengths[]), int maxI){
@@ -214,20 +209,6 @@ double totalLL(int dat[], int n, double m){
   }
 
   return ll;
-}
-
-double var(int dat[], int n, double mean){
-
-  double sum = 0;
-
-  for(int i = 0; i < n; i++){
-    sum += pow( (double(dat[i]) - mean), 2);
-  }
-
-  double var = sum / (n - 1);
-
-  return var;
-
 }
 
 void calc(std::vector<std::pair<std::string, std::string>>& haplotypes, int nhaps, const vector<long int>& pos, const vector<double>& afs, const vector<int> & target, const vector<int> & background,  const vector<int>& total,  const string& seqid){
@@ -450,7 +431,7 @@ int main(int argc, char** argv) {
 
     Variant var(variantFile);
 
-    vector<string> samples = variantFile.sampleNames;
+    const vector<string>& samples = variantFile.sampleNames;
     int nsamples = samples.size();
 
     vector<int> ibi, iti, itot;

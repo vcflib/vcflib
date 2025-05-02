@@ -9,11 +9,9 @@
 
 #include "Variant.h"
 #include "convert.h"
-#include "join.h"
-#include "split.h"
-#include <set>
+
 #include <getopt.h>
-#include "Fasta.h"
+#include <Fasta.h>
 #include <iostream>
 #include <fstream>
 

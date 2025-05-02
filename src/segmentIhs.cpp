@@ -49,13 +49,8 @@ THE SOFTWARE.
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
 #include <unistd.h>
-#include <algorithm>
 #include "split.h"
 #include "gpatInfo.hpp"
 

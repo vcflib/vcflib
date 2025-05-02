@@ -52,7 +52,7 @@ Type: filter
 
     // Track the previous variant
     string lastsn;
-    long int lastpos;
+    long int lastpos = 0;
     string lastref;
     vector<string> lastalt;
 
