@@ -183,7 +183,7 @@ set(vcflib_SOURCE
 
 if (tabixpp_LOCAL) # add the tabixpp source file
     list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
-    list(APPEND INCLUDES ${TABIXPP_LOCAL}/tabix.hpp)
+    list(APPEND INCLUDES ${tabixpp_LOCAL}/tabix.hpp)
 endif()
 
 add_library(vcflib
