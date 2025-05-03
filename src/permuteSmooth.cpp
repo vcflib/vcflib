@@ -430,14 +430,12 @@ int parse = parseOpts(argc, argv);
    }
  }
 
- for(vector<score*>::iterator itz = data.begin();
-     itz != data.end(); itz++){
-   delete *itz;
- }
- for(vector<smoothedInputData*>::iterator itz = sData.begin();
-     itz != sData.end(); itz++){
-   delete *itz;
- }
+    for(auto* score : data){
+        delete score;
+    }
+    for(auto* smoothed : sData){
+        delete smoothed;
+    }
 
 
 return 0;

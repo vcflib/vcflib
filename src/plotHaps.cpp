@@ -192,14 +192,14 @@ int main(int argc, char** argv) {
     int index  = 0;
     int indexi = 0;
 
-    for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
+	for(const auto& _ : samples){
 
-      if(it.find(index) != it.end() ){
-	target_h.push_back(indexi);
-	indexi++;
-      }
-      index++;
-    }
+		if(it.find(index) != it.end() ){
+			target_h.push_back(indexi);
+			indexi++;
+		}
+		index++;
+	}
 
     vector<long int> positions;
 

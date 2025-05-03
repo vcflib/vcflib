@@ -156,20 +156,17 @@ double pl::unphred(map< string, vector<string> > & geno, int index){
 }
 
 void pooled::loadPop(vector< map< string, vector<string> > > & group, long int position){
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
+  for(auto& target : group){
 
-
-  for(; targ_it != group.end(); targ_it++){
-
-    string genotype = (*targ_it)["GT"].front();
+    string genotype = target["GT"].front();
 
     if(genotype == "./."){
       continue;
     }
 
-    string allelecounts = (*targ_it)["AD"].front();
+    // string allelecounts = target["AD"].front();
 
-    vector<string> ac   = (*targ_it)["AD"];
+    vector<string> ac   = target["AD"];
     
     npop += 1;
     
@@ -260,11 +257,9 @@ void pooled::estimatePosterior(void){
 void genotype::loadPop( vector< map< string, vector<string> > >& group, long int position){
   pos   = position  ;
 
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-
-  for(; targ_it != group.end(); targ_it++){
+  for(auto& target : group){
         
-    string genotype = (*targ_it)["GT"].front();
+    string genotype = target["GT"].front();
 
     if(genotype == "./0" || genotype == "./1" || genotype == "."){
       genotype = "./.";
@@ -278,9 +273,9 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, long int
     double sum  = 0;
     if(genotype != "./."){
 
-      double pa  =  unphred( (*targ_it), 0)  ;
-      double pab =  unphred( (*targ_it), 1)  ;
-      double pbb =  unphred( (*targ_it), 2)  ;
+      double pa  =  unphred( target, 0)  ;
+      double pab =  unphred( target, 1)  ;
+      double pbb =  unphred( target, 2)  ;
 
       double norm = log(exp(pa) + exp(pab) + exp(pbb))  ;
 
@@ -301,6 +296,7 @@ void genotype::loadPop( vector< map< string, vector<string> > >& group, long int
       phredsCDF.push_back(sum);
     }
     else{
+      // TODO: 1/3 is 0, possibly a bug?
       phreds.push_back(log(1/3));
       phreds.push_back(log(1/3));
       phreds.push_back(log(1/3));

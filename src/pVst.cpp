@@ -176,16 +176,15 @@ void calc(copyNcounts * d){
 
     int counter = 0;
 
-    for(std::vector<double>::iterator it = d->total.begin();
-	it!= d->total.end(); it++){
-      if(counter < tsize){
-	d->target.push_back(*it);
-      }
-      else{
-	d->background.push_back(*it);
-      }
-      counter+=1;
-    }
+  	for(const auto t : d->total){
+  		if(counter < tsize){
+  			d->target.push_back(t);
+  		}
+  		else{
+  			d->background.push_back(t);
+  		}
+  		counter+=1;
+  	}
 
     //    std::cerr << "PER\t" << v << "\t" << vst(d) << std::endl;
 
