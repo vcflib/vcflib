@@ -1,11 +1,9 @@
 #pragma once
 
-#include "convert.h"
-#include "join.h"
-#include "split.h"
 #include "allele.hpp"
+
 #include <vector>
-#include <set>
+#include <list>
 
 namespace vcflib {
 

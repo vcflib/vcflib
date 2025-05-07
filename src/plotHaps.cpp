@@ -8,18 +8,13 @@
 */
 
 #include "Variant.h"
-#include "split.h"
-#include "cdflib.hpp"
-#include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 #include "phase.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -197,14 +192,14 @@ int main(int argc, char** argv) {
     int index  = 0;
     int indexi = 0;
 
-    for(vector<string>::iterator samp = samples.begin(); samp != samples.end(); samp++){
+	for(const auto& _ : samples){
 
-      if(it.find(index) != it.end() ){
-	target_h.push_back(indexi);
-	indexi++;
-      }
-      index++;
-    }
+		if(it.find(index) != it.end() ){
+			target_h.push_back(indexi);
+			indexi++;
+		}
+		index++;
+	}
 
     vector<long int> positions;
 

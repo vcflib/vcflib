@@ -8,7 +8,6 @@
 */
 
 #include "Variant.h"
-#include <algorithm>
 #include <getopt.h>
 #include "convert.h"
 

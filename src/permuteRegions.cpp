@@ -45,23 +45,21 @@ THE SOFTWARE.
 
 */
 #include "split.h"
-#include "stats.hpp"
 #include "gpatInfo.hpp"
+#include "stats.hpp"
 
 #include <fstream>
 #include <vector>
 #include <map>
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 #include <omp.h>
+
 // print lock
 omp_lock_t lock;
 
@@ -218,7 +216,7 @@ int parseOpts(int argc, char** argv)
 
 */
 
-bool getContiguousWindow(const vector<score> & data, vector<double> & load, int n){
+bool getContiguousWindow(const vector<score*> & data, vector<double> & load, int n){
   int r = rand() % data.size();    
 
   if(r+n >= data.size()){
@@ -262,7 +260,7 @@ void permute(double s, int n, vector<score *> & data,
       getWindow = getContiguousWindow(data, scores, n);
     }
 
-    double ns = mean(scores);
+    double ns = vcflib::mean(scores);
     
     if(ns > s){
       *nSuc += 1;

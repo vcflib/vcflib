@@ -9,14 +9,13 @@
 
 #include "Variant.h"
 #include "BedReader.h"
-#include "IntervalTree.h"
+#include "cigar.hpp"
+#include "join.h"
+
 #include <getopt.h>
-#include "Fasta.h"
-#include <algorithm>
+#include <Fasta.h>
 #include <list>
-#include <set>
 #include <SmithWatermanGotoh.h>
-// #include "ssw_cpp.hpp"
 
 
 using namespace std;
@@ -344,9 +343,9 @@ int main(int argc, char** argv) {
 
             // find the lowest positional difference
             int pdiff = 0;
-            for (vector<int>::iterator d = positionDiffs.begin(); d != positionDiffs.end(); ++d) {
-                if (*d + altwindowsize < pdiff)
-                    pdiff = *d + altwindowsize;
+            for (const auto diff : positionDiffs) {
+                if (diff+ altwindowsize < pdiff)
+                    pdiff = diff + altwindowsize;
             }
 
             // adjust the reference string

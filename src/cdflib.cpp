@@ -11,7 +11,6 @@
 # include <iostream>
 # include <iomanip>
 # include <cmath>
-# include <ctime>
 # include <cstring>
 
 using namespace std;

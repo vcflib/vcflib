@@ -11,7 +11,6 @@
 extern "C" {
 #include "vcf-c-api.h"
 }
-#include <set>
 #include <sstream>
 #include <getopt.h>
 #include "progress.h"

@@ -10,6 +10,13 @@
 #include "Variant.h"
 #include "vcf-wfa.h"
 
+#include "convert.h"
+
+#include "cigar.hpp"
+#include "join.h"
+#include "rkmh.hpp"
+
+
 namespace vcflib {
 
 // parsedAlternates returns a hash of 'ref' and a vector of alts. A
@@ -591,12 +598,12 @@ void Variant::reduceAlleles(
     }
 
     // genotypes
-    for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
-        string& sampleName = *s;
-        if (var.samples.find(sampleName) == var.samples.end()) {
+    for (auto& sampleName : var.sampleNames) {
+        auto samplesIt = var.samples.find(sampleName);
+        if (samplesIt == var.samples.end()) {
             continue;
         }
-        map<string, vector<string> >& sample = var.samples[sampleName];
+        map<string, vector<string> >& sample = samplesIt->second;
         if (sample.find("GT") == sample.end()) {
             continue;
         }

@@ -8,19 +8,13 @@
 */
 
 #include "Variant.h"
-#include "split.h"
 #include "cdflib.hpp"
-#include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
 #include <getopt.h>
 #include <memory>
 

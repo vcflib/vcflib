@@ -8,15 +8,15 @@
 */
 
 #include "Variant.h"
-#include "convert.h"
 #include "join.h"
-#include "split.h"
-#include "Fasta.h"
-#include <set>
+#include "LeftAlign.hpp"
+
+#include <Fasta.h>
 #include <vector>
 #include <getopt.h>
 #include <cmath>
 #include <SmithWatermanGotoh.h>
+
 
 using namespace std;
 using namespace vcflib;

@@ -10,7 +10,11 @@
 */
 
 #include "legacy.h"
+#include "cigar.hpp"
+#include "vcf-wfa.h"
+
 #include <SmithWatermanGotoh.h>
+
 
 namespace vcflib {
 

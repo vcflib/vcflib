@@ -44,19 +44,18 @@ THE SOFTWARE.
 
 
 */
-#include <fstream>
+#include "gpatInfo.hpp"
 #include "split.h"
+
+#include <fstream>
 #include <vector>
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include "gpatInfo.hpp"
+
 
 struct options{
   std::string file;

@@ -11,8 +11,6 @@
 #define gpatInfo_H
 
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
 
 void printBasicVersion(void){
   std::cout << "vcflib" << "\t" << VCFLIB_VERSION << std::endl;

@@ -9,7 +9,6 @@
 
 #include "Variant.h"
 #include "split.h"
-#include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
@@ -19,11 +18,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
 #include <getopt.h>
 
 // maaas speed
@@ -201,8 +196,8 @@ void countHaps(int nhaps, map<string, int> & targetH,
   }
 }
 
-void computeNs(map<string, int> & targetH, int start,
-	       int end, double * sumT, char ref, bool dir){
+void computeNs(map<string, int> & targetH, int /*start*/,
+	       int /*end*/, double * sumT, char ref, bool dir){
 
   for(const auto& th : targetH){
 

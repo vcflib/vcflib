@@ -9,17 +9,13 @@
 
 #include "Variant.h"
 #include "split.h"
-#include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "index.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>  
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 
 using namespace std;
@@ -62,14 +58,12 @@ void initPop(pop & population){
 
 void loadPop( vector< map< string, vector<string> > >& group, pop & population, string seqid, long int pos, int phased){
 
-  vector< map< string, vector<string> > >::iterator targ_it = group.begin();
-  
   population.seqid = seqid;
   population.pos   = pos  ;
     
-  for(; targ_it != group.end(); targ_it++){
+  for(auto& target : group){
     
-    string genotype = (*targ_it)["GT"].front();
+    string genotype = target["GT"].front();
     
     vector<double> phreds;
     
@@ -79,9 +73,9 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
 
       if(genotype != "./."){
 	
-	double pa  = exp( unphred((*targ_it)["PL"][0])) ; 
-	double pab = exp( unphred((*targ_it)["PL"][1])) ; 
-	double pbb = exp( unphred((*targ_it)["PL"][2])) ; 
+	double pa  = exp( unphred(target["PL"][0])) ;
+	double pab = exp( unphred(target["PL"][1])) ;
+	double pbb = exp( unphred(target["PL"][2])) ;
 	
 	double norm = pa + pab + pbb  ;
 	
@@ -184,7 +178,7 @@ void loadPop( vector< map< string, vector<string> > >& group, pop & population, 
   }  
 }
 
-void calc(string haplotypes[][2], int nhaps, vector<long int> pos, vector<int> & target, vector<int> & background, string state, string seqid){
+void calc(string haplotypes[][2], int /*nhaps*/, vector<long int> pos, vector<int> & target, vector<int> & background, string state, string seqid){
 
   for(int snp = 0; snp < haplotypes[0][0].length(); snp++){
     
@@ -320,7 +314,7 @@ void appendHaplotypes(string tmpHaplotypes[][2], string haplotypes[][2], int nta
   }
 }
 
-void loadPhased(string haplotypes[][2], list<pop> & window, int ntarget){
+void loadPhased(string haplotypes[][2], list<pop> & window, int /*ntarget*/){
   for(list<pop>::iterator pos = window.begin(); pos != window.end(); pos++){
     int indIndex = 0;
     for(vector<int>::iterator ind = pos->geno_index.begin(); ind != pos->geno_index.end(); ind++){

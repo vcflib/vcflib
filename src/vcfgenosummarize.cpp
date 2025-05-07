@@ -7,12 +7,12 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
+
 #include "Variant.h"
-#include "split.h"
+#include "convert.h"
+
 #include <string>
-#include <sstream>
 #include <iostream>
-#include <getopt.h>
 
 using namespace std;
 using namespace vcflib;

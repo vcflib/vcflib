@@ -7,11 +7,12 @@
     This software is published under the MIT License. See the LICENSE file.
 */
 
+#include "convert.h"
+
 #include "Variant.h"
-#include "split.h"
-#include "Fasta.h"
+#include <Fasta.h>
 #include <getopt.h>
-#include "disorder.h"
+#include <disorder.h>
 
 using namespace std;
 using namespace vcflib;

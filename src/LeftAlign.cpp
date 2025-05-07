@@ -22,6 +22,10 @@
 //
 // In practice, we must call this function until the alignment is stabilized.
 
+#include <cmath>
+#include <sstream>
+#include <set>
+
 #define VCFLEFTALIGN_DEBUG(msg) \
     if (false) { cerr << msg; }
 
@@ -91,7 +95,7 @@ double entropy(const string& st) {
     return ent;
 }
 
-bool leftAlign(const string& alternateSequence, Cigar& cigar, string& referenceSequence, bool debug) {
+bool leftAlign(const string& alternateSequence, Cigar& cigar, string& referenceSequence, bool /*debug*/) {
 
     int arsOffset = 0; // pointer to insertion point in aligned reference sequence
     string alignedReferenceSequence = referenceSequence;

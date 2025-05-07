@@ -8,25 +8,20 @@
 */
 
 #include "Variant.h"
-#include "cdflib.hpp"
-#include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
 #include "stats.hpp"
+#include "gpatInfo.hpp"
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 #include <algorithm>
-#include <ctime>
-#include <cstdlib>
 #include <random>
-#include "gpatInfo.hpp"
+#include <sstream>
+
 
 #if defined HAS_OPENMP
 #include <omp.h>
@@ -181,16 +176,15 @@ void calc(copyNcounts * d){
 
     int counter = 0;
 
-    for(std::vector<double>::iterator it = d->total.begin();
-	it!= d->total.end(); it++){
-      if(counter < tsize){
-	d->target.push_back(*it);
-      }
-      else{
-	d->background.push_back(*it);
-      }
-      counter+=1;
-    }
+  	for(const auto t : d->total){
+  		if(counter < tsize){
+  			d->target.push_back(t);
+  		}
+  		else{
+  			d->background.push_back(t);
+  		}
+  		counter+=1;
+  	}
 
     //    std::cerr << "PER\t" << v << "\t" << vst(d) << std::endl;
 

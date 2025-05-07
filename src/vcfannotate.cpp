@@ -11,6 +11,8 @@
 #include "BedReader.h"
 #include <getopt.h>
 
+#include "join.h"
+
 using namespace std;
 using namespace vcflib;
 

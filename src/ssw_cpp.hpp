@@ -10,7 +10,7 @@
 #ifndef VCFLIB_COMPLETE_STRIPED_SMITH_WATERMAN_CPP_H_
 #define VCFLIB_COMPLETE_STRIPED_SMITH_WATERMAN_CPP_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 

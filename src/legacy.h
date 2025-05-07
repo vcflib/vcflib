@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include <utility>
 #include "Variant.h"
-#include "vcf-wfa.h"
-#include "allele.hpp"
-#include "cigar.hpp"
+
+#include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 

@@ -46,17 +46,15 @@ THE SOFTWARE.
 
 */
 #include <fstream>
-#include "split.h"
 #include <vector>
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdio>
 #include <unistd.h>
-#include <stdlib.h>
+
+#include "split.h"
 
 struct options{
   std::string file;

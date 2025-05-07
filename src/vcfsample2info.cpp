@@ -8,9 +8,10 @@
 */
 
 #include "Variant.h"
-#include "split.h"
 #include "stats.hpp"
-#include "Fasta.h"
+#include "convert.h"
+
+#include <Fasta.h>
 #include <getopt.h>
 #include <algorithm>
 #include <numeric>

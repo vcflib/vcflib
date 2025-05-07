@@ -8,8 +8,6 @@
 */
 
 #include "Variant.h"
-#include "split.h"
-#include "cdflib.hpp"
 #include "pdflib.hpp"
 #include "var.hpp"
 #include "index.hpp"
@@ -19,12 +17,10 @@
 #include <iostream>
 #include <math.h>  
 #include <cmath>
-#include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <getopt.h>
-
-#include "phase.hpp"
+#include <memory>
 
 using namespace std;
 using namespace vcflib;
@@ -73,7 +69,7 @@ void clearHaplotypes(vector<pair<string,string>>& haplotypes, int ntarget){
   }
 }
 
-void calc(const vector<pair<string, string>>& haplotypes, int nhaps, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background, string seqid){
+void calc(const vector<pair<string, string>>& haplotypes, int /*nhaps*/, vector<long int> pos, vector<double> afs, vector<int> & target, vector<int> & background, string seqid){
 
   for(int snp = 0; snp < haplotypes[0].first.length(); snp++){
     
@@ -121,18 +117,18 @@ void calc(const vector<pair<string, string>>& haplotypes, int nhaps, vector<long
 	backgroundH[ haplotypes[background[i]].first.substr(start, (end - start)) ]++;
       }
 
-      // interating over the target populations haplotypes
-      for( map<string, int>::iterator th = targetH.begin(); th != targetH.end(); th++){    	
-	// grabbing the core SNP (*th).first.substr((end-start)/2, 1) == "1"
-	if( (*th).first.substr((end-start)/2, 1) == "1"){     
-	   sumaT += r8_choose(th->second, 2);  
-	   naltT += th->second;
-	}
-	else{
-	  sumrT += r8_choose(th->second, 2);  
-	  nrefT += th->second;
-	}
-      }
+    	// iterating over the target populations haplotypes
+    	for(const auto&[key, val] : targetH){
+    		// grabbing the core SNP (*th).first.substr((end-start)/2, 1) == "1"
+    		if( key.substr((end-start)/2, 1) == "1"){
+    			sumaT += r8_choose(val, 2);
+    			naltT += val;
+    		}
+    		else{
+    			sumrT += r8_choose(val, 2);
+    			nrefT += val;
+    		}
+    	}
 
       // integrating over the background populations haplotypes
       for( map<string, int>::iterator bh = backgroundH.begin(); bh != backgroundH.end(); bh++){

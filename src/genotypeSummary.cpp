@@ -13,11 +13,8 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
 #include <getopt.h>
 #include <memory>
 

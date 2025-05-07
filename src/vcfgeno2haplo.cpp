@@ -8,12 +8,15 @@
 */
 
 #include "Variant.h"
-#include <getopt.h>
-#include "Fasta.h"
 #include "gpatInfo.hpp"
-#include <algorithm>
+#include "convert.h"
+#include "join.h"
+
+#include <getopt.h>
+#include <Fasta.h>
 #include <list>
 #include <set>
+
 
 using namespace std;
 using namespace vcflib;
@@ -371,8 +374,7 @@ int main(int argc, char** argv) {
             outputVar.format = cluster.front().format;
 
             // now the genotypes
-            for (vector<string>::iterator s = var.sampleNames.begin(); s != var.sampleNames.end(); ++s) {
-                string& sampleName = *s;
+            for (auto& sampleName : var.sampleNames) {
                 vector<string> gt;
                 vector<vector<int> > & hs = sampleHaplotypes[sampleName];
                 for (vector<vector<int> >::iterator h = hs.begin(); h != hs.end(); ++h) {

@@ -14,11 +14,10 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <cmath>
+
 #include "split.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include "gpatInfo.hpp"
-#include <math.h>
 
 using namespace std;
 
