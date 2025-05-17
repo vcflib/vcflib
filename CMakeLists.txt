@@ -28,15 +28,6 @@ feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
   WHAT REQUIRED_PACKAGES_NOT_FOUND)
 
-if (BUILD_STATIC)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  set(BUILD_SHARED_LIBS OFF)
-  set(CMAKE_EXE_LINKER_FLAGS "-static")
-  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-else ()
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
-endif ()
-
 # ---- Options
 
 option(BUILD_STATIC "Build static binary" OFF)
@@ -51,6 +42,15 @@ include(CheckIPOSupported) # adds lto
 check_ipo_supported(RESULT ipo_supported OUTPUT output)
 
 set(EXTRA_FLAGS " ") # otherwise it injects OFF
+
+if (BUILD_STATIC)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+else ()
+  set(BUILD_SHARED_LIBS ON)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
+endif ()
 
 # ---- Dependencies
 
@@ -431,9 +431,6 @@ list(APPEND vcflib_LIBS
   ${htslib_dependencies} # linking htslib for everything is not needed if we have our own bgzip reader
 )
 
-#  # ${WFA_LINK_LIBRARIES}
-
-
 if (NOT tabixpp_LOCAL)
   target_link_libraries(vcflib PkgConfig::tabixpp)
 endif()
@@ -445,7 +442,7 @@ endif()
 # ---- Build all
 
 if (BUILD_SHARED_LIBS)
-  target_link_libraries(vcflib PUBLIC ${vcflib_LIBS} ${WFALIB})
+  target_link_libraries(vcflib ${WFALIB})
 endif()
 
 if (NOT BUILD_ONLY_LIB)
@@ -590,9 +587,13 @@ endif (PANDOC)
 
 # ---- Install
 
-install(TARGETS vcflib ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS vcflib
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
 if(WFA_GITMODULE)
-  install(TARGETS ${WFALIB} ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS ${WFALIB} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif(WFA_GITMODULE)
 
 install(FILES ${INCLUDES} DESTINATION include/vcflib)
