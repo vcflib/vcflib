@@ -14,6 +14,7 @@ and
 
 ## ChangeLog ongoing
 
+* CMake: Fixed building static libs and shared libs (the previous version just compiled a static lib)
 * Updated zig compile for 0.14 (MichaelK)
 * Lots of refactoring (MichaelK)
 * CMake: Improved linker speeds by moving some libs
