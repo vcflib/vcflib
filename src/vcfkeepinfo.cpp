@@ -59,14 +59,18 @@ int main(int argc, char** argv) {
 
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
-        for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ++i) {
+        for (map<string, vector<string> >::iterator i = var.info.begin(); i != var.info.end(); ) {
             if (!fieldsToKeep.count(i->first)) {
                 i = var.info.erase(i);
+            } else {
+                ++i;
             }
         }
-        for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ++i) {
+        for (map<string, bool>::iterator i = var.infoFlags.begin(); i != var.infoFlags.end(); ) {
             if (!fieldsToKeep.count(i->first)) {
                 i = var.infoFlags.erase(i);
+            } else {
+                ++i;
             }
         }
         cout << var << endl;
