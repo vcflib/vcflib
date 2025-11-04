@@ -20,6 +20,9 @@ find_package(BZip2 REQUIRED)   # htslib
 find_package(LibLZMA REQUIRED) # htslib
 find_package(PkgConfig REQUIRED)
 find_package(ZLIB REQUIRED)
+
+set(PYBIND11_FINDPYTHON ON)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 CONFIG)
 
 include(GNUInstallDirs)
@@ -64,7 +67,7 @@ find_package(Threads)
 set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
 pkg_check_modules(htslib IMPORTED_TARGET htslib)   # Optionally builds from contrib/
-pkg_check_modules(tabixpp IMPORTED_TARGET tabixpp) # Optionally builds from contrib/
+pkg_check_modules(libdeflate IMPORTED_TARGET libdeflate)
 
 # ---- Build switches
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ipo_supported})
@@ -123,17 +126,9 @@ if(NOT htslib_FOUND)
   message(STATUS "Using included htslib")
   include(FindCURL) # for htslib
   set(htslib_LOCAL contrib/tabixpp/htslib)
-  set(tabixpp_FOUND OFF) # also build tabixpp if htslib is missing
 endif()
 
-if(NOT tabixpp_FOUND)
-  message(STATUS "Using included tabixpp")
-  set(tabixpp_LOCAL contrib/tabixpp)
-  include_directories(contrib/tabixpp)
-  set(tabixpp_SOURCE
-    contrib/tabixpp/tabix.cpp
-  )
-endif()
+
 
 if(WFA_GITMODULE)
   set(WFA_LOCAL contrib/WFA2-lib)
@@ -181,10 +176,7 @@ set(vcflib_SOURCE
     contrib/c-progress-bar/progress.c
 )
 
-if (tabixpp_LOCAL) # add the tabixpp source file
-    list(APPEND vcflib_SOURCE ${tabixpp_SOURCE})
-    list(APPEND INCLUDES ${tabixpp_LOCAL}/tabix.hpp)
-endif()
+
 
 add_library(vcflib
     ${vcflib_SOURCE}
@@ -412,28 +404,28 @@ else (ZIG)
   add_definitions(-DNO_ZIG=1)
 endif (ZIG)
 
-if (htslib_LOCAL)
-  target_link_libraries(vcflib htslib)
-  set(vcflib_LIBS curl deflate) # local build requires linking curl explicitly
-else ()
-  target_link_libraries(vcflib PkgConfig::htslib)
-  set(vcflib_LIBS hts)
-endif()
-
 list(APPEND htslib_dependencies
   lzma
   z
   bz2
 )
 
-list(APPEND vcflib_LIBS
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${htslib_dependencies} # linking htslib for everything is not needed if we have our own bgzip reader
-)
-
-if (NOT tabixpp_LOCAL)
-  target_link_libraries(vcflib PkgConfig::tabixpp)
+if (htslib_LOCAL)
+  # When using local htslib, link all its dependencies directly to vcflib
+  if (libdeflate_FOUND)
+    target_link_libraries(vcflib htslib ${htslib_dependencies} ${CURL_LIBRARIES} PkgConfig::libdeflate)
+  else()
+    target_link_libraries(vcflib htslib ${htslib_dependencies} ${CURL_LIBRARIES})
+  endif()
+else ()
+  target_link_libraries(vcflib PkgConfig::htslib)
 endif()
+
+# vcflib_LIBS is used for binaries that link against vcflib
+# No need to add htslib_dependencies again since they're already linked into vcflib
+set(vcflib_LIBS ${CMAKE_THREAD_LIBS_INIT})
+
+
 
 if(OPENMP)
   target_link_libraries(vcflib OpenMP::OpenMP_CXX)
@@ -470,7 +462,7 @@ if (NOT BUILD_ONLY_LIB)
 endif()
 
 
-if (NOT BUILD_STATIC) # only when not building static
+if (NOT BUILD_STATIC AND pybind11_FOUND) # only when not building static and pybind11 is available
   # ---- Python bindings - mostly for testing at this stage
   pybind11_add_module(pyvcflib "${CMAKE_SOURCE_DIR}/src/pythonffi.cpp")
   # add_dependencies(pyvcflib CURL::libcurl)
@@ -527,18 +519,20 @@ endfunction()
   add_zigtest()
 endif(ZIG_TEST)
 
-add_pytest(realign)
-add_pydoctest(pyvcflib)
-add_pydoctest(vcflib-api)
-add_pydoctest(vcf2tsv)
-add_pydoctest(vcfallelicprimitives)
-add_pydoctest(vcfwave)
-add_pydoctest(vcffilter)
-if (ZIG)
-  add_pydoctest(vcfcreatemulti)
-endif (ZIG)
+if (pybind11_FOUND)
+  add_pytest(realign)
+  add_pydoctest(pyvcflib)
+  add_pydoctest(vcflib-api)
+  add_pydoctest(vcf2tsv)
+  add_pydoctest(vcfallelicprimitives)
+  add_pydoctest(vcfwave)
+  add_pydoctest(vcffilter)
+  if (ZIG)
+    add_pydoctest(vcfcreatemulti)
+  endif (ZIG)
 
-add_pydoctest(vcfnulldotslashdot)
+  add_pydoctest(vcfnulldotslashdot)
+endif()
 add_doctest(doc/vcfintersect)
 
 # ---- Build documentation
