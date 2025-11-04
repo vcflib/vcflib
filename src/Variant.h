@@ -24,7 +24,10 @@
 #include <queue>
 #include <set>
 #include "split.h"
-#include <tabix.hpp>
+#include <htslib/hts.h>
+#include <htslib/tbx.h>
+#include <htslib/bgzf.h>
+#include <htslib/kseq.h>
 #include <Fasta.h>
 
 #include "allele.hpp"
@@ -75,7 +78,10 @@ class VariantCallFile {
 public:
 
     istream* file;
-    Tabix* tabixFile;
+    htsFile* htsFp;        // htslib file handle for indexed files
+    tbx_t* tbxIdx;         // tabix/csi index structure
+    hts_itr_t* tbxIter;    // iterator for region queries
+    kstring_t tbxStr;      // string buffer for reading lines
 
     bool usingTabix;
     string vcf_header;
@@ -120,13 +126,7 @@ public:
         return parsedHeader;
     }
 
-    bool openTabix(const string& filename) {
-        usingTabix = true;
-        // Tabix does not modify the string, better to keep rest of the interface clean
-        tabixFile = new Tabix(const_cast<string&>(filename));
-        parsedHeader = parseHeader();
-        return parsedHeader;
-    }
+    bool openTabix(const string& filename);
 
     bool open(istream& stream) {
         file = &stream;
@@ -145,23 +145,36 @@ public:
         return parsedHeader;
     }
 
-    off_t file_pos() {
-        if (usingTabix) {
-            return tabixFile->file_pos();
-        }
-        return file->tellg();
-    }
+    off_t file_pos();
 
     VariantCallFile(void) :
+        htsFp(NULL),
+        tbxIdx(NULL),
+        tbxIter(NULL),
         usingTabix(false),
         parseSamples(true),
         justSetRegion(false),
         parsedHeader(false)
-    { }
+    {
+        tbxStr.l = 0;
+        tbxStr.m = 0;
+        tbxStr.s = NULL;
+    }
 
     ~VariantCallFile(void) {
         if (usingTabix) {
-            delete tabixFile;
+            if (tbxIter) {
+                tbx_itr_destroy(tbxIter);
+            }
+            if (tbxIdx) {
+                tbx_destroy(tbxIdx);
+            }
+            if (tbxStr.s) {
+                free(tbxStr.s);
+            }
+            if (htsFp) {
+                hts_close(htsFp);
+            }
         }
     }
 
