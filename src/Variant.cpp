@@ -1627,6 +1627,26 @@ bool VariantCallFile::openVCF(ifstream& stream) {
 }
 */
 
+bool VariantCallFile::openTabix(const string& filename) {
+    // Open compressed file
+    htsFp = hts_open(filename.c_str(), "r");
+    if (!htsFp) {
+        throw std::runtime_error("Failed to open indexed VCF file: " + filename);
+    }
+    
+    // Load index (.tbi or .csi - htslib tries both automatically)
+    tbxIdx = tbx_index_load(filename.c_str());
+    if (!tbxIdx) {
+        hts_close(htsFp);
+        htsFp = NULL;
+        throw std::runtime_error("Failed to load index for file: " + filename);
+    }
+    
+    usingTabix = true;
+    parsedHeader = parseHeader();
+    return parsedHeader;
+}
+
 void VariantCallFile::updateSamples(vector<string>& newSamples) {
     sampleNames = newSamples;
     // regenerate the last line of the header
@@ -1749,17 +1769,29 @@ void VariantCallFile::removeGenoHeaderLine(string const & tag) {
     header = join(newHeader, "\n");
 }
 
+off_t VariantCallFile::file_pos(void) {
+    if (usingTabix && htsFp) {
+        return bgzf_tell(htsFp->fp.bgzf);
+    }
+    return file->tellg();
+}
+
 vector<string> VariantCallFile::getHeaderLinesFromFile()
 {
     string headerStr = "";
 
     if (usingTabix) {
-        tabixFile->getHeader(headerStr);
-        if (headerStr.empty()) {
-            cerr << "error: no VCF header" << endl;
-            exit(1);
+        // Read header lines (those starting with meta_char, typically '#')
+        while (hts_getline(htsFp, KS_SEP_LINE, &tbxStr) >= 0) {
+            if (!tbxStr.l || tbxStr.s[0] != tbxIdx->conf.meta_char) {
+                line = string(tbxStr.s);
+                break;  // Stop at first non-header line
+            }
+            headerStr += string(tbxStr.s) + "\n";
         }
-        tabixFile->getNextLine(line);
+        if (headerStr.empty()) {
+            throw std::runtime_error("error: no VCF header");
+        }
         firstRecord = true;
     } else {
         while (std::getline(*file, line)) {
@@ -1784,12 +1816,17 @@ bool VariantCallFile::parseHeader(void) {
     string headerStr = "";
 
     if (usingTabix) {
-        tabixFile->getHeader(headerStr);
-        if (headerStr.empty()) {
-            cerr << "error: no VCF header" << endl;
-            exit(1);
+        // Read header lines (those starting with meta_char, typically '#')
+        while (hts_getline(htsFp, KS_SEP_LINE, &tbxStr) >= 0) {
+            if (!tbxStr.l || tbxStr.s[0] != tbxIdx->conf.meta_char) {
+                line = string(tbxStr.s);
+                break;  // Stop at first non-header line
+            }
+            headerStr += string(tbxStr.s) + "\n";
         }
-        tabixFile->getNextLine(line);
+        if (headerStr.empty()) {
+            throw std::runtime_error("error: no VCF header");
+        }
         firstRecord = true;
     } else {
         while (std::getline(*file, line)) {
@@ -1924,13 +1961,28 @@ bool VariantCallFile::getNextVariant(Variant& var) {
                 justSetRegion = false;
                 _done = false;
                 return true;
-            } else if (tabixFile->getNextLine(line)) {
-                var.parse(line, parseSamples);
-                _done = false;
-                return true;
             } else {
-                _done = true;
-                return false;
+                int ret;
+                if (tbxIter) {
+                    // Reading with region filter
+                    ret = tbx_itr_next(htsFp, tbxIdx, tbxIter, &tbxStr);
+                } else {
+                    // Sequential reading without region
+                    ret = hts_getline(htsFp, KS_SEP_LINE, &tbxStr);
+                    // Skip header lines if any
+                    while (ret >= 0 && tbxStr.l && tbxStr.s[0] == tbxIdx->conf.meta_char) {
+                        ret = hts_getline(htsFp, KS_SEP_LINE, &tbxStr);
+                    }
+                }
+                if (ret >= 0) {
+                    line = string(tbxStr.s);
+                    var.parse(line, parseSamples);
+                    _done = false;
+                    return true;
+                } else {
+                    _done = true;
+                    return false;
+                }
             }
         } else {
             if (std::getline(*file, line)) {
@@ -1956,21 +2008,32 @@ bool VariantCallFile::setRegion(const string& seq, long int start, long int end)
 
 bool VariantCallFile::setRegion(const string& region) {
     if (!usingTabix) {
-        cerr << "cannot setRegion on a non-tabix indexed file" << endl;
-        exit(1);
+        throw std::runtime_error("cannot setRegion on a non-tabix indexed file");
     }
     // convert between bamtools/freebayes style region string and tabix/samtools style
     regex txt_regex("(\\d+)\\.\\.(\\d+)$");
     string tabix_region = regex_replace(region, txt_regex, "$1-$2");
 
-    if (tabixFile->setRegion(tabix_region)) {
-        if (tabixFile->getNextLine(line)) {
-	    justSetRegion = true;
-            return true;
-        } else {
-            return false;
-        }
+    // Clean up existing iterator if any
+    if (tbxIter) {
+        tbx_itr_destroy(tbxIter);
+        tbxIter = NULL;
+    }
+    
+    // Create new iterator for region
+    tbxIter = tbx_itr_querys(tbxIdx, tabix_region.c_str());
+    if (!tbxIter) {
+        return false;  // Invalid region
+    }
+    
+    // Try to read first line in region
+    if (tbx_itr_next(htsFp, tbxIdx, tbxIter, &tbxStr) >= 0) {
+        line = string(tbxStr.s);
+        justSetRegion = true;
+        return true;
     } else {
+        tbx_itr_destroy(tbxIter);
+        tbxIter = NULL;
         return false;
     }
 }
