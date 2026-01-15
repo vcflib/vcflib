@@ -68,7 +68,7 @@ pkg_check_modules(tabixpp IMPORTED_TARGET tabixpp) # Optionally builds from cont
 if(tabixpp_FOUND)
   set(TABIXPP_LIB PkgConfig::tabixpp)
 else()
-  find_path(TABIXPP_INCLUDE_DIR tabix.hpp)
+  find_path(TABIXPP_INCLUDE_DIR tabix.hpp PATH_SUFFIXES tabix)
   find_library(TABIXPP_LIB NAMES tabixpp tabix)
   if(TABIXPP_INCLUDE_DIR AND TABIXPP_LIB)
     include_directories(${TABIXPP_INCLUDE_DIR})
