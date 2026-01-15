@@ -65,6 +65,16 @@ set_package_properties(Threads PROPERTIES TYPE REQUIRED)
 
 pkg_check_modules(htslib IMPORTED_TARGET htslib)   # Optionally builds from contrib/
 pkg_check_modules(tabixpp IMPORTED_TARGET tabixpp) # Optionally builds from contrib/
+if(tabixpp_FOUND)
+  set(TABIXPP_LIB PkgConfig::tabixpp)
+else()
+  find_path(TABIXPP_INCLUDE_DIR tabix.hpp PATH_SUFFIXES tabix)
+  find_library(TABIXPP_LIB NAMES tabixpp tabix)
+  if(TABIXPP_INCLUDE_DIR AND TABIXPP_LIB)
+    include_directories(${TABIXPP_INCLUDE_DIR})
+    set(tabixpp_FOUND ON)
+  endif()
+endif()
 
 # ---- Build switches
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ipo_supported})
@@ -432,7 +442,7 @@ list(APPEND vcflib_LIBS
 )
 
 if (NOT tabixpp_LOCAL)
-  target_link_libraries(vcflib PkgConfig::tabixpp)
+  target_link_libraries(vcflib ${TABIXPP_LIB})
 endif()
 
 if(OPENMP)
