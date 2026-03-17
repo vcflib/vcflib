@@ -598,4 +598,7 @@ endif(WFA_GITMODULE)
 
 install(FILES ${INCLUDES} DESTINATION include/vcflib)
 
+configure_file(${CMAKE_SOURCE_DIR}/vcflib.pc.in ${CMAKE_BINARY_DIR}/vcflib.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/vcflib.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/man/ DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
