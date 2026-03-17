@@ -24,6 +24,11 @@
 #include <queue>
 #include <set>
 #include "split.h"
+#include "convert.h"
+#include "join.h"
+#include "cigar.hpp"
+#include <memory>
+#include <functional>
 #include <tabix.hpp>
 #include <Fasta.h>
 
