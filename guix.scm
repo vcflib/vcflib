@@ -107,7 +107,7 @@
        time ; for tests
        wfa2-lib/fixed ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
        xz
-       zig-0.14))
+       zig))
     (native-inputs
      `(("pkg-config" ,pkg-config)))
     (home-page "https://github.com/vcflib/vcflib/")
