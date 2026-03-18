@@ -47,6 +47,7 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bioinformatics)
+  #:use-module (gn packages bioinformatics)
   #:use-module (gnu packages build-tools)
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
@@ -104,7 +105,7 @@
        smithwaterman
        tabixpp
        time ; for tests
-       wfa2-lib ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
+       wfa2-lib/fixed ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
        xz
        zig-0.14))
     (native-inputs
