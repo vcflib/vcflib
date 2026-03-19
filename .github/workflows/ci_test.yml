@@ -34,7 +34,7 @@ jobs:
         tar xf zig-x86_64-*.tar.xz
         ./zig-x86_64-*/zig version
         pwd
-        ls -l zig-linux-*
+        ls -l zig-*
         echo "$(pwd)/zig-x86_64-linux-0.15.2" >> $GITHUB_PATH
         # echo "$(pwd)/zig-linux-x86_64-*" >> $GITHUB_PATH
         # echo "::add-path::./zig-linux*"
