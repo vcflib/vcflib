@@ -21,7 +21,7 @@ and
 * Added include files to build with vg
 * Added pkgconfig support
 * Fix wfa2lib builds and sent upstream
-* Update zig build and fix static build with zig for vcfcreatemulti
+* Update zig build to 0.15, or later, and fix static build with zig for vcfcreatemulti
 * Create tar ball with static binaries
 
 ## ChangeLog v1.0.14 (20250518)
