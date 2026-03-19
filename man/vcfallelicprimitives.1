@@ -119,7 +119,7 @@ the original (but arguably OBSOLETE) SW algorithm:
 .nf
 \f[C]
 
->>> sh(\[dq]../build/vcfallelicprimitives -a SW -m -L 1000 ../samples/10158243.vcf|grep -v \[ha]\[rs]#\[dq])
+>>> sh(\[dq]vcfallelicprimitives -a SW -m -L 1000 ../samples/10158243.vcf|grep -v \[ha]\[rs]#\[dq])
 grch38#chr4     10158243        >3655>3662_1    ACCCCCACCCCCAC  ACCCCCAC,ACAC,AC,A      60      .       AC=3,1,64,3;AF=0.0337079,0.011236,0.719101,0.0337079;LEN=6,10,12,13;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243,grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del,del,del     GT      0|0     3|3     3|3     3|0     2|3     0|1     0|3     0|3     3|3     3|3     3|3     3|3     3|3     3|3     3|3     1|0     3|3     3|3     3|3     3|0     3|0     3|0     3|0     3|3     3|3     3|1     3|3     3|3     0|0     3|0     3|3     0|3     3|3     3|3     4|3     3|4     3|3     3|3     0|3     3|3     3|3     3|0     3|4     3|3     0
 grch38#chr4     10158255        >3655>3662_2    ACC     AC,A    60      .       AC=2,1;AF=0.0224719,0.011236;LEN=1,2;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del      GT      0|0     .|.     .|.     .|0     2|.     0|0     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     0|1     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|0     .|.     .|.     1|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
 \f[R]
@@ -140,7 +140,7 @@ With the default wavefront algorithm we get a different result
 .nf
 \f[C]
 
->>> sh(\[dq]../build/vcfallelicprimitives -m -L 1000 ../samples/10158243.vcf|grep -v \[ha]\[rs]#\[dq])
+>>> sh(\[dq]vcfallelicprimitives -m -L 1000 ../samples/10158243.vcf|grep -v \[ha]\[rs]#\[dq])
 grch38#chr4     10158244        >3655>3662_1    CCCCCACCCCCACC  CC,C    60      .       AC=1,3;AF=0.011236,0.0337079;LEN=12,13;ORIGIN=grch38#chr4:10158243,grch38#chr4:10158243;TYPE=del,del    GT      0|0     0|0     0|0     0|0     1|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     0|0     2|0     0|2     0|0     0|0     0|0     0|0     0|0     0|0     0|2     0|0     0
 grch38#chr4     10158245        >3655>3662_2    CCCCACCCCCACC   C       60      .       AC=64;AF=0.719101;LEN=12;ORIGIN=grch38#chr4:10158243;TYPE=del   GT      0|0     1|1     1|1     1|0     .|1     0|0     0|1     0|1     1|1     1|1     1|1     1|1     1|1     1|1     1|1     0|0     1|1     1|1     1|1     1|0     1|0     1|0     1|0     1|1     1|1     1|0     1|1     1|1     0|0     1|0     1|1     0|1     1|1     1|1     .|1     1|.     1|1     1|1     0|1     1|1     1|1     1|0     1|.     1|1     0
 grch38#chr4     10158251        >3655>3662_3    CCCCACC C       60      .       AC=3;AF=0.0337079;LEN=6;ORIGIN=grch38#chr4:10158243;TYPE=del    GT      0|0     .|.     .|.     .|0     .|.     0|1     0|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     .|.     1|0     .|.     .|.     .|.     .|0     .|0     .|0     .|0     .|.     .|.     .|1     .|.     .|.     0|0     .|0     .|.     0|.     .|.     .|.     .|.     .|.     .|.     .|.     0|.     .|.     .|.     .|0     .|.     .|.     0
@@ -341,7 +341,7 @@ Now where does TAGAATCCCAATTGATGG come from?
 Output produced by test/tests/realign.py
 .SH LICENSE
 .PP
-Copyright 2011-2024 (C) Erik Garrison, Pjotr Prins and vcflib
+Copyright 2011-2025 (C) Erik Garrison, Pjotr Prins and vcflib
 contributors.
 MIT licensed.
 .SH AUTHORS

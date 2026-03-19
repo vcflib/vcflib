@@ -1,7 +1,7 @@
 # For Debian currently with
 #
 #   cd build
-#   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DZIG=OFF ..
+#   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 #   cmake --build .
 #   ctest .
 #   cmake --install .
@@ -388,6 +388,11 @@ MESSAGE(STATUS "WFA using include ${WFA_INCLUDE_DIRS}")
 # external project so we can run 'zig build'
 
 if (ZIG)
+if (BUILD_STATIC)
+  set(ZIG_BUILD_FLAGS "-Doptimize=ReleaseFast")
+else()
+  set(ZIG_BUILD_FLAGS "")
+endif()
 ExternalProject_Add(ZIG-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/zig"
     UPDATE_COMMAND ""
@@ -395,7 +400,7 @@ ExternalProject_Add(ZIG-EXT
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
     BUILD_ALWAYS ON
-    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh # -Drelease-fast=true -freference-trace
+    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh ${ZIG_BUILD_FLAGS}
 )
 ExternalProject_Get_property(ZIG-EXT SOURCE_DIR)
 set(ZIG_INCLUDE_DIRS ${SOURCE_DIR})
@@ -485,7 +490,7 @@ function(add_pytest TEST_FILE)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}:$ENV{GUIX_PROFILE}/lib;PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}")
+      PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_odr_violation=0;LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${CMAKE_BINARY_DIR};LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}:$ENV{GUIX_PROFILE}/lib;PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}")
 endfunction()
 
 function(add_pydoctest TEST_FILE)
@@ -496,7 +501,7 @@ function(add_pydoctest TEST_FILE)
   )
   SET_TESTS_PROPERTIES(${TEST_FILE}
       # PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=1:symbolize=1;LSAN_OPTIONS=verbosity=2:log_threads=1:suppressions=../test/libasan-suppress.txt")
-      PROPERTIES ENVIRONMENT "LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${PROJECT_SOURCE_DIR}/build:${PROJECT_SOURCE_DIR}/test/pytest;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}:$ENV{GUIX_PROFILE}/lib;PATH=${CMAKE_BINARY_DIR}:$ENV{PATH}")
+      PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_odr_violation=0;LSAN_OPTIONS=suppressions=../test/libasan-suppress.txt;PYTHONPATH=${CMAKE_BINARY_DIR}:${PROJECT_SOURCE_DIR}/test/pytest;LD_LIBRARY_PATH=$ENV{LIBRARY_PATH}:$ENV{GUIX_PROFILE}/lib;PATH=${CMAKE_BINARY_DIR}:$ENV{PATH}")
 endfunction()
 
 function(add_doctest TEST_FILE)
@@ -527,8 +532,10 @@ endfunction()
   add_zigtest()
 endif(ZIG_TEST)
 
-add_pytest(realign)
-add_pydoctest(pyvcflib)
+if (NOT BUILD_STATIC)
+  add_pytest(realign)
+  add_pydoctest(pyvcflib)
+endif()
 add_pydoctest(vcflib-api)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
@@ -597,5 +604,8 @@ if(WFA_GITMODULE)
 endif(WFA_GITMODULE)
 
 install(FILES ${INCLUDES} DESTINATION include/vcflib)
+
+configure_file(${CMAKE_SOURCE_DIR}/vcflib.pc.in ${CMAKE_BINARY_DIR}/vcflib.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/vcflib.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/man/ DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)

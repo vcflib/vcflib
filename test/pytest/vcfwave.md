@@ -171,4 +171,4 @@ Note the `INV=YES' info.
 
 # LICENSE
 
-Copyright 2022-2024 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2022-2025 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
