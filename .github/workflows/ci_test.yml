@@ -7,13 +7,7 @@ jobs:
       matrix:
           include:
               - os: ubuntu-24.04
-                python-version: "3.9"
-              - os: ubuntu-24.04
-                python-version: "3.10"
-              - os: ubuntu-24.04
-                python-version: "3.11"
-              - os: ubuntu-24.04
-                python-version: "3.12"
+                python-version: "3.13"
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
     runs-on: ${{ matrix.os }}
@@ -36,12 +30,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: install zig using wget
       run: |
-        wget -q https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz
+        wget -q https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz
         tar xf zig-linux-x86_64-*.tar.xz
         ./zig-linux-x86_64-*/zig version
         pwd
         ls -l zig-linux-*
-        echo "$(pwd)/zig-linux-x86_64-0.13.0" >> $GITHUB_PATH
+        echo "$(pwd)/zig-linux-x86_64-0.15.2" >> $GITHUB_PATH
         # echo "$(pwd)/zig-linux-x86_64-*" >> $GITHUB_PATH
         # echo "::add-path::./zig-linux*"
         echo GITHUB_PATH=$GITHUB_PATH
@@ -52,7 +46,7 @@ jobs:
     - name: Configure
       run: |
         echo $(pwd)/zig-linux-x86_64-* >> $GITHUB_PATH
-        echo "$(pwd)/zig-linux-x86_64-0.13.0" >> $GITHUB_PATH
+        echo "$(pwd)/zig-linux-x86_64-0.15.2" >> $GITHUB_PATH
         echo GITHUB_PATH=$GITHUB_PATH
         echo PATH=$PATH
         zig version
