@@ -388,6 +388,11 @@ MESSAGE(STATUS "WFA using include ${WFA_INCLUDE_DIRS}")
 # external project so we can run 'zig build'
 
 if (ZIG)
+if (BUILD_STATIC)
+  set(ZIG_BUILD_FLAGS "-Doptimize=ReleaseFast")
+else()
+  set(ZIG_BUILD_FLAGS "")
+endif()
 ExternalProject_Add(ZIG-EXT
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/zig"
     UPDATE_COMMAND ""
@@ -395,7 +400,7 @@ ExternalProject_Add(ZIG-EXT
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE ON
     BUILD_ALWAYS ON
-    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh # -Drelease-fast=true -freference-trace
+    BUILD_COMMAND ${CMAKE_SOURCE_DIR}/src/zig/compile.sh ${ZIG_BUILD_FLAGS}
 )
 ExternalProject_Get_property(ZIG-EXT SOURCE_DIR)
 set(ZIG_INCLUDE_DIRS ${SOURCE_DIR})
@@ -527,8 +532,10 @@ endfunction()
   add_zigtest()
 endif(ZIG_TEST)
 
-add_pytest(realign)
-add_pydoctest(pyvcflib)
+if (NOT BUILD_STATIC)
+  add_pytest(realign)
+  add_pydoctest(pyvcflib)
+endif()
 add_pydoctest(vcflib-api)
 add_pydoctest(vcf2tsv)
 add_pydoctest(vcfallelicprimitives)
