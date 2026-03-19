@@ -138,7 +138,7 @@ sequences to accelerate the alignment process.")
        time ; for tests
        wfa2-lib/fixed ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
        xz
-       zig))
+       zig-0.15))
     (native-inputs
      `(("pkg-config" ,pkg-config)))
     (home-page "https://github.com/vcflib/vcflib/")
