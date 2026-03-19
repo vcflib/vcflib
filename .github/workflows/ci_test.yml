@@ -31,11 +31,11 @@ jobs:
     - name: install zig using wget
       run: |
         wget -q https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz
-        tar xf zig-linux-x86_64-*.tar.xz
-        ./zig-linux-x86_64-*/zig version
+        tar xf zig-x86_64-*.tar.xz
+        ./zig-x86_64-*/zig version
         pwd
         ls -l zig-linux-*
-        echo "$(pwd)/zig-linux-x86_64-0.15.2" >> $GITHUB_PATH
+        echo "$(pwd)/zig-x86_64-linux-0.15.2" >> $GITHUB_PATH
         # echo "$(pwd)/zig-linux-x86_64-*" >> $GITHUB_PATH
         # echo "::add-path::./zig-linux*"
         echo GITHUB_PATH=$GITHUB_PATH
@@ -45,8 +45,8 @@ jobs:
       run: git submodule update --init --recursive
     - name: Configure
       run: |
-        echo $(pwd)/zig-linux-x86_64-* >> $GITHUB_PATH
-        echo "$(pwd)/zig-linux-x86_64-0.15.2" >> $GITHUB_PATH
+        echo $(pwd)/zig-x86_64-* >> $GITHUB_PATH
+        echo "$(pwd)/zig-x86_64-linux-0.15.2" >> $GITHUB_PATH
         echo GITHUB_PATH=$GITHUB_PATH
         echo PATH=$PATH
         zig version
