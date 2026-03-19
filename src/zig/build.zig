@@ -1,4 +1,3 @@
-const zig_version = @import("builtin").zig_version;
 const std = @import("std");
 
 const test_targets = [_]std.Target.Query{
