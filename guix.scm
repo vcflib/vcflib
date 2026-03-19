@@ -8,9 +8,12 @@
 ;;
 ;;   guix shell -C -D -F -f guix.scm
 ;;
+;;   mkdir -p build ; cd build
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
 ;;   make -j 12 VERBOSE=1
 ;;   ctest .
+;;   cmake --build . --target man # generate documentation
+;;   cmake --install .
 ;;
 ;; in guix shell debug example:
 ;;
