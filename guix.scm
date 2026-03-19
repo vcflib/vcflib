@@ -47,7 +47,6 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bioinformatics)
-  #:use-module (gn packages bioinformatics)
   #:use-module (gnu packages build-tools)
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
@@ -78,6 +77,35 @@
 
 (define %version
   (read-string (open-pipe "git describe --always --tags --long|tr -d $'\n'" OPEN_READ)))
+
+;; wfa2-lib v2.3.6 with cstdint fix, pkg-config and tests
+(define-public wfa2-lib/fixed
+  (package
+    (name "wfa2-lib")
+    (version "2.3.6")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/smarco/WFA2-lib")
+                    (commit (string-append "v" version))))
+              (file-name (git-file-name name version))
+              (sha256
+               (base32
+                "0hfgq09r0ndrsa2jwy9wkg8p7xzgvclbj5ysp73bawwkgwpgfhy4"))))
+    (build-system cmake-build-system)
+    (native-inputs
+     (list pkg-config time))
+    (arguments
+     (list
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=RelWithDebInfo")))
+    (home-page "https://github.com/smarco/WFA2-lib")
+    (synopsis "Wavefront alignment algorithm library")
+    (description "The wavefront alignment (WFA) algorithm is an exact
+gap-affine algorithm that takes advantage of homologous regions between the
+sequences to accelerate the alignment process.")
+    (properties '((tunable? . #t)))
+    (license license:expat)))
 
 (define-public vcflib-git
   (package
