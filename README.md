@@ -126,6 +126,16 @@ guix package -i vcflib
 
 See also the Guix shell below.
 
+### Static binaries, Docker and Singularity
+
+Images are available from [files.genenetwork.org](https://files.genenetwork.org/software/vcflib/).
+
+For singularity simply run someting like:
+
+```
+singularity exec vcflib-version-singularity.pack.gz vcfcreatemulti -h
+```
+
 ## USAGE
 
 Users are encouraged to drive the utilities in the library in a
@@ -383,7 +393,7 @@ For include files add
 
 And for some of the VCF executables
 
-- zig 0.13 (disable with cmake -DZIG=OFF)
+- zig 0.15 (disable with cmake -DZIG=OFF)
 - python
 - perl
 
@@ -394,7 +404,7 @@ Note you need to add the full path before running cmake and make. From the build
 
 ```sh
 cd build
-export PATH=$(pwd)/../zig-linux-x86_64-0.13.0:$PATH
+export PATH=$(pwd)/../zig-linux-x86_64-0.15.0:$PATH
 zig version
 cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=1 ..
 make VERBOSE=1
