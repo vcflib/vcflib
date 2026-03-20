@@ -3,15 +3,6 @@ For contributions see
 and
 [commits](https://github.com/vcflib/vcflib/commits/master).
 
-## TODO
-
-- [ ] vcfcreatemulti: fix problem with slow and wrong complex regions (implement backtrack)
-      + [ ] check for indels which are really the same
-      + [ ] combine vcfwave duplicated functionality
-- bgzip
-- tabix -p vcf my_file.vcf.gz
-- pangenie, vg deconstruct, vcfbub
-
 ## ChangeLog ongoing
 
 ## ChangeLog v1.0.15 (20260319)
