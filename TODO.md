@@ -32,3 +32,5 @@
   So yes -- zig is simply turned off (-DZIG=OFF). The patches are all about unbundling dependencies to use Debian
   system packages, plus building a shared library. No zig-related patches at all. They're also 3 minor versions behind
   and have their tests disabled.
+
+For Debian/Ubuntu packages: we use [guix.scm](./guix.scm) for development and deployment. We also have a passing github CI test defined in [ci_test.yaml](.github/workflows/ci_test.yml).
