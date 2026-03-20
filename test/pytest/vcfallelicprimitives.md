@@ -305,4 +305,4 @@ Output produced by test/tests/realign.py
 
 # LICENSE
 
-Copyright 2011-2024 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.
+Copyright 2011-2025 (C) Erik Garrison, Pjotr Prins and vcflib contributors. MIT licensed.

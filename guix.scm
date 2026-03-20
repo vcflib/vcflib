@@ -8,9 +8,12 @@
 ;;
 ;;   guix shell -C -D -F -f guix.scm
 ;;
+;;   mkdir -p build ; cd build
 ;;   cmake  -DCMAKE_BUILD_TYPE=Debug -DOPENMP=OFF -DASAN=ON ..
 ;;   make -j 12 VERBOSE=1
 ;;   ctest .
+;;   cmake --build . --target man # generate documentation
+;;   cmake --install .
 ;;
 ;; in guix shell debug example:
 ;;
@@ -78,6 +81,35 @@
 (define %version
   (read-string (open-pipe "git describe --always --tags --long|tr -d $'\n'" OPEN_READ)))
 
+;; wfa2-lib v2.3.6 with cstdint fix, pkg-config and tests
+(define-public wfa2-lib/fixed
+  (package
+    (name "wfa2-lib")
+    (version "2.3.6")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/smarco/WFA2-lib")
+                    (commit (string-append "v" version))))
+              (file-name (git-file-name name version))
+              (sha256
+               (base32
+                "0hfgq09r0ndrsa2jwy9wkg8p7xzgvclbj5ysp73bawwkgwpgfhy4"))))
+    (build-system cmake-build-system)
+    (native-inputs
+     (list pkg-config time))
+    (arguments
+     (list
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=RelWithDebInfo")))
+    (home-page "https://github.com/smarco/WFA2-lib")
+    (synopsis "Wavefront alignment algorithm library")
+    (description "The wavefront alignment (WFA) algorithm is an exact
+gap-affine algorithm that takes advantage of homologous regions between the
+sequences to accelerate the alignment process.")
+    (properties '((tunable? . #t)))
+    (license license:expat)))
+
 (define-public vcflib-git
   (package
     (name "vcflib-git")
@@ -104,9 +136,9 @@
        smithwaterman
        tabixpp
        time ; for tests
-       wfa2-lib ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
+       wfa2-lib/fixed ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
        xz
-       zig-0.14))
+       zig-0.15)) ; older versions of zig will not work
     (native-inputs
      `(("pkg-config" ,pkg-config)))
     (home-page "https://github.com/vcflib/vcflib/")
@@ -147,14 +179,28 @@ manipulations on VCF files.")
     (inherit vcflib-git)
     (name "vcflib-local-htslib-git")
     (arguments
-     `(#:tests? #f ;; tests don't work when running build directly
-       #:configure-flags
-       ,#~(list
-           ;; "-DBUILD_OPTIMIZED=ON"       ;; we don't use the standard cmake optimizations
-           "-DCMAKE_BUILD_TYPE=Generic"))) ;; to optimize use guix --tune=march-type (e.g. --tune=native)
+     (list
+      #:tests? #t
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=Generic")
+      #:phases
+      #~(modify-phases %standard-phases
+          (add-after 'unpack 'fix-htslib-configure
+            (lambda _
+              ;; In the Guix build sandbox /bin/sh does not exist.
+              ;; Set CONFIG_SHELL so autoconf tools use the right
+              ;; shell in configure and generated config.status.
+              (setenv "CONFIG_SHELL" (which "bash"))
+              ;; Patch CMakeLists.txt so ExternalProject uses bash
+              ;; to invoke configure.
+              (substitute* "CMakeLists.txt"
+                (("CONFIGURE_COMMAND ./configure")
+                 (string-append "CONFIGURE_COMMAND "
+                                (which "bash")
+                                " ./configure"))))))))
     (inputs
      (modify-inputs (package-inputs vcflib-git)
-                    (delete "htslib" "tabixpp")
+                    (delete "htslib" "tabixpp" "fastahack" "wfa2-lib/fixed")
                     (prepend
                      autoconf  ;; htslib build requirements
                      automake
