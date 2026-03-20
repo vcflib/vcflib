@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "nqdhkt:L:p:t:K:I:f:",
+        c = getopt_long (argc, argv, "nqdhkt:L:p:K:I:f:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -301,7 +301,7 @@ int main(int argc, char** argv) {
                     const auto& ref = wfmatch.ref;
                     const auto& aligned = wfmatch.alt;
                     const auto wfpos = wfmatch.position;
-                    int alt_index,AC=-1,AN = -1;
+                    int alt_index=-1,AC=-1,AN = -1;
                     string AT;
                     double AF = -1;
                     if (ref != aligned) {
@@ -439,7 +439,7 @@ int main(int argc, char** argv) {
                             auto overlap = [] (unsigned int pos,tuple<unsigned int, unsigned int> range) {
                                 auto start = get<0>(range);
                                 auto end = get<1>(range);
-                                return (pos >= start && pos <= end);
+                                return (pos >= start && pos < end);
                             };
                             if (overlap(pos1,check_range) || overlap(pos2,check_range)) {
                                 int i = 0;

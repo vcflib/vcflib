@@ -14,6 +14,16 @@ and
 
 ## ChangeLog ongoing
 
+## ChangeLog v1.0.15 (20260319)
+
+* Fix iterator usage in vcfkeepinfo and vcfremoveaberrantgenotypes (Jukka Matilainen)
+* Fixes for vcfwave (Glenn Hickey)
+* Added include files to build with vg
+* Added pkgconfig support
+* Fix wfa2lib builds and sent upstream
+* Update zig build to 0.15, or later, and fix static build with zig for vcfcreatemulti
+* Create tar ball with static binaries
+
 ## ChangeLog v1.0.14 (20250518)
 
 * CMake: Fixed building static libs and shared libs (the previous version just compiled a static lib)

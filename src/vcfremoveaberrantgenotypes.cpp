@@ -26,20 +26,25 @@ void stripAberrant(Variant& var) {
         map<int, int> genotype = decomposeGenotype(sample["GT"].front());
         int refobs = 0;
         convert(sample["RO"].front(), refobs);
+        bool eraseSample = false;
         if (isHomNonRef(genotype) && refobs > 0) {
-            var.samples.erase(s);
+            eraseSample = true;
         } else if (isHomRef(genotype)) {
             for (vector<string>::iterator a = var.alt.begin(); a != var.alt.end(); ++a) {
                 int alleleIndex = var.altAlleleIndexes[*a];
                 int altobs = 0;
                 convert(sample["AO"].at(alleleIndex), altobs);
                 if (altobs > 0) {
-                    var.samples.erase(s);
+                    eraseSample = true;
                     break;
                 }
             }
         }
-        ++s;
+        if (eraseSample) {
+            s = var.samples.erase(s);
+        } else {
+            ++s;
+        }
     }
 }
 

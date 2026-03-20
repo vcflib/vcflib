@@ -9,8 +9,7 @@ const expectEqual = std.testing.expectEqual;
 const expectEqualSlices = std.testing.expectEqualSlices;
 const eql = std.mem.eql;
 const p = std.debug.print;
-var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-const allocator = gpa.allocator();
+const allocator = std.heap.page_allocator;
 
 const vcf = @import("vcf.zig");
 
@@ -26,15 +25,15 @@ pub const VcfSampleError = error{
 const GENOTYPE_MISSING = -256;
 
 fn split_samples(str: []const u8) *ArrayList([] const u8) {
-    var list = ArrayList([] const u8).init(allocator);
-    defer list.deinit();
-    
+    var list = ArrayList([] const u8){};
+    defer list.deinit(allocator);
+
     var splits = if (@hasDecl(std.mem, "splitScalar"))
         std.mem.splitScalar(u8, str, ' ')
     else
         std.mem.split(u8, str, ' ');
     while (splits.next()) |chunk| {
-        list.append(chunk) catch |err| {
+        list.append(allocator, chunk) catch |err| {
             std.debug.print("out of memory {}\n", .{err});
         };
     }
@@ -48,7 +47,7 @@ fn split_samples(str: []const u8) *ArrayList([] const u8) {
 /// ArrayList(genotypes).
 const Genotypes = struct {
     // default field values
-    genos: ArrayList(i64), 
+    genos: ArrayList(i64),
     phased: bool = false,
 
     const Self = @This();
@@ -60,10 +59,11 @@ const Genotypes = struct {
     fn is_phased(str: [] const u8) bool {
         return std.mem.containsAtLeast(u8, str, 1, "|");
     }
-    
+
     /// Convert a genotype (sample) string to a list of numbers
     fn to_num(str: []const u8) !ArrayList(i64) {
-        var list = ArrayList(i64).init(allocator);
+
+        var list = ArrayList(i64){};
 
         var splits =  if (@hasDecl(std.mem, "splitScalar"))
             std.mem.splitScalar(u8, str, if (is_phased(str)) '|' else '/')
@@ -71,37 +71,39 @@ const Genotypes = struct {
             std.mem.split(u8, str, if (is_phased(str)) '|' else '/' );
 
         while (splits.next()) |chunk| {
-            const i: i64 = 
-                if (chunk[0] == '.') 
+            const i: i64 =
+                if (chunk[0] == '.')
                 GENOTYPE_MISSING
                 else
                 fmt.parseInt(i64,chunk,10) catch |err| {
                     try expect(err == error.InvalidCharacter);
                     return error.CannotParseSample;
                 };
-            list.append(i) catch unreachable;
+            list.append(allocator, i) catch unreachable;
         }
         return list;
     }
 
-    fn init(str: [] const u8) Genotypes {
-        const parsed = to_num(str) catch unreachable;
+    fn init(str: [] const u8) !Genotypes {
+        const parsed = try to_num(str);
         return Genotypes {
             .genos = parsed,
             .phased = is_phased(str)
         };
     }
-    
+
     fn deinit(self: *const Self) void {
-        self.genos.deinit();
+        var genos_copy = self.genos;
+        genos_copy.deinit(allocator);
     }
-    
+
     /// Take a 0-n indexed genotype and add offset idx. When the
     /// genotype is 0 (ref) or missing it is not changed.
     fn renumber(self: *const Self, idx: usize) !void {
+
         var list = self.genos;
         for (list.items,0..) | g,i | {
-            list.items[i] = 
+            list.items[i] =
                 switch (g) {
                     0 => 0,
                     GENOTYPE_MISSING => GENOTYPE_MISSING,
@@ -114,10 +116,12 @@ const Genotypes = struct {
     /// last genotype. FIXME: at this point we are not checking for
     /// size mismatches
     fn merge(self: *const Self, genos2: Genotypes) !void {
+
         var base = self.genos;
         var g_err: VcfSampleError = error.None;
-        
+
         for (genos2.genos.items,0..) | g2,i | {
+            if (i >= base.items.len) break; // size mismatch guard
             const current = base.items[i];
             if (g2 == 0 or g2 == GENOTYPE_MISSING) continue; // no update
             if (current>0) {
@@ -128,34 +132,35 @@ const Genotypes = struct {
         }
         return g_err;
     }
-    
+
     fn to_s(self: *const Self) !ArrayList(u8) {
+
         const list = self.genos.items;
         const phase_repr = if (self.phased) "|" else "/";
-        var s = ArrayList(u8).init(allocator);
+        var s = ArrayList(u8){};
         // concatenate genotypes with their phase separator
         for (list) | g | {
-            const result = if (g == GENOTYPE_MISSING) 
+            const result = if (g == GENOTYPE_MISSING)
                 try fmt.allocPrint(allocator, ".{s}", .{phase_repr})
             else
                 try fmt.allocPrint(allocator, "{}{s}", .{g,phase_repr});
             defer allocator.free(result);
-            try s.appendSlice(result);
+            try s.appendSlice(allocator, result);
         }
-        s.items = s.items[0..s.items.len-1]; // drop trailing phase character
+        if (s.items.len > 0) s.items = s.items[0..s.items.len-1]; // drop trailing phase character
         // p("*{s}*",.{s.items});
         return s;
     }
-    
+
     fn to_s2(self: *const Self) !ArrayList([] const u8) {
         // _ = self;
-        var s = ArrayList([] const u8).init(allocator);
+        var s = ArrayList([] const u8){};
         for (self.genos.items) |g| {
             // parseInt to go to str
             // charDigit to int
             const result = try fmt.allocPrint(allocator, "{}", .{g});
             // p("Result is {s}!\n", .{result});
-            try s.append(result);
+            try s.append(allocator, result);
         }
         return s;
     }
@@ -172,17 +177,17 @@ const ReturnGenotypes = struct {
 /// heterozygous only (at this point).
 pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ReturnGenotypes {
 //pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ArrayList([] const u8) {
-    var samples = ArrayList(Genotypes).init(allocator); // result set
+    var sample_list = ArrayList(Genotypes){}; // result set
     var g_err: VcfSampleError = error.None;
     for (vs.items, 0..) | v,i | { // Fetch the genotypes from each variant
         for (v.genotypes().items, 0..) | geno,j | {
-            var geno2 = Genotypes.init(geno); // convert from string to number list
+            var geno2 = try Genotypes.init(geno); // convert from string to number list
             try geno2.renumber(i);
             if (i==0) {
-                try samples.append(geno2);
+                try sample_list.append(allocator, geno2);
             }
             else {
-                samples.items[j].merge(geno2) catch |err| {
+                sample_list.items[j].merge(geno2) catch |err| {
                     if (err != error.None)
                         g_err = err;
                 };
@@ -190,10 +195,10 @@ pub fn reduce_renumber_genotypes(comptime T: type, vs: ArrayList(T)) !ReturnGeno
         }
     }
     // convert to zero terminated strings for vcflib C++ core code
-    var s_samples = ArrayList([] const u8).init(allocator);
-    for (samples.items) |g| {
+    var s_samples = ArrayList([] const u8){};
+    for (sample_list.items) |g| {
         const s = try g.to_s();
-        s_samples.append(s.items) catch unreachable;
+        s_samples.append(allocator, s.items) catch unreachable;
     }
     // p("ngeno_s: size {d} {s}\n",.{s_samples.items.len,s_samples.items});
     // return s_samples;
@@ -206,25 +211,25 @@ test "split genotypes" {
 }
 
 test "genotypes" {
-    var list = ArrayList(i64).init(allocator);
-    defer list.deinit();
-    try list.append(0);
-    try list.append(1);
+    var list = ArrayList(i64){};
+    defer list.deinit(allocator);
+    try list.append(allocator, 0);
+    try list.append(allocator, 1);
     var gs = Genotypes{.genos = list, .phased = true};
     var genos = try gs.to_s2();
     defer {
         for (genos.items) |item| {
                 allocator.free(item);
             }
-        genos.deinit();
+        genos.deinit(allocator);
     }
     // p("YES {s}",.{genos.items});
 
-    const gs2 = try Genotypes.to_num("1|0");
-    defer gs2.deinit();
+    var gs2 = try Genotypes.to_num("1|0");
+    defer gs2.deinit(allocator);
     try expect(gs2.items[0]==1);
     try expectEqual(gs2.items[1],0);
-    const gs3 = Genotypes.init("1|.");
+    const gs3 = try Genotypes.init("1|.");
     defer gs3.deinit();
     const list2 = gs3.genos.items;
     try expectEqual(list2.len,2);
@@ -232,20 +237,20 @@ test "genotypes" {
     try gs3.renumber(1);
     // try expectEqual(add3.items[0],2);
     // try expectEqual(add3.items[1],GENOTYPE_MISSING);
-    const s3 = try gs3.to_s();
-    defer s3.deinit();
+    var s3 = try gs3.to_s();
+    defer s3.deinit(allocator);
     try expect(eql(u8, s3.items, "2|."));
-    const gs4 = try Genotypes.to_num(".|2");
-    defer gs4.deinit();
+    var gs4 = try Genotypes.to_num(".|2");
+    defer gs4.deinit(allocator);
     try expectEqualSlices(i64, gs4.items, &.{ GENOTYPE_MISSING, 2 });
     //const add4 = Genotypes.renumber(1,gs4);
     //try expectEqualSlices(i64, add4.items, &.{ GENOTYPE_MISSING, 3 });
 
-    const genotypes = Genotypes.init("1|0");
-    defer genotypes.deinit();
-    // p("{d}",.{genotypes.genos.items});
-    const str = try genotypes.to_s();
-    defer str.deinit();
+    const genotypes_val = try Genotypes.init("1|0");
+    defer genotypes_val.deinit();
+    // p("{d}",.{genotypes_val.genos.items});
+    var str = try genotypes_val.to_s();
+    defer str.deinit(allocator);
     // p("{s}",.{str});
     try expect(eql(u8, str.items, "1|0"));
 }
