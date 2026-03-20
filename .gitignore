@@ -135,3 +135,8 @@ paper/plos_latex_template.blg
 paper/plos_latex_template.out
 src/zig/.zig-cache/
 zig-linux-x86_64-*/
+src/zig/b/
+src/zig/h/
+src/zig/o/
+src/zig/z/
+
