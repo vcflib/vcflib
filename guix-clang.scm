@@ -1,3 +1,5 @@
+;; IMPORTANT: this file is out of date. 
+;; 
 ;; To use this file to build HEAD of vcflib:
 ;;
 ;;   guix build -f guix-clang.scm
