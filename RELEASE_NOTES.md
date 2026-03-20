@@ -17,7 +17,7 @@ and
 * Update zig build to 0.15, or later, and fix static build with zig for vcfcreatemulti
 * Create tar ball with static binaries
 * Fix building with git submodules only
-* Download singularity and docker containers from https://files.genenetwork.org/software/vcflib/v1.0.15/
+* Download statically linked binaries, singularity and docker containers from https://files.genenetwork.org/software/vcflib/v1.0.15/
   md5sum:
   5768540e7bef2db1363e422bc37614c4  vcflib-1.0.15-docker.tar.gz # Docker
   680cd7675325561636e03274e679d195  vcflib-1.0.15-singularity.pack.gz # Singularity
