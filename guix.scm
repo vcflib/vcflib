@@ -179,14 +179,29 @@ manipulations on VCF files.")
     (inherit vcflib-git)
     (name "vcflib-local-htslib-git")
     (arguments
-     `(#:tests? #f ;; tests don't work when running build directly
+     `(#:tests? #t
        #:configure-flags
        ,#~(list
            ;; "-DBUILD_OPTIMIZED=ON"       ;; we don't use the standard cmake optimizations
-           "-DCMAKE_BUILD_TYPE=Generic"))) ;; to optimize use guix --tune=march-type (e.g. --tune=native)
+           "-DCMAKE_BUILD_TYPE=Generic") ;; to optimize use guix --tune=march-type (e.g. --tune=native)
+       #:phases
+       ,#~(modify-phases %standard-phases
+            (add-after 'unpack 'fix-htslib-configure
+              (lambda _
+                ;; In the Guix build sandbox /bin/sh does not exist.
+                ;; Set CONFIG_SHELL so autoconf tools use the right
+                ;; shell in configure and generated config.status.
+                (setenv "CONFIG_SHELL" (which "bash"))
+                ;; Patch CMakeLists.txt so ExternalProject uses bash
+                ;; to invoke configure.
+                (substitute* "CMakeLists.txt"
+                  (("CONFIGURE_COMMAND ./configure")
+                   (string-append "CONFIGURE_COMMAND "
+                                  (which "bash")
+                                  " ./configure"))))))))
     (inputs
      (modify-inputs (package-inputs vcflib-git)
-                    (delete "htslib" "tabixpp")
+                    (delete "htslib" "tabixpp" "fastahack" "wfa2-lib/fixed")
                     (prepend
                      autoconf  ;; htslib build requirements
                      automake
