@@ -1,6 +1,10 @@
-;; Generate a Singularity container with:
+;; Create a Singularity container with:
 ;;
-;;   guix pack -f squashfs -S /bin=bin -m guix-container-manifest.scm
+;;   guix pack -f squashfs -S /bin=bin -L . -m guix-container-manifest.scm   # Singularity
+;;
+;; Create a Docker container with:
+;;
+;;   guix pack -f docker   -S /bin=bin -L . -m guix-container-manifest.scm   # Docker                
 ;;
 ;; Run with produced container:
 ;;
