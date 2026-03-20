@@ -19,9 +19,9 @@ and
 * Fix building with git submodules only
 * Download singularity and docker containers from https://files.genenetwork.org/software/vcflib/v1.0.15/
   md5sum:
-  5768540e7bef2db1363e422bc37614c4  vcflib-1.0.15-docker.tar.gz
-  680cd7675325561636e03274e679d195  vcflib-1.0.15-singularity.pack.gz
-
+  5768540e7bef2db1363e422bc37614c4  vcflib-1.0.15-docker.tar.gz # Docker
+  680cd7675325561636e03274e679d195  vcflib-1.0.15-singularity.pack.gz # Singularity
+  7f60bb29dfb498c1059a33e10e99ac02  vcflib-static-git-v1.0.15-2-g0d40ff1.tar.gz # Static binaries
 
 ## ChangeLog v1.0.14 (20250518)
 
