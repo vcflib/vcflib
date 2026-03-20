@@ -251,7 +251,7 @@ These binaries can be copied to HPC."
     (inherit vcflib-git)
     (name "vcflib-static-git")
     (arguments
-     `(#:tests? #f
+     `(#:tests? #t
        #:configure-flags
        ,#~(list
            "-DBUILD_STATIC=ON"
