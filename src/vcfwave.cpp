@@ -14,6 +14,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 
 #include <getopt.h>
 #ifdef WFA_PARALLEL
@@ -57,8 +58,10 @@ options:
                             REF is longer than LEN (default: unlimited).
     -K, --inv-kmer K        Length of k-mer to use for inversion detection sketching (default: 17).
     -I, --inv-min LEN       Minimum allele length to consider for inverted alignment (default: 64).
-    -t, --threads N         Use this many threads for variant decomposition (default is 1).
-                            For most datasets threading may actually slow vcfwave down.
+    -t, --threads N         Decompose up to N records in parallel (default 1); output order
+                            is preserved. Peak memory grows ~0.7GB per concurrent big site.
+    -w, --wfa-threads M     Legacy: M cores inside each WFA alignment, one record at a time
+                            (default 1). Mutually exclusive with -t.
     --quiet                 Do not display progress bar.
     -d, --debug             Debug mode.
 
@@ -88,6 +91,7 @@ int main(int argc, char** argv) {
     bool debug    = false;
 
     int thread_count = 1;
+    int wfa_thread_count = 1;
     int inv_sketch_kmer = 17;
     int min_inv_len = 64;
 
@@ -110,6 +114,7 @@ int main(int argc, char** argv) {
                 {"keep-info", no_argument, nullptr, 'k'},
                 {"keep-geno", no_argument, nullptr, 'g'},
                 {"threads", required_argument, nullptr, 't'},
+                {"wfa-threads", required_argument, nullptr, 'w'},
                 {"nextgen", no_argument, nullptr, 'n'},
                 {"quiet", no_argument, nullptr, 'q'},
                 {"debug", no_argument, nullptr, 'd'},
@@ -118,7 +123,7 @@ int main(int argc, char** argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "nqdhkt:L:p:K:I:f:",
+        c = getopt_long (argc, argv, "nqdhkt:w:L:p:K:I:f:",
                          long_options, &option_index);
 
         if (c == -1)
@@ -140,6 +145,10 @@ int main(int argc, char** argv) {
 
         case 't':
             thread_count = atoi(optarg);
+            break;
+
+        case 'w':
+            wfa_thread_count = atoi(optarg);
             break;
 
         case 'n':
@@ -184,6 +193,18 @@ int main(int argc, char** argv) {
         }
     }
 
+    // -t (parallel records, WFA single-threaded) and -w (one record at a time,
+    // WFA multi-threaded) are mutually exclusive: combining them would require
+    // nested OpenMP, and the WFA-threaded path never outperforms record-level
+    // parallelism anyway. Keeping them exclusive means the -w path runs the
+    // record loop single-threaded, so WFA's threads are not nested.
+    if (thread_count > 1 && wfa_thread_count > 1) {
+        cerr << "vcfwave: -t/--threads and -w/--wfa-threads are mutually exclusive "
+             << "(use -t to parallelise across records, or -w for the legacy "
+             << "per-alignment threading)." << endl;
+        exit(1);
+    }
+
     #ifdef WFA_PARALLEL
     omp_set_num_threads(thread_count);
     #endif
@@ -226,20 +247,19 @@ int main(int argc, char** argv) {
     variantFile.addHeaderLine("##INFO=<ID=INV,Number=0,Type=Flag,Description=\"Inversion detected\">");
     cout << variantFile.header << endl;
 
-    WfaVariant var(variantFile);
     double amount = 0.0, prev_amount = 0.0;
     uint64_t start = get_timestamp();
 
     if (!quiet)
         cerr << "vcfwave " << VCFLIB_VERSION << " processing..." << endl;
-    while (variantFile.getNextVariant(var)) {
 
-        amount = (double)variantFile.file_pos()/(double)file_size;
-        // cerr << file_size << "," << variantFile.file_pos() << "=" << amount << endl;
-        if (!quiet && variantFile.file_pos() >= 0 && file_size >= 0 && amount > prev_amount+0.003) {
-            prev_amount = amount;
-            print_progress(amount*100, start);
-        }
+    // Decompose one record. Returns true and writes the decomposed VCF output to
+    // `out` for records that are actually realigned; returns false WITHOUT
+    // writing for pass-through records (the driver renders those serially, so the
+    // historical carry-over of cout's float precision is preserved byte-for-byte).
+    // All configuration is captured by reference and only read; `var` and `out`
+    // are per-call, so this is safe to run concurrently on distinct records.
+    auto process_record = [&](WfaVariant& var, ostream& out) -> bool {
 
         // we can't decompose *1* bp events, these are already in simplest-form whether SNPs or indels
         // we also don't handle anything larger than maxLength bp
@@ -255,9 +275,8 @@ int main(int argc, char** argv) {
         if ((maxLength && max_allele_length > maxLength) || max_allele_length == 1 ||
             (var.alt.size() == 1 &&
              (var.ref.size() == 1 || (maxLength && var.ref.size() > maxLength)))) {
-            // nothing to do
-            cout << var << endl;
-            continue;
+            // nothing to do -- pass-through; rendered serially by the driver
+            return false;
         }
 
         map<string, pair<vector<VariantAllele>, bool> > varAlleles =
@@ -268,7 +287,7 @@ int main(int argc, char** argv) {
                                 &wfa_params,
                                 inv_sketch_kmer,
                                 min_inv_len,
-                                thread_count,
+                                wfa_thread_count, // cores per WFA alignment (-w); parallelism is mainly across records
                                 debug);  // bool debug=false
 
         if (nextGen) {
@@ -517,22 +536,25 @@ int main(int argc, char** argv) {
                 // newvar.samples = v.genotypeStrs;
 
                 // Instead of using above format output we now simply print genotypes
-                cout.precision(2);
-                cout << newvar;
-                cout << "\tGT";
+                out.precision(2);
+                out << newvar;
+                out << "\tGT";
                 for (const auto& gts: v.genotypes) {
-                    cout << "\t";
+                    out << "\t";
                     int idx = 0;
                     for (auto gt : gts) {
-                        cout << (gt == ALLELE_NULL2 ? "." : to_string(gt));
-                        if (idx < gts.size()-1) cout << "|";
+                        out << (gt == ALLELE_NULL2 ? "." : to_string(gt));
+                        if (idx < gts.size()-1) out << "|";
                         idx++;
                     }
                 }
-                cout << endl;
+                out << endl;
             }
         }
         else {
+            // Legacy path: not reachable from the CLI (nextGen is always on) and
+            // NOT compatible with the ordered parallel driver, since reduceAlleles
+            // writes to cout directly. Kept only so the call site still compiles.
             var.reduceAlleles(
                 varAlleles,
                 variantFile,
@@ -541,6 +563,76 @@ int main(int argc, char** argv) {
                 keepInfo,
                 keepGeno,
                 debug);
+        }
+        return true;
+    }; // end process_record lambda
+
+    // ---- Record-level parallel driver ----
+    // Records are independent, but parsing mutates the shared file stream, so we
+    // read a batch serially, decompose the expensive (realigned) records in the
+    // batch concurrently (one thread per record; each WFA alignment runs
+    // single-threaded), then emit results in input order. This scales ~linearly
+    // with cores, unlike WFA-internal threading which plateaus around 2-3x. Peak
+    // memory grows with the number of threads (each big alignment needs ~0.7GB).
+    const int nthreads = max(1, thread_count);
+    const size_t batch_size = (size_t)nthreads * 8;
+
+    bool eof = false;
+    while (!eof) {
+        vector<WfaVariant> batch;
+        batch.reserve(batch_size);
+        for (size_t i = 0; i < batch_size; ++i) {
+            WfaVariant v(variantFile);
+            if (!variantFile.getNextVariant(v)) { eof = true; break; }
+            batch.push_back(std::move(v));
+        }
+        if (batch.empty()) break;
+
+        vector<string> outputs(batch.size());
+        vector<string> errors(batch.size());
+        vector<char> decomposed(batch.size(), 0); // 1 = realigned (output pre-rendered), 0 = pass-through
+
+        #pragma omp parallel for schedule(dynamic, 1) num_threads(nthreads)
+        for (size_t i = 0; i < batch.size(); ++i) {
+            // Exceptions must not escape an OpenMP region; capture and report
+            // serially after the parallel loop.
+            try {
+                ostringstream oss;
+                if (process_record(batch[i], oss)) {
+                    decomposed[i] = 1;
+                    outputs[i] = oss.str();
+                }
+            } catch (const std::exception& e) {
+                errors[i] = e.what();
+            }
+        }
+
+        // Emit in input order. Pass-through records are rendered here, straight to
+        // cout, so cout's float precision carries across records exactly as in the
+        // original serial code; a realigned record carries its own precision(2)
+        // and then bumps cout to precision(2) for the records that follow it.
+        for (size_t i = 0; i < batch.size(); ++i) {
+            if (!errors[i].empty()) {
+                cerr << "vcfwave: error decomposing record: " << errors[i] << endl;
+                exit(1);
+            }
+            if (decomposed[i]) {
+                cout << outputs[i];
+                if (!outputs[i].empty()) cout.precision(2);
+            } else {
+                cout << batch[i] << endl;
+            }
+        }
+
+        if (!quiet && file_size >= 0) {
+            off_t pos = variantFile.file_pos();
+            if (pos >= 0) {
+                amount = (double)pos/(double)file_size;
+                if (amount > prev_amount+0.003) {
+                    prev_amount = amount;
+                    print_progress(amount*100, start);
+                }
+            }
         }
     }
 
