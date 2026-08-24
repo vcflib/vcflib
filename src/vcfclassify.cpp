@@ -34,9 +34,18 @@ bool hasTransition(const Variant& var) {
     return false;
 }
 
+bool isBase(const string& allele) {
+    return allele == "A" || allele == "C" || allele == "G" || allele == "T";
+}
+
+// a transversion is a single base substitution that is not a transition
+bool isTransversion(const string& ref, const string& alt) {
+    return isBase(ref) && isBase(alt) && ref != alt && !isTransition(ref, alt);
+}
+
 bool hasTransversion(const Variant& var) {
     for (const auto& alt : var.alt) {
-        if (!isTransition(var.ref, alt)) {
+        if (isTransversion(var.ref, alt)) {
             return true;
         }
     }

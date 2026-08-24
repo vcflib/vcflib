@@ -1,0 +1,14 @@
+##fileformat=VCFv4.2
+##contig=<ID=chr1,length=1000>
+##ALT=<ID=DEL,Description="Deletion relative to the reference">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1	10	.	A	G	100	.	.
+chr1	20	.	C	T	100	.	.
+chr1	30	.	A	C	100	.	.
+chr1	40	.	T	G	100	.	.
+chr1	50	.	A	AT	100	.	.
+chr1	60	.	AT	A	100	.	.
+chr1	70	.	A	<DEL>	100	.	.
+chr1	80	.	AC	GT	100	.	.
+chr1	90	.	A	G,AT	100	.	.
+chr1	100	.	A	C,AT	100	.	.
