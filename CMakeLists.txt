@@ -546,6 +546,7 @@ if (ZIG)
 endif (ZIG)
 
 add_pydoctest(vcfnulldotslashdot)
+add_pydoctest(vcfclassify)
 add_doctest(doc/vcfintersect)
 
 # ---- Build documentation
