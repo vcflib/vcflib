@@ -284,7 +284,7 @@ int main(int argc, char** argv) {
                 int relpos;
                 int AC=-1,AN=-1;
                 double AF=-1;
-                string AT;
+                string AT_ref, AT_alt;
                 int size = -99;
                 bool is_inv = false;
                 string type;
@@ -302,7 +302,7 @@ int main(int argc, char** argv) {
                     const auto& aligned = wfmatch.alt;
                     const auto wfpos = wfmatch.position;
                     int alt_index=-1,AC=-1,AN = -1;
-                    string AT;
+                    string AT_ref, AT_alt;
                     double AF = -1;
                     if (ref != aligned) {
                         auto index = [&](const vector<string>& v, const string& allele) {
@@ -318,8 +318,13 @@ int main(int argc, char** argv) {
                         if (var.info["AF"].size() > alt_index) {
                             AF = stod(var.info["AF"].at(alt_index));
                         }
-                        if (var.info["AT"].size() > alt_index) {
-                            AT = var.info["AT"].at(alt_index);
+                        // AT is Number=R: one entry per allele *including* REF at
+                        // index 0, so allele k sits at index k and the ALT that
+                        // produced this record is allele alt_index + 1. AC/AF above
+                        // are Number=A and are correctly indexed by alt_index.
+                        if (var.info["AT"].size() > alt_index + 1) {
+                            AT_ref = var.info["AT"].at(0);
+                            AT_alt = var.info["AT"].at(alt_index + 1);
                         }
                         if (var.info["AN"].size() > alt_index) {
                             AN = stoi(var.info["AN"].at(alt_index));
@@ -340,7 +345,8 @@ int main(int argc, char** argv) {
                     u.AC = AC;
                     u.AF = AF;
                     u.AN = AN;
-                    u.AT = AT;
+                    u.AT_ref = AT_ref;
+                    u.AT_alt = AT_alt;
                     u.is_inv = is_inv;
                 }
             }
@@ -380,7 +386,7 @@ int main(int argc, char** argv) {
                 const auto& ref = v.ref1;
                 const auto& aligned = v.algn;
                 if (ref != aligned) {
-                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv) + "_"+ v.AT; 
+                    auto ntag = to_string(v.pos1) + ":" + ref + "/" + aligned + "_" + to_string(v.is_inv) + "_"+ v.AT_alt; 
                     if (track_variants.count(ntag)>0 && track_variants[ntag].AN == v.AN) { // this variant already exists
                         track_variants[ntag].AC += v.AC;
                         // Check AN number is equal so we can compute AF by addition
@@ -478,7 +484,6 @@ int main(int argc, char** argv) {
                 newvar.info = var.info;
                 newvar.infoOrderedKeys = var.infoOrderedKeys;
 
-                vector<string> AT{ v.AT };
                 vector<string> TYPE{ v.type };
                 if (v.AC > -1) {
                     newvar.info["AC"] = vector<string>{ to_string(v.AC) };
@@ -489,8 +494,8 @@ int main(int argc, char** argv) {
                 if (v.AN > -1) {
                     newvar.info["AN"] = vector<string>{ to_string(v.AN) };
                 }
-                if (v.AT.find_first_not_of(' ') != std::string::npos) {
-                    newvar.info["AT"] = AT; // there is a non-space character
+                if (v.AT_alt.find_first_not_of(' ') != std::string::npos) {
+                    newvar.info["AT"] = vector<string>{ v.AT_ref, v.AT_alt };
                 }
 
                 // Inversions are not decomposed anymore, so there is no need to specify the ORIGIN
