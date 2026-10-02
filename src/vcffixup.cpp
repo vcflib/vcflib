@@ -32,6 +32,27 @@ int countAlts(Variant& var, int alleleIndex) {
     return alts;
 }
 
+// NS is documented, both in the usage text and in the header line this tool writes, as the
+// number of samples WITH DATA.  it was being set to the total number of sample columns, which
+// is only the same thing when no genotype is missing.
+int countSamplesWithData(Variant& var) {
+    int samples = 0;
+    for (const auto& s : var.samples) {
+        const map<string, vector<string> >& sample = s.second;
+        const auto gt = sample.find("GT");
+        if (gt != sample.end()) {
+            map<int, int> genotype = decomposeGenotype(gt->second.front());
+            for (const auto& g : genotype) {
+                if (g.first != NULL_ALLELE) {
+                    ++samples;
+                    break;
+                }
+            }
+        }
+    }
+    return samples;
+}
+
 int countAlleles(Variant& var) {
     int alleles = 0;
     for (const auto& s : var.samples) {
@@ -108,7 +129,7 @@ was not called as polymorphic.
     // print the records, filtering is done via the setting of varA's output sample names
     while (variantFile.getNextVariant(var)) {
         stringstream ns;
-        ns << var.samples.size();
+        ns << countSamplesWithData(var);
         var.info["NS"].clear();
         var.info["NS"].push_back(ns.str());
 

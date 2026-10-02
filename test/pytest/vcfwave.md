@@ -68,7 +68,7 @@ Current command line options:
 
 ```
 
->>> head("vcfwave -h",26)
+>>> head("vcfwave -h",28)
 >
 usage: vcfwave [options] [file]
 >
@@ -87,8 +87,10 @@ options:
                             REF is longer than LEN (default: unlimited).
     -K, --inv-kmer K        Length of k-mer to use for inversion detection sketching (default: 17).
     -I, --inv-min LEN       Minimum allele length to consider for inverted alignment (default: 64).
-    -t, --threads N         Use this many threads for variant decomposition (default is 1).
-                            For most datasets threading may actually slow vcfwave down.
+    -t, --threads N         Decompose up to N records in parallel (default 1); output order
+                            is preserved. Peak memory grows ~0.7GB per concurrent big site.
+    -w, --wfa-threads M     Legacy: M cores inside each WFA alignment, one record at a time
+                            (default 1). Mutually exclusive with -t.
     --quiet                 Do not display progress bar.
     -d, --debug             Debug mode.
 >
