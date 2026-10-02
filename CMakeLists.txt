@@ -23,6 +23,7 @@ find_package(ZLIB REQUIRED)
 find_package(pybind11 CONFIG)
 
 include(GNUInstallDirs)
+include(CMakeDependentOption)
 
 feature_summary(
   FATAL_ON_MISSING_REQUIRED_PACKAGES
@@ -31,6 +32,7 @@ feature_summary(
 # ---- Options
 
 option(BUILD_STATIC "Build static binary" OFF)
+cmake_dependent_option(BUILD_STATIC_LIBS "Build static libraries" OFF "NOT BUILD_STATIC" ON)
 option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
@@ -55,11 +57,18 @@ check_ipo_supported(RESULT ipo_supported OUTPUT output)
 set(EXTRA_FLAGS " ") # otherwise it injects OFF
 
 if (BUILD_STATIC)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  message(STATUS "vcflib executable linking mode: static")
   set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+else ()
+  message(STATUS "vcflib executable linking mode: dynamic")
+endif ()
+
+if (BUILD_STATIC_LIBS)
+  message(STATUS "vcflib library type: static")
   set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 else ()
-  set(BUILD_SHARED_LIBS ON)
+  message(STATUS "vcflib library type: dynamic")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
 endif ()
 
@@ -457,7 +466,7 @@ endif()
 
 # ---- Build all
 
-if (BUILD_SHARED_LIBS)
+if (NOT BUILD_STATIC_LIBS)
   target_link_libraries(vcflib ${WFALIB})
 endif()
 
@@ -497,7 +506,7 @@ if (NOT BUILD_ONLY_LIB)
 endif()
 
 
-if (NOT BUILD_STATIC) # only when not building static
+if (NOT BUILD_STATIC_LIBS) # only when building dynamic libraries
   # ---- Python bindings - mostly for testing at this stage
   if (pybind11_FOUND)
     # pyvcfstd: bindings for the standalone VCFv4.5 field validator
@@ -559,7 +568,7 @@ endfunction()
   add_zigtest()
 endif(ZIG_TEST)
 
-if (NOT BUILD_STATIC)
+if (NOT BUILD_STATIC_LIBS)
   add_pytest(realign)
   add_pydoctest(pyvcflib)
 endif()
