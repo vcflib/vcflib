@@ -32,7 +32,7 @@ feature_summary(
 # ---- Options
 
 option(BUILD_STATIC "Build static binary" OFF)
-cmake_dependent_option(BUILD_STATIC_LIBS "Build static libraries" OFF "NOT BUILD_STATIC" OFF)
+cmake_dependent_option(BUILD_STATIC_LIBS "Build static libraries" OFF "NOT BUILD_STATIC" ON)
 option(BUILD_DOC "Build documentation" ON)
 option(OPENMP "Enable OpenMP" ON) # disabling does not work because of vcfwave
 option(PROFILING "Enable profiling" OFF)
@@ -57,14 +57,18 @@ check_ipo_supported(RESULT ipo_supported OUTPUT output)
 set(EXTRA_FLAGS " ") # otherwise it injects OFF
 
 if (BUILD_STATIC)
+  message(STATUS "vcflib executable linking mode: static")
   set(CMAKE_EXE_LINKER_FLAGS "-static")
-  set(BUILD_STATIC_LIBS ON)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+else ()
+  message(STATUS "vcflib executable linking mode: dynamic")
 endif ()
 
 if (BUILD_STATIC_LIBS)
+  message(STATUS "vcflib library type: static")
   set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 else ()
+  message(STATUS "vcflib library type: dynamic")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for pybind11
 endif ()
 
