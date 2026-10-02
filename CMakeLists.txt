@@ -577,6 +577,7 @@ add_pydoctest(vcfputtogetheragain-norm)
 add_pydoctest(vcfvalidate)
 
 add_pydoctest(vcfnulldotslashdot)
+add_pydoctest(vcfclassify)
 add_doctest(doc/vcfintersect)
 
 # ---- Build documentation
